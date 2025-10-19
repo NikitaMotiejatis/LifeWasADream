@@ -144,7 +144,7 @@ paths:
           description: Updated
     delete:
       tags: [Customers]
-      summary: Delete customer
+      summary: Delete customer data
       security: [{ bearerAuth: [] }]
       responses:
         '204':
@@ -583,7 +583,6 @@ paths:
                 items: { $ref: '#/components/schemas/Item' }
     post:
       tags: [Order Items]
-
       summary: Add item to order
       security: [{ bearerAuth: [] }]
       parameters:
@@ -630,63 +629,8 @@ paths:
         '204': { description: Deleted }
 
   # Payments
-  /payments/cash:
-    post:
-      tags: [Payments]
-      summary: Record a cash payment for an order
-      security: [{ bearerAuth: [] }]
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: { $ref: '#/components/schemas/CashPaymentRequest' }
-      responses:
-        '201':
-          description: Cash payment recorded
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/Payment' }
-        '409':
-          description: Order not open or already fully paid
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/Error' }
-
-  /payments/stripe/checkout-session:
-    post:
-      tags: [Payments]
-      summary: Create a Stripe Checkout Session for an order or split selection
-      security: [{ bearerAuth: [] }]
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: { $ref: '#/components/schemas/StripeCheckoutRequest' }
-      responses:
-        '201':
-          description: Session created
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  sessionId: { type: string }
-                  sessionUrl: { type: string, format: uri }
-                required: [sessionId, sessionUrl]
-
-  /payments/stripe/webhook:
-    post:
-      tags: [Webhooks]
-      summary: Stripe webhook endpoint (events like checkout.session.completed)
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: { type: object, additionalProperties: true }
-      responses:
-        '200': { description: Acknowledged }
-
-  /orders/{orderId}/payments:
+  
+  /order/{orderId}/pay:
     get:
       tags: [Payments]
       summary: List payments for an order
@@ -700,10 +644,57 @@ paths:
             application/json:
               schema:
                 type: array
-                items: { $ref: '#/components/schemas/Payment' }
+                items: { $ref: '#/components/schemas/Order' }
+                
+  /payment/cash:
+    post:
+      tags: [Payments]
+      summary: Record a cash payment for an order
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PaymentRequest' }
+      responses:
+        '201':
+          description: Cash payment recorded
+        '409':
+          description: Order not open or already fully paid
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /payment/card:
+    post:
+      tags: [Payments]
+      summary: Record a card payment for an order
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PaymentRequest' }
+      responses:
+        '201':
+          description: Payment recorded
+        '400':
+          description: Payment failed
+
+  /payments/stripe/webhook:
+    post:
+      tags: [Webhooks]
+      summary: Stripe webhook endpoint (events like checkout.session.completed)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, additionalProperties: true }
+      responses:
+        '200': { description: Acknowledged }
 
   # Refunds
-  /refunds:
+  /refund:
     post:
       tags: [Refunds]
       summary: Refund a payment (RBAC/approval may be required)
@@ -715,16 +706,12 @@ paths:
             schema: { $ref: '#/components/schemas/RefundRequest' }
       responses:
         '201':
-          description: Refund created
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/Refund' }
-        '403':
-          description: Requires higher privilege or approval
+          description: Refunded
+        '400':
+          description: Refund failed
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Error' }
-
 
   # Roles & Permissions
   /roles:
@@ -1070,11 +1057,9 @@ components:
         employmentLocationId:
           type: integer
         phoneNumber:
-
           type: string
         email:
           type: string
-
         status:
           type: string
           enum: [active, inactive]
@@ -1101,7 +1086,6 @@ components:
       type: object
       properties:
         serviceId: { type: integer }
-
         locationId: { type: integer }
         providerId: { type: integer }
         customerId: { type: integer }
@@ -1230,49 +1214,20 @@ components:
           nullable: true
       required: [id, orderId, method, amount, currency]
 
-    CashPaymentRequest:
+    PaymentRequest:
       type: object
       properties:
         orderId: { type: integer }
         amount: { $ref: '#/components/schemas/Money' }
-        currency: { $ref: '#/components/schemas/CurrencyCode' }
-        payerCustomerId:
-          type: integer
-          description: Optional (for split payments)
-      required: [orderId, amount, currency]
+      required: [orderId, amount]
 
-    StripeCheckoutRequest:
-      type: object
-      properties:
-        orderId: { type: integer }
-        currency: { $ref: '#/components/schemas/CurrencyCode' }
-        itemIds:
-          type: array
-          items: { type: integer }
-        successUrl: { type: string, format: uri }
-        cancelUrl: { type: string, format: uri }
-      required: [orderId, currency, successUrl, cancelUrl]
-
-    Refund:
-      type: object
-      properties:
-        id: { type: integer }
-        paymentId: { type: integer }
-        amount: { $ref: '#/components/schemas/Money' }
-        reason: { type: string }
-        status:
-          type: string
-          enum: [pending_approval, approved, rejected, processed]
-        createdAt: { type: string, format: date-time }
-      required: [id, paymentId, amount, status]
 
     RefundRequest:
       type: object
       properties:
         paymentId: { type: integer }
-        amount: { $ref: '#/components/schemas/Money' }
         reason: { type: string }
-      required: [paymentId, amount]
+      required: [paymentId]
 
     # --- Roles and permissions ---
     Role:
