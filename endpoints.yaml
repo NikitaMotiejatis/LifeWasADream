@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: POS API
-  version: 1.0.1
+  version: 1.0.2
   description: |
     REST API contracts for the POS system.
     Supports reservations, orders, payments (cash & card via Stripe),
@@ -17,7 +17,6 @@ tags:
   - name: Reservations
   - name: Orders
   - name: Order Items
-  - name: Discounts
   - name: Payments
   - name: Refunds
   - name: Webhooks
@@ -488,14 +487,6 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Reservation' }
-    delete:
-      tags: [Reservations]
-      summary: Cancel reservation
-      security: [{ bearerAuth: [] }]
-      parameters:
-        - $ref: '#/components/parameters/ReservationId'
-      responses:
-        '204': { description: Canceled }
 
   # Orders
   /orders:
@@ -630,7 +621,7 @@ paths:
 
   # Payments
   
-  /order/{orderId}/pay:
+  /orders/{orderId}/payments:
     get:
       tags: [Payments]
       summary: List payments for an order
@@ -644,7 +635,7 @@ paths:
             application/json:
               schema:
                 type: array
-                items: { $ref: '#/components/schemas/Order' }
+                items: { $ref: '#/components/schemas/Payment' }
                 
   /payment/cash:
     post:
@@ -795,12 +786,26 @@ paths:
       responses:
         '204':
           description: Assigned
+          
+  /roles/{roleId}/assign/{employeeId}:
+    delete:
+      tags: [Roles]
+      summary: Remove this role from an employee
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/RoleId'
+        - $ref: '#/components/parameters/EmployeeId'
+      responses:
+        '204':
+          description: Unassigned (idempotent)
+        '404':
+          description: Role or employee not found
 
-  # Admin (kept for compatibility if you list raw permission names elsewhere)
+  # Admin (for compatibility to list raw permission names)
   /admin/permissions:
     get:
       tags: [Admin]
-      summary: List permissions (raw list, optional)
+      summary: List permissions (raw list, for debugging)
       security: [{ bearerAuth: [] }]
       responses:
         '200':
@@ -844,6 +849,12 @@ components:
       in: path
       required: true
       schema: { type: integer }
+    EmployeeId:
+      name: employeeId
+      in: path
+      required: true
+      schema: { type: integer, format: int32 }
+      description: Target employee ID
     RoleId:
       name: roleId
       in: path
@@ -857,6 +868,8 @@ components:
       name: pageSize
       in: query
       schema: { type: integer, minimum: 1, maximum: 200, default: 25 }
+    
+    
 
   schemas:
     Error:
@@ -866,6 +879,7 @@ components:
         message: { type: string }
         details: { type: object, additionalProperties: true }
 
+
     AuthToken:
       type: object
       properties:
@@ -873,6 +887,7 @@ components:
         tokenType: { type: string, example: Bearer }
         expiresIn: { type: integer, example: 3600 }
       required: [accessToken, tokenType, expiresIn]
+
 
     RegisterRequest:
       type: object
@@ -883,12 +898,14 @@ components:
         password: { type: string, minLength: 8 }
       required: [name, email, password]
 
+
     LoginRequest:
       type: object
       properties:
         email: { type: string, format: email }
         password: { type: string }
       required: [email, password]
+
 
     Customer:
       type: object
@@ -899,6 +916,7 @@ components:
         phoneNumber: { type: string, maxLength: 16 }
       required: [id, name, email]
 
+
     CustomerCreateData:
       type: object
       properties:
@@ -907,6 +925,7 @@ components:
         phoneNumber: { type: string, maxLength: 16 }
       required: [name, email]
 
+
     CustomerUpdateData:
       type: object
       properties:
@@ -914,12 +933,14 @@ components:
         email: { type: string, format: email, maxLength: 512 }
         phoneNumber: { type: string, maxLength: 16 }
 
+
     Company:
       type: object
       properties:
         id: { type: integer }
         name: { type: string, maxLength: 64 }
         phoneNumber: { type: string, maxLength: 16 }
+       
         email: { type: string, format: email, maxLength: 512 }
 
     Location:
@@ -932,6 +953,7 @@ components:
         phoneNumber: { type: string, maxLength: 16 }
         email: { type: string, format: email, maxLength: 512 }
 
+
     Product:
       type: object
       properties:
@@ -942,6 +964,7 @@ components:
         vatPercent: { type: number, format: float, minimum: 0 }
       required: [id, name, unitPrice, currency]
 
+
     ProductVariation:
       type: object
       properties:
@@ -949,6 +972,7 @@ components:
         productId: { type: integer }
         name: { type: string, maxLength: 256 }
         unitPrice: { $ref: '#/components/schemas/Money' }
+
 
     Service:
       type: object
@@ -964,6 +988,7 @@ components:
           type: string
           enum: [available, unavailable]
 
+
     ServiceUpdate:
       type: object
       properties:
@@ -974,6 +999,7 @@ components:
         status:
           type: string
           enum: [available, unavailable]
+
 
     ServiceProvider:
       type: object
@@ -1024,6 +1050,7 @@ components:
           type: string
           enum: [active, inactive]
 
+
     EmployeeUpdate:
       type: object
       properties:
@@ -1046,6 +1073,7 @@ components:
           type: string
           enum: [active, inactive]
           nullable: true
+
 
     EmployeeCreate:
       type: object
@@ -1079,8 +1107,9 @@ components:
         appointmentTime: { type: string, format: date-time, nullable: true }
         status:
           type: string
-          enum: [created, confirmed, completed, canceled]
+          enum: [active, completed, canceled]
       required: [id, serviceId, locationId, providerId, customerId, reservationTime, status]
+
 
     ReservationCreate:
       type: object
@@ -1092,6 +1121,7 @@ components:
         reservationTime: { type: string, format: date-time }
       required: [serviceId, locationId, providerId, customerId, reservationTime]
 
+
     ReservationUpdate:
       type: object
       properties:
@@ -1099,7 +1129,8 @@ components:
         providerId: { type: integer }
         status:
           type: string
-          enum: [confirmed, completed, canceled]
+          enum: [active, completed, canceled]
+
 
     Order:
       type: object
@@ -1127,6 +1158,7 @@ components:
             grandTotal: { $ref: '#/components/schemas/Money' }
             amountDue: { $ref: '#/components/schemas/Money' }
 
+
     OrderOpenRequest:
       type: object
       properties:
@@ -1137,12 +1169,14 @@ components:
           description: Optionally link to a reservation
       required: [operatorId, currency]
 
+
     OrderUpdate:
       type: object
       properties:
         tip: { $ref: '#/components/schemas/Money' }
         serviceCharge: { $ref: '#/components/schemas/Money' }
         currency: { $ref: '#/components/schemas/CurrencyCode' }
+
 
     Item:
       type: object
@@ -1163,6 +1197,7 @@ components:
           items: { $ref: '#/components/schemas/ItemVariation' }
       required: [id, orderId, productId, unitPrice, currency, quantity]
 
+
     ItemCreate:
       type: object
       properties:
@@ -1177,6 +1212,7 @@ components:
           items: { type: integer }
       required: [productId, unitPrice, currency, quantity]
 
+
     ItemUpdate:
       type: object
       properties:
@@ -1188,6 +1224,7 @@ components:
           type: array
           items: { type: integer }
 
+
     ItemVariation:
       type: object
       properties:
@@ -1195,6 +1232,7 @@ components:
         variationId: { type: integer }
         name: { type: string }
         deltaPrice: { $ref: '#/components/schemas/Money' }
+
 
     Payment:
       type: object
@@ -1214,6 +1252,7 @@ components:
           nullable: true
       required: [id, orderId, method, amount, currency]
 
+
     PaymentRequest:
       type: object
       properties:
@@ -1229,50 +1268,50 @@ components:
         reason: { type: string }
       required: [paymentId]
 
-    # --- Roles and permissions ---
+
+    PermissionFlag:
+      type: string
+      enum: 
+        - canAddEmployees
+        - canAddLocation
+        - canMakeRefunds
+        - canChangeVat
+        - canAddDiscounts
+        - canAddCustomers
+        - canAddProducts
+        - canChangeProducts
+    
+    
     Role:
       type: object
       properties:
         id: { type: integer }
         name: { type: string, maxLength: 64 }
-        # explicit booleans for the requested capabilities
-        canAddEmployees: { type: boolean, default: false }
-        canAddLocation: { type: boolean, default: false }
-        canMakeRefunds: { type: boolean, default: false }
-        canChangeVat: { type: boolean, default: false }
-        canAddDiscounts: { type: boolean, default: false }
-        canAddCustomers: { type: boolean, default: false }
-        canAddProducts: { type: boolean, default: false }
-        canChangeProducts: { type: boolean, default: false }
+        flags:
+          type: array
+          items: { $ref: '#/components/schemas/PermissionFlag' }
       required: [id, name]
+
 
     RoleCreateData:
       type: object
       properties:
         name: { type: string, maxLength: 64 }
-        canAddEmployees: { type: boolean, default: false }
-        canAddLocation: { type: boolean, default: false }
-        canMakeRefunds: { type: boolean, default: false }
-        canChangeVat: { type: boolean, default: false }
-        canAddDiscounts: { type: boolean, default: false }
-        canAddCustomers: { type: boolean, default: false }
-        canAddProducts: { type: boolean, default: false }
-        canChangeProducts: { type: boolean, default: false }
+        flags:
+          type: array
+          items: { $ref: '#/components/schemas/PermissionFlag' }
       required: [name]
+
 
     RoleUpdateData:
       type: object
       properties:
         name: { type: string, maxLength: 64 }
-        canAddEmployees: { type: boolean }
-        canAddLocation: { type: boolean }
-        canMakeRefunds: { type: boolean }
-        canChangeVat: { type: boolean }
-        canAddDiscounts: { type: boolean }
-        canAddCustomers: { type: boolean }
-        canAddProducts: { type: boolean }
-        canChangeProducts: { type: boolean }
-
+        flags:
+          type: array
+          items: { $ref: '#/components/schemas/PermissionFlag' }
+          
+          
     RoleAssignmentRequest:
       type: object
       properties:
@@ -1281,12 +1320,13 @@ components:
           description: Employee to whom the role will be assigned
       required: [employeeId]
 
-    # Optional raw permission structure (if you still want a list)
+
     Permission:
       type: object
       properties:
         id: { type: integer }
         name: { type: string, maxLength: 64 }
+
 
     CurrencyCode:
       type: string
@@ -1294,12 +1334,14 @@ components:
       maxLength: 3
       example: EUR
 
+
     Money:
       type: object
       properties:
         amount: { type: integer }
         currency: { type: string, minLength: 3, maxLength: 3 }
       required: [amount, currency]
+
 
     PaginatedCustomers:
       type: object
