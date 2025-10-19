@@ -428,10 +428,12 @@ paths:
           schema: { type: integer }
         - in: query
           name: from
-          schema: { type: string, format: date-time }
+          schema: { type: number, format: bigint }
+          description: Start of appointment time range (Unix timestamp)
         - in: query
           name: to
-          schema: { type: string, format: date-time }
+          schema: { type: number, format: bigint }
+          description: End of appointment time range (Unix timestamp)
       responses:
         '200':
           description: OK
@@ -470,7 +472,7 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/Reservation' }
         '404': { description: Not found }
-    patch:
+    put:
       tags: [Reservations]
       summary: Update reservation time/provider/status
       security: [{ bearerAuth: [] }]
@@ -1103,8 +1105,8 @@ components:
         locationId: { type: integer }
         providerId: { type: integer }
         customerId: { type: integer }
-        reservationTime: { type: string, format: date-time }
-        appointmentTime: { type: string, format: date-time, nullable: true }
+        reservationTime: { type: number, format: bigint }
+        appointmentTime: { type: number, format: bigint, nullable: true }
         status:
           type: string
           enum: [active, completed, canceled]
@@ -1118,14 +1120,14 @@ components:
         locationId: { type: integer }
         providerId: { type: integer }
         customerId: { type: integer }
-        reservationTime: { type: string, format: date-time }
+        reservationTime: { type: number, format: bigint }
       required: [serviceId, locationId, providerId, customerId, reservationTime]
 
 
     ReservationUpdate:
       type: object
       properties:
-        reservationTime: { type: string, format: date-time }
+        reservationTime: { type: number, format: bigint }
         providerId: { type: integer }
         status:
           type: string
