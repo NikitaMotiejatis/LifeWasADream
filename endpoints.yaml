@@ -1193,7 +1193,7 @@ components:
             vatTotal: { $ref: '#/components/schemas/Money' }
             grandTotal: { $ref: '#/components/schemas/Money' }
             amountDue: { $ref: '#/components/schemas/Money' }
-    required: [id, operatorId, status, items, payments, totals]    
+      required: [id, operatorId, status, items, payments, totals]    
 
     OrderOpenRequest:
       type: object
