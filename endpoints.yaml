@@ -472,7 +472,7 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/Reservation' }
         '404': { description: Not found }
-    put:
+    patch:
       tags: [Reservations]
       summary: Update reservation time/provider/status
       security: [{ bearerAuth: [] }]
