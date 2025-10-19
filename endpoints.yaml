@@ -507,6 +507,8 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Order' }
+        '400':
+          description: Invalid order data
 
   /orders/{orderId}:
     get:
@@ -524,7 +526,7 @@ paths:
         '404': { description: Not found }
     patch:
       tags: [Orders]
-      summary: Update order fields (tip, serviceCharge, currency)
+      summary: Update order fields (tip, serviceCharge, discountTotal, status)
       security: [{ bearerAuth: [] }]
       parameters:
         - $ref: '#/components/parameters/OrderId'
@@ -539,6 +541,7 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Order' }
+        '404': { description: Not found }
 
   /orders/{orderId}/close:
     post:
@@ -558,6 +561,22 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Error' }
+
+  /orders/{orderId}/cancel:
+    post:
+      tags: [Orders]
+      summary: Cancel an open order
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/OrderId'
+      responses:
+        '200':
+          description: order closed
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Order' }
+        '409':
+          description: Cannot cancel
 
   /orders/{orderId}/items:
     get:
@@ -591,6 +610,21 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Item' }
+
+  /orders/{orderId}/receipt:
+    get:
+      tags: [Orders]
+      summary: Get final receipt for closed order
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/OrderId'
+      responses:
+        '200':
+          description: Receipt data
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Order' }
+        '404': { description: Order not found }
 
   /orders/{orderId}/items/{itemId}:
     patch:
@@ -1159,12 +1193,14 @@ components:
             vatTotal: { $ref: '#/components/schemas/Money' }
             grandTotal: { $ref: '#/components/schemas/Money' }
             amountDue: { $ref: '#/components/schemas/Money' }
-
+    required: [id, operatorId, status, items, payments, totals]    
 
     OrderOpenRequest:
       type: object
       properties:
         operatorId: { type: integer }
+        serviceCharge: { $ref: '#/components/schemas/Money' }
+        discountTotal: { $ref: '#/components/schemas/Money' }
         currency: { $ref: '#/components/schemas/CurrencyCode' }
         reservationId:
           type: integer
@@ -1178,6 +1214,9 @@ components:
         tip: { $ref: '#/components/schemas/Money' }
         serviceCharge: { $ref: '#/components/schemas/Money' }
         currency: { $ref: '#/components/schemas/CurrencyCode' }
+        status:
+          type: string
+          enum: [opened, closed, refunded]
 
 
     Item:
