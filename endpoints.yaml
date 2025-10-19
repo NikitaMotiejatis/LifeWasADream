@@ -1,0 +1,1395 @@
+openapi: 3.0.3
+info:
+  title: POS API
+  version: 1.0.2
+  description: |
+    REST API contracts for the POS system.
+    Supports reservations, orders, payments (cash & card via Stripe),
+    discounts, roles & permissions, and basic user management.
+servers:
+  - url: https://api.example.com/v1
+tags:
+  - name: Auth
+  - name: Customers
+  - name: Employees
+  - name: ServiceProviders
+  - name: Services
+  - name: Reservations
+  - name: Orders
+  - name: Order Items
+  - name: Payments
+  - name: Refunds
+  - name: Webhooks
+  - name: Roles
+  - name: Admin
+security:
+  - bearerAuth: []
+
+paths:
+  /auth/register:
+    post:
+      tags: [Auth]
+      summary: Register a new customer account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: Registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Customer'
+        '409':
+          description: Email already registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Login and obtain JWT
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthToken'
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  # Customers
+  /customer:
+    get:
+      tags: [Customers]
+      summary: List customers
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/PageSizeParam'
+        - in: query
+          name: search
+          schema: { type: string }
+          description: Name, phone, or email substring
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedCustomers'
+    post:
+      tags: [Customers]
+      summary: Create customer
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomerCreateData'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Customer'
+
+  /customer/{customerId}:
+    parameters:
+      - $ref: '#/components/parameters/CustomerId'
+    get:
+      tags: [Customers]
+      summary: Get customer by id
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Customer'
+        '404':
+          description: Not found
+    patch:
+      tags: [Customers]
+      summary: Update customer
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomerUpdateData'
+      responses:
+        '204':
+          description: Updated
+    delete:
+      tags: [Customers]
+      summary: Delete customer data
+      security: [{ bearerAuth: [] }]
+      responses:
+        '204':
+          description: Deleted
+
+  /employee:
+    get:
+      tags: [Employees]
+      summary: List employees
+      parameters:
+        - in: query
+          name: id
+          schema:
+            type: integer
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum: [active, inactive]
+        - in: query
+          name: locationId
+          schema:
+            type: integer
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - in: query
+          name: pageSize
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+            default: 25
+        - in: query
+          name: search
+          schema:
+            type: string
+          description: Search by first name, last name, email, or phone
+      responses:
+        '200':
+          description: List of employees
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  page: { type: integer }
+                  pageSize: { type: integer }
+                  total: { type: integer }
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Employee'
+
+    post:
+      tags: [Employees]
+      summary: Create a new employee
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmployeeCreate'
+      responses:
+        '201':
+          description: Employee created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Employee'
+
+  /employee/{id}:
+    get:
+      tags: [Employees]
+      summary: Get employee by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Employee found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Employee'
+        '404':
+          description: Employee not found
+
+    patch:
+      tags: [Employees]
+      summary: Update an employee
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmployeeUpdate'
+      responses:
+        '200':
+          description: Employee updated
+        '404':
+          description: Employee not found
+
+
+
+  # Services
+  /service:
+    get:
+      tags: [Services]
+      summary: List available services
+      parameters:
+        - in: query
+          name: locationId
+          schema: { type: integer, format: int32 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Service' }
+
+  /service/{serviceId}:
+    get:
+      tags: [Services]
+      summary: Get service details
+      parameters:
+        - $ref: '#/components/parameters/ServiceId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Service' }
+        '404':
+          description: Not found
+    patch:
+      tags: [Services]
+      summary: Update service
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/ServiceId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ServiceUpdate' }
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Service' }
+
+  # Providers
+  /provider:
+    get:
+      tags: [ServiceProviders]
+      summary: List service providers
+      parameters:
+        - in: query
+          name: employeeId
+          schema:
+            type: integer
+            format: int32
+        - in: query
+          name: employeeName
+          schema:
+            type: string
+        - in: query
+          name: serviceId
+          schema:
+            type: integer
+            format: int32
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - in: query
+          name: pageSize
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+            default: 25
+        - in: query
+          name: search
+          schema:
+            type: string
+          description: Search by employee name
+      responses:
+        '200':
+          description: List of service providers
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  page: { type: integer }
+                  pageSize: { type: integer }
+                  total: { type: integer }
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ServiceProvider'
+
+
+  /provider/{id}:
+    get:
+      tags: [ServiceProviders]
+      summary: Get a service provider by ID
+      parameters:
+        - in: path
+          name: id
+          description: Employee ID
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Provider found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceProvider'
+        '404':
+          description: Provider not found
+
+    patch:
+      tags: [ServiceProviders]
+      summary: Update service provider qualifications
+      parameters:
+        - in: path
+          name: id
+          description: Employee ID
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ServiceProviderUpdate'
+      responses:
+        '200':
+          description: Provider updated
+        '404':
+          description: Provider not found
+
+
+  # Reservations
+  /reservations:
+    get:
+      tags: [Reservations]
+      summary: List reservations (by customer or employee scope)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: query
+          name: customerId
+          schema: { type: integer }
+        - in: query
+          name: serviceId
+          schema: { type: integer }
+        - in: query
+          name: providerId
+          schema: { type: integer }
+        - in: query
+          name: from
+          schema: { type: number, format: bigint }
+          description: Start of appointment time range (Unix timestamp)
+        - in: query
+          name: to
+          schema: { type: number, format: bigint }
+          description: End of appointment time range (Unix timestamp)
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Reservation' }
+    post:
+      tags: [Reservations]
+      summary: Create reservation
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ReservationCreate' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Reservation' }
+
+  /reservations/{reservationId}:
+    get:
+      tags: [Reservations]
+      summary: Get reservation
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/ReservationId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Reservation' }
+        '404': { description: Not found }
+    put:
+      tags: [Reservations]
+      summary: Update reservation time/provider/status
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/ReservationId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ReservationUpdate' }
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Reservation' }
+
+  # Orders
+  /orders:
+    post:
+      tags: [Orders]
+      summary: Open a new order (status=opened)
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/OrderOpenRequest' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Order' }
+        '400':
+          description: Invalid order data
+
+  /orders/{orderId}:
+    get:
+      tags: [Orders]
+      summary: Get order by id
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/OrderId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Order' }
+        '404': { description: Not found }
+    patch:
+      tags: [Orders]
+      summary: Update order fields (tip, serviceCharge, discountTotal, status)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/OrderId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/OrderUpdate' }
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Order' }
+        '404': { description: Not found }
+
+  /orders/{orderId}/close:
+    post:
+      tags: [Orders]
+      summary: Close order (after successful payment)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/OrderId'
+      responses:
+        '200':
+          description: Closed
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Order' }
+        '409':
+          description: Cannot close (unpaid or already closed)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /orders/{orderId}/cancel:
+    post:
+      tags: [Orders]
+      summary: Cancel an open order
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/OrderId'
+      responses:
+        '200':
+          description: order closed
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Order' }
+        '409':
+          description: Cannot cancel
+
+  /orders/{orderId}/items:
+    get:
+      tags: [Order Items]
+      summary: List items in order
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/OrderId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Item' }
+    post:
+      tags: [Order Items]
+      summary: Add item to order
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/OrderId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ItemCreate' }
+      responses:
+        '201':
+          description: Added
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Item' }
+
+  /orders/{orderId}/receipt:
+    get:
+      tags: [Orders]
+      summary: Get final receipt for closed order
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/OrderId'
+      responses:
+        '200':
+          description: Receipt data
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Order' }
+        '404': { description: Order not found }
+
+  /orders/{orderId}/items/{itemId}:
+    patch:
+      tags: [Order Items]
+      summary: Update item (qty, unitPrice, discount, vat)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/OrderId'
+        - $ref: '#/components/parameters/ItemId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ItemUpdate' }
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Item' }
+    delete:
+      tags: [Order Items]
+      summary: Remove item from order
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/OrderId'
+        - $ref: '#/components/parameters/ItemId'
+      responses:
+        '204': { description: Deleted }
+
+  # Payments
+  
+  /orders/{orderId}/payments:
+    get:
+      tags: [Payments]
+      summary: List payments for an order
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/OrderId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Payment' }
+                
+  /payment/cash:
+    post:
+      tags: [Payments]
+      summary: Record a cash payment for an order
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PaymentRequest' }
+      responses:
+        '201':
+          description: Cash payment recorded
+        '409':
+          description: Order not open or already fully paid
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /payment/card:
+    post:
+      tags: [Payments]
+      summary: Record a card payment for an order
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PaymentRequest' }
+      responses:
+        '201':
+          description: Payment recorded
+        '400':
+          description: Payment failed
+
+  /payments/stripe/webhook:
+    post:
+      tags: [Webhooks]
+      summary: Stripe webhook endpoint (events like checkout.session.completed)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, additionalProperties: true }
+      responses:
+        '200': { description: Acknowledged }
+
+  # Refunds
+  /refund:
+    post:
+      tags: [Refunds]
+      summary: Refund a payment (RBAC/approval may be required)
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RefundRequest' }
+      responses:
+        '201':
+          description: Refunded
+        '400':
+          description: Refund failed
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  # Roles & Permissions
+  /roles:
+    get:
+      tags: [Roles]
+      summary: List roles
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Role' }
+    post:
+      tags: [Roles]
+      summary: Create a role with permissions
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RoleCreateData' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Role' }
+
+  /roles/{roleId}:
+    parameters:
+      - $ref: '#/components/parameters/RoleId'
+    get:
+      tags: [Roles]
+      summary: Get role by id
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Role' }
+        '404': { description: Not found }
+    patch:
+      tags: [Roles]
+      summary: Update role name and permissions
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RoleUpdateData' }
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Role' }
+    delete:
+      tags: [Roles]
+      summary: Delete role
+      security: [{ bearerAuth: [] }]
+      responses:
+        '204': { description: Deleted }
+
+  /roles/{roleId}/assign:
+    post:
+      tags: [Roles]
+      summary: Assign this role to an employee
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/RoleId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoleAssignmentRequest'
+      responses:
+        '204':
+          description: Assigned
+          
+  /roles/{roleId}/assign/{employeeId}:
+    delete:
+      tags: [Roles]
+      summary: Remove this role from an employee
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/RoleId'
+        - $ref: '#/components/parameters/EmployeeId'
+      responses:
+        '204':
+          description: Unassigned (idempotent)
+        '404':
+          description: Role or employee not found
+
+  # Admin (for compatibility to list raw permission names)
+  /admin/permissions:
+    get:
+      tags: [Admin]
+      summary: List permissions (raw list, for debugging)
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Permission' }
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    OrderId:
+      name: orderId
+      in: path
+      required: true
+      schema: { type: integer }
+    ItemId:
+      name: itemId
+      in: path
+      required: true
+      schema: { type: integer }
+    ReservationId:
+      name: reservationId
+      in: path
+      required: true
+      schema: { type: integer }
+    ServiceId:
+      name: serviceId
+      in: path
+      required: true
+      schema: { type: integer }
+    CustomerId:
+      name: customerId
+      in: path
+      required: true
+      schema: { type: integer }
+    EmployeeId:
+      name: employeeId
+      in: path
+      required: true
+      schema: { type: integer, format: int32 }
+      description: Target employee ID
+    RoleId:
+      name: roleId
+      in: path
+      required: true
+      schema: { type: integer }
+    PageParam:
+      name: page
+      in: query
+      schema: { type: integer, minimum: 1, default: 1 }
+    PageSizeParam:
+      name: pageSize
+      in: query
+      schema: { type: integer, minimum: 1, maximum: 200, default: 25 }
+    
+    
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        code: { type: string }
+        message: { type: string }
+        details: { type: object, additionalProperties: true }
+
+
+    AuthToken:
+      type: object
+      properties:
+        accessToken: { type: string }
+        tokenType: { type: string, example: Bearer }
+        expiresIn: { type: integer, example: 3600 }
+      required: [accessToken, tokenType, expiresIn]
+
+
+    RegisterRequest:
+      type: object
+      properties:
+        name: { type: string, maxLength: 64 }
+        email: { type: string, format: email, maxLength: 512 }
+        phoneNumber: { type: string, maxLength: 16 }
+        password: { type: string, minLength: 8 }
+      required: [name, email, password]
+
+
+    LoginRequest:
+      type: object
+      properties:
+        email: { type: string, format: email }
+        password: { type: string }
+      required: [email, password]
+
+
+    Customer:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string, maxLength: 64 }
+        email: { type: string, format: email, maxLength: 512 }
+        phoneNumber: { type: string, maxLength: 16 }
+      required: [id, name, email]
+
+
+    CustomerCreateData:
+      type: object
+      properties:
+        name: { type: string, maxLength: 64 }
+        email: { type: string, format: email, maxLength: 512 }
+        phoneNumber: { type: string, maxLength: 16 }
+      required: [name, email]
+
+
+    CustomerUpdateData:
+      type: object
+      properties:
+        name: { type: string, maxLength: 64 }
+        email: { type: string, format: email, maxLength: 512 }
+        phoneNumber: { type: string, maxLength: 16 }
+
+
+    Company:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string, maxLength: 64 }
+        phoneNumber: { type: string, maxLength: 16 }
+       
+        email: { type: string, format: email, maxLength: 512 }
+
+    Location:
+      type: object
+      properties:
+        id: { type: integer }
+        companyId: { type: integer }
+        name: { type: string, maxLength: 64 }
+        address: { type: string, maxLength: 256 }
+        phoneNumber: { type: string, maxLength: 16 }
+        email: { type: string, format: email, maxLength: 512 }
+
+
+    Product:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string, maxLength: 256 }
+        unitPrice: { $ref: '#/components/schemas/Money' }
+        currency: { $ref: '#/components/schemas/CurrencyCode' }
+        vatPercent: { type: number, format: float, minimum: 0 }
+      required: [id, name, unitPrice, currency]
+
+
+    ProductVariation:
+      type: object
+      properties:
+        id: { type: integer }
+        productId: { type: integer }
+        name: { type: string, maxLength: 256 }
+        unitPrice: { $ref: '#/components/schemas/Money' }
+
+
+    Service:
+      type: object
+      properties:
+        id: { type: integer }
+        productId: { type: integer }
+        companyId: { type: integer }
+        title: { type: string, maxLength: 256 }
+        description: { type: string }
+        basePrice: { $ref: '#/components/schemas/Money' }
+        durationMinutes: { type: integer, minimum: 1 }
+        status:
+          type: string
+          enum: [available, unavailable]
+
+
+    ServiceUpdate:
+      type: object
+      properties:
+        title: { type: string, maxLength: 256 }
+        description: { type: string }
+        basePrice: { $ref: '#/components/schemas/Money' }
+        durationMinutes: { type: integer, minimum: 1 }
+        status:
+          type: string
+          enum: [available, unavailable]
+
+
+    ServiceProvider:
+      type: object
+      properties:
+        id:
+          type: integer
+        employeeId:
+          type: integer
+        name:
+          type: string 
+        qualifiedServiceIds:
+          type: array
+          items:
+            type: integer
+
+
+    ServiceProviderUpdate:
+      type: object
+      properties:
+        qualifiedServiceIdsToAdd:
+          type: array
+          items:
+            type: integer
+          nullable: true
+        qualifiedServiceIdsToRemove:
+          type: array
+          items:
+            type: integer
+          nullable: true
+
+
+    Employee:
+      type: object
+      properties:
+        id:
+          type: integer
+        firstName:
+          type: string
+        lastName:
+          type: string
+        employmentLocationId:
+          type: integer
+        phoneNumber:
+          type: string
+        email:
+          type: string
+        status:
+          type: string
+          enum: [active, inactive]
+
+
+    EmployeeUpdate:
+      type: object
+      properties:
+        firstName:
+          type: string
+          nullable: true
+        lastName:
+          type: string
+          nullable: true
+        employmentLocationId:
+          type: integer
+          nullable: true
+        phoneNumber:
+          type: string
+          nullable: true
+        email:
+          type: string
+          nullable: true
+        status:
+          type: string
+          enum: [active, inactive]
+          nullable: true
+
+
+    EmployeeCreate:
+      type: object
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        employmentLocationId:
+          type: integer
+        phoneNumber:
+          type: string
+        email:
+          type: string
+        status:
+          type: string
+          enum: [active, inactive]
+      required: [firstName, lastName, employmentLocationId, status]
+
+
+
+    Reservation:
+      type: object
+      properties:
+        id: { type: integer }
+        serviceId: { type: integer }
+        locationId: { type: integer }
+        providerId: { type: integer }
+        customerId: { type: integer }
+        reservationTime: { type: number, format: bigint }
+        appointmentTime: { type: number, format: bigint, nullable: true }
+        status:
+          type: string
+          enum: [active, completed, canceled]
+      required: [id, serviceId, locationId, providerId, customerId, reservationTime, status]
+
+
+    ReservationCreate:
+      type: object
+      properties:
+        serviceId: { type: integer }
+        locationId: { type: integer }
+        providerId: { type: integer }
+        customerId: { type: integer }
+        reservationTime: { type: number, format: bigint }
+      required: [serviceId, locationId, providerId, customerId, reservationTime]
+
+
+    ReservationUpdate:
+      type: object
+      properties:
+        reservationTime: { type: number, format: bigint }
+        providerId: { type: integer }
+        status:
+          type: string
+          enum: [active, completed, canceled]
+
+
+    Order:
+      type: object
+      properties:
+        id: { type: integer }
+        operatorId: { type: integer, description: 'Employee who opened the order' }
+        status:
+          type: string
+          enum: [opened, closed, refunded]
+        tip: { $ref: '#/components/schemas/Money' }
+        serviceCharge: { $ref: '#/components/schemas/Money' }
+        discountTotal: { $ref: '#/components/schemas/Money' }
+        currency: { $ref: '#/components/schemas/CurrencyCode' }
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/Item' }
+        payments:
+          type: array
+          items: { $ref: '#/components/schemas/Payment' }
+        totals:
+          type: object
+          properties:
+            subtotal: { $ref: '#/components/schemas/Money' }
+            vatTotal: { $ref: '#/components/schemas/Money' }
+            grandTotal: { $ref: '#/components/schemas/Money' }
+            amountDue: { $ref: '#/components/schemas/Money' }
+      required: [id, operatorId, status, items, payments, totals]    
+
+    OrderOpenRequest:
+      type: object
+      properties:
+        operatorId: { type: integer }
+        serviceCharge: { $ref: '#/components/schemas/Money' }
+        discountTotal: { $ref: '#/components/schemas/Money' }
+        currency: { $ref: '#/components/schemas/CurrencyCode' }
+        reservationId:
+          type: integer
+          description: Optionally link to a reservation
+      required: [operatorId, currency]
+
+
+    OrderUpdate:
+      type: object
+      properties:
+        tip: { $ref: '#/components/schemas/Money' }
+        serviceCharge: { $ref: '#/components/schemas/Money' }
+        currency: { $ref: '#/components/schemas/CurrencyCode' }
+        status:
+          type: string
+          enum: [opened, closed, refunded]
+
+
+    Item:
+      type: object
+      properties:
+        id: { type: integer }
+        orderId: { type: integer }
+        productId: { type: integer }
+        unitPrice: { $ref: '#/components/schemas/Money' }
+        currency: { $ref: '#/components/schemas/CurrencyCode' }
+        quantity:
+          type: number
+          format: float
+          description: Supports fractional quantities
+        discount: { $ref: '#/components/schemas/Money' }
+        vatPercent: { type: number, format: float }
+        variations:
+          type: array
+          items: { $ref: '#/components/schemas/ItemVariation' }
+      required: [id, orderId, productId, unitPrice, currency, quantity]
+
+
+    ItemCreate:
+      type: object
+      properties:
+        productId: { type: integer }
+        unitPrice: { $ref: '#/components/schemas/Money' }
+        currency: { $ref: '#/components/schemas/CurrencyCode' }
+        quantity: { type: number, format: float, default: 1 }
+        discount: { $ref: '#/components/schemas/Money' }
+        vatPercent: { type: number, format: float }
+        variationIds:
+          type: array
+          items: { type: integer }
+      required: [productId, unitPrice, currency, quantity]
+
+
+    ItemUpdate:
+      type: object
+      properties:
+        unitPrice: { $ref: '#/components/schemas/Money' }
+        quantity: { type: number, format: float }
+        discount: { $ref: '#/components/schemas/Money' }
+        vatPercent: { type: number, format: float }
+        variationIds:
+          type: array
+          items: { type: integer }
+
+
+    ItemVariation:
+      type: object
+      properties:
+        itemId: { type: integer }
+        variationId: { type: integer }
+        name: { type: string }
+        deltaPrice: { $ref: '#/components/schemas/Money' }
+
+
+    Payment:
+      type: object
+      properties:
+        id: { type: integer }
+        orderId: { type: integer }
+        method:
+          type: string
+          enum: [cash, card]
+        amount: { $ref: '#/components/schemas/Money' }
+        currency: { $ref: '#/components/schemas/CurrencyCode' }
+        payerCustomerId:
+          type: integer
+          description: Provided for split payments
+        stripeChargeId:
+          type: string
+          nullable: true
+      required: [id, orderId, method, amount, currency]
+
+
+    PaymentRequest:
+      type: object
+      properties:
+        orderId: { type: integer }
+        amount: { $ref: '#/components/schemas/Money' }
+      required: [orderId, amount]
+
+
+    RefundRequest:
+      type: object
+      properties:
+        paymentId: { type: integer }
+        reason: { type: string }
+      required: [paymentId]
+
+
+    PermissionFlag:
+      type: string
+      enum: 
+        - canAddEmployees
+        - canAddLocation
+        - canMakeRefunds
+        - canChangeVat
+        - canAddDiscounts
+        - canAddCustomers
+        - canAddProducts
+        - canChangeProducts
+    
+    
+    Role:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string, maxLength: 64 }
+        flags:
+          type: array
+          items: { $ref: '#/components/schemas/PermissionFlag' }
+      required: [id, name]
+
+
+    RoleCreateData:
+      type: object
+      properties:
+        name: { type: string, maxLength: 64 }
+        flags:
+          type: array
+          items: { $ref: '#/components/schemas/PermissionFlag' }
+      required: [name]
+
+
+    RoleUpdateData:
+      type: object
+      properties:
+        name: { type: string, maxLength: 64 }
+        flags:
+          type: array
+          items: { $ref: '#/components/schemas/PermissionFlag' }
+          
+          
+    RoleAssignmentRequest:
+      type: object
+      properties:
+        employeeId:
+          type: integer
+          description: Employee to whom the role will be assigned
+      required: [employeeId]
+
+
+    Permission:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string, maxLength: 64 }
+
+
+    CurrencyCode:
+      type: string
+      minLength: 3
+      maxLength: 3
+      example: EUR
+
+
+    Money:
+      type: object
+      properties:
+        amount: { type: integer }
+        currency: { type: string, minLength: 3, maxLength: 3 }
+      required: [amount, currency]
+
+
+    PaginatedCustomers:
+      type: object
+      properties:
+        page: { type: integer }
+        pageSize: { type: integer }
+        total: { type: integer }
+        data:
+          type: array
+          items: { $ref: '#/components/schemas/Customer' }
