@@ -28,6 +28,7 @@ func (oc OrderController) list(c *gin.Context) {
 }
 
 func (oc OrderController) order(c *gin.Context) {
+	c.Header("Access-Control-Allow-Origin", "*")
 	orderId, err := strconv.ParseInt(c.Param("orderId"), 10, 64)
 	if err != nil {
 		c.Status(http.StatusBadRequest)
