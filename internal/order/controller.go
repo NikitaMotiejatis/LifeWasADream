@@ -28,7 +28,7 @@ func (oc OrderController) list(c *gin.Context) {
 }
 
 func (oc OrderController) order(c *gin.Context) {
-	c.Header("Access-Control-Allow-Origin", "*")
+	c.Header("Access-Control-Allow-Origin", "*") // TODO: not super safe
 	orderId, err := strconv.ParseInt(c.Param("orderId"), 10, 64)
 	if err != nil {
 		c.Status(http.StatusBadRequest)
@@ -41,5 +41,6 @@ func (oc OrderController) order(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, *order)
+	//c.JSON(http.StatusOK, *order)
+	c.JSONP(http.StatusOK, *order)
 }
