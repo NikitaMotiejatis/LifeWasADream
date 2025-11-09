@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { HiOutlineBriefcase } from "react-icons/hi";
-import { IoBusiness } from "react-icons/io5";
+import PagePathDisplay from "../../component/page-path-display";
 
 const Sidebar: React.FC = () => {
   return (
@@ -205,16 +205,7 @@ export const BusinessCreatePage: React.FC = () => {
 
       {/* Main Content Area */}
       <div className="flex-1 p-8 overflow-y-auto">
-        <div className="flex justify-start items-center gap-1 w-screen mb-10 pr-auto">
-          <IoBusiness />
-            <a href="/business">
-              <div className="text-sm text-black text-left font-bold">Business</div>
-            </a>
-            <div className="text-sm text-black text-left font-bold"> / </div>
-            <a href="/business/create">
-              <div className="text-sm text-black text-left font-bold">Create</div>
-            </a>
-        </div>
+        <PagePathDisplay steps={["Business", "Create"]} />
       
         <CreateBusinessForm />
       </div>

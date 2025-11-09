@@ -1,6 +1,7 @@
 import { HiDotsVertical, HiOutlineBriefcase, HiOutlineUser } from "react-icons/hi";
-import { IoBusiness } from "react-icons/io5";
 import { MdOutlineAddBox, MdOutlineViewModule, MdViewList } from "react-icons/md";
+import PagePathDisplay from "../../component/page-path-display";
+import OptionCard from "../../component/option-card";
 
 const Sidebar: React.FC = () => {
   return (
@@ -69,41 +70,6 @@ const BusinessCard: React.FC<BusinessCardProps> = ({ id, title, isCoOwned }) => 
   );
 };
 
-const CreateBusinessCard: React.FC = () => {
-  return (
-    <a href="/business/create">
-        <div className="w-48 h-48 text-center cursor-pointer bg-gray-200 hover:bg-gray-300 transition p-4 rounded-xl">
-            <div className="w-20 h-20 border border-gray-400 rounded-lg mx-auto mb-2 flex items-center justify-center">
-                <MdOutlineAddBox className="w-10 h-10 text-gray-600" />
-            </div>
-            <span className="text-sm text-black font-medium">Create new business</span>
-        </div>
-    </a>
-  );
-};
-
-type PagePath = {
-  steps: string[];
-};
-
-const PathComponent: React.FC<PagePath> = ({steps}) => {
-  let subpaths: string[][] = [];
-  for (let i = 1; i <= steps.length; ++i) {
-    subpaths.push(steps.slice(0, i));
-  }
-
-  return (
-    <div className="flex justify-start items-center gap-1 w-screen mb-10 pr-auto">
-      <IoBusiness />
-      {subpaths.map(subpath => { return (
-        <a href={subpath.join("/").toLowerCase()}>
-          <div className="text-sm text-black text-left font-bold">{subpath}</div>
-        </a>
-      )})}
-    </div>
-  )
-}
-
 const BusinessMainPage: React.FC = () => {
   
   // TODO: should be fetched from DB
@@ -123,7 +89,7 @@ const BusinessMainPage: React.FC = () => {
       <div className="flex-1 p-8 overflow-y-auto">
         
         {/* Header - Business */}
-        <PathComponent steps={["Business"]} />
+        <PagePathDisplay steps={["Business"]} />
 
         {/* Section 1: Manage Businesses */}
         <div className="mb-10 text-left">
@@ -131,7 +97,7 @@ const BusinessMainPage: React.FC = () => {
           <p className="text-sm text-gray-500 mb-4">
             Choose quick actions for businesses management.
           </p>
-          <CreateBusinessCard />
+          <OptionCard name="Create new business" linkPath="business/create" Icon={MdOutlineAddBox} />
         </div>
 
         {/* Section 2: Your Businesses */}
