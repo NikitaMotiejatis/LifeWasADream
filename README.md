@@ -28,7 +28,7 @@ To start the DB run:
 docker compose up -d
 ```
 
-**Node:** To run DB using Docker containers 
+**Note:** To run DB using Docker containers 
 you **still need** to specify DB environment variables from before.
 
 Docker containers, besides the Postgres DB, will also start pgAdmin.
@@ -50,5 +50,23 @@ To stop the DB run:
 
 ```console
 docker compose down -v
+```
+
+#### Creating DB objects and filling in dummy data
+
+Execute `postgres/init.sql` to generate DB with some sample data.
+
+
+### Starting the server
+
+Before starting the server 
+you need to specify `URL` environment variable in `.env` file
+in the root directory of the repository
+(if it's not there create it).
+
+To start the server at the `URL` run:
+
+```console
+go run cmd/dreampos/main.go
 ```
 
