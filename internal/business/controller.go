@@ -38,6 +38,7 @@ func (c BusinessController) list(ctx *gin.Context) {
 	businesses, err := c.Service.ListBusinesses(int32(pageNumber), int32(pageSize))
 	if errors.Is(err, ErrInternal) {
 		ctx.Status(http.StatusInternalServerError)
+		return
 	} else if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -60,6 +61,7 @@ func (c BusinessController) business(ctx *gin.Context) {
 	business, err := c.Service.GetBusiness(int32(businessId))
 	if errors.Is(err, ErrInternal) {
 		ctx.Status(http.StatusInternalServerError)
+		return
 	} else if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -84,6 +86,7 @@ func (c BusinessController) create(ctx *gin.Context) {
 	err = c.Service.CreateBusiness(business)
 	if errors.Is(err, ErrInternal) {
 		ctx.Status(http.StatusInternalServerError)
+		return
 	} else if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

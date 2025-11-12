@@ -9,7 +9,7 @@ import (
 	_ "github.com/lib/pq"
 
 	"dreampos/internal/config"
-	"dreampos/internal/server"
+	"dreampos/internal/app"
 )
 
 func main() {
@@ -33,10 +33,6 @@ func main() {
 		return
 	}
 
-	server := server.Server{
-		Url: config.Url,
-		Db: database,
-	}
-
-	server.Start()
+	app := app.New(config.Url, database)
+	app.Start()
 }
