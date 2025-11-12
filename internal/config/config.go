@@ -1,10 +1,6 @@
 package config
 
-import (
-	"os"
-
-	_ "github.com/joho/godotenv/autoload"
-)
+import "os"
 
 type Config struct {
 	Url    string
@@ -17,15 +13,15 @@ type Config struct {
 }
 
 func LoadConfig() (*Config, error) {
-	ca := &Config{}
+	config := &Config{
+		Url: os.Getenv("URL"),
 
-	ca.Url = os.Getenv("URL")
+		DbHostname: os.Getenv("DB_HOSTNAME"),
+		DbPort:	 	os.Getenv("DB_PORT"),
+		DbName:	 	os.Getenv("DB_NAME"),
+		DbUser:	 	os.Getenv("DB_USER"),
+		DbPass:	 	os.Getenv("DB_PASS"),
+	}
 
-	ca.DbHostname 	= os.Getenv("DB_HOSTNAME")
-	ca.DbPort	 	= os.Getenv("DB_PORT")
-	ca.DbName	 	= os.Getenv("DB_NAME")
-	ca.DbUser	 	= os.Getenv("DB_USER")
-	ca.DbPass	 	= os.Getenv("DB_PASS")
-
-	return ca, nil
+	return config, nil
 }

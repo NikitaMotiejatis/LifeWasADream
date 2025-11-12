@@ -1,20 +1,15 @@
-// TODO: Better error handeling
-
-
 package business
 
 import (
-	"log/slog"
+	"errors"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/jmoiron/sqlx"
 )
 
 type BusinessController struct {
 	Service BusinessService
-	Db		*sqlx.DB
 }
 
 func (c BusinessController) Attach(rg *gin.RouterGroup) {
@@ -25,25 +20,35 @@ func (c BusinessController) Attach(rg *gin.RouterGroup) {
 
 func (c BusinessController) list(ctx *gin.Context) {
 	if ctx == nil {
-		slog.Warn("controller was reached with nil context")
+		panic("controller was reached with nil context")
+	}
+
+	pageNumber, err := strconv.ParseInt(ctx.DefaultQuery("pageNumber", "0"), 10, 32)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid page number"})
 		return
 	}
 
-	businesses, err := c.Service.ListBusinesses(c.Db)
+	pageSize, err := strconv.ParseInt(ctx.DefaultQuery("pageSize", "10"), 10, 32)
 	if err != nil {
-		slog.Warn(err.Error())
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid page size"})
+		return
+	}
+
+	businesses, err := c.Service.ListBusinesses(int32(pageNumber), int32(pageSize))
+	if errors.Is(err, ErrInternal) {
 		ctx.Status(http.StatusInternalServerError)
+	} else if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	ctx.JSON(http.StatusOK, businesses)
 }
 
-// TODO: pagination
 func (c BusinessController) business(ctx *gin.Context) {
 	if ctx == nil {
-		slog.Warn("controller was reached with nil context")
-		return
+		panic("controller was reached with nil context")
 	}
 
 	businessId, err := strconv.ParseInt(ctx.Param("businessId"), 10, 32)
@@ -52,10 +57,11 @@ func (c BusinessController) business(ctx *gin.Context) {
 		return
 	}
 
-	business, err := c.Service.GetBusiness(c.Db, uint32(businessId))
-	if err != nil {
-		slog.Warn(err.Error())
+	business, err := c.Service.GetBusiness(int32(businessId))
+	if errors.Is(err, ErrInternal) {
 		ctx.Status(http.StatusInternalServerError)
+	} else if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -64,8 +70,7 @@ func (c BusinessController) business(ctx *gin.Context) {
 
 func (c BusinessController) create(ctx *gin.Context) {
 	if ctx == nil {
-		slog.Warn("controller was reached with nil context")
-		return
+		panic("controller was reached with nil context")
 	}
 
 	var business Business
@@ -76,9 +81,11 @@ func (c BusinessController) create(ctx *gin.Context) {
 		return
 	}
 
-	err = c.Service.CreateBusiness(c.Db, business)
-	if err != nil {
+	err = c.Service.CreateBusiness(business)
+	if errors.Is(err, ErrInternal) {
 		ctx.Status(http.StatusInternalServerError)
+	} else if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 

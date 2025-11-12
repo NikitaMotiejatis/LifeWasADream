@@ -22,7 +22,8 @@ DB_PASS=...
 #### Running DB locally using Docker containers
 
 Simple way to run DB locally is provided using Docker containers.
-To start the DB run:
+
+**To start the DB:**
 
 ```console
 docker compose up -d
@@ -42,11 +43,11 @@ PGADMIN_PASS=...
 
 You will be able to access pgAdmin panel through the browser at `localhost`
 with the specified DB and pgAdmin variables.
-Note that since the panel is running on the container
-when connecting to DB through it 
-you'll have to specify the standard Postgres port `5432`.
+Note that since the panel is running on the container,
+when connecting to the DB through it,
+you'll have to specify the standard Postgres port (`5432`).
 
-To stop the DB run:
+**To stop the DB:**
 
 ```console
 docker compose down -v
@@ -64,9 +65,36 @@ you need to specify `URL` environment variable in `.env` file
 in the root directory of the repository
 (if it's not there create it).
 
-To start the server at the `URL` run:
+**To start the server at the `URL`:**
 
 ```console
 go run cmd/dreampos/main.go
 ```
 
+#### Using the server
+
+Following routes are implemented:
+ - `/businesses/<business_id>` 
+    - `GET` request;
+    - Returns `Business` with ID equal to `<business_id>`;
+ - `/businesses/list?pageNumber=<page_number>&pageSize=<page_size>`
+    - `GET` request;
+    - Returns a page of `Business` objects according to the parameters;
+    - Defaults: `pageNumber=0`, `pageSize=10`;
+ - `/businesses/create`
+    - `PUT` request;
+    - Adds specified `Business` to DB;
+    - Request body consists solely of a single `Business` (see below);
+
+Following is an example of a `Business` object:
+```json
+{
+    "id": 5,
+    "name": "Zava",
+    "description": "Aenean lectus. Pellentesque eget nunc. Donec quis orci eget orci vehicula condimentum.",
+    "type": "APPOINTMENT_BASED",
+    "email": "lcotter4@studiopress.com",
+    "phone": "530-368-8393",
+    "created_at": "2010-10-27T16:46:23Z"
+}
+```

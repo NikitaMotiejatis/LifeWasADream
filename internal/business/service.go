@@ -2,67 +2,128 @@ package business
 
 import (
 	"errors"
+	"log/slog"
+	"math"
 	"strconv"
 
 	"github.com/jmoiron/sqlx"
 )
 
+var (
+	ErrInternal			= errors.New("internal error")
+	ErrInvalidParams 	= errors.New("invalid parameter(s)")
+	ErrParamsTooBig 	= errors.New("parameter(s) too big")
+)
+
 type BusinessService interface {
-	ListBusinesses(db *sqlx.DB) ([]Business, error)
-	GetBusiness(db *sqlx.DB, businessId uint32) (Business, error)
-	CreateBusiness(db *sqlx.DB, business Business) error
+	ListBusinesses(pageNumber, pageSize int32) ([]Business, error)
+	GetBusiness(businessId int32) (Business, error)
+	CreateBusiness(business Business) error
 }
 
-// ----------------------------------------------------------------------------
-// ProductionBusinessService --------------------------------------------------
-// ----------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------ 
+// ProductionBusinessService ----------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
 
-type ProductionBusinessService struct {}
+type ProductionBusinessService struct {
+	Db *sqlx.DB
+}
 
-func (s ProductionBusinessService) ListBusinesses(db *sqlx.DB) ([]Business, error) {
-	if db == nil {
-		return nil, errors.New("got nil DB pointer")
+func (s ProductionBusinessService) ListBusinesses(pageNumber, pageSize int32) ([]Business, error) {
+	if s.Db == nil {
+		slog.Error("got a nil DB pointer")
+		return []Business{}, ErrInternal
 	}
 
+	if pageNumber < 0 || pageSize < 1 {
+		return []Business{}, ErrInvalidParams
+	}
+
+	if pageNumber > math.MaxInt32 / pageSize {
+		return []Business{}, ErrParamsTooBig
+	}
+
+	const query = `
+		SELECT
+			id,
+			name,
+			description,
+			type,
+			email,
+			phone,
+			created_at
+		FROM business
+		OFFSET $1
+		LIMIT $2
+	`
+
+	offset := pageNumber * pageSize
 	businesses := []Business{}
 
-	if err := db.Select(&businesses, "SELECT * FROM business"); err != nil {
-		return nil, err
+	err := s.Db.Select(&businesses, query, offset, pageSize)
+	if err != nil {
+		slog.Error(err.Error())
+		return nil, ErrInvalidParams
 	}
 
 	return businesses, nil
 }
 
-func (s ProductionBusinessService) GetBusiness(db *sqlx.DB, businessId uint32) (Business, error) {
-	if db == nil {
-		return Business{}, errors.New("got nil DB pointer")
+func (s ProductionBusinessService) GetBusiness(businessId int32) (Business, error) {
+	if s.Db == nil {
+		slog.Error("got a nil DB pointer")
+		return Business{}, ErrInternal
 	}
+
+
+	const query = `
+		SELECT
+			id,
+			name,
+			description,
+			type,
+			email,
+			phone,
+			created_at
+		FROM business
+			WHERE id = $1 
+		LIMIT 1
+	`
 
 	businesses := []Business{}
 
-	err := db.Select(&businesses, "SELECT * FROM business WHERE id = $1 LIMIT 1", businessId)
+	err := s.Db.Select(&businesses, query, businessId)
 	if err != nil {
-		return Business{}, err
+		slog.Error(err.Error())
+		return Business{}, ErrInvalidParams
 	}
 
 	if len(businesses) != 1 {
-		return Business{}, errors.New("expexted 1 entry got " + strconv.Itoa(len(businesses)))
+		slog.Error("expexted 1 entry got " + strconv.Itoa(len(businesses)))
+		return Business{}, ErrInvalidParams
 	}
 
 	return businesses[0], nil
 }
 
-func (s ProductionBusinessService) CreateBusiness(db *sqlx.DB, business Business) error {
-	if db == nil {
-		return errors.New("got nil DB pointer")
+func (s ProductionBusinessService) CreateBusiness(business Business) error {
+	if s.Db == nil {
+		slog.Error("got a nil DB pointer")
+		return ErrInternal
 	}
 
-	_, err := db.NamedExec(`
-		INSERT INTO business 
-			(id, name, description, type, email, phone, created_at) 
-			VALUES
-			(:id, :name, :description, :type, :email, :phone, :created_at)`,
-		business)
+	const statement = `
+		INSERT INTO 
+			business(id, name, description, type, email, phone, created_at) 
+		VALUES
+			(:id, :name, :description, :type, :email, :phone, :created_at)
+	`
 
-	return err
+	_, err := s.Db.NamedExec(statement, business)
+	if err != nil {
+		slog.Error(err.Error())
+		return ErrInvalidParams
+	}
+
+	return nil
 }
