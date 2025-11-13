@@ -1,7 +1,7 @@
 services:
   postgres:
     container_name: dream-container
-    image: postgres
+    image: postgres:17
     hostname: ${DB_HOSTNAME}
     ports:
       - ${DB_PORT}:5432
