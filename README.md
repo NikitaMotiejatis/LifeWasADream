@@ -98,3 +98,18 @@ Following is an example of a `Business` object:
     "created_at": "2010-10-27T16:46:23Z"
 }
 ```
+## Frontend
+
+Make sure to have this variable in `.env` file:
+```
+VITE_PORT=...
+```
+
+### Starting the frontend
+Go to frontend directory and run these commands:
+```
+npm i
+npm run dev
+```
+
+The app can be viewed through a browser at http://localhost:[VITE_PORT]. For example: http://localhost:8082.
