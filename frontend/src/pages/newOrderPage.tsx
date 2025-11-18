@@ -1,14 +1,14 @@
-import Sidebar from "../components/sidebar";
-import Topbar from "../components/topbar";
-import ProductGrid from "../components/productGrid";
-import OrderSummary from "../components/orderSummary";
+import Sidebar from '../components/sidebar';
+import Topbar from '../components/topbar';
+import ProductGrid from '../components/productGrid';
+import OrderSummary from '../components/orderSummary';
 
 export default function NewOrderPage() {
   return (
     <div className="flex h-screen w-full">
       <Sidebar />
 
-      <div className="flex flex-col flex-1">
+      <div className="flex flex-1 flex-col">
         <Topbar />
 
         <div className="flex flex-row gap-4 p-6">

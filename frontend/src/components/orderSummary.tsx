@@ -1,9 +1,9 @@
 export default function OrderSummary() {
   return (
-    <div className="bg-white rounded-lg p-4 shadow-sm h-full flex flex-col">
-      <h3 className="text-lg font-semibold mb-4">Current Order</h3>
+    <div className="flex h-full flex-col rounded-lg bg-white p-4 shadow-sm">
+      <h3 className="mb-4 text-lg font-semibold">Current Order</h3>
 
-      <div className="flex flex-col gap-4 flex-1">
+      <div className="flex flex-1 flex-col gap-4">
         {/* Example items */}
         <div className="flex justify-between">
           <div>Latte x2</div>
@@ -22,7 +22,7 @@ export default function OrderSummary() {
           <span>$13.00</span>
         </div>
 
-        <button className="w-full bg-blue-600 text-white py-2 rounded-lg mt-4">
+        <button className="mt-4 w-full rounded-lg bg-blue-600 py-2 text-white">
           Complete Payment
         </button>
       </div>
