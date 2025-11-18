@@ -331,7 +331,7 @@ CREATE TABLE location (
 DROP TABLE IF EXISTS location_open CASCADE;
 CREATE TABLE location_open (
 	location_id 	INTEGER	PRIMARY KEY,
-	day_of_the_week weekdays    NOT NULL,
+	day_of_the_week weekday    NOT NULL,
 	open_at 	    TIME	    NOT NULL,
 	closes_at 	    TIME 	    NOT NULL,
 
