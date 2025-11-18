@@ -1,6 +1,6 @@
 export default function OrderSummary() {
   return (
-    <div className="bg-white border rounded-lg p-4 shadow-sm h-full flex flex-col">
+    <div className="bg-white rounded-lg p-4 shadow-sm h-full flex flex-col">
       <h3 className="text-lg font-semibold mb-4">Current Order</h3>
 
       <div className="flex flex-col gap-4 flex-1">
@@ -16,7 +16,7 @@ export default function OrderSummary() {
         </div>
       </div>
 
-      <div className="mt-4 border-t pt-4">
+      <div className="mt-4 border-t border-gray-300 pt-4">
         <div className="flex justify-between text-lg font-semibold">
           <span>Total</span>
           <span>$13.00</span>

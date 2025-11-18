@@ -6,7 +6,7 @@ export default function LoginPage() {
         <p className="text-gray-500">Unified Point-of-Sale System</p>
       </div>
 
-      <div className="bg-white p-10 rounded-lg border shadow-md w-[400px] ml-10">
+      <div className="bg-white p-10 rounded-lg shadow-md w-[400px] ml-10">
         <h2 className="text-xl mb-6 font-semibold">LOGIN</h2>
 
         {/* USERNAME */}
@@ -24,7 +24,7 @@ export default function LoginPage() {
           <input
             type="text"
             placeholder="Enter username..."
-            className="w-full border rounded-lg py-2 pl-10 pr-3 bg-gray-100 focus:outline-none focus:ring focus:ring-blue-200"
+            className="w-full rounded-lg py-2 pl-10 pr-3 bg-gray-100 focus:outline-none focus:ring focus:ring-blue-200"
           />
         </div>
 
@@ -43,7 +43,7 @@ export default function LoginPage() {
           <input
             type="password"
             placeholder="Enter password..."
-            className="w-full border rounded-lg py-2 pl-10 pr-3 bg-gray-100 focus:outline-none focus:ring focus:ring-blue-200"
+            className="w-full rounded-lg py-2 pl-10 pr-3 bg-gray-100 focus:outline-none focus:ring focus:ring-blue-200"
           />
         </div>
 

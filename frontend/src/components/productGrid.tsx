@@ -19,7 +19,7 @@ export default function ProductGrid() {
         {products.map((p) => (
           <div
             key={p.name}
-            className="bg-white border rounded-lg p-4 shadow-sm hover:shadow cursor-pointer text-center"
+            className="bg-white rounded-lg p-4 shadow-sm hover:shadow cursor-pointer text-center"
           >
             <div className="w-20 h-20 bg-gray-200 mx-auto mb-2 rounded" />
             <p>{p.name}</p>
