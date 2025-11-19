@@ -233,7 +233,7 @@ DROP TABLE IF EXISTS currency_info CASCADE;
 CREATE TABLE currency_info (
     code    currency PRIMARY KEY,
     name    VARCHAR(64) NOT NULL,
-    symbol  CHAR        NOT NULL
+    symbol  CHAR(3)        NOT NULL 
 );
 
 DROP TABLE IF EXISTS country CASCADE;
@@ -330,12 +330,13 @@ CREATE TABLE location (
 
 DROP TABLE IF EXISTS location_open CASCADE;
 CREATE TABLE location_open (
-	location_id 	INTEGER	PRIMARY KEY,
+	location_id 	INTEGER	NOT NULL,
 	day_of_the_week weekday    NOT NULL,
 	open_at 	    TIME	    NOT NULL,
 	closes_at 	    TIME 	    NOT NULL,
 
-    CONSTRAINT open_before_close CHECK (open_at < closes_at)
+    CONSTRAINT open_before_close CHECK (open_at < closes_at),
+    PRIMARY KEY(location_id, day_of_the_week) -- location can work at different times of the week with different time
 );
 
 -- ------------------------------------------------------------------------------------------------
@@ -481,7 +482,7 @@ DROP TABLE IF EXISTS appointment_bill CASCADE;
 CREATE TABLE appointment_bill(
     id              INTEGER     PRIMARY KEY,
     appointment_id  INTEGER     NOT NULL REFERENCES appointment(id),
-    discount_id     INTEGER     NOT NULL REFERENCES discount_details(id),
+    discount_id     INTEGER     REFERENCES discount_details(id), -- may not have a discount
     tip_amount      price       NOT NULL,
     created_at      TIMESTAMP   NOT NULL
 );
