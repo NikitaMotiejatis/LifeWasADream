@@ -337,27 +337,98 @@ function BookingSummary({
 }) {
   const selectedServiceObj = services.find(s => s.id === selectedService);
 
+  const [nameError, setNameError] = useState(false);
+  const [phoneError, setPhoneError] = useState(false);
+
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const input = e.target.value;
+    const filtered = input.replace(/[^a-zA-ZąčęėįšųūžĄČĘĖĮŠŲŪŽ\s'-]/g, '');
+
+    if (input !== filtered) {
+      setNameError(true);
+    } else if (
+      nameError &&
+      filtered.match(/^[a-zA-ZąčęėįšųūžĄČĘĖĮŠŲŪŽ\s'-]*$/)
+    ) {
+      setNameError(false);
+    }
+
+    setCustomerName(filtered);
+  };
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let input = e.target.value;
+
+    let cleaned = input;
+    let hadInvalid = false;
+
+    if (input.startsWith('+')) {
+      const rest = input.slice(1);
+      if (/[^0-9]/.test(rest)) hadInvalid = true;
+      cleaned = '+' + rest.replace(/[^0-9]/g, '');
+    } else {
+      if (/[^0-9]/.test(input)) hadInvalid = true;
+      cleaned = input.replace(/[^0-9]/g, '');
+    }
+
+    if (cleaned.length > 15) return;
+
+    if (hadInvalid) {
+      setPhoneError(true);
+    } else if (phoneError) {
+      setPhoneError(false);
+    }
+
+    setCustomerPhone(cleaned);
+  };
+
+  const handleConfirmWithClear = () => {
+    setNameError(false);
+    setPhoneError(false);
+
+    onConfirm();
+  };
+
   return (
     <div className="rounded-xl bg-white p-5 shadow-lg">
       <h3 className="mb-6 text-xl font-bold">Booking Summary</h3>
 
-      {/* TODO: VALIDATION NEEDED */}
-      <input
-        type="text"
-        placeholder="Customer name"
-        value={customerName}
-        onChange={e => setCustomerName(e.target.value)}
-        className="mb-4 w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-blue-500 focus:outline-none"
-      />
-
-      {/* TODO: VALIDATION NEEDED */}
-      <input
-        type="tel"
-        placeholder="Phone number"
-        value={customerPhone}
-        onChange={e => setCustomerPhone(e.target.value)}
-        className="mb-6 w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-blue-500 focus:outline-none"
-      />
+      <div className="mb-4">
+        <input
+          type="text"
+          placeholder="Customer name"
+          value={customerName}
+          onChange={handleNameChange}
+          className={`className="mb-4 w-full rounded-lg border px-4 py-3 focus:outline-none ${
+            nameError
+              ? 'border-red-500 focus:border-red-500'
+              : 'border-gray-300 focus:border-blue-500'
+          }`}
+        />
+        {nameError && (
+          <p className="animate-fade-in mt-1 text-sm text-red-600">
+            Only letters, spaces, hyphens and apostrophes allowed
+          </p>
+        )}
+      </div>
+      <div className="mb-6">
+        <input
+          type="tel"
+          placeholder="Phone number"
+          value={customerPhone}
+          onChange={handlePhoneChange}
+          className={`w-full rounded-lg border px-4 py-3 transition-all focus:outline-none ${
+            phoneError
+              ? 'border-red-500 focus:border-red-500'
+              : 'border-gray-300 focus:border-blue-500'
+          }`}
+        />
+        {phoneError && (
+          <p className="animate-fade-in mt-1 text-sm text-red-600">
+            Only numbers and optional "+" at the beginning
+          </p>
+        )}
+      </div>
 
       <div className="mb-5 space-y-3 rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm">
         <SummaryRow
@@ -382,7 +453,7 @@ function BookingSummary({
       </div>
 
       <button
-        onClick={onConfirm}
+        onClick={handleConfirmWithClear}
         className="w-full rounded-lg bg-blue-600 py-4 font-semibold text-white transition hover:bg-blue-700"
       >
         Confirm Reservation
