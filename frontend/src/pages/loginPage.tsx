@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import PersonIcon from '../components/icons/personIcon';
+import LockIcon from '../components/icons/lockIcon';
 
 export default function LoginPage() {
   const [username, setUsername] = useState('');
@@ -46,20 +48,7 @@ export default function LoginPage() {
           </label>
           <div className="relative">
             <span className="absolute inset-y-0 left-3 flex items-center text-gray-400">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="1.5"
-                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                />
-              </svg>
+              <PersonIcon className="h-5 w-5" />
             </span>
             <input
               type="text"
@@ -86,20 +75,7 @@ export default function LoginPage() {
           </label>
           <div className="relative">
             <span className="absolute inset-y-0 left-3 flex items-center text-gray-400">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="1.5"
-                  d="M16.5 10.5V6a4.5 4.5 0 10-9 0v4.5m-.75 0h10.5a1.5 1.5 0 011.5 1.5v7.5a1.5 1.5 0 01-1.5 1.5H6.75a1.5 1.5 0 01-1.5-1.5V12a1.5 1.5 0 011.5-1.5z"
-                />
-              </svg>
+              <LockIcon className="h-5 w-5" />
             </span>
 
             <input

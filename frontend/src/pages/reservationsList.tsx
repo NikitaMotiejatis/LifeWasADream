@@ -1,10 +1,10 @@
-import Sidebar from '../components/sidebar';
+import SidebarCashier from '../components/sidebarCashier';
 import Topbar from '../components/topbar';
 
 export default function ReservationsPage() {
   return (
     <div className="flex h-screen w-full">
-      <Sidebar />
+      <SidebarCashier />
 
       <div className="flex flex-1 flex-col">
         <Topbar />

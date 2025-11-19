@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, ReactNode } from 'react';
+import { Currency, useCurrency } from './currencyContext';
 
 export type Product = {
   name: string;
@@ -9,8 +10,6 @@ export type CartItem = {
   product: Product;
   quantity: number;
 };
-
-type Currency = 'USD' | 'EUR' | 'GBP';
 
 type CartContextType = {
   cart: CartItem[];
@@ -26,15 +25,10 @@ type CartContextType = {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
-const currencySymbols: Record<Currency, string> = {
-  USD: '$',
-  EUR: '€',
-  GBP: '£',
-};
-
 export const CartProvider = ({ children }: { children: ReactNode }) => {
+  const { currency, setCurrency, formatPrice } = useCurrency();
+
   const [cart, setCart] = useState<CartItem[]>([]);
-  const [currency, setCurrency] = useState<Currency>('USD');
 
   const addToCart = (product: Product) => {
     setCart(prev => {
@@ -76,11 +70,6 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     0,
   );
 
-  const formatPrice = (price: number) => {
-    const symbol = currencySymbols[currency];
-    return `${symbol}${price.toFixed(2)}`;
-  };
-
   return (
     <CartContext.Provider
       value={{
@@ -100,8 +89,10 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-export const useCart = () => {
+export const useCart = (): CartContextType => {
   const context = useContext(CartContext);
-  if (!context) throw new Error('useCart must be used within CartProvider');
+  if (!context) {
+    throw new Error('useCart must be used within a CartProvider');
+  }
   return context;
 };

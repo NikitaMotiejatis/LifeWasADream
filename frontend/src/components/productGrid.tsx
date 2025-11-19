@@ -1,4 +1,4 @@
-import { useCart } from './cartContext';
+import { useCart } from '../contexts/cartContext';
 
 const products = [
   { name: 'Iced Coffee', price: 4.5 },
@@ -30,7 +30,7 @@ export default function ProductGrid() {
 
             <div className="w-full px-2">
               <p
-                className="line-clamp-2 text-center text-sm leading-snug font-medium hyphens-auto group-hover:line-clamp-none"
+                className="line-clamp-2 text-center text-sm leading-snug font-medium hyphens-auto"
                 title={p.name}
               >
                 {p.name}
@@ -40,19 +40,6 @@ export default function ProductGrid() {
             <p className="mt-2 font-medium text-gray-600">
               {formatPrice(p.price)}
             </p>
-
-            <div className="pointer-events-none absolute -top-10 left-1/2 z-10 -translate-x-1/2 rounded bg-gray-900 px-3 py-1.5 text-xs font-medium whitespace-nowrap text-white opacity-0 transition-opacity group-hover:opacity-100">
-              {p.name}
-              <svg
-                className="absolute top-full left-1/2 -translate-x-1/2 text-gray-900"
-                width="16"
-                height="8"
-                viewBox="0 0 16 8"
-                fill="currentColor"
-              >
-                <path d="M0 0L8 8L16 0H0Z" />
-              </svg>
-            </div>
           </button>
         ))}
       </div>
