@@ -275,7 +275,7 @@ CREATE TABLE employee (
     first_name      VARCHAR(64)     NOT NULL,
     last_name       VARCHAR(64)     NOT NULL,
     password_hash   CHAR(512)       NOT NULL,   -- TODO: May need to change depending on hasing algorithm
-    email           VARCHAR(512)    NOT NULL,
+    email           VARCHAR(512)    NOT NULL UNIQUE,
     phone           VARCHAR(16)     NOT NULL,
     created_at      TIMESTAMP       NOT NULL,   -- TODO: Check not in future
     business_id     INTEGER         NOT NULL REFERENCES business(id)
