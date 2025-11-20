@@ -1,5 +1,11 @@
 BEGIN TRANSACTION;
 
+-- ------------------------------------------------------------------------------------------------
+-- ------------------------------------------------------------------------------------------------
+-- Custom Types -----------------------------------------------------------------------------------
+-- ------------------------------------------------------------------------------------------------
+-- ------------------------------------------------------------------------------------------------
+
 
 DROP TYPE IF EXISTS weekday CASCADE;
 CREATE TYPE weekday AS ENUM(
@@ -14,194 +20,25 @@ CREATE TYPE weekday AS ENUM(
 
 
 DROP TYPE IF EXISTS currency CASCADE;
-CREATE TYPE currency AS ENUM(
-    'AED',
-    'AFN',
-    'ALL',
-    'AMD',
-    'AOA',
-    'ARS',
-    'AUD',
-    'AWG',
-    'AZN',
-    'BAM',
-    'BBD',
-    'BDT',
-    'BGN',
-    'BHD',
-    'BIF',
-    'BMD',
-    'BND',
-    'BOB',
-    'BOV',
-    'BRL',
-    'BSD',
-    'BTN',
-    'BWP',
-    'BYN',
-    'BZD',
-    'CAD',
-    'CDF',
-    'CHE',
-    'CHF',
-    'CHW',
-    'CLF',
-    'CLP',
-    'CNY',
-    'COP',
-    'COU',
-    'CRC',
-    'CUP',
-    'CVE',
-    'CZK',
-    'DJF',
-    'DKK',
-    'DOP',
-    'DZD',
-    'EGP',
-    'ERN',
-    'ETB',
-    'EUR',
-    'FJD',
-    'FKP',
-    'GBP',
-    'GEL',
-    'GHS',
-    'GIP',
-    'GMD',
-    'GNF',
-    'GTQ',
-    'GYD',
-    'HKD',
-    'HNL',
-    'HTG',
-    'HUF',
-    'IDR',
-    'ILS',
-    'INR',
-    'IQD',
-    'IRR',
-    'ISK',
-    'JMD',
-    'JOD',
-    'JPY',
-    'KES',
-    'KGS',
-    'KHR',
-    'KMF',
-    'KPW',
-    'KRW',
-    'KWD',
-    'KYD',
-    'KZT',
-    'LAK',
-    'LBP',
-    'LKR',
-    'LRD',
-    'LSL',
-    'LYD',
-    'MAD',
-    'MDL',
-    'MGA',
-    'MKD',
-    'MMK',
-    'MNT',
-    'MOP',
-    'MRU',
-    'MUR',
-    'MVR',
-    'MWK',
-    'MXN',
-    'MXV',
-    'MYR',
-    'MZN',
-    'NAD',
-    'NGN',
-    'NIO',
-    'NOK',
-    'NPR',
-    'NZD',
-    'OMR',
-    'PAB',
-    'PEN',
-    'PGK',
-    'PHP',
-    'PKR',
-    'PLN',
-    'PYG',
-    'QAR',
-    'RON',
-    'RSD',
-    'RUB',
-    'RWF',
-    'SAR',
-    'SBD',
-    'SCR',
-    'SDG',
-    'SEK',
-    'SGD',
-    'SHP',
-    'SLE',
-    'SOS',
-    'SRD',
-    'SSP',
-    'STN',
-    'SVC',
-    'SYP',
-    'SZL',
-    'THB',
-    'TJS',
-    'TMT',
-    'TND',
-    'TOP',
-    'TRY',
-    'TTD',
-    'TWD',
-    'TZS',
-    'UAH',
-    'UGX',
-    'USD',
-    'USN',
-    'UYI',
-    'UYU',
-    'UYW',
-    'UZS',
-    'VED',
-    'VES',
-    'VND',
-    'VUV',
-    'WST',
-    'XAD',
-    'XAF',
-    'XAG',
-    'XAU',
-    'XBA',
-    'XBB',
-    'XBC',
-    'XBD',
-    'XCD',
-    'XCG',
-    'XDR',
-    'XOF',
-    'XPD',
-    'XPF',
-    'XPT',
-    'XSU',
-    'XTS',
-    'XUA',
-    'XXX',
-    'YER',
-    'ZAR',
-    'ZMW',
-    'ZWG'
-);
+CREATE TYPE currency AS ENUM( 'AED', 'AFN', 'ALL', 'AMD', 'AOA', 'ARS', 'AUD', 'AWG', 'AZN', 'BAM', 'BBD', 'BDT', 'BGN', 'BHD', 'BIF', 'BMD', 'BND', 'BOB', 'BOV', 'BRL', 'BSD', 'BTN', 'BWP', 'BYN', 'BZD', 'CAD', 'CDF', 'CHE', 'CHF', 'CHW', 'CLF', 'CLP', 'CNY', 'COP', 'COU', 'CRC', 'CUP', 'CVE', 'CZK', 'DJF', 'DKK', 'DOP', 'DZD', 'EGP', 'ERN', 'ETB', 'EUR', 'FJD', 'FKP', 'GBP', 'GEL', 'GHS', 'GIP', 'GMD', 'GNF', 'GTQ', 'GYD', 'HKD', 'HNL', 'HTG', 'HUF', 'IDR', 'ILS', 'INR', 'IQD', 'IRR', 'ISK', 'JMD', 'JOD', 'JPY', 'KES', 'KGS', 'KHR', 'KMF', 'KPW', 'KRW', 'KWD', 'KYD', 'KZT', 'LAK', 'LBP', 'LKR', 'LRD', 'LSL', 'LYD', 'MAD', 'MDL', 'MGA', 'MKD', 'MMK', 'MNT', 'MOP', 'MRU', 'MUR', 'MVR', 'MWK', 'MXN', 'MXV', 'MYR', 'MZN', 'NAD', 'NGN', 'NIO', 'NOK', 'NPR', 'NZD', 'OMR', 'PAB', 'PEN', 'PGK', 'PHP', 'PKR', 'PLN', 'PYG', 'QAR', 'RON', 'RSD', 'RUB', 'RWF', 'SAR', 'SBD', 'SCR', 'SDG', 'SEK', 'SGD', 'SHP', 'SLE', 'SOS', 'SRD', 'SSP', 'STN', 'SVC', 'SYP', 'SZL', 'THB', 'TJS', 'TMT', 'TND', 'TOP', 'TRY', 'TTD', 'TWD', 'TZS', 'UAH', 'UGX', 'USD', 'USN', 'UYI', 'UYU', 'UYW', 'UZS', 'VED', 'VES', 'VND', 'VUV', 'WST', 'XAD', 'XAF', 'XAG', 'XAU', 'XBA', 'XBB', 'XBC', 'XBD', 'XCD', 'XCG', 'XDR', 'XOF', 'XPD', 'XPF', 'XPT', 'XSU', 'XTS', 'XUA', 'XXX', 'YER', 'ZAR', 'ZMW', 'ZWG' );
 
-DROP TYPE IF EXISTS price CASCADE;
-CREATE TYPE price AS (
-    currency    currency,
-    amount      INTEGER
-);
 
+CREATE OR REPLACE FUNCTION not_in_future()
+RETURNS TRIGGER AS 
+$$
+BEGIN
+    IF NEW.created_at > CURRENT_TIMESTAMP THEN
+        RAISE EXCEPTION 'created_at cannot be in the future';
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- ------------------------------------------------------------------------------------------------
+-- ------------------------------------------------------------------------------------------------
+-- Tables -----------------------------------------------------------------------------------------
+-- ------------------------------------------------------------------------------------------------
+-- ------------------------------------------------------------------------------------------------
 
 -- ------------------------------------------------------------------------------------------------
 -- Application Data -------------------------------------------------------------------------------
@@ -240,7 +77,7 @@ DROP TABLE IF EXISTS country CASCADE;
 CREATE TABLE country (
     code        CHAR(2) PRIMARY KEY,
     name        VARCHAR(64)     NOT NULL UNIQUE,
-    currency    currency        NOT NULL ,
+    currency    currency        NOT NULL,
     vat         DECIMAL(4, 2)   NOT NULL,
 
     CONSTRAINT non_negative_vat CHECK (vat >= 0)
@@ -261,8 +98,17 @@ CREATE TABLE business (
     type            business_type   NOT NULL,
     email           VARCHAR(512)    NOT NULL UNIQUE,
     phone           VARCHAR(16)     NOT NULL UNIQUE,
-    created_at      TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at      TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT valid_email CHECK (email ~ '^[^\.][a-zA-Z0-9\-\.+]{0,62}[^\.]+@([^\-][a-zA-Z0-9\-]{0,61}[^\-]\.)+[^\-][a-zA-Z0-9\-]{0,61}[^\-]$'),
+    CONSTRAINT valid_phone CHECK (phone ~ '^\+[0-9]{3,15}$')
 );
+
+DROP TRIGGER IF EXISTS business_valid_created_at ON business;
+CREATE TRIGGER business_valid_created_at
+    BEFORE INSERT OR UPDATE ON business
+    FOR EACH ROW
+    EXECUTE FUNCTION not_in_future();
 
 
 -- ------------------------------------------------------------------------------------------------
@@ -274,18 +120,29 @@ CREATE TABLE employee (
     id              INTEGER PRIMARY KEY,
     first_name      VARCHAR(64)     NOT NULL,
     last_name       VARCHAR(64)     NOT NULL,
-    password_hash   CHAR(512)       NOT NULL,   -- TODO: May need to change depending on hashing algorithm
+    password_hash   CHAR(60)        NOT NULL,
     email           VARCHAR(512)    NOT NULL UNIQUE,
     phone           VARCHAR(16)     NOT NULL UNIQUE,
-    created_at      TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,   -- TODO: Check not in future
-    business_id     INTEGER         NOT NULL REFERENCES business(id)
+    created_at      TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    business_id     INTEGER         NOT NULL REFERENCES business(id),
+
+    CONSTRAINT valid_password_hash  CHECK (password_hash ~ '^\$2(a|b|x|y)\$[0-9]{2}\$[a-zA-Z0-9./]{53}$'),
+    CONSTRAINT valid_email          CHECK (email ~ '^[^\.][a-zA-Z0-9\-\.+]{0,62}[^\.]+@([^\-][a-zA-Z0-9\-]{0,61}[^\-]\.)+[^\-][a-zA-Z0-9\-]{0,61}[^\-]$'),
+    CONSTRAINT valid_phone          CHECK (phone ~ '^\+[0-9]{3,15}$')
 );
+
+DROP TRIGGER IF EXISTS employee_valid_created_at ON employee;
+CREATE TRIGGER employee_valid_created_at
+    BEFORE INSERT OR UPDATE ON employee
+    FOR EACH ROW
+    EXECUTE FUNCTION not_in_future();
+
 
 DROP TABLE IF EXISTS work_shift CASCADE;
 CREATE TABLE work_shift (
     id              INTEGER PRIMARY KEY,
     day_of_the_week weekday NOT NULL,
-    start_time      TIME    NOT NULL,   -- TODO: Check not in future
+    start_time      TIME    NOT NULL,
     end_time        TIME    NOT NULL,
 
     CONSTRAINT start_before_end CHECK (start_time < end_time)
@@ -297,22 +154,6 @@ CREATE TABLE employee_shift (
     work_shift_id   INTEGER NOT NULL REFERENCES work_shift(id),
 
     PRIMARY KEY(user_id, work_shift_id)
-);
-
--- ------------------------------------------------------------------------------------------------
--- Authentication ---------------------------------------------------------------------------------
--- ------------------------------------------------------------------------------------------------
-
--- TODO: May not need it. Tokens could be stored in memory
-DROP TABLE IF EXISTS token CASCADE;
-CREATE TABLE token (
-    id          INTEGER PRIMARY KEY,
-    user_id     INTEGER     NOT NULL REFERENCES employee(id),
-    token       CHAR(256)   NOT NULL,   -- TODO: May need to change depending on hashing algorithm
-    created_at  TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    expired_at  TIMESTAMP   NOT NULL,   -- TODO: Check not in future
-
-    CONSTRAINT created_before_expired CHECK (created_at < expired_at)
 );
 
 -- ------------------------------------------------------------------------------------------------
@@ -341,7 +182,7 @@ CREATE TABLE location_open (
 );
 
 -- ------------------------------------------------------------------------------------------------
--- Service data------------------------------------------------------------------------------------
+-- Service data -----------------------------------------------------------------------------------
 -- ------------------------------------------------------------------------------------------------
 
 DROP TABLE IF EXISTS service CASCADE;
@@ -357,11 +198,11 @@ CREATE TABLE service (
 DROP TABLE IF EXISTS service_location CASCADE;
 CREATE TABLE service_location (
    	id 			INTEGER PRIMARY KEY,
-    location_id	INTEGER NOT NULL REFERENCES location(id),
-    service_id 	INTEGER NOT NULL REFERENCES service(id),
-    price 		price	NOT NULL,
+    location_id	INTEGER     NOT NULL REFERENCES location(id),
+    service_id 	INTEGER     NOT NULL REFERENCES service(id),
+    price 		DECIMAL(15) NOT NULL,
 
-    CONSTRAINT positive_service_price CHECK ((price).amount > 0)
+    CONSTRAINT positive_service_price CHECK (price > 0)
 );
 
 DROP TABLE IF EXISTS service_employee CASCADE;
@@ -383,52 +224,61 @@ DROP TABLE IF EXISTS order_data CASCADE;
 CREATE TABLE order_data (
     id              INTEGER PRIMARY KEY,
     employee_id     INTEGER         NOT NULL REFERENCES employee(id),
-    created_at      TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,   -- TODO: Check not in future
+    created_at      TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
     status          order_status    NOT NULL DEFAULT 'OPEN',
-    discount        price           NOT NULL DEFAULT '("EUR",0)',
-    tip             price           NOT NULL DEFAULT '("EUR",0)',
-    service_charge  price           NOT NULL DEFAULT '("EUR",0)',
+    currency        currency        NOT NULL,
+    discount        DECIMAL(15)     NOT NULL DEFAULT 0,
+    tip             DECIMAL(15)     NOT NULL DEFAULT 0,
+    service_charge  DECIMAL(15)     NOT NULL DEFAULT 0,
 
-    CONSTRAINT non_negative_discount        CHECK ((discount).amount >= 0),
-    CONSTRAINT non_negative_tip             CHECK ((tip).amount >= 0),
-    CONSTRAINT non_negative_service_charge  CHECK ((service_charge).amount >= 0)
+    CONSTRAINT non_negative_discount        CHECK (discount >= 0),
+    CONSTRAINT non_negative_tip             CHECK (tip >= 0),
+    CONSTRAINT non_negative_service_charge  CHECK (service_charge >= 0)
 );
+
+DROP TRIGGER IF EXISTS business_valid_created_at ON business;
+CREATE TRIGGER business_valid_created_at
+    BEFORE INSERT OR UPDATE ON business
+    FOR EACH ROW
+    EXECUTE FUNCTION not_in_future();
+
+
+DROP TYPE IF EXISTS item_status CASCADE;
+CREATE TYPE item_status AS ENUM('ACTIVE', 'ARCHIVED');
+
 
 DROP TABLE IF EXISTS item CASCADE;
 CREATE TABLE item (
     id              INTEGER PRIMARY KEY,
     name            VARCHAR(64)     NOT NULL UNIQUE,
     location_id     INTEGER         NOT NULL REFERENCES location(id),
-    price_per_unit  price           NOT NULL,
+    price_per_unit  DECIMAL(15)     NOT NULL,
     vat             DECIMAL(4, 2)   NOT NULL,
+    status          item_status     NOT NULL DEFAULT 'ACTIVE',
 
-    CONSTRAINT positive_price_per_unit_price    CHECK ((price_per_unit).amount > 0),
+    CONSTRAINT positive_price_per_unit_price    CHECK (price_per_unit > 0),
     CONSTRAINT non_negative_vat_price           CHECK (vat >= 0)
-
 );
+
 
 DROP TABLE IF EXISTS item_variation CASCADE;
 CREATE TABLE item_variation (
     id                  INTEGER PRIMARY KEY,
     item_id             INTEGER     NOT NULL REFERENCES item(id),
-    name                VARCHAR(64) NOT NULL UNIQUE,
-    price_difference    price       NOT NULL DEFAULT '("EUR",0)'
+    name                VARCHAR(64) NOT NULL,
+    price_difference    DECIMAL(15) NOT NULL DEFAULT 0
 );
 
 DROP TABLE IF EXISTS order_item CASCADE;
 CREATE TABLE order_item (
     id          INTEGER PRIMARY KEY,
-    order_id    INTEGER NOT NULL REFERENCES order_data(id),
-    item_id     INTEGER NOT NULL REFERENCES item(id),
-    quantity    INTEGER NOT NULL DEFAULT 1,
-    discount    price   NOT NULL DEFAULT '("EUR",0)',
-    tip         price   NOT NULL DEFAULT '("EUR",0)',
-    vat         price   NOT NULL DEFAULT '("EUR",0)', -- TODO: idk if this is a good idea
+    order_id    INTEGER     NOT NULL REFERENCES order_data(id),
+    item_id     INTEGER     NOT NULL REFERENCES item(id),
+    quantity    INTEGER     NOT NULL DEFAULT 1,
+    discount    DECIMAL(15) NOT NULL DEFAULT 0,
 
     CONSTRAINT positive_quantity        CHECK (quantity > 0),
-    CONSTRAINT non_negative_discount    CHECK ((discount).amount >= 0),
-    CONSTRAINT non_negative_tip         CHECK ((tip).amount >= 0),
-    CONSTRAINT non_negative_vat_charge  CHECK ((vat).amount >= 0)
+    CONSTRAINT non_negative_discount    CHECK (discount >= 0)
 );
 
 DROP TABLE IF EXISTS order_item_variation CASCADE;
@@ -439,6 +289,30 @@ CREATE TABLE order_item_variation (
     PRIMARY KEY(order_item_id, variation_id)
 );
 
+CREATE OR REPLACE FUNCTION check_if_item_id_is_consistent()
+RETURNS TRIGGER AS
+$$
+BEGIN
+    IF  (
+            SELECT COUNT(DISTINCT(item_id))
+            FROM (
+                (SELECT id, item_id FROM order_item WHERE id = NEW.order_item_id)
+                UNION
+                (SELECT id, item_id FROM item_variation WHERE id = NEW.variation_id))
+        ) <> 1
+    THEN
+        RAISE EXCEPTION  'item_id does not match on order_item and item_variation';
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS consistent_item_id ON order_item_variation;
+CREATE TRIGGER consistent_item_id
+    BEFORE INSERT OR UPDATE ON order_item_variation
+    FOR EACH ROW
+    EXECUTE FUNCTION check_if_item_id_is_consistent();
+
 -- ------------------------------------------------------------------------------------------------
 -- Discount data-----------------------------------------------------------------------------------
 -- ------------------------------------------------------------------------------------------------
@@ -448,7 +322,7 @@ CREATE TABLE discount_details (
     id          INTEGER PRIMARY KEY,
     business_id INTEGER         NOT NULL REFERENCES business(id),
     percentage  DECIMAL(4, 2)   DEFAULT NULL,
-    amount      price           DEFAULT NULL,
+    amount      DECIMAL(15)     DEFAULT NULL,
     starts_at   TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
     ends_at     TIMESTAMP       NOT NULL,
 
@@ -458,7 +332,7 @@ CREATE TABLE discount_details (
         ((percentage IS     NULL) AND (amount IS NOT NULL))
     ),
     CONSTRAINT positive_percentage  CHECK ((percentage > 0) IS NOT FALSE),
-    CONSTRAINT positive_amount      CHECK (((amount).amount > 0) IS NOT FALSE)
+    CONSTRAINT positive_amount      CHECK ((amount > 0) IS NOT FALSE)
 );
 
 DROP TABLE IF EXISTS item_discount CASCADE;
@@ -494,20 +368,72 @@ CREATE TABLE appointment (
     customer_phone      VARCHAR(16)         NOT NULL UNIQUE,
     appointment_at      TIMESTAMP           NOT NULL,
 	status              appointment_status  NOT NULL DEFAULT 'RESERVED'
+
+    CONSTRAINT valid_customer_email CHECK (customer_email ~ '^[^\.][a-zA-Z0-9\-\.+]{0,62}[^\.]+@([^\-][a-zA-Z0-9\-]{0,61}[^\-]\.)+[^\-][a-zA-Z0-9\-]{0,61}[^\-]$'),
+    CONSTRAINT valid_customer_phone CHECK (customer_phone ~ '^\+[0-9]{3,15}$')
 );
 
 DROP TABLE IF EXISTS appointment_bill CASCADE;
 CREATE TABLE appointment_bill(
     id              INTEGER     PRIMARY KEY,
     appointment_id  INTEGER     NOT NULL REFERENCES appointment(id),
-    amount          price       NOT NULL,
-    discount        price       NOT NULL DEFAULT '("EUR",0)',
-    tip             price       NOT NULL DEFAULT '("EUR",0)',
+    amount          DECIMAL(15) NOT NULL,
+    discount        DECIMAL(15) NOT NULL DEFAULT 0,
+    tip             DECIMAL(15) NOT NULL DEFAULT 0,
     created_at      TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT non_negative_amount      CHECK ((amount).amount >= 0),
-    CONSTRAINT non_negative_discount    CHECK ((discount).amount >= 0),
-    CONSTRAINT non_negative_tip         CHECK ((tip).amount >= 0)
+    CONSTRAINT non_negative_amount      CHECK (amount >= 0),
+    CONSTRAINT non_negative_discount    CHECK (discount >= 0),
+    CONSTRAINT non_negative_tip         CHECK (tip >= 0)
 );
+
+DROP TRIGGER IF EXISTS appointment_bill_valid_created_at ON appointment_bill;
+CREATE TRIGGER appointment_bill_valid_created_at
+    BEFORE INSERT OR UPDATE ON appointment_bill
+    FOR EACH ROW
+    EXECUTE FUNCTION not_in_future();
+
+-- -------------------------------------------------------------------------------------------------
+-- -------------------------------------------------------------------------------------------------
+-- Views -------------------------------------------------------------------------------------------
+-- -------------------------------------------------------------------------------------------------
+-- -------------------------------------------------------------------------------------------------
+
+CREATE OR REPLACE VIEW order_item_total
+AS
+    SELECT
+        order_item.id,
+        order_id,
+        price_per_unit,
+        quantity,
+        discount,
+        vat,
+        (price_per_unit * quantity * (100.0 + vat) / (100::DECIMAL(15)) - discount) AS total
+    FROM order_item
+    JOIN item 
+        ON item_id=item_id;
+    
+CREATE OR REPLACE VIEW order_total
+AS
+    SELECT 
+        id,
+        discount,
+        tip,
+        service_charge,
+        total AS item_total,
+        (total + tip + service_charge - discount) AS total
+    FROM (
+        SELECT order_id, SUM(total) AS total
+        FROM order_item_total 
+        GROUP BY order_id)
+    JOIN order_data
+        ON id = order_id;
+
+
+-- -------------------------------------------------------------------------------------------------
+-- -------------------------------------------------------------------------------------------------
+-- -------------------------------------------------------------------------------------------------
+-- -------------------------------------------------------------------------------------------------
+-- -------------------------------------------------------------------------------------------------
 
 COMMIT TRANSACTION;
