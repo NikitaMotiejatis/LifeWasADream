@@ -1,0 +1,292 @@
+import { useState } from 'react';
+import Topbar from '../components/topbar';
+import SidebarStockClerk from '../components/sidebarStockClerk';
+
+interface AuditRecord {
+  id: string;
+  productName: string;
+  sku: string;
+  action: 'Update' | 'Correction' | 'Remove' | 'Add';
+  previousQty: number;
+  newQty: number;
+  change: number;
+  reason: string;
+  user: string;
+  userId: string;
+  branch: string;
+  timestamp: string;
+  unit: string;
+}
+
+export default function AuditHistoryPage() {
+  const [records] = useState<AuditRecord[]>([
+    {
+      id: 'AUD-001',
+      productName: 'Coffee Beans (Arabica)',
+      sku: 'CB-001',
+      action: 'Update',
+      previousQty: 35,
+      newQty: 45,
+      change: 10,
+      reason: 'Delivery Received',
+      user: 'John Davis',
+      userId: 'CLK-003',
+      branch: 'Downtown Branch',
+      timestamp: '2025-10-20 14:30:15',
+      unit: 'kg',
+    },
+    {
+      id: 'AUD-002',
+      productName: 'Milk (Whole)',
+      sku: 'ML-002',
+      action: 'Correction',
+      previousQty: 20,
+      newQty: 15,
+      change: -5,
+      reason: 'Stock Recount',
+      user: 'Sarah Kim',
+      userId: 'CLK-004',
+      branch: 'Downtown Branch',
+      timestamp: '2025-10-20 13:15:42',
+      unit: 'liters',
+    },
+    {
+      id: 'AUD-003',
+      productName: 'Croissants',
+      sku: 'CR-005',
+      action: 'Remove',
+      previousQty: 30,
+      newQty: 25,
+      change: -5,
+      reason: 'Waste/Spoilage',
+      user: 'John Davis',
+      userId: 'CLK-003',
+      branch: 'Downtown Branch',
+      timestamp: '2025-10-20 11:45:30',
+      unit: 'pcs',
+    },
+    {
+      id: 'AUD-004',
+      productName: 'Sugar',
+      sku: 'SG-003',
+      action: 'Update',
+      previousQty: 25,
+      newQty: 30,
+      change: 5,
+      reason: 'Delivery Received',
+      user: 'Mike Johnson',
+      userId: 'CLK-001',
+      branch: 'Downtown Branch',
+      timestamp: '2025-10-20 10:20:15',
+      unit: 'kg',
+    },
+    {
+      id: 'AUD-005',
+      productName: 'Paper Cups (12oz)',
+      sku: 'PC-004',
+      action: 'Add',
+      previousQty: 450,
+      newQty: 500,
+      change: 50,
+      reason: 'Transfer In',
+      user: 'Sarah Kim',
+      userId: 'CLK-004',
+      branch: 'Downtown Branch',
+      timestamp: '2025-10-20 09:15:00',
+      unit: 'pcs',
+    },
+  ]);
+
+  const [filterAction, setFilterAction] = useState<'ALL' | 'Update' | 'Correction' | 'Remove' | 'Add'>('ALL');
+  const [filterTimePeriod, setFilterTimePeriod] = useState('Today');
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const filteredRecords = records.filter(record => {
+    const matchesAction = filterAction === 'ALL' || record.action === filterAction;
+    const matchesSearch =
+      record.productName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      record.sku.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      record.user.toLowerCase().includes(searchTerm.toLowerCase());
+    return matchesAction && matchesSearch;
+  });
+
+  const getActionColor = (action: string) => {
+    switch (action) {
+      case 'Update':
+        return 'bg-blue-100 text-blue-800 border-blue-300';
+      case 'Correction':
+        return 'bg-yellow-100 text-yellow-800 border-yellow-300';
+      case 'Remove':
+        return 'bg-red-100 text-red-800 border-red-300';
+      case 'Add':
+        return 'bg-green-100 text-green-800 border-green-300';
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-300';
+    }
+  };
+
+  const getChangeColor = (change: number) => {
+    if (change > 0) return 'text-green-600';
+    if (change < 0) return 'text-red-600';
+    return 'text-gray-600';
+  };
+
+  const handleExportReport = () => {
+    console.log('Export audit report');
+    // TODO: Implement export functionality
+  };
+
+  return (
+    <div className="flex h-screen w-full">
+      <SidebarStockClerk />
+
+      <div className="flex flex-1 flex-col">
+        <Topbar />
+
+        <div className="flex-1 overflow-auto bg-gray-100 p-6">
+          <div className="mb-6 flex items-center justify-between">
+            <div>
+              <h1 className="mb-2 text-3xl font-bold text-gray-900">Audit History</h1>
+              <p className="text-gray-600">Complete inventory change tracking</p>
+            </div>
+            <button
+              onClick={handleExportReport}
+              className="rounded-lg bg-green-600 px-6 py-2 font-medium text-white shadow-md transition-all duration-200 hover:bg-green-700 active:scale-95"
+            >
+              Export Report
+            </button>
+          </div>
+
+          {/* Filters */}
+          <div className="mb-6 rounded-lg bg-white p-6 shadow-sm">
+            <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-3">
+              <div>
+                <label className="mb-2 block text-sm font-semibold text-gray-700">
+                  Filter by Action
+                </label>
+                <select
+                  value={filterAction}
+                  onChange={e =>
+                    setFilterAction(
+                      e.target.value as 'ALL' | 'Update' | 'Correction' | 'Remove' | 'Add',
+                    )
+                  }
+                  className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
+                >
+                  <option value="ALL">All Actions</option>
+                  <option value="Update">Update</option>
+                  <option value="Correction">Correction</option>
+                  <option value="Remove">Remove</option>
+                  <option value="Add">Add</option>
+                </select>
+              </div>
+              <div>
+                <label className="mb-2 block text-sm font-semibold text-gray-700">
+                  Time Period
+                </label>
+                <select
+                  value={filterTimePeriod}
+                  onChange={e => setFilterTimePeriod(e.target.value)}
+                  className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
+                >
+                  <option value="Today">Today</option>
+                  <option value="This Week">This Week</option>
+                  <option value="This Month">This Month</option>
+                  <option value="All Time">All Time</option>
+                </select>
+              </div>
+              <div>
+                <label className="mb-2 block text-sm font-semibold text-gray-700">
+                  Search
+                </label>
+                <input
+                  type="text"
+                  placeholder="Product, SKU, or user..."
+                  value={searchTerm}
+                  onChange={e => setSearchTerm(e.target.value)}
+                  className="w-full rounded-lg border border-gray-300 px-4 py-2 transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Audit Records Table */}
+          <div className="overflow-x-auto rounded-lg bg-white shadow-sm">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-gray-200 bg-gray-50">
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
+                    Product
+                  </th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
+                    Action
+                  </th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
+                    Previous Qty
+                  </th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
+                    New Qty
+                  </th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
+                    Change
+                  </th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
+                    Reason
+                  </th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
+                    User
+                  </th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
+                    Timestamp
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredRecords.map(record => (
+                  <tr key={record.id} className="border-b border-gray-200 transition hover:bg-gray-50">
+                    <td className="px-6 py-4">
+                      <div>
+                        <p className="font-medium text-gray-900">{record.productName}</p>
+                        <p className="text-sm text-gray-600">SKU: {record.sku}</p>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span
+                        className={`inline-block rounded-full border px-3 py-1 text-xs font-semibold ${getActionColor(record.action)}`}
+                      >
+                        {record.action}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-900">
+                      {record.previousQty} {record.unit}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-900">
+                      {record.newQty} {record.unit}
+                    </td>
+                    <td className={`px-6 py-4 text-sm font-semibold ${getChangeColor(record.change)}`}>
+                      {record.change > 0 ? '+' : ''}{record.change} {record.unit}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-900">{record.reason}</td>
+                    <td className="px-6 py-4">
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">{record.user}</p>
+                        <p className="text-xs text-gray-600">{record.userId}</p>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-600">{record.timestamp}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {filteredRecords.length === 0 && (
+            <div className="rounded-lg border border-gray-200 bg-white p-12 text-center">
+              <p className="text-gray-600">No audit records found matching your criteria.</p>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
