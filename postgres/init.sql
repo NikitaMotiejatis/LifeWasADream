@@ -232,18 +232,18 @@ CREATE TABLE role_permission (
 DROP TABLE IF EXISTS currency_info CASCADE;
 CREATE TABLE currency_info (
     code    currency PRIMARY KEY,
-    name    VARCHAR(64) NOT NULL,
-    symbol  CHAR(3)        NOT NULL 
+    name    VARCHAR(64) NOT NULL UNIQUE,
+    symbol  CHAR(3)     NOT NULL 
 );
 
 DROP TABLE IF EXISTS country CASCADE;
 CREATE TABLE country (
     code        CHAR(2) PRIMARY KEY,
-    name        VARCHAR(64)     NOT NULL,
-    currency    currency        NOT NULL DEFAULT '("EUR",0)',
-    vat         NUMERIC(3, 2)   NOT NULL DEFAULT 0,
+    name        VARCHAR(64)     NOT NULL UNIQUE,
+    currency    currency        NOT NULL ,
+    vat         DECIMAL(4, 2)   NOT NULL,
 
-    CONSTRAINT positive_vat CHECK (vat >= 0)
+    CONSTRAINT non_negative_vat CHECK (vat >= 0)
 );
 
 -- ------------------------------------------------------------------------------------------------
@@ -256,7 +256,7 @@ CREATE TYPE business_type AS ENUM('ORDER_BASED', 'APPOINTMENT_BASED');
 DROP TABLE IF EXISTS business CASCADE;
 CREATE TABLE business (
     id              INTEGER         PRIMARY KEY,
-    name            VARCHAR(32)     NOT NULL,
+    name            VARCHAR(32)     NOT NULL UNIQUE,
     description     VARCHAR(1024)   NOT NULL,
     type            business_type   NOT NULL,
     email           VARCHAR(512)    NOT NULL UNIQUE,
@@ -274,7 +274,7 @@ CREATE TABLE employee (
     id              INTEGER PRIMARY KEY,
     first_name      VARCHAR(64)     NOT NULL,
     last_name       VARCHAR(64)     NOT NULL,
-    password_hash   CHAR(512)       NOT NULL,   -- TODO: May need to change depending on hasing algorithm
+    password_hash   CHAR(512)       NOT NULL,   -- TODO: May need to change depending on hashing algorithm
     email           VARCHAR(512)    NOT NULL UNIQUE,
     phone           VARCHAR(16)     NOT NULL UNIQUE,
     created_at      TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,   -- TODO: Check not in future
@@ -284,17 +284,17 @@ CREATE TABLE employee (
 DROP TABLE IF EXISTS work_shift CASCADE;
 CREATE TABLE work_shift (
     id              INTEGER PRIMARY KEY,
-    day_of_the_week weekday NOT NULL DEFAULT 'MONDAY',
-    start_time      TIME    NOT NULL DEFAULT '08:00:00',   -- TODO: Check not in future
-    end_time        TIME    NOT NULL DEFAULT '22:00:00',
+    day_of_the_week weekday NOT NULL,
+    start_time      TIME    NOT NULL,   -- TODO: Check not in future
+    end_time        TIME    NOT NULL,
 
     CONSTRAINT start_before_end CHECK (start_time < end_time)
 );
 
 DROP TABLE IF EXISTS employee_shift CASCADE;
 CREATE TABLE employee_shift (
-    user_id         INTEGER REFERENCES employee(id),
-    work_shift_id   INTEGER REFERENCES work_shift(id),
+    user_id         INTEGER NOT NULL REFERENCES employee(id),
+    work_shift_id   INTEGER NOT NULL REFERENCES work_shift(id),
 
     PRIMARY KEY(user_id, work_shift_id)
 );
@@ -303,15 +303,16 @@ CREATE TABLE employee_shift (
 -- Authentication ---------------------------------------------------------------------------------
 -- ------------------------------------------------------------------------------------------------
 
+-- TODO: May not need it. Tokens could be stored in memory
 DROP TABLE IF EXISTS token CASCADE;
 CREATE TABLE token (
     id          INTEGER PRIMARY KEY,
     user_id     INTEGER     NOT NULL REFERENCES employee(id),
-    token       CHAR(256)   NOT NULL,   -- TODO: May need to change depending on hasing algorithm
+    token       CHAR(256)   NOT NULL,   -- TODO: May need to change depending on hashing algorithm
     created_at  TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
     expired_at  TIMESTAMP   NOT NULL,   -- TODO: Check not in future
 
-    CONSTRAINT created_before_expired CHECK (created_at <= expired_at)
+    CONSTRAINT created_before_expired CHECK (created_at < expired_at)
 );
 
 -- ------------------------------------------------------------------------------------------------
@@ -330,13 +331,13 @@ CREATE TABLE location (
 
 DROP TABLE IF EXISTS location_open CASCADE;
 CREATE TABLE location_open (
-	location_id 	INTEGER	NOT NULL,
-	day_of_the_week weekday    NOT NULL DEFAULT 'MONDAY',
-	open_at 	    TIME	    NOT NULL DEFAULT '08:00:00',
-	closes_at 	    TIME 	    NOT NULL DEFAULT '22:00:00',
+	location_id 	INTEGER NOT NULL,
+	day_of_the_week weekday NOT NULL,
+	open_at 	    TIME	NOT NULL,
+	closes_at 	    TIME 	NOT NULL,
 
     CONSTRAINT open_before_close CHECK (open_at < closes_at),
-    PRIMARY KEY(location_id, day_of_the_week) -- location can work at different times of the week with different time
+    PRIMARY KEY(location_id, day_of_the_week)
 );
 
 -- ------------------------------------------------------------------------------------------------
@@ -348,7 +349,7 @@ CREATE TABLE service (
    	id 		        INTEGER	PRIMARY KEY,
     business_id 	INTEGER     NOT NULL REFERENCES business(id),
     name 			VARCHAR(64) NOT NULL,
-    duration_mins 	INTEGER     NOT NULL DEFAULT 30,
+    duration_mins 	INTEGER     NOT NULL, -- TODO: change type to TIME?
 
     CONSTRAINT duration_positive CHECK (duration_mins > 0)
 );
@@ -358,9 +359,9 @@ CREATE TABLE service_location (
    	id 			INTEGER PRIMARY KEY,
     location_id	INTEGER NOT NULL REFERENCES location(id),
     service_id 	INTEGER NOT NULL REFERENCES service(id),
-    price 		price	NOT NULL DEFAULT '("EUR",0)',
+    price 		price	NOT NULL,
 
-    CONSTRAINT positive_service_price CHECK ((price).amount >= 0)
+    CONSTRAINT positive_service_price CHECK ((price).amount > 0)
 );
 
 DROP TABLE IF EXISTS service_employee CASCADE;
@@ -384,25 +385,25 @@ CREATE TABLE order_data (
     employee_id     INTEGER         NOT NULL REFERENCES employee(id),
     created_at      TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,   -- TODO: Check not in future
     status          order_status    NOT NULL DEFAULT 'OPEN',
-    discount_amount price           NOT NULL DEFAULT '("EUR",0)',
-    tip_amount      price           NOT NULL DEFAULT '("EUR",0)',
+    discount        price           NOT NULL DEFAULT '("EUR",0)',
+    tip             price           NOT NULL DEFAULT '("EUR",0)',
     service_charge  price           NOT NULL DEFAULT '("EUR",0)',
 
-    CONSTRAINT positive_discount_amount_price CHECK ((discount_amount).amount >= 0),
-    CONSTRAINT positive_tip_amount_price CHECK ((tip_amount).amount >= 0),
-    CONSTRAINT positive_service_charge_price CHECK ((service_charge).amount >= 0)
+    CONSTRAINT non_negative_discount        CHECK ((discount).amount >= 0),
+    CONSTRAINT non_negative_tip             CHECK ((tip).amount >= 0),
+    CONSTRAINT non_negative_service_charge  CHECK ((service_charge).amount >= 0)
 );
 
 DROP TABLE IF EXISTS item CASCADE;
 CREATE TABLE item (
     id              INTEGER PRIMARY KEY,
     name            VARCHAR(64)     NOT NULL UNIQUE,
-    location_id     INTEGER         NOT NULL, -- TODO
-    price_per_unit  price           NOT NULL DEFAULT '("EUR",0)',
-    vat             DECIMAL(3, 2)   NOT NULL DEFAULT 0,
+    location_id     INTEGER         NOT NULL REFERENCES location(id),
+    price_per_unit  price           NOT NULL,
+    vat             DECIMAL(4, 2)   NOT NULL,
 
-    CONSTRAINT positive_price_per_unit_price CHECK ((price_per_unit).amount >= 0),
-    CONSTRAINT positive_vat_price CHECK (vat >= 0)
+    CONSTRAINT positive_price_per_unit_price    CHECK ((price_per_unit).amount > 0),
+    CONSTRAINT non_negative_vat_price           CHECK (vat >= 0)
 
 );
 
@@ -416,17 +417,18 @@ CREATE TABLE item_variation (
 
 DROP TABLE IF EXISTS order_item CASCADE;
 CREATE TABLE order_item (
-    id              INTEGER PRIMARY KEY,
-    order_id        INTEGER NOT NULL REFERENCES order_data(id),
-    item_id         INTEGER NOT NULL REFERENCES item(id),
-    quantity        INTEGER NOT NULL DEFAULT 1,
-    discount_amount price   NOT NULL DEFAULT '("EUR",0)',
-    tip_amount      price   NOT NULL DEFAULT '("EUR",0)',
-    vat             price   NOT NULL DEFAULT '("EUR",0)',
+    id          INTEGER PRIMARY KEY,
+    order_id    INTEGER NOT NULL REFERENCES order_data(id),
+    item_id     INTEGER NOT NULL REFERENCES item(id),
+    quantity    INTEGER NOT NULL DEFAULT 1,
+    discount    price   NOT NULL DEFAULT '("EUR",0)',
+    tip         price   NOT NULL DEFAULT '("EUR",0)',
+    vat         price   NOT NULL DEFAULT '("EUR",0)', -- TODO: idk if this is a good idea
 
-    CONSTRAINT positive_discount_amount CHECK ((discount_amount).amount >= 0),
-    CONSTRAINT positive_tip_amount CHECK ((tip_amount).amount >= 0),
-    CONSTRAINT positive_vat_charge CHECK ((vat).amount >= 0)
+    CONSTRAINT positive_quantity        CHECK (quantity > 0),
+    CONSTRAINT non_negative_discount    CHECK ((discount).amount >= 0),
+    CONSTRAINT non_negative_tip         CHECK ((tip).amount >= 0),
+    CONSTRAINT non_negative_vat_charge  CHECK ((vat).amount >= 0)
 );
 
 DROP TABLE IF EXISTS order_item_variation CASCADE;
@@ -443,19 +445,20 @@ CREATE TABLE order_item_variation (
 
 DROP TABLE IF EXISTS discount_details CASCADE;
 CREATE TABLE discount_details (
-    id              INTEGER PRIMARY KEY,
-    business_id 	INTEGER         NOT NULL REFERENCES business(id),
-    percantage      DECIMAL(3, 2) DEFAULT 0.0, -- TODO: decimal bounds
-    amount          price DEFAULT '("EUR",0)',
-    starts_at       TIMESTAMP       NOT NULL,
-    ends_at         TIMESTAMP       NOT NULL,
+    id          INTEGER PRIMARY KEY,
+    business_id INTEGER         NOT NULL REFERENCES business(id),
+    percentage  DECIMAL(4, 2)   DEFAULT NULL,
+    amount      price           DEFAULT NULL,
+    starts_at   TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    ends_at     TIMESTAMP       NOT NULL,
 
-    CONSTRAINT starts_before_ends CHECK (starts_at < ends_at),
+    CONSTRAINT starts_before_ends   CHECK (starts_at < ends_at),
     CONSTRAINT exactly_one_not_null CHECK (
-        ((percantage IS NOT NULL) AND (amount IS     NULL)) OR 
-        ((percantage IS     NULL) AND (amount IS NOT NULL))
+        ((percentage IS NOT NULL) AND (amount IS     NULL)) OR 
+        ((percentage IS     NULL) AND (amount IS NOT NULL))
     ),
-    CONSTRAINT amount_positive CHECK ((amount).amount >= 0)
+    CONSTRAINT positive_percentage  CHECK ((percentage > 0) IS NOT FALSE),
+    CONSTRAINT positive_amount      CHECK (((amount).amount > 0) IS NOT FALSE)
 );
 
 DROP TABLE IF EXISTS item_discount CASCADE;
@@ -490,19 +493,21 @@ CREATE TABLE appointment (
     customer_email      VARCHAR(512)        NOT NULL UNIQUE,
     customer_phone      VARCHAR(16)         NOT NULL UNIQUE,
     appointment_at      TIMESTAMP           NOT NULL,
-	status              appointment_status  NOT NULL
+	status              appointment_status  NOT NULL DEFAULT 'RESERVED'
 );
 
 DROP TABLE IF EXISTS appointment_bill CASCADE;
 CREATE TABLE appointment_bill(
     id              INTEGER     PRIMARY KEY,
     appointment_id  INTEGER     NOT NULL REFERENCES appointment(id),
-    discount_id     INTEGER     REFERENCES discount_details(id), -- may not have a discount
-    tip_amount      price       NOT NULL DEFAULT '("EUR",0)',
+    amount          price       NOT NULL,
+    discount        price       NOT NULL DEFAULT '("EUR",0)',
+    tip             price       NOT NULL DEFAULT '("EUR",0)',
     created_at      TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT positive_tip_amount CHECK ((tip_amount).amount >= 0)
-
+    CONSTRAINT non_negative_amount      CHECK ((amount).amount >= 0),
+    CONSTRAINT non_negative_discount    CHECK ((discount).amount >= 0),
+    CONSTRAINT non_negative_tip         CHECK ((tip).amount >= 0)
 );
 
 COMMIT TRANSACTION;
