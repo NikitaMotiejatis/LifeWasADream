@@ -88,7 +88,7 @@ CREATE TRIGGER order_valid_created_at
 -- Appointment data
 -- ---------------------------------------------------------
 
-CREATE OR REPLACE FUNCTION appointment_created_at_before_future()
+CREATE OR REPLACE FUNCTION appointment_bill_created_at_before_future()
 RETURNS TRIGGER AS $$
 BEGIN
     IF NEW.created_at > CURRENT_TIMESTAMP THEN
@@ -99,12 +99,34 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-DROP TRIGGER IF EXISTS appointment_valid_created_at ON appointment_bill;
-CREATE TRIGGER appointment_valid_created_at
+DROP TRIGGER IF EXISTS appointment_bill_valid_created_at ON appointment_bill;
+CREATE TRIGGER appointment_bill_valid_created_at
     BEFORE INSERT OR UPDATE ON appointment_bill
     FOR EACH ROW
-    EXECUTE FUNCTION appointment_created_at_before_future();
+    EXECUTE FUNCTION appointment_bill_created_at_before_future();
+
+----------------------------
+/*
+CREATE OR REPLACE FUNCTION appointment_at_not_past()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.appointment_at < CURRENT_TIMESTAMP THEN
+        RAISE EXCEPTION 'created_at cannot be in the past';
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS appointment_valid ON appointment;
+CREATE TRIGGER appointment_valid
+    BEFORE INSERT OR UPDATE ON appointment
+    FOR EACH ROW
+    EXECUTE FUNCTION appointment_at_not_past();
+    */
+
 
 
 -- ideas for more triggers: 
 --  work shift to not overlap for same employee
+-- kad discount nebutu daugiau nei service or appointments?

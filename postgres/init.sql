@@ -358,7 +358,9 @@ CREATE TABLE service_location (
    	id 			INTEGER PRIMARY KEY,
     location_id	INTEGER NOT NULL REFERENCES location(id),
     service_id 	INTEGER NOT NULL REFERENCES service(id),
-    price 		price	NOT NULL
+    price 		price	NOT NULL,
+    
+    CONSTRAINT positive_price CHECK ((price).amount >= 0)
 );
 
 DROP TABLE IF EXISTS service_employee CASCADE;
