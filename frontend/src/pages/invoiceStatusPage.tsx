@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import Topbar from '../components/topbar';
 import SidebarSupplier from '../components/sidebarSupplier';
+import InvoiceCard from '../components/invoiceCard';
 
 interface InvoiceItem {
   productName: string;
@@ -10,17 +11,18 @@ interface InvoiceItem {
   totalPrice: number;
 }
 
-interface Invoice {
-  id: string;
-  orderId: string;
-  branch: string;
-  status: 'PAID' | 'APPROVED' | 'PENDING' | 'OVERDUE';
-  amount: number;
-  invoiceDate: string;
-  dueDate: string;
-  items: InvoiceItem[];
-  note?: string;
+export interface Invoice {
+    id: string;
+    orderId: string;
+    branch: string;
+    status: 'PAID' | 'APPROVED' | 'PENDING' | 'OVERDUE';
+    amount: number;
+    invoiceDate: string;
+    dueDate: string;
+    items: InvoiceItem[];
+    note?: string;
 }
+
 
 export default function InvoiceStatusPage() {
   const [invoices] = useState<Invoice[]>([
@@ -234,7 +236,7 @@ export default function InvoiceStatusPage() {
             <p className="mt-2 text-4xl font-bold text-gray-900">${totalAmount.toLocaleString()}</p>
           </div>
 
-          {/* Filter Tabs */}
+          {/* Filter Tabs */} {/*TODO: Make filtration combinable */}
           <div className="mb-6 flex gap-2 rounded-lg bg-white p-4 shadow-sm">
             {(['ALL', 'PAID', 'APPROVED', 'PENDING', 'OVERDUE'] as const).map(status => (
               <button
@@ -251,83 +253,16 @@ export default function InvoiceStatusPage() {
             ))}
           </div>
 
-          {/* Invoices List */}
-          <div className="space-y-4">
-            {filteredInvoices.map(invoice => {
-              const colors = getStatusColor(invoice.status);
-              return (
-                <div
-                  key={invoice.id}
-                  className={`rounded-lg border p-6 shadow-sm transition-all ${colors.bg} ${colors.border}`}
-                >
-                  <div className="mb-4 flex items-start justify-between">
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900">{invoice.id}</h3>
-                      <p className="text-sm text-gray-600">Order: {invoice.orderId} | {invoice.branch}</p>
-                    </div>
-                    <span
-                      className={`rounded-full border px-3 py-1 text-sm font-semibold ${colors.badge}`}
-                    >
-                      {invoice.status}
-                    </span>
-                  </div>
-
-                  <div className="mb-4 grid grid-cols-2 gap-4 md:grid-cols-4">
-                    <div>
-                      <p className="text-xs font-semibold text-gray-600">INVOICE AMOUNT</p>
-                      <p className="mt-1 text-lg font-bold text-gray-900">
-                        ${invoice.amount.toLocaleString()}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-xs font-semibold text-gray-600">INVOICE DATE</p>
-                      <p className="mt-1 text-sm text-gray-900">{invoice.invoiceDate}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs font-semibold text-gray-600">DUE DATE</p>
-                      <p className="mt-1 text-sm text-gray-900">{invoice.dueDate}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs font-semibold text-gray-600">ITEMS</p>
-                      <p className="mt-1 text-sm text-gray-900">{invoice.items.length} products</p>
-                    </div>
-                  </div>
-
-                  {/* Invoice Items */}
-                  <div className="mb-4 rounded-lg bg-white/50 p-4">
-                    <p className="mb-3 text-sm font-semibold text-gray-700">INVOICE ITEMS</p>
-                    <div className="space-y-2">
-                      {invoice.items.map((item, idx) => (
-                        <div key={idx} className="flex justify-between text-sm">
-                          <span className="text-gray-700">
-                            {item.quantity} {item.unit} × {item.productName}
-                          </span>
-                          <span className="font-medium text-gray-900">
-                            ${item.unitPrice.toFixed(2)} / {item.unit} = ${item.totalPrice.toLocaleString()}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {invoice.note && (
-                    <div className="mb-4 rounded-lg bg-white/50 p-4">
-                      <p className="text-sm text-gray-700">
-                        <span className="font-semibold">Note:</span> {invoice.note}
-                      </p>
-                    </div>
-                  )}
-
-                  <button
-                    onClick={() => handleViewDetails(invoice.id)}
-                    className="w-full rounded-lg bg-blue-600 py-2 font-medium text-white transition-all duration-200 hover:bg-blue-700 active:scale-95"
-                  >
-                    View Details
-                  </button>
-                </div>
-              );
-            })}
-          </div>
+            {/* Invoices List */}
+            <div className="space-y-4">
+                {filteredInvoices.map(invoice => (
+                    <InvoiceCard
+                        key={invoice.id}
+                        invoice={invoice}
+                        onViewDetails={handleViewDetails}
+                    />
+                ))}
+            </div>
 
           {filteredInvoices.length === 0 && (
             <div className="rounded-lg border border-gray-200 bg-white p-12 text-center">
