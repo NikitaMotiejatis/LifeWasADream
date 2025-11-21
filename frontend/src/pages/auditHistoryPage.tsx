@@ -213,35 +213,29 @@ export default function AuditHistoryPage() {
           {/* Audit Records Table */}
           <div className="overflow-x-auto rounded-lg bg-white shadow-sm">
             <table className="w-full">
-              <thead>
-                <tr className="border-b border-gray-200 bg-gray-50">
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
-                    Product
-                  </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
-                    Action
-                  </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
-                    Previous Qty
-                  </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
-                    New Qty
-                  </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
-                    Change
-                  </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
-                    Reason
-                  </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
-                    User
-                  </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
-                    Timestamp
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
+                <thead>
+                    <tr className="border-b border-gray-200 bg-gray-50">
+                        {[
+                            'Product',
+                            'Action',
+                            'Previous Qty',
+                            'New Qty',
+                            'Change',
+                            'Reason',
+                            'User',
+                            'Timestamp'
+                        ].map((header) => (
+                            <th
+                                key={header}
+                                className="px-6 py-4 text-left text-sm font-semibold text-gray-900"
+                            >
+                                {header}
+                            </th>
+                        ))}
+                    </tr>
+                </thead>
+
+                <tbody>
                 {filteredRecords.map(record => (
                   <tr key={record.id} className="border-b border-gray-200 transition hover:bg-gray-50">
                     <td className="px-6 py-4">
