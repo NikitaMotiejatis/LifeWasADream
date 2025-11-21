@@ -107,7 +107,7 @@ export default function TransferRequestsPage() {
             </button>
           </div>
 
-          {/* Filter Tabs */}
+          {/* Filter Tabs */} {/*TODO: Make filtration combinable */}
           <div className="mb-6 flex gap-2 rounded-lg bg-white p-4 shadow-sm">
             {(['ALL', 'PENDING', 'APPROVED', 'COMPLETED'] as const).map(status => (
               <button
@@ -124,7 +124,7 @@ export default function TransferRequestsPage() {
             ))}
           </div>
 
-          {/* Transfer Requests List */}
+          {/* Transfer Requests List */} {/*TODO: Make filtration combinable */}
           <div className="space-y-4">
             {filteredTransfers.map(transfer => (
               <div

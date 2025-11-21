@@ -166,7 +166,7 @@ export default function DeliveriesPage() {
             </div>
           </div>
 
-          {/* Filter Tabs */}
+          {/* Filter Tabs */} {/*TODO: Make filtration combinable */}
           <div className="mb-6 flex gap-2 rounded-lg bg-white p-4 shadow-sm">
             {(['ALL', 'SCHEDULED', 'IN_TRANSIT', 'DELIVERED'] as const).map(status => (
               <button
