@@ -1,16 +1,18 @@
 import { useState } from 'react';
 import Topbar from '../components/topbar';
 import SidebarStockClerk from '../components/sidebarStockClerk';
+import StockAlertCard from '../components/stockAlertCard';
 
-interface StockAlert {
-  id: string;
-  productName: string;
-  sku: string;
-  currentStock: number;
-  minimumStock: number;
-  unit: string;
-  severity: 'CRITICAL' | 'WARNING' | 'MONITOR';
-  lastOrdered: string;
+
+export interface StockAlert {
+    id: string;
+    productName: string;
+    sku: string;
+    currentStock: number;
+    minimumStock: number;
+    unit: string;
+    severity: 'CRITICAL' | 'WARNING' | 'MONITOR';
+    lastOrdered: string;
 }
 
 export default function StockAlertsPage() {
@@ -161,91 +163,14 @@ export default function StockAlertsPage() {
 
           {/* Alerts List */}
           <div className="space-y-4">
-            {filteredAlerts.map(alert => {
-              const colors = getSeverityColor(alert.severity);
-              return (
-                <div
-                  key={alert.id}
-                  className={`rounded-lg border p-6 shadow-sm transition-all ${colors.bg} ${colors.border}`}
-                >
-                  <div className="mb-4 flex items-start justify-between">
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900">
-                        {alert.productName}
-                      </h3>
-                      <p className="text-sm text-gray-600">SKU: {alert.sku}</p>
-                    </div>
-                    <span
-                      className={`rounded-full border px-3 py-1 text-sm font-semibold ${colors.badge}`}
-                    >
-                      {alert.severity}
-                    </span>
-                  </div>
-
-                  <div className="mb-4 grid grid-cols-2 gap-4 md:grid-cols-4">
-                    <div>
-                      <p className="text-xs font-semibold text-gray-600">CURRENT</p>
-                      <p className={`mt-1 text-lg font-bold ${colors.text}`}>
-                        {alert.currentStock} {alert.unit}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-xs font-semibold text-gray-600">MINIMUM</p>
-                      <p className="mt-1 text-lg font-bold text-gray-900">
-                        {alert.minimumStock} {alert.unit}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-xs font-semibold text-gray-600">LAST ORDERED</p>
-                      <p className="mt-1 text-sm text-gray-900">{alert.lastOrdered}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs font-semibold text-gray-600">SHORTAGE</p>
-                      <p className="mt-1 text-lg font-bold text-red-600">
-                        -{alert.minimumStock - alert.currentStock} {alert.unit}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Progress Bar */}
-                  <div className="mb-4">
-                    <div className="h-2 w-full rounded-full bg-gray-300">
-                      <div
-                        className={`h-full rounded-full transition-all ${colors.text.replace('text-', 'bg-')}`}
-                        style={{
-                          width: `${Math.min(
-                            (alert.currentStock / alert.minimumStock) * 100,
-                            100,
-                          )}%`,
-                        }}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Action Buttons */}
-                  <div className="flex gap-3">
-                    <button
-                      onClick={() => handleReorderNow(alert.id)}
-                      className={`flex-1 rounded-lg px-4 py-2 font-medium text-white transition-all duration-200 ${
-                        alert.severity === 'CRITICAL'
-                          ? 'bg-red-600 hover:bg-red-700'
-                          : alert.severity === 'WARNING'
-                            ? 'bg-yellow-600 hover:bg-yellow-700'
-                            : 'bg-blue-600 hover:bg-blue-700'
-                      } active:scale-95`}
-                    >
-                      Reorder Now
-                    </button>
-                    <button
-                      onClick={() => handleAcknowledge(alert.id)}
-                      className="flex-1 rounded-lg border border-gray-300 bg-white px-4 py-2 font-medium text-gray-700 transition-all duration-200 hover:bg-gray-50 active:scale-95"
-                    >
-                      Acknowledge
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
+            {filteredAlerts.map(alert => (
+              <StockAlertCard
+                key={alert.id}
+                alert={alert}
+                onReorder={handleReorderNow}
+                onAcknowledge={handleAcknowledge}
+              />
+            ))}
           </div>
 
           {filteredAlerts.length === 0 && (
