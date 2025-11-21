@@ -7,8 +7,8 @@ export default function OrderSummary() {
   const { cart, formatPrice, updateQuantity, removeItem, clearCart, total } =
     useCart();
   const [paymentMethod, setPaymentMethod] = useState<
-    'cash' | 'card' | 'gift-card'
-  >('card');
+      'Cash' | 'Card' | 'Gift card'
+  >('Card');
 
   return (
     <div className="flex h-full flex-col rounded-2xl bg-white p-4 shadow-xl xl:p-5">
@@ -168,8 +168,8 @@ function Footer({
 }: {
   total: number;
   formatPrice: (price: number) => string;
-  paymentMethod: 'cash' | 'card' | 'gift-card';
-  setPaymentMethod: (method: 'cash' | 'card' | 'gift-card') => void;
+  paymentMethod: 'Cash' | 'Card' | 'Gift card';
+  setPaymentMethod: (method: 'Cash' | 'Card' | 'Gift card') => void;
 }) {
   return (
     <div>
@@ -198,7 +198,7 @@ function Footer({
             Payment method
           </p>
           <div className="grid grid-cols-3 gap-1.5">
-            {(['cash', 'card', 'gift-card'] as const).map(method => (
+            {(['Cash', 'Card', 'Gift card'] as const).map(method => (
               <button
                 key={method}
                 onClick={() => setPaymentMethod(method)}
@@ -208,9 +208,7 @@ function Footer({
                     : 'border border-gray-400 hover:bg-gray-100'
                 }`}
               >
-                {method === 'gift-card'
-                  ? 'Gift Card'
-                  : method.charAt(0).toUpperCase() + method.slice(1)}
+                {method}
               </button>
             ))}
           </div>
