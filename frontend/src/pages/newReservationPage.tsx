@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useCurrency } from '../contexts/currencyContext';
 import SidebarCashier from '../components/sidebarCashier';
 import Topbar from '../components/topbar';
@@ -340,47 +340,31 @@ function BookingSummary({
   const [nameError, setNameError] = useState(false);
   const [phoneError, setPhoneError] = useState(false);
 
-  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const input = e.target.value;
-    const filtered = input.replace(/[^a-zA-ZąčęėįšųūžĄČĘĖĮŠŲŪŽ\s'-]/g, '');
+    const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const input = e.target.value;
+        const inputValid = input.match(/^[\p{Letter}\s'-]*$/u) != null;
+        const filteredInput =
+            input
+                .replace(/[^\p{Letter}\s'-]*/ug, '')
+                .replace(/^\s+/g, '')
+                .replace(/\s+$/g, ' ');
 
-    if (input !== filtered) {
-      setNameError(true);
-    } else if (
-      nameError &&
-      filtered.match(/^[a-zA-ZąčęėįšųūžĄČĘĖĮŠŲŪŽ\s'-]*$/)
-    ) {
-      setNameError(false);
-    }
+        setNameError(!inputValid);
+        setCustomerName(filteredInput);
+    };
 
-    setCustomerName(filtered);
-  };
+    const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        let input = e.target.value;
+        const inputValid = input.match(/^\+[0-9]*$/) != null;
+        const filteredInput =
+            input
+                .replace(/[^0-9+]/g, '')
+                .replace(/[^+]+\+/g, '+')
+                .slice(0, 1 + 15);
 
-  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let input = e.target.value;
-
-    let cleaned = input;
-    let hadInvalid = false;
-
-    if (input.startsWith('+')) {
-      const rest = input.slice(1);
-      if (/[^0-9]/.test(rest)) hadInvalid = true;
-      cleaned = '+' + rest.replace(/[^0-9]/g, '');
-    } else {
-      if (/[^0-9]/.test(input)) hadInvalid = true;
-      cleaned = input.replace(/[^0-9]/g, '');
-    }
-
-    if (cleaned.length > 15) return;
-
-    if (hadInvalid) {
-      setPhoneError(true);
-    } else if (phoneError) {
-      setPhoneError(false);
-    }
-
-    setCustomerPhone(cleaned);
-  };
+        setPhoneError(!inputValid);
+        setCustomerPhone(filteredInput);
+    };
 
   const handleConfirmWithClear = () => {
     setNameError(false);
