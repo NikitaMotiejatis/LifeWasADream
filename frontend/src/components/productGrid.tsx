@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Product, useCart, Variation } from '../contexts/cartContext';
+import { Product, useCart } from '../contexts/cartContext';
+import VariationModal from './variationModal';
 
 const products = [
   {
@@ -127,7 +128,10 @@ export default function ProductGrid() {
               from {formatPrice(product.basePrice)}
             </p>
             {product.variations && (
-              <p className="mt-2 text-sm text-blue-600">Customizable</p>
+              <p className="mt-2 flex items-center gap-1 text-xs font-medium text-blue-600">
+                <span className="hidden lg:inline">Customizable</span>
+                <span className="lg:hidden">Custom</span>
+              </p>
             )}
           </button>
         ))}
@@ -145,86 +149,6 @@ export default function ProductGrid() {
             }}
           />
         )}
-    </div>
-  );
-}
-
-function VariationModal({
-  product,
-  onClose,
-  onAdd,
-}: {
-  product: Product;
-  onClose: () => void;
-  onAdd: (variations: any[]) => void;
-}) {
-  const { formatPrice, getFinalPrice } = useCart();
-  const [selected, setSelected] = useState<Variation[]>(
-    product.variations ? [product.variations[0]] : [],
-  );
-
-  const toggleVariation = (v: Variation) => {
-    setSelected(prev => {
-      if (prev.includes(v)) return prev.filter(x => x !== v);
-      return [...prev, v];
-    });
-  };
-
-  const finalPrice = getFinalPrice(product, selected);
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-md rounded-2xl bg-white p-6">
-        <h3 className="mb-4 text-2xl font-bold">{product.name}</h3>
-
-        {product.variations && product.variations.length > 0 && (
-          <div className="mb-6 space-y-3">
-            {product.variations.map(v => (
-              <label
-                key={v.name}
-                className="flex cursor-pointer items-center justify-between py-2"
-              >
-                <span className="text-lg">{v.name}</span>
-                <div className="flex items-center gap-3">
-                  <span className="text-gray-600">
-                    {v.priceModifier > 0
-                      ? `+${formatPrice(v.priceModifier)}`
-                      : v.priceModifier < 0
-                        ? `−${formatPrice(-v.priceModifier)}`
-                        : 'Free'}
-                  </span>
-                  <input
-                    type="checkbox"
-                    checked={selected.includes(v)}
-                    onChange={() => toggleVariation(v)}
-                    className="h-5 w-5 rounded text-blue-600"
-                  />
-                </div>
-              </label>
-            ))}
-          </div>
-        )}
-
-        <div className="mb-6 flex justify-between text-xl font-bold">
-          <span>Total</span>
-          <span className="text-blue-600">{formatPrice(finalPrice)}</span>
-        </div>
-
-        <div className="flex gap-3">
-          <button
-            onClick={onClose}
-            className="flex-1 rounded-xl border border-gray-300 py-3"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={() => onAdd(selected)}
-            className="flex-1 rounded-xl bg-blue-600 py-3 font-semibold text-white"
-          >
-            Add to Cart
-          </button>
-        </div>
-      </div>
     </div>
   );
 }
