@@ -30,7 +30,7 @@ export type CartDiscount =
   | { type: 'percent'; value: number }
   | { type: 'fixed'; value: number };
 
-type CartKey = string;
+export type CartKey = string;
 
 type CartContextType = {
   items: Record<CartKey, CartItem>;
@@ -59,9 +59,23 @@ type CartContextType = {
   getDiscountFor: (
     productId: string,
   ) => { amount: number; formatted: string } | null;
+
+  generateKey: (product: Product, variations: Variation[]) => CartKey;
 };
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
+
+export const generateKey = (
+  product: Product,
+  variations: Variation[],
+): CartKey => {
+  const variationKey = variations
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .map(v => v.name)
+    .join('|||');
+
+  return `${product.id}___${variationKey || 'default'}`;
+};
 
 export const CartProvider = ({ children }: { children: ReactNode }) => {
   const { currency, setCurrency, formatPrice } = useCurrency();
@@ -69,21 +83,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [promotions, setPromotions] = useState<Promotions>({
     'iced-latte': { type: 'percent', value: 50 },
   });
-  const [cartDiscount, setCartDiscount] = useState<CartDiscount | null>({
-    type: 'fixed',
-    value: 10,
-  });
-
-  const generateKey = (product: Product, variations: Variation[]): CartKey => {
-    const vars =
-      variations.length > 0
-        ? variations
-            .map(v => v.name)
-            .sort()
-            .join('|')
-        : 'default';
-    return `${product.id}__${vars}`;
-  };
+  const [cartDiscount, setCartDiscount] = useState<CartDiscount | null>(null);
 
   const addToCart = (
     product: Product,
@@ -121,9 +121,8 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const clearCart = () => setItems({});
 
   const getFinalPrice = (product: Product, variations: Variation[]): number => {
-    const base = product.basePrice;
     const extra = variations.reduce((sum, v) => sum + v.priceModifier, 0);
-    return Math.max(0, base + extra);
+    return Math.max(0, product.basePrice + extra);
   };
 
   const { subtotal, itemDiscountsTotal, cartDiscountAmount, total } =
@@ -170,21 +169,19 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       return {
         subtotal,
         itemDiscountsTotal,
-        afterItemsTotal,
         cartDiscountAmount,
         total,
       };
     }, [items, promotions, cartDiscount]);
 
   const discountTotal = itemDiscountsTotal + cartDiscountAmount;
-
   const itemsList = Object.values(items);
 
   const getDiscountFor = (productId: string) => {
     const promo = promotions[productId];
     if (!promo) return null;
 
-    const item = Object.values(items).find(i => i.product.id === productId);
+    const item = itemsList.find(i => i.product.id === productId);
     if (!item) return null;
 
     const base = getFinalPrice(item.product, item.selectedVariations);
@@ -221,6 +218,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         formatPrice,
         getFinalPrice,
         getDiscountFor,
+        generateKey,
       }}
     >
       {children}

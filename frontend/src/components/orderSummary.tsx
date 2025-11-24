@@ -1,4 +1,4 @@
-import { useCart } from '../contexts/cartContext';
+import { generateKey, useCart } from '../contexts/cartContext';
 import { useState } from 'react';
 import type { CartItem } from '../contexts/cartContext';
 import TrashcanIcon from './icons/trashcanIcon';
@@ -111,6 +111,7 @@ function CartItemRow({ item }: { item: CartItem }) {
   const { formatPrice, updateQuantity, removeItem, getFinalPrice } = useCart();
 
   const finalPrice = getFinalPrice(product, selectedVariations);
+  const key = generateKey(product, selectedVariations);
 
   return (
     <div className="rounded-lg border border-gray-200 bg-gray-50 p-3">
@@ -126,11 +127,7 @@ function CartItemRow({ item }: { item: CartItem }) {
             {formatPrice(product.basePrice)} × {quantity}
           </p>
         </div>
-        <button
-          onClick={() =>
-            removeItem(product.id + JSON.stringify(selectedVariations))
-          }
-        >
+        <button onClick={() => removeItem(key)}>
           <TrashcanIcon className="h-5 w-5 text-gray-400 hover:text-red-600" />
         </button>
       </div>
@@ -138,12 +135,7 @@ function CartItemRow({ item }: { item: CartItem }) {
       <div className="flex flex-col items-center gap-3 xl:flex-row xl:items-center xl:justify-between">
         <div className="flex items-center gap-1">
           <button
-            onClick={() =>
-              updateQuantity(
-                product.id + JSON.stringify(selectedVariations),
-                -1,
-              )
-            }
+            onClick={() => updateQuantity(key, -1)}
             className="flex h-9 w-9 scale-70 items-center justify-center rounded-full border border-gray-400 text-sm font-light transition hover:bg-gray-200 active:scale-95 xl:scale-100"
           >
             −
@@ -152,12 +144,7 @@ function CartItemRow({ item }: { item: CartItem }) {
             {quantity}
           </span>
           <button
-            onClick={() =>
-              updateQuantity(
-                product.id + JSON.stringify(selectedVariations),
-                +1,
-              )
-            }
+            onClick={() => updateQuantity(key, +1)}
             className="flex h-9 w-9 scale-70 items-center justify-center rounded-full bg-blue-600 font-bold text-white transition hover:bg-blue-700 active:scale-95 xl:scale-100"
           >
             +
