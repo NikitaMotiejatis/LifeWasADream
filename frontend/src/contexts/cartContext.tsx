@@ -1,87 +1,179 @@
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useMemo, useState, ReactNode } from 'react';
 import { Currency, useCurrency } from './currencyContext';
 
-export type Product = {
+export type Variation = {
   name: string;
-  price: number;
+  priceModifier: number;
+};
+
+export type Product = {
+  id: string;
+  name: string;
+  basePrice: number;
+  variations?: Variation[];
 };
 
 export type CartItem = {
   product: Product;
+  selectedVariations: Variation[];
   quantity: number;
 };
 
+export type Promotion =
+  | { type: 'percent'; value: number }
+  | { type: 'fixed'; value: number }
+  | { type: 'price'; value: number };
+
+export type Promotions = Record<string, Promotion>;
+
+type CartKey = string;
+
 type CartContextType = {
-  cart: CartItem[];
-  addToCart: (product: Product) => void;
-  updateQuantity: (name: string, delta: number) => void;
-  removeItem: (name: string) => void;
+  items: Record<CartKey, CartItem>;
+  itemsList: CartItem[];
+  addToCart: (product: Product, variations?: Variation[]) => void;
+  updateQuantity: (key: CartKey, delta: number) => void;
+  removeItem: (key: CartKey) => void;
   clearCart: () => void;
+
+  promotions: Promotions;
+  setPromotions: (p: Promotions) => void;
+
+  subtotal: number;
+  discountTotal: number;
   total: number;
+
   currency: Currency;
-  setCurrency: (currency: Currency) => void;
+  setCurrency: (c: Currency) => void;
   formatPrice: (price: number) => string;
+
+  getFinalPrice: (product: Product, variations: Variation[]) => number;
+  getDiscountFor: (
+    productId: string,
+  ) => { amount: number; formatted: string } | null;
 };
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider = ({ children }: { children: ReactNode }) => {
   const { currency, setCurrency, formatPrice } = useCurrency();
+  const [items, setItems] = useState<Record<CartKey, CartItem>>({});
+  const [promotions, setPromotions] = useState<Promotions>({
+    'iced-latte': { type: 'percent', value: 50 },
+  });
 
-  const [cart, setCart] = useState<CartItem[]>([]);
+  const generateKey = (product: Product, variations: Variation[]): CartKey => {
+    const vars =
+      variations.length > 0
+        ? variations
+            .map(v => v.name)
+            .sort()
+            .join('|')
+        : 'default';
+    return `${product.id}__${vars}`;
+  };
 
-  const addToCart = (product: Product) => {
-    setCart(prev => {
-      const existing = prev.find(i => i.product.name === product.name);
-      if (existing) {
-        return prev.map(i =>
-          i.product.name === product.name
-            ? { ...i, quantity: i.quantity + 1 }
-            : i,
-        );
+  const addToCart = (
+    product: Product,
+    selectedVariations: Variation[] = [],
+  ) => {
+    const key = generateKey(product, selectedVariations);
+    setItems(prev => ({
+      ...prev,
+      [key]: prev[key]
+        ? { ...prev[key], quantity: prev[key].quantity + 1 }
+        : { product, selectedVariations, quantity: 1 },
+    }));
+  };
+
+  const updateQuantity = (key: CartKey, delta: number) => {
+    setItems(prev => {
+      const item = prev[key];
+      if (!item) return prev;
+      const newQty = item.quantity + delta;
+      if (newQty <= 0) {
+        const { [key]: _, ...rest } = prev;
+        return rest;
       }
-      return [...prev, { product, quantity: 1 }];
+      return { ...prev, [key]: { ...item, quantity: newQty } };
     });
   };
 
-  const updateQuantity = (name: string, delta: number) => {
-    setCart(
-      prev =>
-        prev
-          .map(item => {
-            if (item.product.name === name) {
-              const newQty = item.quantity + delta;
-              return newQty > 0 ? { ...item, quantity: newQty } : null;
-            }
-            return item;
-          })
-          .filter(Boolean) as CartItem[],
-    );
+  const removeItem = (key: CartKey) => {
+    setItems(prev => {
+      const { [key]: _, ...rest } = prev;
+      return rest;
+    });
   };
 
-  const removeItem = (name: string) => {
-    setCart(prev => prev.filter(i => i.product.name !== name));
+  const clearCart = () => setItems({});
+
+  const getFinalPrice = (product: Product, variations: Variation[]): number => {
+    const base = product.basePrice;
+    const extra = variations.reduce((sum, v) => sum + v.priceModifier, 0);
+    return Math.max(0, base + extra);
   };
 
-  const clearCart = () => setCart([]);
+  const { subtotal, discountTotal, total } = useMemo(() => {
+    let sub = 0;
+    let disc = 0;
 
-  const total = cart.reduce(
-    (sum, item) => sum + item.product.price * item.quantity,
-    0,
-  );
+    Object.values(items).forEach(item => {
+      const { product, selectedVariations, quantity } = item;
+      const basePrice = getFinalPrice(product, selectedVariations);
+      const promo = promotions[product.id];
+
+      let finalPrice = basePrice;
+      if (promo) {
+        if (promo.type === 'percent') finalPrice *= 1 - promo.value / 100;
+        if (promo.type === 'fixed')
+          finalPrice = Math.max(0, finalPrice - promo.value);
+        if (promo.type === 'price') finalPrice = promo.value;
+      }
+
+      sub += basePrice * quantity;
+      disc += (basePrice - finalPrice) * quantity;
+    });
+
+    return { subtotal: sub, discountTotal: disc, total: sub - disc };
+  }, [items, promotions]);
+
+  const itemsList = Object.values(items);
+
+  const getDiscountFor = (productId: string) => {
+    const promo = promotions[productId];
+    if (!promo) return null;
+    const item = Object.values(items).find(i => i.product.id === productId);
+    if (!item) return null;
+    const base = getFinalPrice(item.product, item.selectedVariations);
+    let discount = 0;
+    if (promo.type === 'percent') discount = base * (promo.value / 100);
+    if (promo.type === 'fixed') discount = promo.value;
+    if (promo.type === 'price') discount = base - promo.value;
+    return discount > 0
+      ? { amount: discount, formatted: formatPrice(discount) }
+      : null;
+  };
 
   return (
     <CartContext.Provider
       value={{
-        cart,
+        items,
+        itemsList,
         addToCart,
         updateQuantity,
         removeItem,
         clearCart,
+        promotions,
+        setPromotions,
+        subtotal,
+        discountTotal,
         total,
         currency,
         setCurrency,
         formatPrice,
+        getFinalPrice,
+        getDiscountFor,
       }}
     >
       {children}

@@ -7,24 +7,30 @@ import { CurrencyProvider } from '../contexts/currencyContext';
 
 export default function NewOrderPage() {
   return (
-    <div className="flex h-screen w-full">
-      <SidebarCashier />
+    <div className="flex h-screen">
+      <div className="fixed inset-y-0 left-0 z-50 w-64">
+        <SidebarCashier />
+      </div>
 
-      <div className="flex flex-1 flex-col">
-        <Topbar />
+      <div className="ml-64 flex flex-1 flex-col">
+        <div className="flex flex-1 flex-col overflow-hidden">
+          <Topbar />
 
-        <div className="flex flex-row gap-4 p-6">
           <CurrencyProvider>
             <CartProvider>
-              {/* Left: Products */}
-              <div className="flex-1">
-                <ProductGrid />
-              </div>
+              <main className="flex-1 overflow-y-auto">
+                <div className="flex gap-6 p-6">
+                  {/* Left: Products */}
+                  <div className="flex-1">
+                    <ProductGrid />
+                  </div>
 
-              {/* Right: Order summary */}
-              <div className="w-1/3 max-w-md">
-                <OrderSummary />
-              </div>
+                  {/* Right: Order summary */}
+                  <div className="w-1/3 max-w-md">
+                    <OrderSummary />
+                  </div>
+                </div>
+              </main>
             </CartProvider>
           </CurrencyProvider>
         </div>
