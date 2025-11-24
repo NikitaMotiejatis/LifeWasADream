@@ -10,6 +10,7 @@ export type Product = {
   id: string;
   name: string;
   basePrice: number;
+  categories?: string[];
   variations?: Variation[];
 };
 

@@ -124,7 +124,7 @@ function CartItemRow({ item }: { item: CartItem }) {
             </p>
           )}
           <p className="text-xs text-gray-500">
-            {formatPrice(product.basePrice)} × {quantity}
+            {formatPrice(finalPrice)} × {quantity}
           </p>
         </div>
         <button onClick={() => removeItem(key)}>
