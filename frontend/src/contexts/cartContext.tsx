@@ -26,6 +26,10 @@ export type Promotion =
 
 export type Promotions = Record<string, Promotion>;
 
+export type CartDiscount =
+  | { type: 'percent'; value: number }
+  | { type: 'fixed'; value: number };
+
 type CartKey = string;
 
 type CartContextType = {
@@ -39,8 +43,12 @@ type CartContextType = {
   promotions: Promotions;
   setPromotions: (p: Promotions) => void;
 
+  cartDiscount: CartDiscount | null;
+  setCartDiscount: (discount: CartDiscount | null) => void;
+
   subtotal: number;
   discountTotal: number;
+  cartDiscountAmount: number;
   total: number;
 
   currency: Currency;
@@ -60,6 +68,10 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [items, setItems] = useState<Record<CartKey, CartItem>>({});
   const [promotions, setPromotions] = useState<Promotions>({
     'iced-latte': { type: 'percent', value: 50 },
+  });
+  const [cartDiscount, setCartDiscount] = useState<CartDiscount | null>({
+    type: 'fixed',
+    value: 10,
   });
 
   const generateKey = (product: Product, variations: Variation[]): CartKey => {
@@ -114,42 +126,74 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     return Math.max(0, base + extra);
   };
 
-  const { subtotal, discountTotal, total } = useMemo(() => {
-    let sub = 0;
-    let disc = 0;
+  const { subtotal, itemDiscountsTotal, cartDiscountAmount, total } =
+    useMemo(() => {
+      let subtotal = 0;
+      let itemDiscountsTotal = 0;
+      let afterItemsTotal = 0;
 
-    Object.values(items).forEach(item => {
-      const { product, selectedVariations, quantity } = item;
-      const basePrice = getFinalPrice(product, selectedVariations);
-      const promo = promotions[product.id];
+      Object.values(items).forEach(item => {
+        const { product, selectedVariations, quantity } = item;
+        const basePrice = getFinalPrice(product, selectedVariations);
+        const promo = promotions[product.id];
 
-      let finalPrice = basePrice;
-      if (promo) {
-        if (promo.type === 'percent') finalPrice *= 1 - promo.value / 100;
-        if (promo.type === 'fixed')
-          finalPrice = Math.max(0, finalPrice - promo.value);
-        if (promo.type === 'price') finalPrice = promo.value;
+        let priceAfterPromo = basePrice;
+
+        if (promo) {
+          if (promo.type === 'percent') {
+            priceAfterPromo *= 1 - promo.value / 100;
+          } else if (promo.type === 'fixed') {
+            priceAfterPromo = Math.max(0, priceAfterPromo - promo.value);
+          } else if (promo.type === 'price') {
+            priceAfterPromo = promo.value;
+          }
+        }
+
+        const itemDiscount = basePrice - priceAfterPromo;
+
+        subtotal += basePrice * quantity;
+        itemDiscountsTotal += itemDiscount * quantity;
+        afterItemsTotal += priceAfterPromo * quantity;
+      });
+
+      let cartDiscountAmount = 0;
+      if (cartDiscount && afterItemsTotal > 0) {
+        if (cartDiscount.type === 'percent') {
+          cartDiscountAmount = afterItemsTotal * (cartDiscount.value / 100);
+        } else if (cartDiscount.type === 'fixed') {
+          cartDiscountAmount = Math.min(afterItemsTotal, cartDiscount.value);
+        }
       }
 
-      sub += basePrice * quantity;
-      disc += (basePrice - finalPrice) * quantity;
-    });
+      const total = Math.max(0, afterItemsTotal - cartDiscountAmount);
 
-    return { subtotal: sub, discountTotal: disc, total: sub - disc };
-  }, [items, promotions]);
+      return {
+        subtotal,
+        itemDiscountsTotal,
+        afterItemsTotal,
+        cartDiscountAmount,
+        total,
+      };
+    }, [items, promotions, cartDiscount]);
+
+  const discountTotal = itemDiscountsTotal + cartDiscountAmount;
 
   const itemsList = Object.values(items);
 
   const getDiscountFor = (productId: string) => {
     const promo = promotions[productId];
     if (!promo) return null;
+
     const item = Object.values(items).find(i => i.product.id === productId);
     if (!item) return null;
+
     const base = getFinalPrice(item.product, item.selectedVariations);
     let discount = 0;
+
     if (promo.type === 'percent') discount = base * (promo.value / 100);
-    if (promo.type === 'fixed') discount = promo.value;
-    if (promo.type === 'price') discount = base - promo.value;
+    else if (promo.type === 'fixed') discount = promo.value;
+    else if (promo.type === 'price') discount = Math.max(0, base - promo.value);
+
     return discount > 0
       ? { amount: discount, formatted: formatPrice(discount) }
       : null;
@@ -166,8 +210,11 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         clearCart,
         promotions,
         setPromotions,
+        cartDiscount,
+        setCartDiscount,
         subtotal,
         discountTotal,
+        cartDiscountAmount,
         total,
         currency,
         setCurrency,
