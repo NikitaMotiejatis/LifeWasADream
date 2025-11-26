@@ -155,14 +155,14 @@ export default function ProductGrid() {
   return (
     <div>
       <div className="mb-4 rounded-lg border border-gray-200 bg-white p-3 shadow-sm">
-        <h2 className="mb-4 text-xl font-semibold">Menu</h2>
+        <h2 className="mb-4 text-xl font-bold">Menu</h2>
         <div className="relative flex-1">
           <input
             type="text"
             placeholder="Search items..."
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="mb-4 w-full rounded-lg border border-gray-300 px-4 py-2 pr-10 text-sm placeholder-gray-500 shadow-sm transition placeholder:leading-tight focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
+            className="mb-4 w-full rounded-lg border border-gray-300 px-4 py-2 pr-10 text-sm placeholder-gray-500 transition placeholder:leading-tight focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
             title="Search items..."
           />
 
