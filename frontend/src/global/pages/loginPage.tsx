@@ -2,6 +2,20 @@ import { useState } from 'react';
 import PersonIcon from '@/icons/personIcon';
 import LockIcon from '@/icons/lockIcon';
 
+// TODO: move somewhere more appropriate or read cookie differently
+function getCookie(name: string): string | null {
+	const nameLenPlus = (name.length + 1);
+	return document.cookie
+		.split(';')
+		.map(c => c.trim())
+		.filter(cookie => {
+			return cookie.substring(0, nameLenPlus) === `${name}=`;
+		})
+		.map(cookie => {
+			return decodeURIComponent(cookie.substring(nameLenPlus));
+		})[0] || null;
+}
+
 export default function LoginPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -47,6 +61,43 @@ export default function LoginPage() {
 
   const showUsernameError = touched.username && !username.trim();
   const showPasswordError = touched.password && !password.trim();
+
+  const [loginInfo, setLoginInfo] = useState({
+    username: "",
+    password: "",
+  });
+
+  function handleChange(event : React.ChangeEvent<HTMLInputElement>) {
+      setLoginInfo({...loginInfo,[event.target.name] : event.target.value});
+  } 
+
+  const handleSubmit = (event : React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    console.log(loginInfo);
+    try {
+      fetch(
+        "http://localhost:8081/auth/local/login?session=101010010",
+          {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            user: loginInfo.username,
+            passwd: loginInfo.password,
+            role: "order",
+          }),
+          credentials: "include",
+        }
+      ).then(response => response.json())
+      .then(x => console.log(x));
+
+      const xsrfToken = getCookie("XSRF-TOKEN") ?? "";
+      console.log(xsrfToken);
+    } catch (e) {
+      console.error(e);
+    }
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-100">
