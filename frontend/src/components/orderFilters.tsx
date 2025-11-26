@@ -7,8 +7,12 @@ interface Props {
   setSearchTerm: (v: string) => void;
   dateFrom: string;
   setDateFrom: (v: string) => void;
+  timeFrom: string;
+  setTimeFrom: (v: string) => void;
   dateTo: string;
   setDateTo: (v: string) => void;
+  timeTo: string;
+  setTimeTo: (v: string) => void;
   counts: { all: number; open: number; closed: number; pending: number };
 }
 
@@ -19,8 +23,12 @@ export default function OrderFilters({
   setSearchTerm,
   dateFrom,
   setDateFrom,
+  timeFrom,
+  setTimeFrom,
   dateTo,
   setDateTo,
+  timeTo,
+  setTimeTo,
   counts,
 }: Props) {
   return (
@@ -44,7 +52,7 @@ export default function OrderFilters({
         ))}
       </div>
 
-      <div className="relative min-w-64 flex-1">
+      <div className="relative flex-1">
         <input
           type="text"
           placeholder="Search by #..."
@@ -63,37 +71,64 @@ export default function OrderFilters({
         )}
       </div>
 
-      <div className="flex flex-wrap items-center gap-3 text-xs">
-        <div className="flex items-center gap-2">
-          <span className="whitespace-nowrap text-gray-600">From:</span>
-          <input
-            type="datetime-local"
-            value={dateFrom}
-            onChange={e => setDateFrom(e.target.value)}
-            className="rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
-          />
+      <div className="flex flex-wrap gap-4 text-xs">
+        <div className="flex flex-wrap items-center gap-4 pr-4">
+          <div className="flex items-center gap-2">
+            <span className="min-w-8 font-semibold whitespace-nowrap text-gray-600">
+              From:
+            </span>
+
+            <input
+              type="date"
+              value={dateFrom}
+              onChange={e => setDateFrom(e.target.value)}
+              className="rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
+            />
+
+            <input
+              type="time"
+              value={timeFrom}
+              onChange={e => setTimeFrom(e.target.value)}
+              className="rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
+            />
+          </div>
         </div>
-        <span className="hidden text-gray-400 sm:inline">→</span>
-        <div className="flex items-center gap-2">
-          <span className="whitespace-nowrap text-gray-600">To:</span>
-          <input
-            type="datetime-local"
-            value={dateTo}
-            onChange={e => setDateTo(e.target.value)}
-            className="rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
-          />
+
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-2">
+            <span className="min-w-8 font-semibold whitespace-nowrap text-gray-600">
+              To:
+            </span>
+
+            <input
+              type="date"
+              value={dateTo}
+              onChange={e => setDateTo(e.target.value)}
+              className="rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
+            />
+
+            <input
+              type="time"
+              value={timeTo}
+              onChange={e => setTimeTo(e.target.value)}
+              className="rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
+            />
+
+            {(dateFrom || dateTo || timeFrom || timeTo) && (
+              <button
+                onClick={() => {
+                  setDateFrom('');
+                  setTimeFrom('');
+                  setDateTo('');
+                  setTimeTo('');
+                }}
+                className="p-2 text-sm font-medium text-red-600"
+              >
+                Clear
+              </button>
+            )}
+          </div>
         </div>
-        {(dateFrom || dateTo) && (
-          <button
-            onClick={() => {
-              setDateFrom('');
-              setDateTo('');
-            }}
-            className="text-sm font-medium text-red-600 hover:underline"
-          >
-            Clear
-          </button>
-        )}
       </div>
     </div>
   );

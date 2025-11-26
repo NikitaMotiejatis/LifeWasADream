@@ -17,7 +17,9 @@ export default function OrderList() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [dateFrom, setDateFrom] = useState('');
+  const [timeFrom, setTimeFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
+  const [timeTo, setTimeTo] = useState('');
   const [filterStatus, setFilterStatus] = useState<
     'all' | 'open' | 'closed' | 'pending'
   >('open');
@@ -81,15 +83,33 @@ export default function OrderList() {
   }, []);
 
   const sortedAndFiltered = useMemo(() => {
+    const buildDateTime = (
+      dateStr: string,
+      timeStr: string,
+      isEnd: boolean = false,
+    ) => {
+      if (!dateStr) return null;
+
+      let time = timeStr;
+      if (!time) {
+        time = isEnd ? '23:59' : '00:00';
+      }
+
+      return new Date(`${dateStr}T${time}`);
+    };
+
+    const fromDateTime = buildDateTime(dateFrom, timeFrom, false);
+    const toDateTime = buildDateTime(dateTo, timeTo, true);
+
     let filtered = orders.filter(o => {
       if (filterStatus === 'open' && o.status !== 'active') return false;
       if (filterStatus === 'closed' && o.status !== 'closed') return false;
       if (filterStatus === 'pending' && o.status !== 'refund_pending')
         return false;
       if (searchTerm && !o.id.includes(searchTerm)) return false;
-      const time = o.createdAt.getTime();
-      if (dateFrom && time < new Date(dateFrom).getTime()) return false;
-      if (dateTo && time > new Date(dateTo).getTime()) return false;
+      const orderTime = o.createdAt.getTime();
+      if (fromDateTime && orderTime < fromDateTime.getTime()) return false;
+      if (toDateTime && orderTime > toDateTime.getTime()) return false;
       return true;
     });
 
@@ -98,7 +118,7 @@ export default function OrderList() {
       const diff = order[a.status] - order[b.status];
       return diff !== 0 ? diff : parseInt(b.id) - parseInt(a.id);
     });
-  }, [orders, filterStatus, searchTerm, dateFrom, dateTo]);
+  }, [orders, filterStatus, searchTerm, dateFrom, timeFrom, dateTo, timeTo]);
 
   const openModal = (
     type: 'edit' | 'pay' | 'refund' | 'cancel',
@@ -144,8 +164,12 @@ export default function OrderList() {
             setSearchTerm={setSearchTerm}
             dateFrom={dateFrom}
             setDateFrom={setDateFrom}
+            timeFrom={timeFrom}
+            setTimeFrom={setTimeFrom}
             dateTo={dateTo}
             setDateTo={setDateTo}
+            timeTo={timeTo}
+            setTimeTo={setTimeTo}
             counts={counts}
           />
         </div>
