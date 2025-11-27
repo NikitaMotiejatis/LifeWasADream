@@ -51,27 +51,18 @@ func New(config config.Config) App {
 
 	mainRouter := chi.NewRouter()
 
-	mainRouter.Use(cors.Handler(corsOptions(config)))
 	mainRouter.Use(middleware.Logger)
 	mainRouter.Use(middleware.Recoverer)
+	mainRouter.Use(cors.Handler(corsOptions(config)))
 
 	authService := auth.NewService(authOptions(config))
 
 	authService.AddDirectProvider(
 		"local",
-		provider.CredCheckerFunc(checkCredentials),
+		provider.CredCheckerFunc(MockProvider.CheckCredentials),
 	)
 
-	authMiddlewareBase := authService.Middleware()
-
-	mainRouter.Group(func(r chi.Router) {
-		r.Get("/ping", func(w http.ResponseWriter, r *http.Request) {w.Write([]byte("pong"))})
-	})
-
-	mainRouter.Group(func(r chi.Router) {
-		r.Use(authMiddlewareBase.Auth)
-		r.Get("/vping", func(w http.ResponseWriter, r *http.Request) {w.Write([]byte("vpong"))})
-	})
+	// authMiddlewareBase := authService.Middleware()
 
 	authRoutes, _ := authService.Handlers()
 	mainRouter.Mount("/auth", authRoutes)

@@ -10,6 +10,7 @@ require (
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/joho/godotenv v1.5.1
 	github.com/lib/pq v1.10.9
+	golang.org/x/crypto v0.45.0
 )
 
 require (
@@ -53,7 +54,6 @@ require (
 	go.mongodb.org/mongo-driver v1.13.4 // indirect
 	go.uber.org/mock v0.5.0 // indirect
 	golang.org/x/arch v0.20.0 // indirect
-	golang.org/x/crypto v0.45.0 // indirect
 	golang.org/x/image v0.13.0 // indirect
 	golang.org/x/mod v0.29.0 // indirect
 	golang.org/x/net v0.47.0 // indirect

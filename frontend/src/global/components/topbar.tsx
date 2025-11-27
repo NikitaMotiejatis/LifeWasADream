@@ -1,11 +1,17 @@
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/auth/authContext';
 import ChevronDownIcon from '@/icons/chevronDownIcon';
 import LogoutIcon from '@/icons/logoutIcon';
 import SearchIcon from '@/icons/searchIcon';
 
 export default function Topbar() {
+  const { username, logout } = useAuth();
+  const navigate = useNavigate();
+
   const handleLogout = () => {
-    window.location.href = '/login';
     console.log('Logging out...');
+    logout()
+      .then(() => navigate("/login"));
   };
 
   return (
@@ -34,10 +40,10 @@ export default function Topbar() {
       <div className="flex shrink-0 items-center gap-3 whitespace-nowrap">
         <div className="flex items-center gap-3">
           <span className="hidden text-sm font-medium text-gray-700 sm:block">
-            John Doe
+            {username}
           </span>
           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-linear-to-br from-blue-500 to-purple-600 text-sm font-semibold text-white shadow-md ring-2 ring-white">
-            JD
+            TODO
           </div>
         </div>
 
