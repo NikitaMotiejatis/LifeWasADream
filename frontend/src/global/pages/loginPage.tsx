@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import PersonIcon from '@/icons/personIcon';
 import LockIcon from '@/icons/lockIcon';
 import { useAuth } from '@/auth/authContext';
+import Toast, { ToastDetails } from '@/global/components/toast';
 
 // TODO: move somewhere more appropriate or read cookie differently
 function getCookie(name: string): string | null {
@@ -26,6 +27,8 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [touched, setTouched] = useState({ username: false, password: false });
 
+  const [toast, setToast] = useState<ToastDetails | null>(null);
+
   const demoAccounts = [
     { role: 'Cashier / Receptionist', login: 'cashier1', pass: 'demo123' },
     { role: 'Manager', login: 'manager1', pass: 'demo123' },
@@ -46,9 +49,21 @@ export default function LoginPage() {
     }
   }, [roles]);
 
-  function handleSubmit (event : React.FormEvent<HTMLFormElement>) {
+  function handleSubmit(event : React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    login(username, password);
+    login(username, password)
+      .then(errorMessage => {
+        if (errorMessage) {
+          setToast({
+            message: errorMessage,
+            type: "error",
+          });
+          setUsername("");
+          setPassword("");
+          setTouched({ username: false, password: false });
+          setTimeout(() => setToast(null), 1500); // TODO: better solution for multiple toast calls
+        }
+      });
   }
 
   return (
@@ -151,6 +166,8 @@ export default function LoginPage() {
           </div>
         </div>
       </form>
+
+      <Toast toast={toast} />
     </div>
   );
 }

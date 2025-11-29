@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, ReactNode, PropsWithChildren } from 'react';
+import { createContext, useContext, useState, PropsWithChildren } from 'react';
 
 // TODO: move somewhere more appropriate or read cookie differently
 function getCookie(name: string): string | null {
@@ -19,7 +19,7 @@ export type Role = 'Manager' | 'Cashier' | 'Clerk' | 'Supplier';
 type AuthContextType = {
   username?: string;
   roles: Role[]; // TODO: make a Set?
-  login: (username: string, password: string) => Promise<void>;
+  login: (username: string, password: string) => Promise<string | null>;
   checkLoginStatus: () => Promise<string>; // TODO: something a bit more sophisticated than string
   getUser: () => Promise<void>;
   logout: () => Promise<void>;
@@ -33,7 +33,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [username, setUsername] = useState<string | undefined>(undefined);
   const [roles, setRoles] = useState<Role[]>([]);
 
-  const login = async (username: string, password: string) => {
+  const login = async (username: string, password: string): Promise<string | null> => {
     const sessionId = "1010110000";
     const loginUrl = `http://localhost:8081/auth/local/login?session=${sessionId}`;
     const requestHeaders = {
@@ -55,17 +55,16 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       const { name: resUsername, attrs: { roles: resRoles } } = await response.json();
 
       if (!resUsername || !resRoles) {
-        console.error("LoginFailed");
-        return;
+        return "Login failed";
       }
 
       setUsername(resUsername);
       setRoles(resRoles);
-
-      console.log("Login success");
     } catch {
-      console.error("Login failed");
+      return "Login failed";
     }
+
+    return null;
   }
 
   const checkLoginStatus = async () => {

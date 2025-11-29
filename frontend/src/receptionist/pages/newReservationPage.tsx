@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { useCurrency } from '@/global/contexts/currencyContext';
 import SidebarCashier from '@/receptionist/components/sidebarCashier';
 import Topbar from '@/global/components/topbar';
-import Toast from '@/global/components/toast';
+import Toast, { ToastDetails } from '@/global/components/toast';
 
 type Staff = { id: string; name: string; role: string };
 type Service = { id: string; title: string; price: number; duration: string };
@@ -58,10 +58,7 @@ export default function NewReservationPage() {
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [customerName, setCustomerName] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
-  const [toast, setToast] = useState<{
-    message: string;
-    type: 'success' | 'error';
-  } | null>(null);
+  const [toast, setToast] = useState<ToastDetails | null>(null);
   const [currentMonth, setCurrentMonth] = useState(new Date());
 
   const generateCode = () => `RES-${Math.floor(100 + Math.random() * 900)}`;
