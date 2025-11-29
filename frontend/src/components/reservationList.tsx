@@ -1,5 +1,3 @@
-'use client';
-
 import { useState, useEffect, useMemo } from 'react';
 import { useCurrency } from '../contexts/currencyContext';
 import ReservationFilters from './reservationFilters';
@@ -20,11 +18,7 @@ export interface Reservation {
     | 'cancelled'
     | 'no_show'
     | 'refund_pending';
-  createdAt: Date;
 }
-
-const formatDate = (date: Date) => date.toISOString().split('T')[0];
-const formatTime = (date: Date) => date.toTimeString().slice(0, 5);
 
 const staffMap: Record<string, string> = {
   anyone: 'Any Staff',
@@ -43,9 +37,7 @@ export default function ReservationList() {
   const { formatPrice } = useCurrency();
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [loading, setLoading] = useState(true);
-
   const [searchTerm, setSearchTerm] = useState('');
-  ('');
   const [dateFrom, setDateFrom] = useState('');
   const [timeFrom, setTimeFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
@@ -64,119 +56,143 @@ export default function ReservationList() {
   const [modalType, setModalType] = useState<
     'start' | 'complete' | 'cancel' | 'noshow' | 'refund' | 'cancel_refund'
   >('start');
-  const [selectedRes, setSelectedRes] = useState<Reservation | null>(null);
+  const [selectedReservation, setSelectedReservation] =
+    useState<Reservation | null>(null);
 
-  // MOCK DUOMENYS SU TIKRU datetime
   useEffect(() => {
-    const mock: Reservation[] = [
-      {
-        id: 'RES-301',
-        customerName: 'Emma Wilson',
-        customerPhone: '+1234567890',
-        staffId: 'james',
-        serviceId: '1',
-        datetime: new Date('2025-04-05T10:00:00'),
-        status: 'completed',
-        createdAt: new Date(),
-      },
-      {
-        id: 'RES-302',
-        customerName: 'Liam Chen',
-        customerPhone: '+1987654321',
-        staffId: 'anyone',
-        serviceId: '3',
-        datetime: new Date('2025-04-06T14:30:00'),
-        status: 'in_service',
-        createdAt: new Date(),
-      },
-      {
-        id: 'RES-303',
-        customerName: 'Sophia Kim',
-        customerPhone: '+1555123456',
-        staffId: 'sarah',
-        serviceId: '4',
-        datetime: new Date('2025-04-06T11:00:00'),
-        status: 'pending',
-        createdAt: new Date(),
-      },
-      {
-        id: 'RES-304',
-        customerName: 'Noah Park',
-        customerPhone: '+1443123456',
-        staffId: 'james',
-        serviceId: '2',
-        datetime: new Date('2025-04-07T16:00:00'),
-        status: 'pending',
-        createdAt: new Date(),
-      },
-      {
-        id: 'RES-305',
-        customerName: 'Ava Brown',
-        customerPhone: '+1333444555',
-        staffId: 'anyone',
-        serviceId: '1',
-        datetime: new Date('2025-04-04T09:30:00'),
-        status: 'no_show',
-        createdAt: new Date(),
-      },
-    ];
-
-    setTimeout(() => {
+    const load = async () => {
+      await new Promise(r => setTimeout(r, 500));
+      const mock: Reservation[] = [
+        {
+          id: 'RES-301',
+          customerName: 'Emma Wilson',
+          customerPhone: '+1234567890',
+          staffId: 'james',
+          serviceId: '1',
+          datetime: new Date('2025-11-28T10:00:00'),
+          status: 'completed',
+        },
+        {
+          id: 'RES-302',
+          customerName: 'Liam Chen',
+          customerPhone: '+1987654321',
+          staffId: 'anyone',
+          serviceId: '3',
+          datetime: new Date('2025-11-30T14:30:00'),
+          status: 'in_service',
+        },
+        {
+          id: 'RES-303',
+          customerName: 'Sophia Kim',
+          customerPhone: '+1555123456',
+          staffId: 'sarah',
+          serviceId: '4',
+          datetime: new Date('2025-12-05T11:00:00'),
+          status: 'pending',
+        },
+        {
+          id: 'RES-304',
+          customerName: 'Noah Park',
+          customerPhone: '+1443123456',
+          staffId: 'james',
+          serviceId: '2',
+          datetime: new Date('2025-12-18T16:00:00'),
+          status: 'pending',
+        },
+        {
+          id: 'RES-305',
+          customerName: 'Ava Brown',
+          customerPhone: '+1333444555',
+          staffId: 'anyone',
+          serviceId: '1',
+          datetime: new Date('2025-11-20T09:30:00'),
+          status: 'no_show',
+        },
+      ];
       setReservations(mock);
       setLoading(false);
-    }, 400);
+    };
+    load();
   }, []);
 
-  // TOBULAS FILTRAVIMAS SU VIENU datetime LAUKU
-  const filtered = useMemo(() => {
-    const parseFilter = (
-      date: string,
-      time: string | undefined,
-      isEnd: boolean,
-    ): number | null => {
-      if (!date) return null;
-      const t = time ? `${time}:00` : isEnd ? '23:59:59' : '00:00:00';
-      const d = new Date(`${date}T${t}`);
-      return isNaN(d.getTime()) ? null : d.getTime();
+  const formatDateTime = (date: Date) => {
+    const d = new Date(date);
+    const day = d.getDate();
+    const month = d.toLocaleString('en', { month: 'short' });
+    const time = d.toLocaleTimeString('en-GB', {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+    return `${day} ${month} • ${time}`;
+  };
+
+  const sortedAndFiltered = useMemo(() => {
+    const buildDateTime = (
+      dateStr: string,
+      timeStr: string,
+      isEnd: boolean = false,
+    ) => {
+      if (!dateStr) return null;
+
+      let time = timeStr;
+      if (!time) {
+        time = isEnd ? '23:59' : '00:00';
+      }
+
+      return new Date(`${dateStr}T${time}`);
     };
 
-    const fromTs = parseFilter(dateFrom, timeFrom, false);
-    const toTs = parseFilter(dateTo, timeTo, true);
+    const fromDateTime = buildDateTime(dateFrom, timeFrom, false);
+    const toDateTime = buildDateTime(dateTo, timeTo, true);
 
-    return reservations
-      .filter(r => {
-        if (statusFilter !== 'all' && r.status !== statusFilter) return false;
+    let filtered = reservations.filter(r => {
+      if (statusFilter === 'pending' && r.status !== 'pending') return false;
+      if (statusFilter === 'in_service' && r.status !== 'in_service')
+        return false;
+      if (statusFilter === 'completed' && r.status !== 'completed')
+        return false;
+      if (statusFilter === 'cancelled' && r.status !== 'cancelled')
+        return false;
+      if (statusFilter === 'no_show' && r.status !== 'no_show') return false;
+      if (statusFilter === 'refund_pending' && r.status !== 'refund_pending')
+        return false;
 
-        if (searchTerm) {
-          const q = searchTerm.toLowerCase();
-          const text =
-            `${r.id} ${r.customerName} ${r.customerPhone}`.toLowerCase();
-          if (!text.includes(q)) return false;
-        }
+      if (searchTerm) {
+        const query = searchTerm.toLowerCase().trim();
 
-        const resTs = r.datetime.getTime();
+        const searchable = [
+          r.id,
+          r.customerName,
+          r.customerPhone,
+          servicesMap[r.serviceId]?.title || '',
+          staffMap[r.staffId] ||
+            (r.staffId === 'anyone' ? 'any staff' : r.staffId),
+        ]
+          .join(' ')
+          .toLowerCase();
 
-        if (fromTs !== null && resTs < fromTs) return false;
-        if (toTs !== null && resTs > toTs) return false;
+        if (!searchable.includes(query)) return false;
+      }
 
-        return true;
-      })
-      .sort((a, b) => {
-        const priority: Record<Reservation['status'], number> = {
-          in_service: 1,
-          pending: 2,
-          completed: 3,
-          refund_pending: 4,
-          cancelled: 5,
-          no_show: 6,
-        };
+      const reservationTime = r.datetime.getTime();
+      if (fromDateTime && reservationTime < fromDateTime.getTime())
+        return false;
+      if (toDateTime && reservationTime > toDateTime.getTime()) return false;
+      return true;
+    });
 
-        const pa = priority[a.status];
-        const pb = priority[b.status];
-        if (pa !== pb) return pa - pb;
-
-        return b.datetime.getTime() - a.datetime.getTime(); // naujausios viršuje
-      });
+    return [...filtered].sort((a, b) => {
+      const reservation = {
+        in_service: 0,
+        pending: 1,
+        refund_pending: 2,
+        completed: 3,
+        cancelled: 4,
+        no_show: 5,
+      };
+      const diff = reservation[a.status] - reservation[b.status];
+      return diff !== 0 ? diff : parseInt(b.id) - parseInt(a.id);
+    });
   }, [
     reservations,
     searchTerm,
@@ -198,7 +214,7 @@ export default function ReservationList() {
     reservation: Reservation,
   ) => {
     setModalType(type);
-    setSelectedRes(reservation);
+    setSelectedReservation(reservation);
     setModalOpen(true);
   };
 
@@ -249,13 +265,13 @@ export default function ReservationList() {
         />
       </div>
 
-      <div className="space-y-3">
-        {filtered.length === 0 ? (
+      <div className="mt-6 space-y-3">
+        {sortedAndFiltered.length === 0 ? (
           <p className="py-12 text-center text-gray-400">
             No reservations found
           </p>
         ) : (
-          filtered.map(res => (
+          sortedAndFiltered.map(res => (
             <ReservationListItem
               key={res.id}
               reservation={res}
@@ -263,8 +279,7 @@ export default function ReservationList() {
               staffMap={staffMap}
               servicesMap={servicesMap}
               onAction={openModal}
-              formatDate={formatDate}
-              formatTime={formatTime}
+              formatDateTime={formatDateTime}
             />
           ))
         )}
@@ -273,10 +288,10 @@ export default function ReservationList() {
       <ReservationModal
         open={modalOpen}
         type={modalType}
-        reservation={selectedRes}
+        reservation={selectedReservation}
         onClose={() => setModalOpen(false)}
         onConfirm={() => {
-          if (!selectedRes) return;
+          if (!selectedReservation) return;
           const map = {
             start: 'in_service',
             complete: 'completed',
@@ -285,7 +300,7 @@ export default function ReservationList() {
             refund: 'refund_pending',
             cancel_refund: 'completed',
           } as const;
-          updateStatus(selectedRes.id, map[modalType]);
+          updateStatus(selectedReservation.id, map[modalType]);
         }}
       />
     </div>

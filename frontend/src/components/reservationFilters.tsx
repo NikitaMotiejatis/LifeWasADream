@@ -77,7 +77,7 @@ export default function ReservationFilters({
       <div className="relative">
         <input
           type="text"
-          placeholder="Search by name, phone or code..."
+          placeholder="Search by name, phone, code, service or staff..."
           value={searchTerm}
           onChange={e => setSearchTerm(e.target.value)}
           className="w-full rounded-lg border border-gray-300 py-2.5 pr-10 pl-10 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
@@ -134,9 +134,9 @@ export default function ReservationFilters({
               setDateTo('');
               setTimeTo('');
             }}
-            className="text-sm font-medium text-red-600 hover:text-red-700"
+            className="p-2 text-sm font-medium text-red-600"
           >
-            Clear dates
+            Clear
           </button>
         )}
       </div>

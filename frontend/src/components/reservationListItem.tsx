@@ -1,4 +1,4 @@
-import { Reservation } from './reservationList';
+import type { Reservation } from './reservationList';
 
 interface Props {
   reservation: Reservation;
@@ -15,8 +15,7 @@ interface Props {
       | 'cancel_refund',
     reservation: Reservation,
   ) => void;
-  formatDate: (date: Date) => string;
-  formatTime: (date: Date) => string;
+  formatDateTime: (date: Date) => string;
 }
 
 export default function ReservationListItem({
@@ -25,8 +24,7 @@ export default function ReservationListItem({
   staffMap,
   servicesMap,
   onAction,
-  formatDate,
-  formatTime,
+  formatDateTime,
 }: Props) {
   const service = servicesMap[reservation.serviceId];
   const staff = staffMap[reservation.staffId] || 'Any Staff';
@@ -40,8 +38,7 @@ export default function ReservationListItem({
               #{reservation.id}
             </h3>
             <span className="text-sm whitespace-nowrap text-gray-500">
-              {formatDate(reservation.datetime)} •{' '}
-              {formatTime(reservation.datetime)}
+              {formatDateTime(reservation.datetime)}
             </span>
           </div>
 
