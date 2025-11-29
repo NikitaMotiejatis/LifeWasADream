@@ -18,7 +18,7 @@ export default function ProtectedRoute({
   }
 
   if (!roleAuthPredicate(roles)) {
-    return <div>404</div>;
+    return <div>404</div>; // TODO: add Page not found
   }
 
   return children;

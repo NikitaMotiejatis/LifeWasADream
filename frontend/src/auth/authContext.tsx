@@ -125,7 +125,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
     try {
       const _ = await fetch(url, {
-          method: "GET",
+          method: "POST",
           headers: requestHeaders,
           credentials: "include",
       });
