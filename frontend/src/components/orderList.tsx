@@ -3,6 +3,7 @@ import { useCurrency } from '../contexts/currencyContext';
 import OrderFilters from './orderFilters';
 import OrderListItem from './orderListItem';
 import OrderModal from './orderModal';
+import Toast from './toast';
 
 interface Order {
   id: string;
@@ -28,6 +29,10 @@ export default function OrderList() {
     'edit' | 'pay' | 'refund' | 'cancel'
   >('pay');
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [toast, setToast] = useState<{
+    message: string;
+    type: 'success' | 'error';
+  } | null>(null);
 
   useEffect(() => {
     const load = async () => {
@@ -151,6 +156,14 @@ export default function OrderList() {
     pending: orders.filter(o => o.status === 'refund_pending').length,
   };
 
+  const showToast = (
+    message: string,
+    type: 'success' | 'error' = 'success',
+  ) => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 5800);
+  };
+
   return (
     <>
       <div className="space-y-6">
@@ -197,14 +210,23 @@ export default function OrderList() {
         onClose={closeModal}
         onConfirm={() => {
           if (!selectedOrder) return;
-          if (modalType === 'pay')
+
+          if (modalType === 'pay') {
             updateOrderStatus(selectedOrder.id, 'closed');
-          if (modalType === 'refund')
+          }
+
+          if (modalType === 'refund') {
             updateOrderStatus(selectedOrder.id, 'refund_pending');
-          if (modalType === 'cancel')
+            showToast('Order refund request sent successfully.');
+          }
+
+          if (modalType === 'cancel') {
             updateOrderStatus(selectedOrder.id, 'closed');
+            showToast('Order refund request cancelled.');
+          }
         }}
       />
+      <Toast toast={toast} />
     </>
   );
 }
