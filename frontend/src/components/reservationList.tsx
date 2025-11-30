@@ -3,6 +3,7 @@ import { useCurrency } from '../contexts/currencyContext';
 import ReservationFilters from './reservationFilters';
 import ReservationListItem from './reservationListItem';
 import ReservationModal from './reservationModal';
+import Toast from './toast';
 
 export interface Reservation {
   id: string;
@@ -26,7 +27,7 @@ const staffMap: Record<string, string> = {
   sarah: 'Sarah Johnson',
 };
 
-const servicesMap: Record<string, { title: string; price: number }> = {
+export const servicesMap: Record<string, { title: string; price: number }> = {
   '1': { title: 'Haircut & Style', price: 65 },
   '2': { title: 'Hair Color', price: 120 },
   '3': { title: 'Manicure', price: 35 },
@@ -58,6 +59,10 @@ export default function ReservationList() {
   >('start');
   const [selectedReservation, setSelectedReservation] =
     useState<Reservation | null>(null);
+  const [toast, setToast] = useState<{
+    message: string;
+    type: 'success' | 'error';
+  } | null>(null);
 
   useEffect(() => {
     const load = async () => {
@@ -244,6 +249,14 @@ export default function ReservationList() {
       .length,
   };
 
+  const showToast = (
+    message: string,
+    type: 'success' | 'error' = 'success',
+  ) => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 5800);
+  };
+
   return (
     <div className="space-y-6">
       <div className="rounded-lg bg-white p-5 shadow">
@@ -292,17 +305,38 @@ export default function ReservationList() {
         onClose={() => setModalOpen(false)}
         onConfirm={() => {
           if (!selectedReservation) return;
-          const map = {
-            start: 'in_service',
-            complete: 'completed',
-            cancel: 'cancelled',
-            noshow: 'no_show',
-            refund: 'refund_pending',
-            cancel_refund: 'completed',
-          } as const;
-          updateStatus(selectedReservation.id, map[modalType]);
+
+          const actions: Record<typeof modalType, () => void> = {
+            start: () => {
+              updateStatus(selectedReservation.id, 'in_service');
+              showToast('Service marked as started.');
+            },
+            complete: () => {
+              updateStatus(selectedReservation.id, 'completed');
+            },
+            cancel: () => {
+              updateStatus(selectedReservation.id, 'cancelled');
+              showToast('Reservation cancelled.');
+            },
+            noshow: () => {
+              updateStatus(selectedReservation.id, 'no_show');
+              showToast('Marked as No-Show.');
+            },
+            refund: () => {
+              updateStatus(selectedReservation.id, 'refund_pending');
+              showToast('Refund request sent successfully.');
+            },
+            cancel_refund: () => {
+              updateStatus(selectedReservation.id, 'completed');
+              showToast('Refund request cancelled.');
+            },
+          };
+
+          actions[modalType]();
         }}
       />
+
+      <Toast toast={toast} />
     </div>
   );
 }

@@ -217,12 +217,12 @@ export default function OrderList() {
 
           if (modalType === 'refund') {
             updateOrderStatus(selectedOrder.id, 'refund_pending');
-            showToast('Order refund request sent successfully.');
+            showToast('Refund request sent successfully.');
           }
 
           if (modalType === 'cancel') {
             updateOrderStatus(selectedOrder.id, 'closed');
-            showToast('Order refund request cancelled.');
+            showToast('Refund request cancelled.');
           }
         }}
       />

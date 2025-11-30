@@ -132,7 +132,7 @@ export default function OrderModal({
           <div className="mb-6 space-y-5">
             <div>
               <label className="mb-1 block text-sm font-medium text-gray-700">
-                Full Name <span className="text-red-500">*</span>
+                Customer's Full Name <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -154,7 +154,7 @@ export default function OrderModal({
 
             <div>
               <label className="mb-1 block text-sm font-medium text-gray-700">
-                Phone Number <span className="text-red-500">*</span>
+                Customer's Phone Number <span className="text-red-500">*</span>
               </label>
               <input
                 type="tel"
@@ -176,7 +176,7 @@ export default function OrderModal({
 
             <div>
               <label className="mb-1 block text-sm font-medium text-gray-700">
-                Email
+                Customer's Email
               </label>
               <input
                 type="email"
@@ -200,7 +200,7 @@ export default function OrderModal({
                   setRefundForm(prev => ({ ...prev, reason: e.target.value }))
                 }
                 className="w-full resize-none rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
-                placeholder="Please explain why you want a refund..."
+                placeholder="Please explain why Customer wants a refund..."
               />
             </div>
           </div>
@@ -217,7 +217,7 @@ export default function OrderModal({
           <button
             onClick={handleConfirm}
             disabled={isFormInvalid}
-            className={`flex-1 rounded-lg py-2 text-xs font-medium text-white transition ${type === 'pay' || type === 'edit' ? 'bg-blue-600 hover:bg-blue-700' : ''} ${type === 'refund' ? 'bg-purple-600 hover:bg-purple-700' : ''} ${type === 'cancel' ? 'bg-orange-600 hover:bg-orange-700' : ''} disabled:cursor-not-allowed disabled:bg-gray-400 disabled:text-gray-200 disabled:opacity-60`}
+            className={`flex-1 rounded-lg py-2 text-xs font-medium text-white transition ${type === 'pay' || type === 'edit' ? 'bg-blue-600 hover:bg-blue-700' : ''} ${type === 'refund' ? 'bg-purple-600 hover:bg-purple-700' : ''} ${type === 'cancel' ? 'bg-red-600 hover:bg-red-700' : ''} disabled:cursor-not-allowed disabled:bg-gray-400 disabled:text-gray-200 disabled:opacity-60`}
           >
             {type === 'pay' && 'Confirm Payment'}
             {type === 'edit' && 'Save Changes'}
