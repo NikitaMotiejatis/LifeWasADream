@@ -340,31 +340,28 @@ function BookingSummary({
   const [nameError, setNameError] = useState(false);
   const [phoneError, setPhoneError] = useState(false);
 
-    const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const input = e.target.value;
-        const inputValid = input.match(/^[\p{Letter}\s'-]*$/u) != null;
-        const filteredInput =
-            input
-                .replace(/[^\p{Letter}\s'-]*/ug, '')
-                .replace(/^\s+/g, '')
-                .replace(/\s+$/g, ' ');
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const input = e.target.value;
+    const inputValid = input.match(/^[\p{Letter}\s'-]*$/u) != null;
+    const filteredInput = input
+      .replace(/[^\p{Letter}\s'-]*/gu, '')
+      .replace(/^\s+/g, '')
+      .replace(/\s+$/g, ' ');
 
-        setNameError(!inputValid);
-        setCustomerName(filteredInput);
-    };
+    setNameError(!inputValid);
+    setCustomerName(filteredInput);
+  };
 
-    const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        let input = e.target.value;
-        const inputValid = input.match(/^\+[0-9]*$/) != null;
-        const filteredInput =
-            input
-                .replace(/[^0-9+]/g, '')
-                .replace(/[^+]+\+/g, '+')
-                .slice(0, 1 + 15);
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const input = e.target.value;
+    const filtered = input
+      .replace(/[^0-9+]/g, '')
+      .replace(/\+/g, (_match, offset) => (offset === 0 ? '+' : ''))
+      .slice(0, 16);
 
-        setPhoneError(!inputValid);
-        setCustomerPhone(filteredInput);
-    };
+    setPhoneError(input !== filtered);
+    setCustomerPhone(filtered);
+  };
 
   const handleConfirmWithClear = () => {
     setNameError(false);
