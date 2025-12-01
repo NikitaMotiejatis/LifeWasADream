@@ -3,11 +3,14 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 import './styles/globals.css';
 import { CurrencyProvider } from '@/global/contexts/currencyContext';
+import { AuthProvider } from '@/auth/authContext';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <CurrencyProvider>
-      <App />
-    </CurrencyProvider>
+    <AuthProvider>
+      <CurrencyProvider>
+        <App />
+      </CurrencyProvider>
+    </AuthProvider>
   </React.StrictMode>,
 );

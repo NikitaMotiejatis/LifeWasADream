@@ -1,11 +1,33 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import PersonIcon from '@/icons/personIcon';
 import LockIcon from '@/icons/lockIcon';
+import { useAuth } from '@/auth/authContext';
+import Toast, { ToastDetails } from '@/global/components/toast';
+
+// TODO: move somewhere more appropriate or read cookie differently
+function getCookie(name: string): string | null {
+	const nameLenPlus = (name.length + 1);
+	return document.cookie
+		.split(';')
+		.map(c => c.trim())
+		.filter(cookie => {
+			return cookie.substring(0, nameLenPlus) === `${name}=`;
+		})
+		.map(cookie => {
+			return decodeURIComponent(cookie.substring(nameLenPlus));
+		})[0] || null;
+}
 
 export default function LoginPage() {
+  const { roles, login } = useAuth();
+  const navigate  = useNavigate();
+
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [touched, setTouched] = useState({ username: false, password: false });
+
+  const [toast, setToast] = useState<ToastDetails | null>(null);
 
   const demoAccounts = [
     { role: 'Cashier / Receptionist', login: 'cashier1', pass: 'demo123' },
@@ -14,39 +36,35 @@ export default function LoginPage() {
     { role: 'Supplier', login: 'supplier1', pass: 'demo123' },
   ];
 
-  const loginAs = (login: string, pass: string) => {
-    setUsername(login);
-    setPassword(pass);
-    setTouched({ username: true, password: true });
-    if (login.trim() == 'cashier1' && pass.trim() == 'demo123')
-        setTimeout(() => (window.location.href = '/newOrder'), 250);
-    else if (login.trim() == 'manager1' && pass.trim() == 'demo123')
-        setTimeout(() => (window.location.href = '/newOrder'), 250);
-    else if (login.trim() == 'clerk1' && pass.trim() == 'demo123')
-        setTimeout(() => (window.location.href = '/stockUpdates'), 250);
-    else if (login.trim() == 'supplier1' && pass.trim() == 'demo123')
-        setTimeout(() => (window.location.href = '/invoiceStatus'), 250);
-  };
-
-  const handleLogin = () => {
-    setTouched({ username: true, password: true });
-    if (username.trim() == 'cashier1' && password.trim() == 'demo123') {
-      window.location.href = '/newOrder';
-    }
-    else if (username.trim() == 'manager1' && password.trim() == 'demo123') {
-        window.location.href = '/newOrder';
-    }
-    else if (username.trim() == 'clerk1' && password.trim() == 'demo123') {
-        window.location.href = '/stockUpdates';
-    }
-    else if (username.trim() == 'supplier1' && password.trim() == 'demo123') {
-        window.location.href = '/invoiceStatus';
-    }
-
-  };
-
   const showUsernameError = touched.username && !username.trim();
   const showPasswordError = touched.password && !password.trim();
+
+  useEffect(() => {
+    if (roles.includes("Cashier")) {
+      navigate("/newOrder");
+    } else if (roles.includes("Clerk")) {
+      navigate("/stockUpdates");
+    } else if (roles.includes("Supplier")) {
+      navigate("/invoiceStatus");
+    }
+  }, [roles]);
+
+  function handleSubmit(event : React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    login(username, password)
+      .then(errorMessage => {
+        if (errorMessage) {
+          setToast({
+            message: errorMessage,
+            type: "error",
+          });
+          setUsername("");
+          setPassword("");
+          setTouched({ username: false, password: false });
+          setTimeout(() => setToast(null), 1500); // TODO: better solution for multiple toast calls
+        }
+      });
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-100">
@@ -55,7 +73,7 @@ export default function LoginPage() {
         <p className="mt-2 text-gray-500">Unified Point-of-Sale System</p>
       </div>
 
-      <div className="ml-10 w-full max-w-md rounded-xl bg-white p-10 shadow-lg">
+      <form onSubmit={handleSubmit} className="ml-10 w-full max-w-md rounded-xl bg-white p-10 shadow-lg">
         <h2 className="mb-6 text-xl font-semibold">LOGIN</h2>
 
         {/* USERNAME */}
@@ -76,6 +94,7 @@ export default function LoginPage() {
               className={`w-full rounded-lg border bg-gray-50 py-3 pr-4 pl-10 transition focus:bg-white focus:ring-2 focus:ring-blue-400 focus:outline-none ${
                 showUsernameError ? 'border-red-500' : 'border-gray-200'
               }`}
+              required
             />
           </div>
           <div className="mt-1 h-5">
@@ -104,6 +123,7 @@ export default function LoginPage() {
               className={`w-full rounded-lg border bg-gray-50 py-3 pr-4 pl-10 transition focus:bg-white focus:ring-2 focus:ring-blue-400 focus:outline-none ${
                 showPasswordError ? 'border-red-500' : 'border-gray-200'
               }`}
+              required
             />
           </div>
 
@@ -116,7 +136,6 @@ export default function LoginPage() {
 
         {/* LOGIN BUTTON */}
         <button
-          onClick={handleLogin}
           className="w-full cursor-pointer rounded-lg bg-blue-600 py-3 font-medium text-white shadow-md transition-all duration-200 hover:scale-[1.02] hover:bg-blue-700 hover:shadow-lg active:scale-95 active:bg-blue-700"
         >
           Login
@@ -132,7 +151,10 @@ export default function LoginPage() {
               <button
                 key={acc.login}
                 type="button"
-                onClick={() => loginAs(acc.login, acc.pass)}
+                onClick={() => {
+                  setUsername(acc.login);
+                  setPassword(acc.pass);
+                }}
                 className="group relative cursor-pointer overflow-hidden rounded-xl border border-gray-300 bg-white px-5 py-4 text-left shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-gray-400 hover:bg-gray-200 hover:shadow-lg active:scale-95 active:bg-gray-300"
               >
                 <div className="font-semibold text-gray-900">{acc.role}</div>
@@ -143,7 +165,9 @@ export default function LoginPage() {
             ))}
           </div>
         </div>
-      </div>
+      </form>
+
+      <Toast toast={toast} />
     </div>
   );
 }
