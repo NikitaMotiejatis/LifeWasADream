@@ -1,6 +1,9 @@
 import { Reservation, servicesMap } from './reservationList';
 import { useState, useEffect } from 'react';
 import { useCurrency } from '../contexts/currencyContext';
+import { useNameValidation } from '../utils/useNameValidation';
+import { usePhoneValidation } from '../utils/usePhoneValidation';
+import { formatDateTime } from '../utils/formatDateTime';
 
 interface Props {
   open: boolean;
@@ -24,23 +27,25 @@ export default function ReservationModal({
 }: Props) {
   const { formatPrice } = useCurrency();
 
-  const [refundForm, setRefundForm] = useState({
-    name: '',
-    phone: '',
-    email: '',
-    reason: '',
-  });
-
-  const [nameError, setNameError] = useState(false);
-  const [phoneError, setPhoneError] = useState(false);
+  const name = useNameValidation(reservation?.customerName ?? '');
+  const phone = usePhoneValidation(reservation?.customerPhone ?? '');
+  const [email, setEmail] = useState('');
+  const [reason, setReason] = useState('');
 
   useEffect(() => {
-    if (!open) {
-      setRefundForm({ name: '', phone: '', email: '', reason: '' });
-      setNameError(false);
-      setPhoneError(false);
+    if (open && reservation) {
+      name.reset(reservation.customerName || '');
+      phone.reset(reservation.customerPhone || '');
+      setEmail('');
+      setReason('');
     }
-  }, [open]);
+    if (!open) {
+      name.reset();
+      phone.reset();
+      setEmail('');
+      setReason('');
+    }
+  }, [open, reservation]);
 
   if (!open || !reservation) return null;
 
@@ -53,57 +58,20 @@ export default function ReservationModal({
     cancel_refund: 'Cancel Refund Request',
   };
 
-  const servicePrice = servicesMap[reservation.serviceId]?.price;
-
-  const formatDateTime = (date: Date) => {
-    const d = new Date(date);
-    const day = d.getDate();
-    const month = d.toLocaleString('en', { month: 'short' });
-    const time = d.toLocaleTimeString('en-GB', {
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-    return `${day} ${month} • ${time}`;
-  };
-
-  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const input = e.target.value;
-    const valid = /^[\p{Letter}\s'-]*$/u.test(input);
-    const filtered = input
-      .replace(/[^\p{Letter}\s'-]/gu, '')
-      .replace(/^\s+/g, '')
-      .replace(/\s+$/g, ' ');
-
-    setNameError(input !== '' && !valid);
-    setRefundForm(prev => ({ ...prev, name: filtered }));
-  };
-
-  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const input = e.target.value;
-    const filtered = input
-      .replace(/[^0-9+]/g, '')
-      .replace(/\+/g, (_m, offset) => (offset === 0 ? '+' : ''))
-      .slice(0, 16);
-
-    setPhoneError(input !== filtered);
-    setRefundForm(prev => ({ ...prev, phone: filtered }));
-  };
+  const servicePrice = servicesMap[reservation.serviceId]?.price || 0;
 
   const isRefundInvalid =
-    type === 'refund' &&
-    (!refundForm.name.trim() ||
-      !refundForm.phone.trim() ||
-      !refundForm.reason.trim());
+    type === 'refund' && (!name.isValid || !phone.isValid || !reason.trim());
 
   const handleConfirm = () => {
     if (type === 'refund') {
       if (isRefundInvalid) return;
 
       onConfirm({
-        name: refundForm.name.trim(),
-        phone: refundForm.phone.trim(),
-        email: refundForm.email.trim(),
-        reason: refundForm.reason.trim(),
+        name: name.value.trim(),
+        phone: phone.value.trim(),
+        email: email.trim(),
+        reason: reason.trim(),
       });
     } else {
       onConfirm();
@@ -120,7 +88,7 @@ export default function ReservationModal({
           {titles[type]} #{reservation.id}
         </h3>
 
-        <div className="space-y-2 text-sm text-gray-700">
+        <div className="flex justify-evenly text-sm text-gray-700">
           <p className="font-medium">{reservation.customerName}</p>
           <p className="text-gray-600">{reservation.customerPhone}</p>
           <p className="text-gray-600">
@@ -149,16 +117,16 @@ export default function ReservationModal({
               </label>
               <input
                 type="text"
-                value={refundForm.name}
-                onChange={handleNameChange}
+                value={name.value}
+                onChange={name.handleChange}
                 className={`w-full rounded-lg border px-3 py-2 text-sm transition-all focus:ring-2 focus:ring-blue-500/20 focus:outline-none ${
-                  nameError
+                  name.error
                     ? 'border-red-500 focus:border-red-500'
                     : 'border-gray-300 focus:border-blue-500'
                 }`}
                 placeholder="John Doe"
               />
-              {nameError && (
+              {name.error && (
                 <p className="animate-in fade-in mt-1 text-xs text-red-600 duration-200">
                   Only letters, spaces, hyphens and apostrophes allowed
                 </p>
@@ -171,16 +139,16 @@ export default function ReservationModal({
               </label>
               <input
                 type="tel"
-                value={refundForm.phone}
-                onChange={handlePhoneChange}
+                value={phone.value}
+                onChange={phone.handleChange}
                 className={`w-full rounded-lg border px-3 py-2 text-sm transition-all focus:ring-2 focus:ring-blue-500/20 focus:outline-none ${
-                  phoneError
+                  phone.error
                     ? 'border-red-500 focus:border-red-500'
                     : 'border-gray-300 focus:border-blue-500'
                 }`}
-                placeholder="+370 600 00000"
+                placeholder="+37060000000"
               />
-              {phoneError && (
+              {phone.error && (
                 <p className="animate-in fade-in mt-1 text-xs text-red-600 duration-200">
                   Only numbers and optional "+" at the beginning
                 </p>
@@ -193,10 +161,8 @@ export default function ReservationModal({
               </label>
               <input
                 type="email"
-                value={refundForm.email}
-                onChange={e =>
-                  setRefundForm(prev => ({ ...prev, email: e.target.value }))
-                }
+                value={email}
+                onChange={e => setEmail(e.target.value)}
                 className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
                 placeholder="john@example.com"
               />
@@ -208,10 +174,8 @@ export default function ReservationModal({
               </label>
               <textarea
                 rows={3}
-                value={refundForm.reason}
-                onChange={e =>
-                  setRefundForm(prev => ({ ...prev, reason: e.target.value }))
-                }
+                value={reason}
+                onChange={e => setReason(e.target.value)}
                 className="w-full resize-none rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
                 placeholder="Please explain why Customer wants a refund..."
               />

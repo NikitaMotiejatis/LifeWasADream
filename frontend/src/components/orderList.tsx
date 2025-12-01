@@ -211,18 +211,20 @@ export default function OrderList() {
         onConfirm={() => {
           if (!selectedOrder) return;
 
-          if (modalType === 'pay') {
-            updateOrderStatus(selectedOrder.id, 'closed');
-          }
-
-          if (modalType === 'refund') {
-            updateOrderStatus(selectedOrder.id, 'refund_pending');
-            showToast('Refund request sent successfully.');
-          }
-
-          if (modalType === 'cancel') {
-            updateOrderStatus(selectedOrder.id, 'closed');
-            showToast('Refund request cancelled.');
+          switch (modalType) {
+            case 'pay':
+              updateOrderStatus(selectedOrder.id, 'closed');
+              break;
+            case 'refund':
+              updateOrderStatus(selectedOrder.id, 'refund_pending');
+              showToast('Refund request sent successfully.');
+              break;
+            case 'cancel':
+              updateOrderStatus(selectedOrder.id, 'closed');
+              showToast('Refund request cancelled.');
+              break;
+            default:
+              break;
           }
         }}
       />

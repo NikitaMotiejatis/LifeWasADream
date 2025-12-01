@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useCurrency } from '../contexts/currencyContext';
+import { useNameValidation } from '../utils/useNameValidation';
+import { usePhoneValidation } from '../utils/usePhoneValidation';
 
 interface Order {
   id: string;
@@ -28,21 +30,18 @@ export default function OrderModal({
 }: Props) {
   const { formatPrice } = useCurrency();
 
-  const [refundForm, setRefundForm] = useState({
-    name: '',
-    phone: '',
-    email: '',
-    reason: '',
-  });
+  const name = useNameValidation();
+  const phone = usePhoneValidation();
 
-  const [nameError, setNameError] = useState(false);
-  const [phoneError, setPhoneError] = useState(false);
+  const [email, setEmail] = useState('');
+  const [reason, setReason] = useState('');
 
   useEffect(() => {
     if (!open) {
-      setRefundForm({ name: '', phone: '', email: '', reason: '' });
-      setNameError(false);
-      setPhoneError(false);
+      name.reset();
+      phone.reset();
+      setEmail('');
+      setReason('');
     }
   }, [open]);
 
@@ -55,34 +54,8 @@ export default function OrderModal({
     cancel: 'Cancel Refund',
   };
 
-  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const input = e.target.value;
-    const valid = /^[\p{Letter}\s'-]*$/u.test(input);
-    const filtered = input
-      .replace(/[^\p{Letter}\s'-]/gu, '')
-      .replace(/^\s+/g, '')
-      .replace(/\s+$/g, ' ');
-
-    setNameError(input !== '' && !valid);
-    setRefundForm(prev => ({ ...prev, name: filtered }));
-  };
-
-  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const input = e.target.value;
-    const filtered = input
-      .replace(/[^0-9+]/g, '')
-      .replace(/\+/g, (_m, offset) => (offset === 0 ? '+' : ''))
-      .slice(0, 16);
-
-    setPhoneError(input !== filtered);
-    setRefundForm(prev => ({ ...prev, phone: filtered }));
-  };
-
   const isFormInvalid =
-    type === 'refund' &&
-    (!refundForm.name.trim() ||
-      !refundForm.phone.trim() ||
-      !refundForm.reason.trim());
+    type === 'refund' && (!name.isValid || !phone.isValid || !reason.trim());
 
   const handleConfirm = () => {
     if (type === 'edit') {
@@ -94,10 +67,10 @@ export default function OrderModal({
       if (isFormInvalid) return;
 
       onConfirm({
-        name: refundForm.name.trim(),
-        phone: refundForm.phone.trim(),
-        email: refundForm.email.trim(),
-        reason: refundForm.reason.trim(),
+        name: name.value.trim(),
+        phone: phone.value.trim(),
+        email: email.trim(),
+        reason: reason.trim(),
       });
     } else {
       onConfirm();
@@ -136,16 +109,16 @@ export default function OrderModal({
               </label>
               <input
                 type="text"
-                value={refundForm.name}
-                onChange={handleNameChange}
+                value={name.value}
+                onChange={name.handleChange}
                 className={`w-full rounded-lg border px-3 py-2 text-sm transition-all focus:ring-2 focus:ring-blue-500/20 focus:outline-none ${
-                  nameError
+                  name.error
                     ? 'border-red-500 focus:border-red-500'
                     : 'border-gray-300 focus:border-blue-500'
                 }`}
                 placeholder="John Doe"
               />
-              {nameError && (
+              {name.error && (
                 <p className="animate-in fade-in mt-1 text-xs text-red-600 duration-200">
                   Only letters, spaces, hyphens and apostrophes allowed
                 </p>
@@ -158,16 +131,16 @@ export default function OrderModal({
               </label>
               <input
                 type="tel"
-                value={refundForm.phone}
-                onChange={handlePhoneChange}
+                value={phone.value}
+                onChange={phone.handleChange}
                 className={`w-full rounded-lg border px-3 py-2 text-sm transition-all focus:ring-2 focus:ring-blue-500/20 focus:outline-none ${
-                  phoneError
+                  phone.error
                     ? 'border-red-500 focus:border-red-500'
                     : 'border-gray-300 focus:border-blue-500'
                 }`}
-                placeholder="+370 600 00000"
+                placeholder="+37060000000"
               />
-              {phoneError && (
+              {phone.error && (
                 <p className="animate-in fade-in mt-1 text-xs text-red-600 duration-200">
                   Only numbers and optional "+" at the beginning
                 </p>
@@ -180,10 +153,8 @@ export default function OrderModal({
               </label>
               <input
                 type="email"
-                value={refundForm.email}
-                onChange={e =>
-                  setRefundForm(prev => ({ ...prev, email: e.target.value }))
-                }
+                value={email}
+                onChange={e => setEmail(e.target.value)}
                 className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
                 placeholder="john@example.com"
               />
@@ -195,10 +166,8 @@ export default function OrderModal({
               </label>
               <textarea
                 rows={3}
-                value={refundForm.reason}
-                onChange={e =>
-                  setRefundForm(prev => ({ ...prev, reason: e.target.value }))
-                }
+                value={reason}
+                onChange={e => setReason(e.target.value)}
                 className="w-full resize-none rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
                 placeholder="Please explain why Customer wants a refund..."
               />

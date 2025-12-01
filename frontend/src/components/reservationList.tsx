@@ -120,17 +120,6 @@ export default function ReservationList() {
     load();
   }, []);
 
-  const formatDateTime = (date: Date) => {
-    const d = new Date(date);
-    const day = d.getDate();
-    const month = d.toLocaleString('en', { month: 'short' });
-    const time = d.toLocaleTimeString('en-GB', {
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-    return `${day} ${month} • ${time}`;
-  };
-
   const sortedAndFiltered = useMemo(() => {
     const buildDateTime = (
       dateStr: string,
@@ -292,7 +281,6 @@ export default function ReservationList() {
               staffMap={staffMap}
               servicesMap={servicesMap}
               onAction={openModal}
-              formatDateTime={formatDateTime}
             />
           ))
         )}
