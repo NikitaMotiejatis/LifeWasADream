@@ -1,4 +1,4 @@
-import { Invoice } from '../pages/invoiceStatusPage';
+import { Invoice } from 'supplier/pages/invoiceStatusPage';
 
 const getStatusColor = (status: string) => {
     switch (status) {

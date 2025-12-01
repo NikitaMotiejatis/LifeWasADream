@@ -1,8 +1,8 @@
 import { useLocation } from 'react-router-dom';
 import { useState } from 'react';
-import HamburgerIcon from './icons/hamburgerIcon';
-import { MenuGroup } from './menuGroup';
-import { MenuGroupItem } from './menuGroupItem';
+import HamburgerIcon from '@/icons/hamburgerIcon';
+import { MenuGroup } from '@/global/components/menuGroup';
+import { MenuGroupItem } from '@/global/components/menuGroupItem';
 
 export default function SidebarSupplier() {
   const location = useLocation();

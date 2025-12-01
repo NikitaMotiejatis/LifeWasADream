@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import Topbar from '../components/topbar';
-import SidebarSupplier from '../components/sidebarSupplier';
-import InvoiceCard from '../components/invoiceCard';
+import Topbar from '@/global/components/topbar';
+import SidebarSupplier from '@/supplier/components/sidebarSupplier';
+import InvoiceCard from '@/supplier/components/invoiceCard';
 
 interface InvoiceItem {
   productName: string;

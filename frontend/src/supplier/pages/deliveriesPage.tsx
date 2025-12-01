@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import Topbar from '../components/topbar';
-import SidebarSupplier from '../components/sidebarSupplier';
+import Topbar from '@/global/components/topbar';
+import SidebarSupplier from '@/supplier/components/sidebarSupplier';
 
 interface DeliveryItem {
   productName: string;

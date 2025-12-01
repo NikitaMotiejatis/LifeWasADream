@@ -1,6 +1,6 @@
-import ChevronDownIcon from './icons/chevronDownIcon';
-import LogoutIcon from './icons/logoutIcon';
-import SearchIcon from './icons/searchIcon';
+import ChevronDownIcon from '@/icons/chevronDownIcon';
+import LogoutIcon from '@/icons/logoutIcon';
+import SearchIcon from '@/icons/searchIcon';
 
 export default function Topbar() {
   const handleLogout = () => {

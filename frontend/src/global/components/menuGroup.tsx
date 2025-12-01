@@ -1,4 +1,4 @@
-import ChevronDownIcon from './icons/chevronDownIcon';
+import ChevronDownIcon from '@/icons/chevronDownIcon';
 
 type GroupProps = {
   title: string;

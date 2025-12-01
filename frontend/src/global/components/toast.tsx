@@ -1,7 +1,7 @@
 'use client';
 
-import SuccessIcon from './icons/successIcon';
-import ErrorIcon from './icons/errorIcon';
+import SuccessIcon from '@/icons/successIcon';
+import ErrorIcon from '@/icons/errorIcon';
 
 type ToastProps = {
   toast: { message: string; type: 'success' | 'error' } | null;
