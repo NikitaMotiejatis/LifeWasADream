@@ -20,5 +20,10 @@ export default defineConfig(({ mode }) => {
         input: path.resolve(__dirname, 'index.html'),
       },
     },
+    resolve: {
+      alias: [
+        { find: '@', replacement: path.resolve(__dirname, 'src') },
+      ],
+    },
   };
 });

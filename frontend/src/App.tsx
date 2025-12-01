@@ -3,17 +3,17 @@ import {
   RouterProvider,
   Navigate,
 } from 'react-router-dom';
-import LoginPage from './pages/loginPage';
-import NewOrderPage from './pages/newOrderPage';
-import OrdersPage from './pages/ordersList';
-import NewReservationPage from './pages/newReservationPage';
-import ReservationsPage from './pages/reservationsList';
-import StockUpdatesPage from './pages/stockUpdatesPage';
-import TransferRequestsPage from './pages/transferRequestsPage';
-import StockAlertsPage from './pages/stockAlertsPage';
-import AuditHistoryPage from './pages/auditHistoryPage';
-import InvoiceStatusPage from './pages/invoiceStatusPage';
-import DeliveriesPage from './pages/deliveriesPage';
+import LoginPage from '@/global/pages/loginPage';
+import NewOrderPage from '@/receptionist/pages/newOrderPage';
+import OrdersPage from '@/receptionist/pages/ordersList';
+import NewReservationPage from '@/receptionist/pages/newReservationPage';
+import ReservationsPage from '@/receptionist/pages/reservationsList';
+import StockUpdatesPage from '@/stock/pages/stockUpdatesPage';
+import TransferRequestsPage from '@/stock/pages/transferRequestsPage';
+import StockAlertsPage from '@/stock/pages/stockAlertsPage';
+import AuditHistoryPage from '@/stock/pages/auditHistoryPage';
+import InvoiceStatusPage from '@/supplier/pages/invoiceStatusPage';
+import DeliveriesPage from '@/supplier/pages/deliveriesPage';
 
 const router = createBrowserRouter(
   [
