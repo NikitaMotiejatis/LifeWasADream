@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import Topbar from '../components/topbar';
-import SidebarStockClerk from '../components/sidebarStockClerk';
+import Topbar from '@/global/components/topbar';
+import SidebarStockClerk from '@/stock/components/sidebarStockClerk';
 
 interface AuditRecord {
   id: string;

@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import PersonIcon from '../components/icons/personIcon';
-import LockIcon from '../components/icons/lockIcon';
+import PersonIcon from '@/icons/personIcon';
+import LockIcon from '@/icons/lockIcon';
 
 export default function LoginPage() {
   const [username, setUsername] = useState('');

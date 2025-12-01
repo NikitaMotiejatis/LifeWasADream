@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import Topbar from '../components/topbar';
-import SidebarStockClerk from '../components/sidebarStockClerk';
-import StockAlertCard from '../components/stockAlertCard';
+import Topbar from '@/global/components/topbar';
+import SidebarStockClerk from '@/stock/components/sidebarStockClerk';
+import StockAlertCard from '@/stock/components/stockAlertCard';
 
 
 export interface StockAlert {

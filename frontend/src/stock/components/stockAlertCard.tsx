@@ -1,4 +1,4 @@
-import { StockAlert } from '../pages/stockAlertsPage';
+import { StockAlert } from '@/stock/pages/stockAlertsPage';
 
 const getSeverityColor = (severity: string) => {
     switch (severity) {
