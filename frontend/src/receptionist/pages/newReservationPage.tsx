@@ -1,10 +1,10 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useCurrency } from '../contexts/currencyContext';
-import SidebarCashier from '../components/sidebarCashier';
-import Topbar from '../components/topbar';
-import Toast from '../components/toast';
+import { useCurrency } from '@/global/contexts/currencyContext';
+import SidebarCashier from '@/receptionist/components/sidebarCashier';
+import Topbar from '@/global/components/topbar';
+import Toast from '@/global/components/toast';
 
 type Staff = { id: string; name: string; role: string };
 type Service = { id: string; title: string; price: number; duration: string };

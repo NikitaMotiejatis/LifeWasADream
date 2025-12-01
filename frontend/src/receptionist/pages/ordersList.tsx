@@ -1,6 +1,6 @@
-import OrderList from '../components/orderList';
-import SidebarCashier from '../components/sidebarCashier';
-import Topbar from '../components/topbar';
+import OrderList from '@/receptionist/components/orderList';
+import SidebarCashier from '@/receptionist/components/sidebarCashier';
+import Topbar from '@/global/components/topbar';
 
 export default function OrdersPage() {
   return (

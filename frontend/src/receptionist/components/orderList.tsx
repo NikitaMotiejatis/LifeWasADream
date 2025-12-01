@@ -1,9 +1,9 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useCurrency } from '../contexts/currencyContext';
-import OrderFilters from './orderFilters';
-import OrderListItem from './orderListItem';
-import OrderModal from './orderModal';
-import Toast from './toast';
+import { useCurrency } from '@/global/contexts/currencyContext';
+import OrderFilters from '@/receptionist/components/orderFilters';
+import OrderListItem from '@/receptionist/components/orderListItem';
+import OrderModal from '@/receptionist/components/orderModal';
+import Toast from '@/global/components/toast';
 
 interface Order {
   id: string;

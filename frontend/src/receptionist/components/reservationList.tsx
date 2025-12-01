@@ -1,9 +1,9 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useCurrency } from '../contexts/currencyContext';
-import ReservationFilters from './reservationFilters';
-import ReservationListItem from './reservationListItem';
-import ReservationModal from './reservationModal';
-import Toast from './toast';
+import { useCurrency } from '@/global/contexts/currencyContext';
+import ReservationFilters from '@/receptionist/components/reservationFilters';
+import ReservationListItem from '@/receptionist/components/reservationListItem';
+import ReservationModal from '@/receptionist/components/reservationModal';
+import Toast from '@/global/components/toast';
 
 export interface Reservation {
   id: string;

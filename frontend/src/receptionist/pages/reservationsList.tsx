@@ -1,6 +1,6 @@
-import ReservationList from '../components/reservationList';
-import SidebarCashier from '../components/sidebarCashier';
-import Topbar from '../components/topbar';
+import ReservationList from '@/receptionist/components/reservationList';
+import SidebarCashier from '@/receptionist/components/sidebarCashier';
+import Topbar from '@/global/components/topbar';
 
 export default function ReservationsPage() {
   return (

@@ -1,9 +1,9 @@
-import SidebarCashier from '../components/sidebarCashier';
-import Topbar from '../components/topbar';
-import ProductGrid from '../components/productGrid';
-import OrderSummary from '../components/orderSummary';
-import { CartProvider } from '../contexts/cartContext';
-import { CurrencyProvider } from '../contexts/currencyContext';
+import SidebarCashier from '@/receptionist/components/sidebarCashier';
+import Topbar from '@/global/components/topbar';
+import ProductGrid from '@/receptionist/components/productGrid';
+import OrderSummary from '@/receptionist/components/orderSummary';
+import { CartProvider } from '@/receptionist/contexts/cartContext';
+import { CurrencyProvider } from '@/global/contexts/currencyContext';
 
 export default function NewOrderPage() {
   return (

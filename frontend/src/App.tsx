@@ -4,10 +4,10 @@ import {
   Navigate,
 } from 'react-router-dom';
 import LoginPage from '@/global/pages/loginPage';
-import NewOrderPage from './pages/newOrderPage';
-import OrdersPage from './pages/ordersList';
-import NewReservationPage from './pages/newReservationPage';
-import ReservationsPage from './pages/reservationsList';
+import NewOrderPage from '@/receptionist/pages/newOrderPage';
+import OrdersPage from '@/receptionist/pages/ordersList';
+import NewReservationPage from '@/receptionist/pages/newReservationPage';
+import ReservationsPage from '@/receptionist/pages/reservationsList';
 import StockUpdatesPage from '@/stock/pages/stockUpdatesPage';
 import TransferRequestsPage from '@/stock/pages/transferRequestsPage';
 import StockAlertsPage from '@/stock/pages/stockAlertsPage';
@@ -19,10 +19,10 @@ const router = createBrowserRouter(
   [
     { path: '/', element: <Navigate to="/login" /> },
     { path: '/login', element: <LoginPage /> },
-    //{ path: '/newOrder', element: <NewOrderPage /> },
-    //{ path: '/orders', element: <OrdersPage /> },
-    //{ path: '/newReservation', element: <NewReservationPage /> },
-    //{ path: '/reservations', element: <ReservationsPage /> },
+    { path: '/newOrder', element: <NewOrderPage /> },
+    { path: '/orders', element: <OrdersPage /> },
+    { path: '/newReservation', element: <NewReservationPage /> },
+    { path: '/reservations', element: <ReservationsPage /> },
     { path: '/stockUpdates', element: <StockUpdatesPage /> },
     { path: '/transferRequests', element: <TransferRequestsPage /> },
     { path: '/stockAlerts', element: <StockAlertsPage /> },

@@ -1,4 +1,4 @@
-import SearchIcon from './icons/searchIcon';
+import SearchIcon from '@/icons/searchIcon';
 
 interface Props {
   filterStatus: string;

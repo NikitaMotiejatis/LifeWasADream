@@ -1,11 +1,11 @@
 import { useLocation } from 'react-router-dom';
 import { useState } from 'react';
-import OrdersGroupIcon from './icons/ordersGroupIcon';
-import BigPlusIcon from './icons/bigPlusIcon';
-import HamburgerIcon from './icons/hamburgerIcon';
-import ReservationsGroupIcon from './icons/reservationsGroupIcon';
-import { MenuGroup } from './menuGroup';
-import { MenuGroupItem } from './menuGroupItem';
+import OrdersGroupIcon from '@/icons/ordersGroupIcon';
+import BigPlusIcon from '@/icons/bigPlusIcon';
+import HamburgerIcon from '@/icons/hamburgerIcon';
+import ReservationsGroupIcon from '@/icons/reservationsGroupIcon';
+import { MenuGroup } from '@/global/components/menuGroup';
+import { MenuGroupItem } from '@/global/components/menuGroupItem';
 
 export default function SidebarCashier() {
   const location = useLocation();

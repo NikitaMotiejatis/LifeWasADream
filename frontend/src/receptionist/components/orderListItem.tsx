@@ -1,4 +1,4 @@
-import { formatDateTime } from '../utils/formatDateTime';
+import { formatDateTime } from '@/utils/formatDateTime';
 
 interface Order {
   id: string;

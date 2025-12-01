@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { Product, useCart } from '../contexts/cartContext';
-import VariationModal from './variationModal';
-import SearchIcon from './icons/searchIcon';
+import { Product, useCart } from '@/receptionist/contexts/cartContext';
+import VariationModal from '@/receptionist/components/variationModal';
+import SearchIcon from '@/icons/searchIcon';
 
 const products: Product[] = [
   {

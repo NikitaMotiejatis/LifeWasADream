@@ -1,7 +1,7 @@
-import { generateKey, useCart } from '../contexts/cartContext';
 import { useState } from 'react';
-import type { CartItem } from '../contexts/cartContext';
-import TrashcanIcon from './icons/trashcanIcon';
+import { generateKey, useCart } from '@/receptionist/contexts/cartContext';
+import type { CartItem } from '@/receptionist/contexts/cartContext';
+import TrashcanIcon from '@/icons/trashcanIcon';
 
 export default function OrderSummary() {
   const { itemsList, formatPrice, clearCart, subtotal, discountTotal, total } =

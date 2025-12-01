@@ -1,5 +1,5 @@
-import { formatDateTime } from '../utils/formatDateTime';
-import type { Reservation } from './reservationList';
+import { formatDateTime } from '@/utils/formatDateTime';
+import type { Reservation } from '@/receptionist/components/reservationList';
 
 interface Props {
   reservation: Reservation;

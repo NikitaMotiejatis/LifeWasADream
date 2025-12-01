@@ -1,14 +1,17 @@
-import { Reservation, servicesMap } from './reservationList';
 import { useState, useEffect } from 'react';
-import { useCurrency } from '../contexts/currencyContext';
-import { useNameValidation } from '../utils/useNameValidation';
-import { usePhoneValidation } from '../utils/usePhoneValidation';
-import { formatDateTime } from '../utils/formatDateTime';
+import { useCurrency } from '@/global/contexts/currencyContext';
+import { useNameValidation } from '@/utils/useNameValidation';
+import { usePhoneValidation } from '@/utils/usePhoneValidation';
+
+interface Order {
+  id: string;
+  total: number;
+}
 
 interface Props {
   open: boolean;
-  type: 'start' | 'complete' | 'cancel' | 'noshow' | 'refund' | 'cancel_refund';
-  reservation: Reservation | null;
+  type: 'edit' | 'pay' | 'refund' | 'cancel';
+  order: Order | null;
   onClose: () => void;
   onConfirm: (refundData?: {
     name: string;
@@ -18,54 +21,50 @@ interface Props {
   }) => void;
 }
 
-export default function ReservationModal({
+export default function OrderModal({
   open,
   type,
-  reservation,
+  order,
   onClose,
   onConfirm,
 }: Props) {
   const { formatPrice } = useCurrency();
 
-  const name = useNameValidation(reservation?.customerName ?? '');
-  const phone = usePhoneValidation(reservation?.customerPhone ?? '');
+  const name = useNameValidation();
+  const phone = usePhoneValidation();
+
   const [email, setEmail] = useState('');
   const [reason, setReason] = useState('');
 
   useEffect(() => {
-    if (open && reservation) {
-      name.reset(reservation.customerName || '');
-      phone.reset(reservation.customerPhone || '');
-      setEmail('');
-      setReason('');
-    }
     if (!open) {
       name.reset();
       phone.reset();
       setEmail('');
       setReason('');
     }
-  }, [open, reservation]);
+  }, [open]);
 
-  if (!open || !reservation) return null;
+  if (!open || !order) return null;
 
   const titles = {
-    start: 'Start Service',
-    complete: 'Complete Service',
-    cancel: 'Cancel Reservation',
-    noshow: 'Mark as No-Show',
-    refund: 'Request Refund',
-    cancel_refund: 'Cancel Refund Request',
+    pay: 'Complete Payment',
+    edit: 'Edit Order',
+    refund: 'Refund Order',
+    cancel: 'Cancel Refund',
   };
 
-  const servicePrice = servicesMap[reservation.serviceId]?.price || 0;
-
-  const isRefundInvalid =
+  const isFormInvalid =
     type === 'refund' && (!name.isValid || !phone.isValid || !reason.trim());
 
   const handleConfirm = () => {
+    if (type === 'edit') {
+      onClose();
+      return;
+    }
+
     if (type === 'refund') {
-      if (isRefundInvalid) return;
+      if (isFormInvalid) return;
 
       onConfirm({
         name: name.value.trim(),
@@ -76,6 +75,7 @@ export default function ReservationModal({
     } else {
       onConfirm();
     }
+
     onClose();
   };
 
@@ -85,25 +85,17 @@ export default function ReservationModal({
 
       <div className="relative w-full max-w-md rounded-2xl bg-white p-7 shadow-2xl">
         <h3 className="mb-5 text-xl font-bold text-gray-900">
-          {titles[type]} #{reservation.id}
+          {titles[type]} #{order.id}
         </h3>
 
-        <div className="flex justify-evenly text-sm text-gray-700">
-          <p className="font-medium">{reservation.customerName}</p>
-          <p className="text-gray-600">{reservation.customerPhone}</p>
-          <p className="text-gray-600">
-            {formatDateTime(reservation.datetime)}
-          </p>
-        </div>
-
-        {(type === 'complete' || type === 'refund') && (
-          <div className="mt-6 mb-6 rounded-xl bg-blue-50 px-5 py-4">
+        {(type === 'pay' || type === 'refund') && (
+          <div className="mt-4 mb-6 rounded-xl bg-blue-50 px-5 py-4">
             <div className="flex items-center justify-between">
               <span className="text-lg font-semibold text-gray-700">
                 Total Amount
               </span>
               <span className="text-2xl font-bold text-blue-600">
-                {formatPrice(servicePrice)}
+                {formatPrice(order.total)}
               </span>
             </div>
           </div>
@@ -193,15 +185,13 @@ export default function ReservationModal({
 
           <button
             onClick={handleConfirm}
-            disabled={isRefundInvalid}
-            className={`flex-1 rounded-lg py-2 text-xs font-medium text-white transition ${type === 'complete' ? 'bg-green-600 hover:bg-green-700' : ''} ${type === 'refund' ? 'bg-purple-600 hover:bg-purple-700' : ''} ${type === 'cancel' || type === 'noshow' || type === 'cancel_refund' ? 'bg-red-600 hover:bg-red-700' : ''} ${type === 'start' ? 'bg-blue-600 hover:bg-blue-700' : ''} disabled:cursor-not-allowed disabled:bg-gray-400 disabled:text-gray-200 disabled:opacity-60`}
+            disabled={isFormInvalid}
+            className={`flex-1 rounded-lg py-2 text-xs font-medium text-white transition ${type === 'pay' || type === 'edit' ? 'bg-blue-600 hover:bg-blue-700' : ''} ${type === 'refund' ? 'bg-purple-600 hover:bg-purple-700' : ''} ${type === 'cancel' ? 'bg-red-600 hover:bg-red-700' : ''} disabled:cursor-not-allowed disabled:bg-gray-400 disabled:text-gray-200 disabled:opacity-60`}
           >
-            {type === 'start' && 'Start Service'}
-            {type === 'complete' && 'Confirm Completion'}
+            {type === 'pay' && 'Confirm Payment'}
+            {type === 'edit' && 'Save Changes'}
+            {type === 'refund' && 'Issue Refund'}
             {type === 'cancel' && 'Confirm Cancellation'}
-            {type === 'noshow' && 'Mark as No-Show'}
-            {type === 'refund' && 'Request Refund'}
-            {type === 'cancel_refund' && 'Cancel Refund Request'}
           </button>
         </div>
       </div>
