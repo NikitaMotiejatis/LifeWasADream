@@ -6,6 +6,10 @@ import { useCurrency } from '@/global/contexts/currencyContext';
 import SidebarCashier from '@/receptionist/components/sidebarCashier';
 import Topbar from '@/global/components/topbar';
 import Toast from '@/global/components/toast';
+import {
+  useNameValidation,
+  usePhoneValidation,
+} from '@/utils/useInputValidation';
 
 type Staff = { id: string; name: string; role: string };
 type Service = { id: string; title: string; price: number; duration: string };
@@ -43,8 +47,6 @@ export default function NewReservationPage() {
   const [selectedService, setSelectedService] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
-  const [customerName, setCustomerName] = useState('');
-  const [customerPhone, setCustomerPhone] = useState('');
   const [toast, setToast] = useState<{
     message: string;
     type: 'success' | 'error';
@@ -59,7 +61,7 @@ export default function NewReservationPage() {
   };
 
   const handleConfirm = () => {
-    if (!customerName.trim() || !customerPhone.trim()) {
+    if (!customerName.value.trim() || !customerPhone.value.trim()) {
       showToast(t('reservation.toast.missingInfo'), 'error');
       return;
     }
@@ -70,17 +72,23 @@ export default function NewReservationPage() {
 
     const code = generateCode();
     showToast(
-      t('reservation.toast.success', { code, phone: customerPhone.trim() }),
+      t('reservation.toast.success', {
+        code,
+        phone: customerPhone.value.trim(),
+      }),
       'success',
     );
 
-    setCustomerName('');
-    setCustomerPhone('');
+    customerName.reset();
+    customerPhone.reset();
     setSelectedStaff('anyone');
     setSelectedService(null);
     setSelectedDate(null);
     setSelectedTime(null);
   };
+
+  const customerName = useNameValidation();
+  const customerPhone = usePhoneValidation();
 
   return (
     <div className="flex h-screen">
@@ -109,9 +117,7 @@ export default function NewReservationPage() {
 
             <BookingSummary
               customerName={customerName}
-              setCustomerName={setCustomerName}
               customerPhone={customerPhone}
-              setCustomerPhone={setCustomerPhone}
               selectedDate={selectedDate}
               selectedTime={selectedTime}
               selectedStaff={selectedStaff}
@@ -307,9 +313,7 @@ function DateTimePicker({
 
 function BookingSummary({
   customerName,
-  setCustomerName,
   customerPhone,
-  setCustomerPhone,
   selectedDate,
   selectedTime,
   selectedStaff,
@@ -317,10 +321,8 @@ function BookingSummary({
   formatPrice,
   onConfirm,
 }: {
-  customerName: string;
-  setCustomerName: (name: string) => void;
-  customerPhone: string;
-  setCustomerPhone: (phone: string) => void;
+  customerName: ReturnType<typeof useNameValidation>;
+  customerPhone: ReturnType<typeof usePhoneValidation>;
   selectedDate: Date | null;
   selectedTime: string | null;
   selectedStaff: string;
@@ -330,33 +332,6 @@ function BookingSummary({
 }) {
   const { t } = useTranslation();
   const selectedServiceObj = services.find(s => s.id === selectedService);
-  const [nameError, setNameError] = useState(false);
-  const [phoneError, setPhoneError] = useState(false);
-
-  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const input = e.target.value;
-    const valid = /^[\p{L}\s'-]*$/u.test(input);
-    const filtered = input.replace(/[^\p{L}\s'-]/gu, '').trimStart();
-    setNameError(!valid && input !== '');
-    setCustomerName(filtered);
-  };
-
-  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const input = e.target.value;
-    const filtered = input
-      .replace(/[^0-9+]/g, '')
-      .replace(/\+/g, (m, o) => (o === 0 ? '+' : ''))
-      .slice(0, 16);
-    setPhoneError(input !== filtered);
-    setCustomerPhone(filtered);
-  };
-
-  const handleConfirmWithClear = () => {
-    setNameError(false);
-    setPhoneError(false);
-
-    onConfirm();
-  };
 
   return (
     <div className="rounded-xl bg-white p-5 shadow-lg">
@@ -364,37 +339,42 @@ function BookingSummary({
         {t('reservation.bookingSummary')}
       </h3>
 
-      <input
-        type="text"
-        placeholder={t('reservation.customerNamePlaceholder')}
-        value={customerName}
-        onChange={handleNameChange}
-        className={`mb-4 w-full rounded-lg border px-4 py-3 focus:outline-none ${
-          nameError ? 'border-red-500' : 'border-gray-300 focus:border-blue-500'
-        }`}
-      />
-      {nameError && (
-        <p className="mt-1 text-sm text-red-600">
-          {t('reservation.nameError')}
-        </p>
-      )}
-
-      <input
-        type="tel"
-        placeholder={t('reservation.customerPhonePlaceholder')}
-        value={customerPhone}
-        onChange={handlePhoneChange}
-        className={`mb-6 w-full rounded-lg border px-4 py-3 focus:outline-none ${
-          phoneError
-            ? 'border-red-500'
-            : 'border-gray-300 focus:border-blue-500'
-        }`}
-      />
-      {phoneError && (
-        <p className="mt-1 text-sm text-red-600">
-          {t('reservation.phoneError')}
-        </p>
-      )}
+      <div className="mb-4">
+        <input
+          type="text"
+          placeholder={t('reservation.customerNamePlaceholder')}
+          value={customerName.value}
+          onChange={customerName.handleChange}
+          className={`mb-4 w-full rounded-lg border px-4 py-3 focus:outline-none ${
+            customerName.error
+              ? 'border-red-500'
+              : 'border-gray-300 focus:border-blue-500'
+          }`}
+        />
+        {customerName.error && (
+          <p className="animate-fade-in mt-1 text-sm text-red-600">
+            {t('reservation.nameError')}
+          </p>
+        )}
+      </div>
+      <div className="mb-6">
+        <input
+          type="tel"
+          placeholder={t('reservation.customerPhonePlaceholder')}
+          value={customerPhone.value}
+          onChange={customerPhone.handleChange}
+          className={`mb-4 w-full rounded-lg border px-4 py-3 focus:outline-none ${
+            customerPhone.error
+              ? 'border-red-500'
+              : 'border-gray-300 focus:border-blue-500'
+          }`}
+        />
+        {customerPhone.error && (
+          <p className="animate-fade-in mt-1 text-sm text-red-600">
+            {t('reservation.phoneError')}
+          </p>
+        )}
+      </div>
 
       <div className="mb-5 space-y-3 rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm">
         <SummaryRow
@@ -431,7 +411,7 @@ function BookingSummary({
       </div>
 
       <button
-        onClick={handleConfirmWithClear}
+        onClick={onConfirm}
         className="w-full rounded-lg bg-blue-600 py-4 font-semibold text-white transition hover:bg-blue-700"
       >
         {t('reservation.confirmButton')}

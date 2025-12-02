@@ -305,6 +305,7 @@
     "smoothieMango": "Kokteilis – Mangų rojus"
   },
   "reservation": {
+    "service": "Paslauga",
     "bookingSummary": "Rezervacijos santrauka",
     "confirmButton": "Patvirtinti rezervaciją",
     "customerNamePlaceholder": "Kliento vardas ir pavardė",
@@ -364,7 +365,7 @@
     "toast": {
       "incomplete": "Prašome užpildyti visus laukus: paslaugą, datą ir laiką.",
       "missingInfo": "Trūksta kliento duomenų.\nĮveskite vardą ir telefono numerį.",
-      "success": "Rezervacija patvirtinta!\nKodas: {code}\nSMS išsiųsta į {phone}"
+      "success": "Rezervacija patvirtinta!\nKodas: {{code}}\nSMS išsiųsta į {{phone}}"
     },
     "weekdays": {
       "mo": "Pr",

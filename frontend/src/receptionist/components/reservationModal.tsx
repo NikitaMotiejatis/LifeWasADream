@@ -5,8 +5,10 @@ import {
   servicesMap,
 } from '@/receptionist/components/reservationList';
 import { useCurrency } from '@/global/contexts/currencyContext';
-import { useNameValidation } from '@/utils/useNameValidation';
-import { usePhoneValidation } from '@/utils/usePhoneValidation';
+import {
+  useNameValidation,
+  usePhoneValidation,
+} from '@/utils/useInputValidation';
 import { formatDateTime } from '@/utils/formatDateTime';
 
 type Props = {

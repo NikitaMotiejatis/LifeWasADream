@@ -305,6 +305,7 @@
     "smoothieMango": "Smoothie – Mango Paradise"
   },
   "reservation": {
+    "service": "Service",
     "confirmButton": "Confirm Reservation",
     "customerNamePlaceholder": "Customer name",
     "customerPhonePlaceholder": "Phone number",
@@ -364,7 +365,7 @@
     "toast": {
       "incomplete": "Please complete all booking details: service, date and time.",
       "missingInfo": "Missing customer information.\nPlease enter customer name and phone number.",
-      "success": "Reservation confirmed!\nConfirmation code: {code}\nSMS sent to {phone}"
+      "success": "Reservation confirmed!\nConfirmation code: {{code}}\nSMS sent to {{phone}}"
     },
     "weekdays": {
       "mo": "Mo",

@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useCurrency } from '@/global/contexts/currencyContext';
-import { useNameValidation as useNameValidation } from '@/utils/useNameValidation';
-import { usePhoneValidation } from '@/utils/usePhoneValidation';
+import {
+  useNameValidation,
+  usePhoneValidation,
+} from '@/utils/useInputValidation';
 
 type Order = {
   id: string;
