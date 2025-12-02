@@ -13,13 +13,7 @@ export type Reservation = {
   staffId: string;
   serviceId: string;
   datetime: Date;
-  status:
-    | 'pending'
-    | 'in_service'
-    | 'completed'
-    | 'cancelled'
-    | 'no_show'
-    | 'refund_pending';
+  status: 'pending' | 'completed' | 'cancelled' | 'no_show' | 'refund_pending';
 };
 
 export const servicesMap: Record<string, { title: string; price: number }> = {
@@ -40,19 +34,13 @@ export default function ReservationList() {
   const [dateTo, setDateTo] = useState('');
   const [timeTo, setTimeTo] = useState('');
   const [statusFilter, setStatusFilter] = useState<
-    | 'all'
-    | 'pending'
-    | 'in_service'
-    | 'completed'
-    | 'cancelled'
-    | 'no_show'
-    | 'refund_pending'
+    'all' | 'pending' | 'completed' | 'cancelled' | 'no_show' | 'refund_pending'
   >('all');
 
   const [modalOpen, setModalOpen] = useState(false);
   const [modalType, setModalType] = useState<
-    'start' | 'complete' | 'cancel' | 'noshow' | 'refund' | 'cancel_refund'
-  >('start');
+    'complete' | 'cancel' | 'noshow' | 'refund' | 'cancel_refund'
+  >('complete');
   const [selectedReservation, setSelectedReservation] =
     useState<Reservation | null>(null);
   const [toast, setToast] = useState<{
@@ -62,7 +50,8 @@ export default function ReservationList() {
 
   useEffect(() => {
     const load = async () => {
-      await new Promise(r => setTimeout(r, 500));
+      // TODO: remove timeout
+      await new Promise(r => setTimeout(r, 300));
       const mock: Reservation[] = [
         {
           id: 'RES-301',
@@ -80,7 +69,7 @@ export default function ReservationList() {
           staffId: 'anyone',
           serviceId: '3',
           datetime: new Date('2025-11-30T14:30:00'),
-          status: 'in_service',
+          status: 'pending',
         },
         {
           id: 'RES-303',
@@ -98,7 +87,7 @@ export default function ReservationList() {
           staffId: 'james',
           serviceId: '2',
           datetime: new Date('2025-12-18T16:00:00'),
-          status: 'pending',
+          status: 'cancelled',
         },
         {
           id: 'RES-305',
@@ -137,7 +126,7 @@ export default function ReservationList() {
         if (searchTerm) {
           const q = searchTerm.toLowerCase();
           const searchable =
-            `${r.id} ${r.customerName} ${r.customerPhone} ${t(`services.${r.serviceId}`)} ${t(`staff.${r.staffId}`)}`.toLowerCase();
+            `${r.id} ${r.customerName} ${r.customerPhone} ${t(`reservations.services.${r.serviceId}`)} ${t(`reservations.staff.${r.staffId}`)}`.toLowerCase();
           if (!searchable.includes(q)) return false;
         }
 
@@ -149,12 +138,11 @@ export default function ReservationList() {
       })
       .sort((a, b) => {
         const order: Record<Reservation['status'], number> = {
-          in_service: 0,
-          pending: 1,
-          refund_pending: 2,
-          completed: 3,
-          cancelled: 4,
-          no_show: 5,
+          pending: 0,
+          refund_pending: 1,
+          completed: 2,
+          cancelled: 3,
+          no_show: 4,
         };
         return (
           order[a.status] - order[b.status] ||
@@ -196,7 +184,6 @@ export default function ReservationList() {
   const counts = {
     all: reservations.length,
     pending: reservations.filter(r => r.status === 'pending').length,
-    in_service: reservations.filter(r => r.status === 'in_service').length,
     completed: reservations.filter(r => r.status === 'completed').length,
     cancelled: reservations.filter(r => r.status === 'cancelled').length,
     no_show: reservations.filter(r => r.status === 'no_show').length,
@@ -258,10 +245,6 @@ export default function ReservationList() {
           if (!selectedReservation) return;
 
           const actions: Record<typeof modalType, () => void> = {
-            start: () => {
-              updateStatus(selectedReservation.id, 'in_service');
-              showToast('reservations.toast.started');
-            },
             complete: () => {
               updateStatus(selectedReservation.id, 'completed');
               showToast('reservations.toast.completed');

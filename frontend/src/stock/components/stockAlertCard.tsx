@@ -49,9 +49,8 @@ export default function StockAlertCard({
   onReorder,
   onAcknowledge,
 }: StockAlertCardProps) {
-  const { t } = useTranslation();
   const colors = getSeverityColor(alert.severity);
-  const shortage = alert.minimumStock - alert.currentStock;
+  const shortage = Math.max(0, alert.minimumStock - alert.currentStock);
   const stockPercentage = Math.min(
     (alert.currentStock / alert.minimumStock) * 100,
     100,
@@ -130,7 +129,7 @@ function AlertStats({
       />
       <StatItem
         label={t('stockAlerts.shortageBig')}
-        value={`-${shortage} ${alert.unit}`}
+        value={shortage > 0 ? `–${shortage} ${alert.unit}` : `0 ${alert.unit}`}
         className="text-red-600"
         isBold
       />

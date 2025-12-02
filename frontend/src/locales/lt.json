@@ -14,6 +14,7 @@
       "allTime": "Visas laikas",
       "correction": "Korekcija",
       "remove": "Nurašymas",
+      "search": "Paieška",
       "searchPlaceholder": "Produktas, SKU arba darbuotojas...",
       "thisMonth": "Šį mėnesį",
       "thisWeek": "Šią savaitę",
@@ -21,6 +22,7 @@
       "today": "Šiandien",
       "update": "Atnaujinimas"
     },
+    "sku": "SKU:",
     "noRecords": "Nerasta jokių įrašų pagal jūsų kriterijus.",
     "pageSubtitle": "Visiškas atsargų pokyčių sekimas",
     "pageTitle": "Atsargų pokyčių istorija",
@@ -288,7 +290,7 @@
   "products": {
     "blueberryMuffin": "Mėlynių keksiukas",
     "cappuccino": "Kapučino",
-    "caramelFrappuccino": "Karamelinis Frappuccino",
+    "caramelFrappuccino": "Karamelinis Frapučino",
     "chocolateCroissant": "Šokoladinis kruasanas",
     "chocolateMilkshake": "Šokoladinis kokteilis",
     "cinnamonRoll": "Cinamoninė bandelė",
@@ -534,9 +536,9 @@
       "warningDesc": "Užsakyti artimiausiu metu"
     },
     "units": {
-      "bottles": "buteliai",
+      "bottles": "but.",
       "kg": "kg",
-      "liters": "litrai",
+      "liters": "L",
       "pcs": "vnt."
     }
   },
@@ -573,6 +575,7 @@
     },
     "searchPlaceholder": "Ieškoti pagal pavadinimą ar SKU...",
     "units": {
+      "kg": "kg",
       "bottles": "{{count}} butelių",
       "bottles_few": "{{count}} buteliai",
       "bottles_many": "{{count}} butelių",

@@ -32,7 +32,12 @@ export default function Topbar() {
             {t('topbar.userName')}
           </span>
           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-linear-to-br from-blue-500 to-purple-600 text-sm font-semibold text-white shadow-md ring-2 ring-white">
-            JD
+            {t('topbar.userName')
+              ?.trim()
+              .split(/\s+/)
+              .slice(0, 2)
+              .map(w => w[0]?.toUpperCase())
+              .join('') || '?'}
           </div>
         </div>
 

@@ -7,13 +7,7 @@ type Props = {
   reservation: Reservation;
   formatPrice: (n: number) => string;
   onAction: (
-    type:
-      | 'start'
-      | 'complete'
-      | 'cancel'
-      | 'noshow'
-      | 'refund'
-      | 'cancel_refund',
+    type: 'complete' | 'cancel' | 'noshow' | 'refund' | 'cancel_refund',
     reservation: Reservation,
   ) => void;
 };
@@ -67,10 +61,10 @@ export default function ReservationListItem({
           {reservation.status === 'pending' && (
             <>
               <button
-                onClick={() => onAction('start', reservation)}
+                onClick={() => onAction('complete', reservation)}
                 className="rounded-lg bg-blue-600 px-5 py-2 text-xs font-medium text-white shadow-sm hover:bg-blue-700"
               >
-                {t('reservations.actions.start')}
+                {t('reservations.actions.complete')}
               </button>
               <button
                 onClick={() => onAction('cancel', reservation)}
@@ -78,24 +72,13 @@ export default function ReservationListItem({
               >
                 {t('reservations.actions.cancel')}
               </button>
+              <button
+                onClick={() => onAction('noshow', reservation)}
+                className="rounded-lg border border-orange-500 bg-orange-50 px-3 py-2 text-xs text-orange-600 hover:bg-orange-100"
+              >
+                {t('reservations.actions.noShow')}
+              </button>
             </>
-          )}
-          {reservation.status === 'in_service' && (
-            <button
-              onClick={() => onAction('complete', reservation)}
-              className="rounded-lg bg-green-600 px-5 py-2 text-xs font-medium text-white hover:bg-green-700"
-            >
-              {t('reservations.actions.complete')}
-            </button>
-          )}
-          {(reservation.status === 'pending' ||
-            reservation.status === 'in_service') && (
-            <button
-              onClick={() => onAction('noshow', reservation)}
-              className="rounded-lg border border-orange-500 bg-orange-50 px-3 py-2 text-xs text-orange-600 hover:bg-orange-100"
-            >
-              {t('reservations.actions.noShow')}
-            </button>
           )}
           {reservation.status === 'completed' && (
             <button

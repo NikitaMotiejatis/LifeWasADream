@@ -218,7 +218,7 @@ export default function AuditHistoryPage() {
               </div>
               <div>
                 <label className="mb-2 block text-sm font-semibold text-gray-700">
-                  Search
+                  {t('auditHistory.filters.search')}
                 </label>
                 <input
                   type="text"
@@ -268,7 +268,7 @@ export default function AuditHistoryPage() {
                           {t(`auditHistory.products.${record.productKey}`)}
                         </p>
                         <p className="text-sm text-gray-600">
-                          SKU: {record.sku}
+                          {t(`auditHistory.sku`)} {record.sku}
                         </p>
                       </div>
                     </td>

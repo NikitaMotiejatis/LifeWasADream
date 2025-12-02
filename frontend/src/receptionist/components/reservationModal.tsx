@@ -11,7 +11,7 @@ import { formatDateTime } from '@/utils/formatDateTime';
 
 type Props = {
   open: boolean;
-  type: 'start' | 'complete' | 'cancel' | 'noshow' | 'refund' | 'cancel_refund';
+  type: 'complete' | 'cancel' | 'noshow' | 'refund' | 'cancel_refund';
   reservation: Reservation | null;
   onClose: () => void;
   onConfirm: (refundData?: {
@@ -193,7 +193,7 @@ export default function ReservationModal({
           <button
             onClick={handleConfirm}
             disabled={isRefundInvalid}
-            className={`flex-1 rounded-lg py-2 text-xs font-medium text-white transition ${type === 'complete' ? 'bg-green-600 hover:bg-green-700' : ''} ${type === 'refund' ? 'bg-purple-600 hover:bg-purple-700' : ''} ${type === 'cancel' || type === 'noshow' || type === 'cancel_refund' ? 'bg-red-600 hover:bg-red-700' : ''} ${type === 'start' ? 'bg-blue-600 hover:bg-blue-700' : ''} disabled:cursor-not-allowed disabled:bg-gray-400 disabled:text-gray-200 disabled:opacity-60`}
+            className={`flex-1 rounded-lg py-2 text-xs font-medium text-white transition ${type === 'complete' ? 'bg-blue-600 hover:bg-blue-700' : ''} ${type === 'refund' ? 'bg-purple-600 hover:bg-purple-700' : ''} ${type === 'cancel' || type === 'noshow' || type === 'cancel_refund' ? 'bg-red-600 hover:bg-red-700' : ''} disabled:cursor-not-allowed disabled:bg-gray-400 disabled:text-gray-200 disabled:opacity-60`}
           >
             {t(`reservations.modal.confirm.${type}`)}
           </button>

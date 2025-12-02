@@ -38,7 +38,8 @@ export default function OrderList() {
 
   useEffect(() => {
     const load = async () => {
-      await new Promise(r => setTimeout(r, 500));
+      // TODO: remove timeout
+      await new Promise(r => setTimeout(r, 300));
       const mock: Order[] = [
         {
           id: '1821',
@@ -148,7 +149,9 @@ export default function OrderList() {
 
   if (loading)
     return (
-      <div className="p-10 text-center text-gray-500">Loading orders...</div>
+      <div className="p-10 text-center text-gray-500">
+        {t('orders.loading')}
+      </div>
     );
 
   const counts = {
@@ -170,7 +173,9 @@ export default function OrderList() {
     <>
       <div className="space-y-6">
         <div className="rounded-lg bg-white p-5 shadow">
-          <h2 className="mb-5 text-xl font-bold text-gray-800">Orders</h2>
+          <h2 className="mb-5 text-xl font-bold text-gray-800">
+            {t('orders.title')}
+          </h2>
 
           <OrderFilters
             filterStatus={filterStatus}
@@ -191,7 +196,9 @@ export default function OrderList() {
 
         <div className="mt-6 space-y-3">
           {sortedAndFiltered.length === 0 ? (
-            <p className="py-12 text-center text-gray-400">No orders found</p>
+            <p className="py-12 text-center text-gray-400">
+              {t('orders.noOrders')}
+            </p>
           ) : (
             sortedAndFiltered.map(order => (
               <OrderListItem

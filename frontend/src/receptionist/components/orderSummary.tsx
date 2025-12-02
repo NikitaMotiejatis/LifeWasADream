@@ -124,10 +124,18 @@ function CartItemRow({ item }: { item: CartItem }) {
     <div className="rounded-lg border border-gray-200 bg-gray-50 p-3">
       <div className="mb-3 flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
-          <p className="font-semibold">{product.name}</p>
+          <p className="font-semibold">
+            {product.nameKey ? t(product.nameKey) : product.name}
+          </p>
           {selectedVariations.length > 0 && (
             <p className="text-sm text-gray-600">
-              {selectedVariations.map(v => v.name).join(', ')}
+              {selectedVariations
+                .map(variation =>
+                  variation.nameKey
+                    ? t(`${variation.nameKey}`)
+                    : variation.name,
+                )
+                .join(', ')}
             </p>
           )}
           <p className="text-xs text-gray-500">

@@ -14,6 +14,7 @@
       "allTime": "All Time",
       "correction": "Correction",
       "remove": "Remove",
+      "search": "Search",
       "searchPlaceholder": "Product, SKU, or user...",
       "thisMonth": "This Month",
       "thisWeek": "This Week",
@@ -21,6 +22,7 @@
       "today": "Today",
       "update": "Update"
     },
+    "sku": "SKU:",
     "noRecords": "No audit records found matching your criteria.",
     "pageSubtitle": "Complete inventory change tracking",
     "pageTitle": "Audit History",
@@ -307,6 +309,7 @@
     "customerNamePlaceholder": "Customer name",
     "customerPhonePlaceholder": "Phone number",
     "dateTimeTitle": "Select Date & Time",
+    "bookingSummary": "Reservation Summary",
     "durations": {
       "120 min": "120 min",
       "45 min": "45 min",
@@ -533,9 +536,9 @@
       "warningDesc": "Reorder soon"
     },
     "units": {
-      "bottles": "bottles",
+      "bottles": "btl",
       "kg": "kg",
-      "liters": "liters",
+      "liters": "L",
       "pcs": "pcs"
     }
   },
@@ -569,6 +572,7 @@
     },
     "searchPlaceholder": "Search by name or SKU...",
     "units": {
+      "kg": "kg",
       "bottles_few": "{{count}} bottles",
       "bottles_many": "{{count}} bottles",
       "bottles_one": "{{count}} bottle",

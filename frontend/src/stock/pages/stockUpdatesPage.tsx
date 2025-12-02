@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import Topbar from '@/global/components/topbar';
 import SidebarStockClerk from '@/stock/components/sidebarStockClerk';
+import SearchIcon from '@/icons/searchIcon';
+import CategoryDropdown from '@/stock/components/categorySelector';
 
 type StockItem = {
   id: string;
@@ -95,7 +97,9 @@ export default function StockUpdatesPage() {
 
   const filteredStocks = stocks.filter(stock => {
     const matchesSearch =
-      stock.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      t(`stockUpdates.products.${stock.name}`)
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
       stock.sku.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory =
       selectedCategory === 'All Categories' ||
@@ -140,24 +144,21 @@ export default function StockUpdatesPage() {
 
           <div className="mb-6 flex flex-col gap-4 rounded-lg bg-white p-6 shadow-sm">
             <div className="flex gap-4">
-              <input
-                type="text"
-                placeholder={t('stockUpdates.searchPlaceholder')}
-                value={searchTerm}
-                onChange={e => setSearchTerm(e.target.value)}
-                className="flex-1 rounded-lg border border-gray-300 px-4 py-2 transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
+              <div className="relative max-w-xl min-w-0 flex-1">
+                <input
+                  type="text"
+                  placeholder={t('stockUpdates.searchPlaceholder')}
+                  value={searchTerm}
+                  onChange={e => setSearchTerm(e.target.value)}
+                  className="w-full min-w-0 rounded-md border border-gray-300 bg-white px-3 py-2 pr-9 pl-3 text-sm placeholder-gray-500 transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
+                />
+                <SearchIcon className="pointer-events-none absolute top-1/2 right-2.5 h-5 w-5 -translate-y-1/2 text-gray-400" />
+              </div>
+
+              <CategoryDropdown
+                selected={selectedCategory}
+                onChange={value => setSelectedCategory(value)}
               />
-              <select
-                value={selectedCategory}
-                onChange={e => setSelectedCategory(e.target.value)}
-                className="rounded-lg border border-gray-300 bg-white px-4 py-2 transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
-              >
-                {categories.map(cat => (
-                  <option key={cat} value={cat}>
-                    {t(`stockUpdates.categories.${cat}`)}
-                  </option>
-                ))}
-              </select>
             </div>
           </div>
 

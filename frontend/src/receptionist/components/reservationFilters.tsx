@@ -17,7 +17,6 @@ type Props = {
   counts: {
     all: number;
     pending: number;
-    in_service: number;
     completed: number;
     cancelled: number;
     no_show: number;
@@ -49,7 +48,6 @@ export default function ReservationFilters({
           [
             'all',
             'pending',
-            'in_service',
             'completed',
             'cancelled',
             'no_show',

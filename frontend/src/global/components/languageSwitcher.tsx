@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
-import { FlagIcon } from '@/components/icons/flagIcon';
+import { FlagIcon } from '@/icons/flagIcon';
 
 export default function LanguageSwitcher() {
   const { i18n } = useTranslation();
