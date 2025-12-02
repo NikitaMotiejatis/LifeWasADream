@@ -1,6 +1,7 @@
+import { useTranslation } from 'react-i18next';
 import SearchIcon from '@/icons/searchIcon';
 
-interface Props {
+type Props = {
   filterStatus: string;
   setFilterStatus: (v: any) => void;
   searchTerm: string;
@@ -14,7 +15,7 @@ interface Props {
   timeTo: string;
   setTimeTo: (v: string) => void;
   counts: { all: number; open: number; closed: number; pending: number };
-}
+};
 
 export default function OrderFilters({
   filterStatus,
@@ -31,6 +32,8 @@ export default function OrderFilters({
   setTimeTo,
   counts,
 }: Props) {
+  const { t } = useTranslation();
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap gap-2">
@@ -44,10 +47,13 @@ export default function OrderFilters({
                 : 'border border-gray-400 hover:bg-gray-100'
             }`}
           >
-            {status === 'all' && `All (${counts.all})`}
-            {status === 'open' && `Open (${counts.open})`}
-            {status === 'closed' && `Closed (${counts.closed})`}
-            {status === 'pending' && `Refund Pending (${counts.pending})`}
+            {status === 'all' && t('orders.filters.all', { count: counts.all })}
+            {status === 'open' &&
+              t('orders.filters.open', { count: counts.open })}
+            {status === 'closed' &&
+              t('orders.filters.closed', { count: counts.closed })}
+            {status === 'pending' &&
+              t('orders.filters.pending', { count: counts.pending })}
           </button>
         ))}
       </div>
@@ -55,7 +61,7 @@ export default function OrderFilters({
       <div className="relative flex-1">
         <input
           type="text"
-          placeholder="Search by #..."
+          placeholder={t('orders.filters.searchPlaceholder')}
           value={searchTerm}
           onChange={e => setSearchTerm(e.target.value)}
           className="w-full rounded-lg border border-gray-300 py-2 pr-10 pl-10 text-sm placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
@@ -65,6 +71,7 @@ export default function OrderFilters({
           <button
             onClick={() => setSearchTerm('')}
             className="absolute top-1/2 right-2 -translate-y-1/2 rounded-full bg-gray-200 px-2 py-0.5 text-xs font-bold hover:bg-gray-300"
+            aria-label={t('common.clear')}
           >
             ×
           </button>
@@ -75,7 +82,7 @@ export default function OrderFilters({
         <div className="flex flex-wrap items-center gap-4 pr-4">
           <div className="flex items-center gap-2">
             <span className="min-w-8 font-semibold whitespace-nowrap text-gray-600">
-              From:
+              {t('orders.filters.from')}:
             </span>
 
             <input
@@ -83,6 +90,7 @@ export default function OrderFilters({
               value={dateFrom}
               onChange={e => setDateFrom(e.target.value)}
               className="rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
+              aria-label={t('orders.filters.fromDate')}
             />
 
             <input
@@ -90,6 +98,7 @@ export default function OrderFilters({
               value={timeFrom}
               onChange={e => setTimeFrom(e.target.value)}
               className="rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
+              aria-label={t('orders.filters.fromTime')}
             />
           </div>
         </div>
@@ -97,7 +106,7 @@ export default function OrderFilters({
         <div className="flex flex-wrap items-center gap-3">
           <div className="flex items-center gap-2">
             <span className="min-w-8 font-semibold whitespace-nowrap text-gray-600">
-              To:
+              {t('orders.filters.to')}:
             </span>
 
             <input
@@ -105,6 +114,7 @@ export default function OrderFilters({
               value={dateTo}
               onChange={e => setDateTo(e.target.value)}
               className="rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
+              aria-label={t('orders.filters.toDate')}
             />
 
             <input
@@ -112,6 +122,7 @@ export default function OrderFilters({
               value={timeTo}
               onChange={e => setTimeTo(e.target.value)}
               className="rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
+              aria-label={t('orders.filters.toTime')}
             />
 
             {(dateFrom || dateTo || timeFrom || timeTo) && (
@@ -123,8 +134,9 @@ export default function OrderFilters({
                   setTimeTo('');
                 }}
                 className="p-2 text-sm font-medium text-red-600"
+                aria-label={t('common.clear')}
               >
-                Clear
+                {t('common.clear')}
               </button>
             )}
           </div>

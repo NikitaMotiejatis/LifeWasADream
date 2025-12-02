@@ -1,18 +1,20 @@
 import { useState, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useCurrency } from '@/global/contexts/currencyContext';
 import OrderFilters from '@/receptionist/components/orderFilters';
 import OrderListItem from '@/receptionist/components/orderListItem';
 import OrderModal from '@/receptionist/components/orderModal';
 import Toast from '@/global/components/toast';
 
-interface Order {
+type Order = {
   id: string;
   total: number;
   createdAt: Date;
   status: 'active' | 'closed' | 'refund_pending';
-}
+};
 
 export default function OrderList() {
+  const { t } = useTranslation();
   const { formatPrice } = useCurrency();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
@@ -217,11 +219,11 @@ export default function OrderList() {
               break;
             case 'refund':
               updateOrderStatus(selectedOrder.id, 'refund_pending');
-              showToast('Refund request sent successfully.');
+              showToast(t('orders.toast.refundRequested'));
               break;
             case 'cancel':
               updateOrderStatus(selectedOrder.id, 'closed');
-              showToast('Refund request cancelled.');
+              showToast(t('orders.toast.refundCancelled'));
               break;
             default:
               break;
