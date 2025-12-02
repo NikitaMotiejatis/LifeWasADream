@@ -1,10 +1,12 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import PersonIcon from '@/icons/personIcon';
 import LockIcon from '@/icons/lockIcon';
 
 export default function LoginPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const navigate = useNavigate();
   const [touched, setTouched] = useState({ username: false, password: false });
 
   const demoAccounts = [
@@ -18,30 +20,28 @@ export default function LoginPage() {
     setUsername(login);
     setPassword(pass);
     setTouched({ username: true, password: true });
-    if (login.trim() == 'cashier1' && pass.trim() == 'demo123')
-        setTimeout(() => (window.location.href = '/newOrder'), 250);
-    else if (login.trim() == 'manager1' && pass.trim() == 'demo123')
-        setTimeout(() => (window.location.href = '/newOrder'), 250);
-    else if (login.trim() == 'clerk1' && pass.trim() == 'demo123')
-        setTimeout(() => (window.location.href = '/stockUpdates'), 250);
-    else if (login.trim() == 'supplier1' && pass.trim() == 'demo123')
-        setTimeout(() => (window.location.href = '/invoiceStatus'), 250);
+      // Determine the correct redirect path based on the demo account role
+      let redirectPath = '/newOrder';
+      if (login.includes('clerk')) {
+          redirectPath = '/stockUpdates';
+      } else if (login.includes('supplier')) {
+          redirectPath = '/invoiceStatus';
+      }
+      setTimeout(() => navigate(redirectPath), 250);
   };
 
   const handleLogin = () => {
     setTouched({ username: true, password: true });
-    if (username.trim() == 'cashier1' && password.trim() == 'demo123') {
-      window.location.href = '/newOrder';
-    }
-    else if (username.trim() == 'manager1' && password.trim() == 'demo123') {
-        window.location.href = '/newOrder';
-    }
-    else if (username.trim() == 'clerk1' && password.trim() == 'demo123') {
-        window.location.href = '/stockUpdates';
-    }
-    else if (username.trim() == 'supplier1' && password.trim() == 'demo123') {
-        window.location.href = '/invoiceStatus';
-    }
+      if (username.trim() && password.trim()) {
+          // Basic logic to determine redirect based on username for demo purposes
+          let redirectPath = '/newOrder';
+          if (username.includes('clerk')) {
+              redirectPath = '/stockUpdates';
+          } else if (username.includes('supplier')) {
+              redirectPath = '/invoiceStatus';
+          }
+          navigate(redirectPath);
+      }
 
   };
 
