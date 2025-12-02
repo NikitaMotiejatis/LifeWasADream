@@ -13,17 +13,7 @@ export type Reservation = {
   staffId: string;
   serviceId: string;
   datetime: Date;
-<<<<<<< HEAD
   status: 'pending' | 'completed' | 'cancelled' | 'no_show' | 'refund_pending';
-=======
-  status:
-    | 'pending'
-    | 'in_service'
-    | 'completed'
-    | 'cancelled'
-    | 'no_show'
-    | 'refund_pending';
->>>>>>> c766386 (Big localization)
 };
 
 export const servicesMap: Record<string, { title: string; price: number }> = {
@@ -136,11 +126,7 @@ export default function ReservationList() {
         if (searchTerm) {
           const q = searchTerm.toLowerCase();
           const searchable =
-<<<<<<< HEAD
             `${r.id} ${r.customerName} ${r.customerPhone} ${t(`reservations.services.${r.serviceId}`)} ${t(`reservations.staff.${r.staffId}`)}`.toLowerCase();
-=======
-            `${r.id} ${r.customerName} ${r.customerPhone} ${t(`services.${r.serviceId}`)} ${t(`staff.${r.staffId}`)}`.toLowerCase();
->>>>>>> c766386 (Big localization)
           if (!searchable.includes(q)) return false;
         }
 
@@ -152,20 +138,11 @@ export default function ReservationList() {
       })
       .sort((a, b) => {
         const order: Record<Reservation['status'], number> = {
-<<<<<<< HEAD
           pending: 0,
           refund_pending: 1,
           completed: 2,
           cancelled: 3,
           no_show: 4,
-=======
-          in_service: 0,
-          pending: 1,
-          refund_pending: 2,
-          completed: 3,
-          cancelled: 4,
-          no_show: 5,
->>>>>>> c766386 (Big localization)
         };
         return (
           order[a.status] - order[b.status] ||
@@ -268,13 +245,6 @@ export default function ReservationList() {
           if (!selectedReservation) return;
 
           const actions: Record<typeof modalType, () => void> = {
-<<<<<<< HEAD
-=======
-            start: () => {
-              updateStatus(selectedReservation.id, 'in_service');
-              showToast('reservations.toast.started');
-            },
->>>>>>> c766386 (Big localization)
             complete: () => {
               updateStatus(selectedReservation.id, 'completed');
               showToast('reservations.toast.completed');

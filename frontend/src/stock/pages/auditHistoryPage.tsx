@@ -108,16 +108,9 @@ export default function AuditHistoryPage() {
     },
   ]);
 
-<<<<<<< HEAD
   const [filterAction, setFilterAction] = useState<ActionFilterValue>('ALL');
   const [filterTimePeriod, setFilterTimePeriod] =
     useState<TimePeriodValue>('Today');
-=======
-  const [filterAction, setFilterAction] = useState<
-    'ALL' | 'Update' | 'Correction' | 'Remove' | 'Add'
-  >('ALL');
-  const [filterTimePeriod, setFilterTimePeriod] = useState('Today');
->>>>>>> c766386 (Big localization)
   const [searchTerm, setSearchTerm] = useState('');
 
   const filteredRecords = records.filter(record => {
@@ -184,7 +177,6 @@ export default function AuditHistoryPage() {
                 <label className="mb-2 block text-sm font-semibold text-gray-700">
                   {t('auditHistory.filters.actionLabel')}
                 </label>
-<<<<<<< HEAD
                 <ActionFilterSelector
                   selected={filterAction}
                   onChange={setFilterAction}
@@ -199,59 +191,10 @@ export default function AuditHistoryPage() {
                   selected={filterTimePeriod}
                   onChange={setFilterTimePeriod}
                 />
-=======
-                <select
-                  value={filterAction}
-                  onChange={e => setFilterAction(e.target.value as any)}
-                  className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
-                >
-                  <option value="ALL">
-                    {t('auditHistory.filters.allActions')}
-                  </option>
-                  <option value="Update">
-                    {t('auditHistory.filters.update')}
-                  </option>
-                  <option value="Correction">
-                    {t('auditHistory.filters.correction')}
-                  </option>
-                  <option value="Remove">
-                    {t('auditHistory.filters.remove')}
-                  </option>
-                  <option value="Add">{t('auditHistory.filters.add')}</option>
-                </select>
->>>>>>> c766386 (Big localization)
               </div>
-
               <div>
                 <label className="mb-2 block text-sm font-semibold text-gray-700">
-<<<<<<< HEAD
                   {t('auditHistory.filters.search')}
-=======
-                  {t('auditHistory.filters.timePeriodLabel')}
-                </label>
-                <select
-                  value={filterTimePeriod}
-                  onChange={e => setFilterTimePeriod(e.target.value)}
-                  className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
-                >
-                  <option value="Today">
-                    {t('auditHistory.filters.today')}
-                  </option>
-                  <option value="This Week">
-                    {t('auditHistory.filters.thisWeek')}
-                  </option>
-                  <option value="This Month">
-                    {t('auditHistory.filters.thisMonth')}
-                  </option>
-                  <option value="All Time">
-                    {t('auditHistory.filters.allTime')}
-                  </option>
-                </select>
-              </div>
-              <div>
-                <label className="mb-2 block text-sm font-semibold text-gray-700">
-                  Search
->>>>>>> c766386 (Big localization)
                 </label>
                 <input
                   type="text"
@@ -301,11 +244,7 @@ export default function AuditHistoryPage() {
                           {t(`auditHistory.products.${record.productKey}`)}
                         </p>
                         <p className="text-sm text-gray-600">
-<<<<<<< HEAD
                           {t(`auditHistory.sku`)} {record.sku}
-=======
-                          SKU: {record.sku}
->>>>>>> c766386 (Big localization)
                         </p>
                       </div>
                     </td>
