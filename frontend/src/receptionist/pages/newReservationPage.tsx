@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import i18n from '@/i18n';
 import { useCurrency } from '@/global/contexts/currencyContext';
 import SidebarCashier from '@/receptionist/components/sidebarCashier';
 import Topbar from '@/global/components/topbar';
@@ -104,6 +105,7 @@ export default function NewReservationPage() {
               selectedService={selectedService}
               setSelectedService={setSelectedService}
               formatPrice={formatPrice}
+              t={t}
             />
 
             <DateTimePicker
@@ -113,6 +115,8 @@ export default function NewReservationPage() {
               setSelectedDate={setSelectedDate}
               selectedTime={selectedTime}
               setSelectedTime={setSelectedTime}
+              t={t}
+              i18n={i18n}
             />
 
             <BookingSummary
@@ -124,6 +128,7 @@ export default function NewReservationPage() {
               selectedService={selectedService}
               formatPrice={formatPrice}
               onConfirm={handleConfirm}
+              t={t}
             />
           </div>
         </main>
@@ -140,15 +145,15 @@ function StaffAndServiceSelector({
   selectedService,
   setSelectedService,
   formatPrice,
+  t,
 }: {
   selectedStaff: string;
   setSelectedStaff: (id: string) => void;
   selectedService: string | null;
   setSelectedService: (id: string | null) => void;
   formatPrice: (price: number) => string;
+  t: any;
 }) {
-  const { t } = useTranslation();
-
   return (
     <div className="rounded-xl bg-white p-5 shadow">
       <h2 className="mb-5 text-xl font-bold">
@@ -221,6 +226,8 @@ function DateTimePicker({
   setSelectedDate,
   selectedTime,
   setSelectedTime,
+  t,
+  i18n,
 }: {
   currentMonth: Date;
   setCurrentMonth: (date: Date) => void;
@@ -228,13 +235,22 @@ function DateTimePicker({
   setSelectedDate: (date: Date | null) => void;
   selectedTime: string | null;
   setSelectedTime: (time: string | null) => void;
+  t: any;
+  i18n: any;
 }) {
-  const { t } = useTranslation();
   const year = currentMonth.getFullYear();
   const month = currentMonth.getMonth();
-  const firstDay = new Date(year, month, 1).getDay();
+  const firstDayOriginal = new Date(year, month, 1).getDay();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const weekdayKeys = ['su', 'mo', 'tu', 'we', 'th', 'fr', 'sa'] as const;
+
+  const isLT = i18n.language.startsWith('lt');
+  let weekdayKeys: string[] = isLT
+    ? ['mo', 'tu', 'we', 'th', 'fr', 'sa', 'su']
+    : ['su', 'mo', 'tu', 'we', 'th', 'fr', 'sa'];
+
+  let firstDay = firstDayOriginal;
+  if (isLT) firstDay = (firstDay + 6) % 7;
+
   const days: (number | null)[] = [];
   for (let i = 0; i < firstDay; i++) days.push(null);
   for (let d = 1; d <= daysInMonth; d++) days.push(d);
@@ -320,6 +336,7 @@ function BookingSummary({
   selectedService,
   formatPrice,
   onConfirm,
+  t,
 }: {
   customerName: ReturnType<typeof useNameValidation>;
   customerPhone: ReturnType<typeof usePhoneValidation>;
@@ -329,8 +346,8 @@ function BookingSummary({
   selectedService: string | null;
   formatPrice: (price: number) => string;
   onConfirm: () => void;
+  t: any;
 }) {
-  const { t } = useTranslation();
   const selectedServiceObj = services.find(s => s.id === selectedService);
 
   return (
