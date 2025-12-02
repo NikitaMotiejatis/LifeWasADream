@@ -3,7 +3,9 @@ import { useTranslation } from 'react-i18next';
 import Topbar from '@/global/components/topbar';
 import SidebarStockClerk from '@/stock/components/sidebarStockClerk';
 import SearchIcon from '@/icons/searchIcon';
-import CategoryDropdown from '@/stock/components/categorySelector';
+import CategoryDropdown, {
+  CategoryValue,
+} from '@/stock/components/categorySelector';
 
 type StockItem = {
   id: string;
@@ -84,16 +86,8 @@ export default function StockUpdatesPage() {
   ]);
 
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('All Categories');
-
-  const categories = [
-    'All Categories',
-    'Raw Materials',
-    'Dairy',
-    'Packaging',
-    'Bakery',
-    'Ingredients',
-  ];
+  const [selectedCategory, setSelectedCategory] =
+    useState<CategoryValue>('All Categories');
 
   const filteredStocks = stocks.filter(stock => {
     const matchesSearch =
