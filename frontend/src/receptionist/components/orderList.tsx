@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useCurrency } from '@/global/contexts/currencyContext';
-import OrderFilters from '@/receptionist/components/editOrderFilters';
+import OrderFilters from '@/receptionist/components/orderFilters';
 import OrderListItem from '@/receptionist/components/orderListItem';
 import OrderModal from '@/receptionist/components/orderModal';
 import Toast from '@/global/components/toast';

@@ -4,7 +4,7 @@ import SidebarCashier from '@/receptionist/components/sidebarCashier';
 import Topbar from '@/global/components/topbar';
 import { CartProvider, useCart } from '@/receptionist/contexts/cartContext';
 import { CurrencyProvider } from '@/global/contexts/currencyContext';
-import { EditOrderPanel } from '@/receptionist/components/editOrderPanel';
+import { EditOrderPanel } from '@/receptionist/components/editOrder/editOrderPanel';
 
 type Order = {
   id: string;
@@ -34,7 +34,6 @@ function EditOrderContent() {
     const fetchOrder = async () => {
       setLoading(true);
       try {
-        // TODO: Replace with your actual API call
         console.warn('API endpoint not implemented. Using empty state.');
         
         setOrderData({
@@ -58,8 +57,6 @@ function EditOrderContent() {
 
   const handleSave = async (items: OrderItem[]) => {
     try {
-      // TODO: Replace with your actual API call
-      console.log('Saving order changes...', items);
       
       alert('Order updated successfully!');
       
@@ -79,11 +76,8 @@ function EditOrderContent() {
   const handleAddMoreItems = (items: OrderItem[]) => {
     clearCart();
     
-    // Add each item to cart
     items.forEach(item => {
-      // Convert OrderItem format to cart format
-      // This would need to be implemented based on your cart context
-      console.log('Adding item to cart:', item);
+  
     });
     
     navigate('/receptionist/new-order');
@@ -170,7 +164,7 @@ export default function EditOrderPage() {
         {/* Topbar */}
         <Topbar />
         
-        {/* Content Area with Context Providers */}
+        {/* */}
         <CurrencyProvider>
           <CartProvider>
             <EditOrderContent />
