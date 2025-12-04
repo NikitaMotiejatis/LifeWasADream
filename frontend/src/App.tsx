@@ -14,6 +14,7 @@ import StockAlertsPage from '@/stock/pages/stockAlertsPage';
 import AuditHistoryPage from '@/stock/pages/auditHistoryPage';
 import InvoiceStatusPage from '@/supplier/pages/invoiceStatusPage';
 import DeliveriesPage from '@/supplier/pages/deliveriesPage';
+import EditOrderPage from '@/receptionist/pages/editOrderPage';
 
 const router = createBrowserRouter(
   [
@@ -29,6 +30,7 @@ const router = createBrowserRouter(
     { path: '/auditHistory', element: <AuditHistoryPage /> },
     { path: '/invoiceStatus', element: <InvoiceStatusPage /> },
     { path: '/deliveries', element: <DeliveriesPage /> },
+    { path: '/edit-order/:orderId', element: <EditOrderPage /> },
   ],
   {
     future: {
