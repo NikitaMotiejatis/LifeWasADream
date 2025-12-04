@@ -9,9 +9,7 @@ import VariationModal from '@/receptionist/components/variationModal';
 import { ProductGridView } from './productGridView';  
 import { OrderSummaryView } from './orderSummaryView';
 import { OrderItemRow } from './orderItemRow';  
-import { PaymentSection } from './paymentSection';
-import { SplitBillSection } from './splitBillSection';
-import type { EditOrderPanelProps, OrderItem, PaymentMethod } from './types';
+import type { EditOrderPanelProps, OrderItem, ExtendedProduct} from './types';
 import { createMockOrderItems } from './utils';
 
 export function EditOrderPanel({
@@ -26,11 +24,8 @@ export function EditOrderPanel({
   const [items, setItems] = useState<OrderItem[]>(createMockOrderItems()); 
   const [editingVariationsId, setEditingVariationsId] = useState<string | null>(null);
   const [tempVariations, setTempVariations] = useState<Variation[]>([]);
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('Card');
-  const [splitBill, setSplitBill] = useState(false);
-  const [splitCount, setSplitCount] = useState(2);
   const [showProductGrid, setShowProductGrid] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<ExtendedProduct | null>(null);
 
   const total = items.reduce(
     (sum, item) => sum + item.finalPrice * item.quantity,
@@ -95,13 +90,19 @@ export function EditOrderPanel({
     }
   };
 
-  const handleAddItemFromGrid = (product: Product) => {
-    if (!product.variations || product.variations.length === 0) {
-      addToCart(product, []);
-      return;
-    }
-    setSelectedProduct(product);
-  };
+const handleAddItemFromGrid = (product: ExtendedProduct) => {
+  console.log('Adding product:', {
+    name: product.name,
+    nameKey: product.nameKey,
+    hasNameKey: !!product.nameKey
+  });
+  
+  if (!product.variations || product.variations.length === 0) {
+    addToCart(product, []);
+    return;
+  }
+  setSelectedProduct(product);
+};
 
   const handleStartAddingItems = () => {
     clearCart();
@@ -131,22 +132,9 @@ export function EditOrderPanel({
     setShowProductGrid(false);
   };
 
-  const handlePayment = () => {
-    onSave?.(items);
-  };
-
   if (showProductGrid) {
     return (
       <div className="flex-1 flex-col overflow-hidden rounded-2xl bg-white p-6 shadow-xl">
-        <div className="mb-6">
-          <h1 className="text-xl font-bold text-gray-900">
-            {t('editOrder.title', 'Edit Order')} #{orderId}
-          </h1>
-          <p className="text-sm text-gray-600">
-            {t('editOrder.subtitle', 'Add more items to the order')}
-          </p>
-        </div>
-
         <div className="flex gap-6">
           <div className="flex-1">
             <ProductGridView onProductClick={handleAddItemFromGrid} />
@@ -176,14 +164,6 @@ export function EditOrderPanel({
 
   return (
     <div className="flex-1 flex-col overflow-hidden rounded-2xl bg-white p-6 shadow-xl">
-      <div className="mb-6">
-        <h1 className="text-xl font-bold text-gray-900">
-          {t('editOrder.title', 'Edit Order')} #{orderId}
-        </h1>
-        <p className="text-sm text-gray-600">
-          {t('editOrder.subtitle', 'Modify items and quantities')}
-        </p>
-      </div>
 
       <div className="mb-6 max-h-[50vh] overflow-y-auto">
         {items.length === 0 ? (
@@ -210,7 +190,7 @@ export function EditOrderPanel({
               onClick={handleStartAddingItems}
               className="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
             >
-               {t('orderPanel.addItem', 'Add Item')} 
+              {t('orderPanel.addItem', 'Add Item')}
             </button>
           </div>
         ) : (
@@ -255,7 +235,7 @@ export function EditOrderPanel({
                 d="M12 4v16m8-8H4"
               />
             </svg>
-            <span className="font-medium"> {t('orderPanel.addItem', 'Add Item')} </span>
+            <span className="font-medium">{t('orderPanel.addItem', 'Add Item')}</span>
           </button>
         </div>
       )}
@@ -266,47 +246,14 @@ export function EditOrderPanel({
           <span className="text-blue-700">${total.toFixed(2)}</span>
         </div>
         <div className="mt-2 text-center text-xs text-gray-500">
-          {t('orderPanel.totalNote', 'Total amount for order')} #{orderId}
+          {t('orderPanel.totalNote', 'Total amount for order')} {orderId}
         </div>
       </div>
 
-      {/* CORRECT ORDER STARTS HERE */}
 
-      {/* 1. Payment Method Selection */}
-      <div className="mb-6">
-        <div>
-          <p className="mb-1.5 text-xs font-medium text-gray-700 xl:text-sm">
-            {t('orderSummary.paymentMethod', 'Payment Method')}
-          </p>
-          <div className="grid grid-cols-3 gap-1.5">
-            {(['Cash', 'Card', 'Gift card'] as const).map(method => (
-              <button
-                key={method}
-                onClick={() => setPaymentMethod(method)}
-                className={`rounded-lg py-2 text-xs font-medium transition ${
-                  paymentMethod === method
-                    ? 'bg-blue-600 text-white hover:bg-blue-700'
-                    : 'border border-gray-400 hover:bg-gray-100'
-                }`}
-              >
-                {t(`orderSummary.paymentMethods.${method}`, method)}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
 
-      {/* 2. Split Bill Section */}
-<SplitBillSection
-  splitBill={splitBill}
-  setSplitBill={setSplitBill}
-  splitCount={splitCount}
-  setSplitCount={setSplitCount}
-  total={total}  // Add this prop
-/>
-
-      {/* 3. Save/Cancel Buttons */}
-      <div className="flex gap-3 border-t border-gray-300 pt-4 mb-6">
+      {/* Save/Cancel Buttons */}
+      <div className="flex gap-3 border-t border-gray-300 pt-6">
         <button
           onClick={onCancel}
           className="flex-1 rounded-lg border border-gray-300 py-3 text-sm font-medium hover:bg-gray-50"
@@ -318,16 +265,6 @@ export function EditOrderPanel({
           className="flex-1 rounded-lg bg-blue-600 py-3 text-sm font-medium text-white hover:bg-blue-700"
         >
           {t('editOrder.saveChanges', 'Save Changes')}
-        </button>
-      </div>
-              
-      {/* 4. Complete Payment Button (at the bottom) */}
-      <div className="border-t border-gray-300 pt-6">
-        <button
-          onClick={handlePayment}
-          className="w-full rounded-lg bg-green-600 py-3 text-sm font-medium text-white hover:bg-green-700"
-        >
-          {t('orderSummary.completePayment', 'Complete Payment')}
         </button>
       </div>
     </div>

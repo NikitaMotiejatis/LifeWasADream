@@ -5,12 +5,12 @@ import { products as realProducts } from '@/locales/products';
 export const realMenu: ExtendedProduct[] = realProducts.map(product => ({
   ...product,
   categories: product.categories || [],
+  nameKey: product.nameKey || `products.${product.id}`, 
   variations: product.variations?.map(v => ({
     ...v,
     nameKey: v.nameKey || `variationModal.variations.${v.name}`,
   })) || [],
 }));
-
 export const getVariationDisplayName = (t: any, variation: Variation): string => {
   if (!variation.nameKey) return variation.name;
   const translated = t(variation.nameKey);
