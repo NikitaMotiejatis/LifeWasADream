@@ -782,27 +782,6 @@ export function EditOrderPanel({
         </div>
       )}
 
-      {/* Totals */}
-      <div className="border-t border-gray-300 pt-4 space-y-2 mb-6">
-        <div className="flex justify-between">
-          <span className="text-gray-600">
-            {t('orderSummary.subtotal', 'Subtotal')}
-          </span>
-          <span className="font-medium">${total.toFixed(2)}</span>
-        </div>
-        
-        <div className="flex justify-between text-xl font-bold pt-2 border-t">
-          <span>{t('orderSummary.total', 'Total')}</span>
-          <span className="text-blue-700">
-            ${total.toFixed(2)}
-          </span>
-        </div>
-        
-        <div className="text-xs text-gray-500 text-center">
-          {t('orderPanel.totalNote', 'Total amount for order')} #{orderId}
-        </div>
-      </div>
-
       {/* Payment Method */}
       <div className="mb-6">
         <p className="mb-2 text-sm font-medium text-gray-700">
