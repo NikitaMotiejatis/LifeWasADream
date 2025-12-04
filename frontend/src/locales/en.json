@@ -671,6 +671,13 @@
       "Small": "Small"
     }
   },
+  "variations": {
+    "almondMilk": "Almond Milk",
+    "large": "Large",
+    "medium": "Medium",
+    "oatMilk": "Oat Milk",
+    "small": "Small"
+  },
   "orderPanel": {
   "addItem": "Add item",
   "cancel": "Cancel",
