@@ -35,15 +35,16 @@ const realMenu: ExtendedProduct[] = realProducts.map(product => ({
 
 const getVariationDisplayName = (t: any, variation: Variation): string => {
   if (!variation.nameKey) return variation.name;
+  
   try {
-    const translated = t(variation.nameKey);
-    return translated !== variation.nameKey ? translated : variation.name;
+    const translated = t(variation.nameKey, { defaultValue: variation.name });
+    return translated;
   } catch (error) {
+    console.error('Translation error for:', variation.nameKey, error);
     return variation.name;
   }
 };
 
-// Initial mock data
 // Initial mock data
 const createMockOrderItems = (): OrderItem[] => [
   {
@@ -608,13 +609,13 @@ export function EditOrderPanel({
                         <div className="flex gap-2">
                           {/* Change Variations Button */}
                              {!isEditingVariations && item.product.variations && item.product.variations.length > 0 && (
-    <button
-      onClick={() => startEditingVariations(item.id, item.selectedVariations)}
-      className="text-sm text-blue-600 hover:text-blue-800"
-    >
-      {t('orderPanel.change', 'Change')}
-    </button>
-  )}
+                                  <button
+                                    onClick={() => startEditingVariations(item.id, item.selectedVariations)}
+                                    className="text-sm text-blue-600 hover:text-blue-800"
+                                  >
+                                    {t('orderPanel.change', 'Change')}
+                                  </button>
+                                )}
                           
                           {/* Remove Button */}
                           <button
@@ -780,28 +781,44 @@ export function EditOrderPanel({
           </button>
         </div>
       )}
+{/* Total Section */}
+<div className="mb-6 border-t border-gray-300 pt-4">
+  <div className="flex justify-between text-xl font-bold">
+    <span>{t('orderSummary.total', 'Total')}</span>
+    <span className="text-blue-700">
+      ${total.toFixed(2)}
+    </span>
+  </div>
+  
+  <div className="text-xs text-gray-500 text-center mt-2">
+    {t('orderPanel.totalNote', 'Total amount for order')} #{orderId}
+  </div>
+</div>
 
-      {/* Payment Method */}
-      <div className="mb-6">
-        <p className="mb-2 text-sm font-medium text-gray-700">
-          {t('orderSummary.paymentMethod', 'Payment Method')}
-        </p>
-        <div className="grid grid-cols-3 gap-2">
-          {(['Cash', 'Card', 'Gift card'] as const).map(method => (
-            <button
-              key={method}
-              onClick={() => setPaymentMethod(method)}
-              className={`rounded-lg py-3 text-sm font-medium transition-colors ${
-                paymentMethod === method
-                  ? 'bg-blue-600 text-white hover:bg-blue-700'
-                  : 'border border-gray-300 hover:bg-gray-100'
-              }`}
-            >
-              {t(`orderSummary.paymentMethods.${method}`, method)}
-            </button>
-          ))}
-        </div>
-      </div>
+
+{/* Payment Method Section */}
+<div className="mb-6">
+  <div>
+    <p className="mb-1.5 text-xs font-medium text-gray-700 xl:text-sm">
+      {t('orderSummary.paymentMethod', 'Payment Method')}
+    </p>
+    <div className="grid grid-cols-3 gap-1.5">
+      {(['Cash', 'Card', 'Gift card'] as const).map(method => (
+        <button
+          key={method}
+          onClick={() => setPaymentMethod(method)}
+          className={`rounded-lg py-2 text-xs font-medium transition ${
+            paymentMethod === method
+              ? 'bg-blue-600 text-white hover:bg-blue-700'
+              : 'border border-gray-400 hover:bg-gray-100'
+          }`}
+        >
+          {t(`orderSummary.paymentMethods.${method}`, method)}
+        </button>
+      ))}
+    </div>
+  </div>
+</div>
 
       {/* Split Bill */}
       <div className="mb-6">
@@ -843,7 +860,6 @@ export function EditOrderPanel({
           </div>
         )}
       </div>
-
       {/* Action Buttons */}
       <div className="flex gap-3 pt-4 border-t border-gray-300">
         <button
@@ -859,6 +875,15 @@ export function EditOrderPanel({
           {t('editOrder.saveChanges', 'Save Changes')}
         </button>
       </div>
+      {/* Payment Section */}
+<div className="mt-6 pt-6 border-t border-gray-300">
+  <button
+    onClick={handlePayment}
+    className="w-full rounded-lg bg-green-600 py-3 text-sm font-medium text-white hover:bg-green-700"
+  >
+    {t('orderSummary.completePayment', 'Complete Payment')}
+  </button>
+</div>
     </div>
   );
 }
