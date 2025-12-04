@@ -57,20 +57,16 @@ function EditOrderContent() {
 
   const handleSave = async (items: OrderItem[]) => {
     try {
-      
-      alert('Order updated successfully!');
-      
+   console.log('Saving order items:', items);
       navigate('/orders');
     } catch (error) {
       console.error('Failed to save order:', error);
-      alert('Failed to save order. Please try again.');
     }
   };
 
   const handleCancel = () => {
-    if (window.confirm('Are you sure you want to cancel? Changes will be lost.')) {
       navigate('/orders');
-    }
+
   };
 
   const handleAddMoreItems = (items: OrderItem[]) => {
