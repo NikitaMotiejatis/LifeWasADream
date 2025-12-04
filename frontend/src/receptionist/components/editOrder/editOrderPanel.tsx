@@ -132,10 +132,6 @@ export function EditOrderPanel({
   };
 
   const handlePayment = () => {
-    alert(
-      t('processingPayment', 'Processing payment') +
-        ` ${paymentMethod} - $${total.toFixed(2)}`,
-    );
     onSave?.(items);
   };
 
