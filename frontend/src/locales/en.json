@@ -375,7 +375,18 @@
       "fr": "Fr",
       "sa": "Sa",
       "su": "Su"
-    }
+    },
+        "customerInfo": "Customer Information",
+    "customerName": "Customer Name",
+    "customerPhone": "Phone Number",
+    "serviceDetails": "Service Details",
+
+    "date": "Date",
+    "time": "Time",
+    "notes": "Notes",
+    "notesPlaceholder": "Additional notes..."
+
+
   },
   "reservations": {
     "actions": {
@@ -384,7 +395,8 @@
       "complete": "Complete",
       "noShow": "No-Show",
       "refund": "Refund",
-      "start": "Start"
+      "start": "Start",
+      "edit" : "Edit"
     },
     "filters": {
       "all": "All ({{count}})",
@@ -406,7 +418,8 @@
         "complete": "Confirm Completion",
         "noshow": "Mark as No-Show",
         "refund": "Request Refund",
-        "start": "Start Service"
+        "start": "Start Service",
+        "edit" : "Edit"
       },
       "refund": {
         "email": "Customer's Email",
@@ -424,7 +437,8 @@
         "complete": "Complete Service",
         "noshow": "Mark as No-Show",
         "refund": "Request Refund",
-        "start": "Start Service"
+        "start": "Start Service",
+        "edit" : "Edit"
       },
       "totalAmount": "Total Amount"
     },
@@ -450,7 +464,8 @@
       "noShow": "Marked as No-Show",
       "refundCancelled": "Refund request cancelled",
       "refundRequested": "Refund request sent",
-      "started": "Service started"
+      "started": "Service started",
+      "updated": "Reservation updated successfully"
     }
   },
   "sidebar": {
@@ -677,5 +692,56 @@
     "medium": "Medium",
     "oatMilk": "Oat Milk",
     "small": "Small"
+  },
+  "orderPanel": {
+  "addItem": "Add item",
+  "cancel": "Cancel",
+  "done": "Done",
+  "change": "change",
+  "selectSize": "Select size:",
+  "selectMilk": "Select milk:",
+  "selectOptions": "Select options:",
+  "noSize": "No size selected",
+  "noMilk": "No milk selected",
+  "noOptions": "No options selected",
+  "extra": "extra",
+  "newItem": "New",
+  "originalItem": "Original",
+  "decreaseQuantity": "Decrease quantity",
+  "increaseQuantity": "Increase quantity",
+  "remove": "Remove",
+  "clearAll": "Clear All",
+  "viewTitle": "Current Order",
+  "originalItems": "Order Items",
+  "newItems": "New Items",
+  "newItemsAdded": "New Items Added",
+  "discounts": "Discounts",
+  "newTotal": "New Total",
+  "totalNote": "Changes will update order #",
+  "subtotal": "Subtotal",
+  "total": "Total",
+  "paymentMethod": "Payment Method",
+  "paymentMethods": {
+    "Cash": "Cash",
+    "Card": "Card",
+    "Gift card": "Gift Card"
+  },
+  "splitBill": "Split Bill",
+  "splitCount": "Split between:",
+  "completePayment": "Complete Payment",
+  "updateOrder": "Update Order"
+},
+"editOrder": {
+  "title": "Edit Order",
+  "subtitle": "Modify items, payment method, and billing",
+  "cancel": "Cancel",
+  "save": "Save Changes",
+  "saveChanges": "Save Changes"
+},
+
+  "editReservation": {
+    "title": "Edit Reservation",
+    "subtitle": "Modify reservation details",
+    "saveChanges": "Save Changes"
   }
 }

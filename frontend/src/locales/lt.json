@@ -375,7 +375,15 @@
       "fr": "Pn",
       "sa": "Št",
       "su": "Sk"
-    }
+    },
+    "customerInfo": "Kliento informacija",
+    "customerName": "Kliento vardas",
+    "customerPhone": "Telefono numeris",
+    "serviceDetails": "Paslaugos detalės",
+    "date": "Data",
+    "time": "Laikas",
+    "notes": "Pastabos",
+    "notesPlaceholder": "Papildomos pastabos..."
   },
   "reservations": {
     "actions": {
@@ -384,7 +392,9 @@
       "complete": "Baigti aptarnavimą",
       "noShow": "Neatvyko",
       "refund": "Grąžinti pinigus",
-      "start": "Pradėti aptarnavimą"
+      "start": "Pradėti aptarnavimą",
+      "edit" : "Edit"
+
     },
     "filters": {
       "all": "Visi ({{count}})",
@@ -406,7 +416,8 @@
         "complete": "Patvirtinti baigimą",
         "noshow": "Pažymėti kaip neatvykusį",
         "refund": "Prašyti grąžinimo",
-        "start": "Pradėti aptarnavimą"
+        "start": "Pradėti aptarnavimą",
+        "edit": "Redaguoti"
       },
       "refund": {
         "email": "Kliento el. paštas",
@@ -424,7 +435,8 @@
         "complete": "Baigti aptarnavimą",
         "noshow": "Pažymėti kaip neatvykusį",
         "refund": "Prašyti pinigų grąžinimo",
-        "start": "Pradėti aptarnavimą"
+        "start": "Pradėti aptarnavimą",
+        "edit": "Redaguoti"
       },
       "totalAmount": "Bendra suma"
     },
@@ -450,7 +462,8 @@
       "noShow": "Pažymėta kaip neatvykęs",
       "refundCancelled": "Grąžinimo prašymas atšauktas",
       "refundRequested": "Grąžinimo prašymas išsiųstas",
-      "started": "Paslauga pradėta"
+      "started": "Paslauga pradėta",
+      "updated": "Rezervacija sėkmingai atnaujinta"
     }
   },
   "sidebar": {
@@ -680,5 +693,55 @@
     "medium": "Vidutinis",
     "oatMilk": "Avižų pienas",
     "small": "Mažas"
+  },
+  "orderPanel": {
+    "addItem": "Pridėti prekę",
+    "cancel": "Atšaukti",
+    "done": "Išaugoti",
+    "change": "pakeisti",
+    "selectSize": "Dydis:",
+    "selectMilk": "Pienas:",
+    "selectOptions": "Pasirinkite:",
+    "noSize": "Nepasirinktas dydis",
+    "noMilk": "Nepasirinktas pienas",
+    "noOptions": "Nepasirinktia",
+    "extra": "papildoma",
+    "newItem": "Naujas",
+    "originalItem": "Originalus",
+    "decreaseQuantity": "Sumažinti kiekį",
+    "increaseQuantity": "Padidinti kiekį",
+    "remove": "Pašalinti",
+    "clearAll": "Išvalyti viską",
+    "viewTitle": "Dabartinis užsakymas",
+    "originalItems": "Užsakymo prekės",
+    "newItems": "Naujos prekės",
+    "newItemsAdded": "Pridėtos naujos prekės",
+    "discounts": "Nuolaidos",
+    "newTotal": "Nauja suma",
+    "totalNote": "Pakeitimai atnaujins užsakymą #",
+    "subtotal": "Tarpinė suma",
+    "total": "Galutinė suma",
+    "paymentMethod": "Mokėjimo būdas",
+    "paymentMethods": {
+      "Cash": "Grynaisiais",
+      "Card": "Kortele",
+      "Gift card": "Dovanų kortele"
+    },
+    "splitBill": "Padalinti sąskaitą",
+    "splitCount": "Padalinti tarp:",
+    "completePayment": "Baigti apmokėjimą",
+    "updateOrder": "Atnaujinti užsakymą"
+  },
+  "editOrder": {
+    "title": "Redaguoti užsakymą",
+    "subtitle": "Keisti prekes, mokėjimo būdą ir sąskaitą",
+    "cancel": "Atšaukti",
+    "save": "Išsaugoti pakeitimus",
+    "saveChanges": "Išsaugoti pakeitimus"
+  },
+  "editReservation": {
+    "title": "Redaguoti rezervaciją",
+    "subtitle": "Keisti rezervacijos detales",
+    "saveChanges": "Išsaugoti pakeitimus"
   }
 }

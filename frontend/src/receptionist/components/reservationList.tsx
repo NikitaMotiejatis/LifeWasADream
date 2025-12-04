@@ -4,6 +4,7 @@ import { useCurrency } from '@/global/contexts/currencyContext';
 import ReservationFilters from '@/receptionist/components/reservationFilters';
 import ReservationListItem from '@/receptionist/components/reservationListItem';
 import ReservationModal from '@/receptionist/components/reservationModal';
+import { EditReservationPanel } from '@/receptionist/components/editReservation/editReservationPanel';
 import Toast from '@/global/components/toast';
 
 export type Reservation = {
@@ -21,6 +22,21 @@ export const servicesMap: Record<string, { title: string; price: number }> = {
   '2': { title: 'Hair Color', price: 120 },
   '3': { title: 'Manicure', price: 35 },
   '4': { title: 'Pedicure', price: 50 },
+};
+
+// Map EditReservationPanel service IDs to your service IDs
+const serviceIdMapping: Record<string, string> = {
+  'haircut': '1',
+  'color': '2',
+  'manicure': '3',
+  'pedicure': '4',
+};
+
+// Map EditReservationPanel staff IDs to your staff IDs
+const staffIdMapping: Record<string, string> = {
+  'james': 'james',
+  'sarah': 'sarah',
+  'any': 'anyone',
 };
 
 export default function ReservationList() {
@@ -43,6 +59,11 @@ export default function ReservationList() {
   >('complete');
   const [selectedReservation, setSelectedReservation] =
     useState<Reservation | null>(null);
+    
+  // States for edit functionality
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [reservationIdToEdit, setReservationIdToEdit] = useState<string | null>(null);
+  
   const [toast, setToast] = useState<{
     message: string;
     type: 'success' | 'error';
@@ -50,7 +71,6 @@ export default function ReservationList() {
 
   useEffect(() => {
     const load = async () => {
-      // TODO: remove timeout
       await new Promise(r => setTimeout(r, 300));
       const mock: Reservation[] = [
         {
@@ -166,11 +186,86 @@ export default function ReservationList() {
     setModalOpen(true);
   };
 
+  // Handle edit click
+  const handleEditClick = (reservation: Reservation) => {
+    setReservationIdToEdit(reservation.id);
+    setEditModalOpen(true);
+  };
+
   const updateStatus = (id: string, newStatus: Reservation['status']) => {
     setReservations(prev =>
       prev.map(r => (r.id === id ? { ...r, status: newStatus } : r)),
     );
     setModalOpen(false);
+  };
+
+  // Handle saving edits - with better error handling
+  const handleSaveEdit = (reservationData: any) => {
+    try {
+      if (!reservationData) {
+        throw new Error('No reservation data received');
+      }
+
+      // Find original reservation to preserve its status
+      const originalReservation = reservations.find(r => r.id === reservationData.id);
+      
+      if (!originalReservation) {
+        throw new Error(`Reservation with ID ${reservationData.id} not found`);
+      }
+
+      // Create datetime safely
+      let datetime: Date;
+      if (reservationData.date && reservationData.time) {
+        datetime = new Date(`${reservationData.date}T${reservationData.time}`);
+        if (isNaN(datetime.getTime())) {
+          // If date is invalid, use original datetime
+          datetime = originalReservation.datetime;
+        }
+      } else {
+        datetime = originalReservation.datetime;
+      }
+
+      // Map service and staff IDs using mapping objects
+      const serviceId = serviceIdMapping[reservationData.service] || originalReservation.serviceId;
+      const staffId = staffIdMapping[reservationData.staff] || originalReservation.staffId;
+
+      const updatedReservation: Reservation = {
+        id: reservationData.id,
+        customerName: reservationData.customerName || originalReservation.customerName,
+        customerPhone: reservationData.customerPhone || originalReservation.customerPhone,
+        staffId: staffId,
+        serviceId: serviceId,
+        datetime: datetime,
+        status: originalReservation.status, // Keep original status
+      };
+      
+      setReservations(prev =>
+        prev.map(r => (r.id === updatedReservation.id ? updatedReservation : r)),
+      );
+      setEditModalOpen(false);
+      setToast({ 
+        message: t('reservations.toast.updated'), 
+        type: 'success' 
+      });
+    } catch (error: any) {
+      console.error('Error saving reservation:', error);
+      setToast({ 
+        message: `Error: ${error.message}`, 
+        type: 'error' 
+      });
+    }
+    
+    setTimeout(() => setToast(null), 5000);
+  };
+
+  const handleCancelEdit = () => {
+    setEditModalOpen(false);
+    setReservationIdToEdit(null);
+  };
+
+  const showToast = (key: string) => {
+    setToast({ message: t(key), type: 'success' });
+    setTimeout(() => setToast(null), 5000);
   };
 
   if (loading) {
@@ -189,11 +284,6 @@ export default function ReservationList() {
     no_show: reservations.filter(r => r.status === 'no_show').length,
     refund_pending: reservations.filter(r => r.status === 'refund_pending')
       .length,
-  };
-
-  const showToast = (key: string) => {
-    setToast({ message: t(key), type: 'success' });
-    setTimeout(() => setToast(null), 5000);
   };
 
   return (
@@ -231,6 +321,7 @@ export default function ReservationList() {
               reservation={res}
               formatPrice={formatPrice}
               onAction={openModal}
+              onEdit={handleEditClick}
             />
           ))
         )}
@@ -270,6 +361,40 @@ export default function ReservationList() {
           actions[modalType]();
         }}
       />
+
+      {/* Edit Reservation Modal */}
+      {editModalOpen && reservationIdToEdit && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div 
+            className="absolute inset-0 bg-black/50" 
+            onClick={handleCancelEdit} 
+          />
+          
+          <div className="relative w-full max-w-4xl rounded-2xl bg-white p-7 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div className="mb-6 flex items-center justify-between">
+              <h3 className="text-2xl font-bold text-gray-900">
+                {t('reservations.modal.title.edit')} #{reservationIdToEdit}
+              </h3>
+              <button
+                onClick={handleCancelEdit}
+                className="rounded-lg p-2 text-gray-500 hover:bg-gray-100"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            
+            {/* Your existing EditReservationPanel with correct props */}
+            <EditReservationPanel
+              mode="edit"
+              reservationId={reservationIdToEdit}
+              onSave={handleSaveEdit}
+              onCancel={handleCancelEdit}
+            />
+          </div>
+        </div>
+      )}
 
       <Toast toast={toast} />
     </div>
