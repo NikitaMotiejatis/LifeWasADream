@@ -1,11 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useCart, type Variation, type Product } from '@/receptionist/contexts/cartContext';
 import { products as realProducts } from '@/locales/products';
 import TrashcanIcon from '@/icons/trashcanIcon';
 import SearchIcon from '@/icons/searchIcon';
 import VariationModal from '@/receptionist/components/variationModal';
-import { CartProvider } from '@/receptionist/contexts/cartContext';
 
 // Define types
 export type OrderItem = {
@@ -36,10 +35,15 @@ const realMenu: ExtendedProduct[] = realProducts.map(product => ({
 
 const getVariationDisplayName = (t: any, variation: Variation): string => {
   if (!variation.nameKey) return variation.name;
-  const translated = t(variation.nameKey);
-  return translated !== variation.nameKey ? translated : variation.name;
+  try {
+    const translated = t(variation.nameKey);
+    return translated !== variation.nameKey ? translated : variation.name;
+  } catch (error) {
+    return variation.name;
+  }
 };
 
+// Initial mock data
 // Initial mock data
 const createMockOrderItems = (): OrderItem[] => [
   {
@@ -48,9 +52,9 @@ const createMockOrderItems = (): OrderItem[] => [
     quantity: 2,
     selectedVariations: [
       { name: 'Large', nameKey: 'variations.large', priceModifier: 0.8 },
-      { name: 'Oat Milk', nameKey: 'variations.oatMilk', priceModifier: 0.6 },
+      { name: 'Almond Milk', nameKey: 'variations.almondMilk', priceModifier: 0.5 },
     ],
-    finalPrice: 4.5 + 0.8 + 0.6,
+    finalPrice: 4.5 + 0.8 + 0.5, // Base price + large + almond milk
   },
   {
     id: '2',
@@ -354,7 +358,6 @@ function OrderSummaryView({
   );
 }
 
-// Main EditOrderPanel Component
 export function EditOrderPanel({
   orderId,
   onSave,
@@ -364,7 +367,7 @@ export function EditOrderPanel({
   const { t } = useTranslation();
   const { addToCart, clearCart, itemsList } = useCart();
 
-  const [items, setItems] = useState<OrderItem[]>(createMockOrderItems());
+  const [items, setItems] = useState<OrderItem[]>(createMockOrderItems()); // Initialize directly
   const [editingVariationsId, setEditingVariationsId] = useState<string | null>(null);
   const [tempVariations, setTempVariations] = useState<Variation[]>([]);
   const [paymentMethod, setPaymentMethod] = useState<'Cash' | 'Card' | 'Gift card'>('Card');
@@ -372,6 +375,8 @@ export function EditOrderPanel({
   const [splitCount, setSplitCount] = useState(2);
   const [showProductGrid, setShowProductGrid] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+
+
 
   const total = items.reduce((sum, item) => sum + item.finalPrice * item.quantity, 0);
 
@@ -431,18 +436,12 @@ export function EditOrderPanel({
   };
 
   const handleDoneAddingItems = () => {
-    // Helper to ensure variations have nameKey as string
-    const ensureStringNameKey = (v: Variation): Variation => ({
-      ...v,
-      nameKey: v.nameKey || '',
-    });
-
     // Convert cart items to order items format
     const newItems: OrderItem[] = itemsList.map(cartItem => ({
       id: `cart_${Date.now()}_${Math.random()}`,
       product: cartItem.product as ExtendedProduct,
       quantity: cartItem.quantity,
-      selectedVariations: cartItem.selectedVariations.map(ensureStringNameKey),
+      selectedVariations: cartItem.selectedVariations,
       finalPrice: cartItem.product.basePrice + cartItem.selectedVariations.reduce((a, v) => a + (v.priceModifier || 0), 0),
     }));
     
@@ -608,14 +607,14 @@ export function EditOrderPanel({
                         
                         <div className="flex gap-2">
                           {/* Change Variations Button */}
-                          {item.product.variations && item.product.variations.length > 0 && (
-                            <button
-                              onClick={() => startEditingVariations(item.id, item.selectedVariations)}
-                              className="text-sm text-blue-600 hover:text-blue-800"
-                            >
-                              {isEditingVariations ? t('orderPanel.cancel', 'Cancel') : t('orderPanel.change', 'Change')}
-                            </button>
-                          )}
+                             {!isEditingVariations && item.product.variations && item.product.variations.length > 0 && (
+    <button
+      onClick={() => startEditingVariations(item.id, item.selectedVariations)}
+      className="text-sm text-blue-600 hover:text-blue-800"
+    >
+      {t('orderPanel.change', 'Change')}
+    </button>
+  )}
                           
                           {/* Remove Button */}
                           <button
@@ -628,124 +627,124 @@ export function EditOrderPanel({
                         </div>
                       </div>
                       
-                      {/* Variations Edit */}
-                      {isEditingVariations && item.product.variations && item.product.variations.length > 0 && (
-                        <div className="mt-3 p-3 bg-gray-50 rounded-lg">
-                          <p className="text-sm font-medium text-gray-700 mb-2">
-                            {t('orderPanel.selectOptions', 'Select options')}
-                          </p>
-                          <div className="space-y-3">
-                            {/* Size Variations - Show only if product has size variations */}
-                            {item.product.variations.some(v => 
-                              ['Small', 'Medium', 'Large', 'Regular'].includes(v.name)
-                            ) && (
-                              <div>
-                                <p className="text-xs font-medium text-gray-600 mb-1">
-                                  {t('variationModal.size', 'Size')}
-                                </p>
-                                <div className="flex flex-wrap gap-1">
-                                  {item.product.variations
-                                    .filter(v => ['Small', 'Medium', 'Large', 'Regular'].includes(v.name))
-                                    .map((variation) => {
-                                      const isSelected = tempVariations.some(v => v.name === variation.name);
-                                      return (
-                                        <button
-                                          key={variation.name}
-                                          onClick={() => {
-                                            // Remove any existing size variation before adding new one
-                                            const newVariations = tempVariations
-                                              .filter(v => !['Small', 'Medium', 'Large', 'Regular'].includes(v.name))
-                                              .concat([variation]);
-                                            setTempVariations(newVariations);
-                                          }}
-                                          className={`px-2 py-1 text-xs rounded border ${
-                                            isSelected
-                                              ? 'bg-blue-600 text-white border-blue-600'
-                                              : 'bg-white text-gray-700 border-gray-300'
-                                          }`}
-                                          title={getVariationDisplayName(t, variation)}
-                                        >
-                                          {getVariationDisplayName(t, variation)}
-                                          {variation.priceModifier !== 0 && (
-                                            <span className="ml-1">
-                                              {variation.priceModifier > 0 ? '+' : ''}
-                                              ${variation.priceModifier.toFixed(2)}
-                                            </span>
-                                          )}
-                                        </button>
-                                      );
-                                    })}
-                                </div>
-                              </div>
-                            )}
-                            
-                            {/* Milk Variations */}
-                            {item.product.variations.some(v => 
-                              v.name.toLowerCase().includes('milk') || 
-                              (v.nameKey && v.nameKey.toLowerCase().includes('milk'))
-                            ) ? (
-                              <div>
-                                <p className="text-xs font-medium text-gray-600 mb-1">
-                                  {t('orderPanel.selectMilk', 'Select Milk')}
-                                </p>
-                                <div className="flex flex-wrap gap-1">
-                                  {item.product.variations
-                                    .filter(v => 
-                                      v.name.toLowerCase().includes('milk') || 
-                                      (v.nameKey && v.nameKey.toLowerCase().includes('milk'))
-                                    )
-                                    .map((variation) => {
-                                      const isSelected = tempVariations.some(v => v.name === variation.name);
-                                      return (
-                                        <button
-                                          key={variation.name}
-                                          onClick={() => {
-                                            // Remove any existing milk variation before adding new one
-                                            const newVariations = tempVariations
-                                              .filter(v => 
-                                                !v.name.toLowerCase().includes('milk') && 
-                                                !(v.nameKey && v.nameKey.toLowerCase().includes('milk'))
-                                              )
-                                              .concat([variation]);
-                                            setTempVariations(newVariations);
-                                          }}
-                                          className={`px-2 py-1 text-xs rounded border ${
-                                            isSelected
-                                              ? 'bg-blue-600 text-white border-blue-600'
-                                              : 'bg-white text-gray-700 border-gray-300'
-                                          }`}
-                                          title={getVariationDisplayName(t, variation)}
-                                        >
-                                          {getVariationDisplayName(t, variation)}
-                                          {variation.priceModifier !== 0 && (
-                                            <span className="ml-1">
-                                              {variation.priceModifier > 0 ? '+' : ''}
-                                              ${variation.priceModifier.toFixed(2)}
-                                            </span>
-                                          )}
-                                        </button>
-                                      );
-                                    })}
-                                </div>
-                              </div>
-                            ) : null}
-                          </div>
-                          <div className="mt-3 flex gap-2">
-                            <button
-                              onClick={() => setEditingVariationsId(null)}
-                              className="text-sm text-gray-600 hover:text-gray-800"
-                            >
-                              {t('orderPanel.cancel', 'Cancel')}
-                            </button>
-                            <button
-                              onClick={confirmEditVariations}
-                              className="text-sm bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
-                            >
-                              {t('orderPanel.done', 'Done')}
-                            </button>
-                          </div>
-                        </div>
-                      )}
+                      {/* Variations Edit - Old Design */}
+{isEditingVariations && item.product.variations && item.product.variations.length > 0 && (
+  <div className="mt-3 p-3 bg-gray-50 rounded-lg">
+    <p className="text-sm font-medium text-gray-700 mb-2">
+      {t('orderPanel.selectOptions', 'Select options')}
+    </p>
+    <div className="space-y-3">
+      {/* Size Variations - Show only if product has size variations */}
+      {item.product.variations.some(v => 
+        ['Small', 'Medium', 'Large', 'Regular'].includes(v.name)
+      ) && (
+        <div>
+          <p className="text-xs font-medium text-gray-600 mb-1">
+            {t('variationModal.size', 'Size')}
+          </p>
+          <div className="flex flex-wrap gap-1">
+            {item.product.variations
+              .filter(v => ['Small', 'Medium', 'Large', 'Regular'].includes(v.name))
+              .map((variation) => {
+                const isSelected = tempVariations.some(v => v.name === variation.name);
+                return (
+                  <button
+                    key={variation.name}
+                    onClick={() => {
+                      // Remove any existing size variation before adding new one
+                      const newVariations = tempVariations
+                        .filter(v => !['Small', 'Medium', 'Large', 'Regular'].includes(v.name))
+                        .concat([variation]);
+                      setTempVariations(newVariations);
+                    }}
+                    className={`px-2 py-1 text-xs rounded border ${
+                      isSelected
+                        ? 'bg-blue-600 text-white border-blue-600'
+                        : 'bg-white text-gray-700 border-gray-300'
+                    }`}
+                    title={getVariationDisplayName(t, variation)}
+                  >
+                    {getVariationDisplayName(t, variation)}
+                    {variation.priceModifier !== 0 && (
+                      <span className="ml-1">
+                        {variation.priceModifier > 0 ? '+' : ''}
+                        ${variation.priceModifier.toFixed(2)}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+          </div>
+        </div>
+      )}
+      
+      {/* Milk Variations - Old Design */}
+      {item.product.variations.some(v => 
+        v.name.toLowerCase().includes('milk') || 
+        (v.nameKey && v.nameKey.toLowerCase().includes('milk'))
+      ) ? (
+        <div>
+          <p className="text-xs font-medium text-gray-600 mb-1">
+            {t('orderPanel.selectMilk', 'Select Milk')}
+          </p>
+          <div className="flex flex-wrap gap-1">
+            {item.product.variations
+              .filter(v => 
+                v.name.toLowerCase().includes('milk') || 
+                (v.nameKey && v.nameKey.toLowerCase().includes('milk'))
+              )
+              .map((variation) => {
+                const isSelected = tempVariations.some(v => v.name === variation.name);
+                return (
+                  <button
+                    key={variation.name}
+                    onClick={() => {
+                      // Remove any existing milk variation before adding new one
+                      const newVariations = tempVariations
+                        .filter(v => 
+                          !v.name.toLowerCase().includes('milk') && 
+                          !(v.nameKey && v.nameKey.toLowerCase().includes('milk'))
+                        )
+                        .concat([variation]);
+                      setTempVariations(newVariations);
+                    }}
+                    className={`px-2 py-1 text-xs rounded border ${
+                      isSelected
+                        ? 'bg-blue-600 text-white border-blue-600'
+                        : 'bg-white text-gray-700 border-gray-300'
+                    }`}
+                    title={getVariationDisplayName(t, variation)}
+                  >
+                    {getVariationDisplayName(t, variation)}
+                    {variation.priceModifier !== 0 && (
+                      <span className="ml-1">
+                        {variation.priceModifier > 0 ? '+' : ''}
+                        ${variation.priceModifier.toFixed(2)}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+          </div>
+        </div>
+      ) : null}
+    </div>
+    <div className="mt-3 flex gap-2">
+      <button
+        onClick={() => setEditingVariationsId(null)}
+        className="text-sm text-gray-600 hover:text-gray-800"
+      >
+        {t('orderPanel.cancel', 'Cancel')}
+      </button>
+      <button
+        onClick={confirmEditVariations}
+        className="text-sm bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
+      >
+        {t('orderPanel.done', 'Done')}
+      </button>
+    </div>
+  </div>
+)}
                     </div>
                   </div>
                 </div>
@@ -845,8 +844,8 @@ export function EditOrderPanel({
         )}
       </div>
 
-      {/* Action Buttons - Cancel and Save */}
-      <div className="flex gap-3 pt-4 border-t border-gray-300 mb-3">
+      {/* Action Buttons */}
+      <div className="flex gap-3 pt-4 border-t border-gray-300">
         <button
           onClick={onCancel}
           className="flex-1 rounded-lg border border-gray-300 py-3 text-sm font-medium hover:bg-gray-50"
@@ -860,29 +859,20 @@ export function EditOrderPanel({
           {t('editOrder.saveChanges', 'Save Changes')}
         </button>
       </div>
-
-      {/* Payment Button - Below Cancel and Save */}
-      <div className="mb-6">
-        <button
-          onClick={handlePayment}
-          className="w-full rounded-lg bg-green-600 py-3 text-sm font-medium text-white hover:bg-green-700"
-        >
-          {t('orderSummary.completePayment', 'Complete Payment')}
-        </button>
-      </div>
     </div>
   );
 }
 
+// Simple wrapper component for the page
 export default function EditOrderPage() {
   return (
-    <CartProvider>
+    <div className="p-6">
       <EditOrderPanel 
         orderId="123" 
         mode="edit"
         onSave={(items) => console.log('Save:', items)}
         onCancel={() => console.log('Cancel')}
       />
-    </CartProvider>
+    </div>
   );
 }
