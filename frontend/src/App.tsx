@@ -19,6 +19,7 @@ import RefundApprovalsPage from '@/manager/pages/refundApprovalsPage';
 import ReportsAnalyticsPage from '@/manager/pages/reportsAnalyticsPage';
 import InventoryOverviewPage from '@/manager/pages/inventoryOverviewPage';
 import EditOrderPage from '@/receptionist/pages/editOrderPage';
+import EditReservationPage from '@/receptionist/pages/editReservationPage';
 
 const router = createBrowserRouter(
   [
@@ -39,6 +40,8 @@ const router = createBrowserRouter(
     { path: '/reports', element: <ReportsAnalyticsPage /> },
     { path: '/inventory', element: <InventoryOverviewPage /> },
     { path: '/edit-order/:orderId', element: <EditOrderPage /> },
+    { path: '/edit-reservation/:reservationId',  element: <EditReservationPage />,
+    },
   ],
   {
     future: {

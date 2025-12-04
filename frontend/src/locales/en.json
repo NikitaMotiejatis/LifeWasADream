@@ -544,7 +544,18 @@
       "fr": "Fr",
       "sa": "Sa",
       "su": "Su"
-    }
+    },
+        "customerInfo": "Customer Information",
+    "customerName": "Customer Name",
+    "customerPhone": "Phone Number",
+    "serviceDetails": "Service Details",
+
+    "date": "Date",
+    "time": "Time",
+    "notes": "Notes",
+    "notesPlaceholder": "Additional notes..."
+
+
   },
   "reservations": {
     "actions": {
@@ -553,7 +564,8 @@
       "complete": "Complete",
       "noShow": "No-Show",
       "refund": "Refund",
-      "start": "Start"
+      "start": "Start",
+      "edit" : "Edit"
     },
     "filters": {
       "all": "All ({{count}})",
@@ -575,7 +587,8 @@
         "complete": "Confirm Completion",
         "noshow": "Mark as No-Show",
         "refund": "Request Refund",
-        "start": "Start Service"
+        "start": "Start Service",
+        "edit" : "Edit"
       },
       "refund": {
         "email": "Customer's Email",
@@ -593,7 +606,8 @@
         "complete": "Complete Service",
         "noshow": "Mark as No-Show",
         "refund": "Request Refund",
-        "start": "Start Service"
+        "start": "Start Service",
+        "edit" : "Edit"
       },
       "totalAmount": "Total Amount"
     },
@@ -619,7 +633,8 @@
       "noShow": "Marked as No-Show",
       "refundCancelled": "Refund request cancelled",
       "refundRequested": "Refund request sent",
-      "started": "Service started"
+      "started": "Service started",
+      "updated": "Reservation updated successfully"
     }
   },
   "sidebar": {
@@ -908,5 +923,11 @@
     "active": "Active",
     "closed": "Closed",
     "refund_pending": "Refund Pending"
+  },
+
+  "editReservation": {
+    "title": "Edit Reservation",
+    "subtitle": "Modify reservation details",
+    "saveChanges": "Save Changes"
   }
 }

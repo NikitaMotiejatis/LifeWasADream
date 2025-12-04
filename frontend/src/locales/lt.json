@@ -552,7 +552,15 @@
       "fr": "Pn",
       "sa": "Št",
       "su": "Sk"
-    }
+    },
+    "customerInfo": "Kliento informacija",
+    "customerName": "Kliento vardas",
+    "customerPhone": "Telefono numeris",
+    "serviceDetails": "Paslaugos detalės",
+    "date": "Data",
+    "time": "Laikas",
+    "notes": "Pastabos",
+    "notesPlaceholder": "Papildomos pastabos..."
   },
   "reservations": {
     "actions": {
@@ -561,7 +569,9 @@
       "complete": "Baigti aptarnavimą",
       "noShow": "Neatvyko",
       "refund": "Grąžinti pinigus",
-      "start": "Pradėti aptarnavimą"
+      "start": "Pradėti aptarnavimą",
+      "edit" : "Edit"
+
     },
     "filters": {
       "all": "Visi ({{count}})",
@@ -583,7 +593,8 @@
         "complete": "Patvirtinti baigimą",
         "noshow": "Pažymėti kaip neatvykusį",
         "refund": "Prašyti grąžinimo",
-        "start": "Pradėti aptarnavimą"
+        "start": "Pradėti aptarnavimą",
+        "edit": "Redaguoti"
       },
       "refund": {
         "email": "Kliento el. paštas",
@@ -601,7 +612,8 @@
         "complete": "Baigti aptarnavimą",
         "noshow": "Pažymėti kaip neatvykusį",
         "refund": "Prašyti pinigų grąžinimo",
-        "start": "Pradėti aptarnavimą"
+        "start": "Pradėti aptarnavimą",
+        "edit": "Redaguoti"
       },
       "totalAmount": "Bendra suma"
     },
@@ -627,7 +639,8 @@
       "noShow": "Pažymėta kaip neatvykęs",
       "refundCancelled": "Grąžinimo prašymas atšauktas",
       "refundRequested": "Grąžinimo prašymas išsiųstas",
-      "started": "Paslauga pradėta"
+      "started": "Paslauga pradėta",
+      "updated": "Rezervacija sėkmingai atnaujinta"
     }
   },
   "sidebar": {
@@ -919,5 +932,10 @@
       "closed": "Uždarytas",
       "refund_pending": "Grąžinimas laukiamas"
     }
+  },
+  "editReservation": {
+    "title": "Redaguoti rezervaciją",
+    "subtitle": "Keisti rezervacijos detales",
+    "saveChanges": "Išsaugoti pakeitimus"
   }
 }

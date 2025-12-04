@@ -13,7 +13,7 @@ import { formatDateTime } from '@/utils/formatDateTime';
 
 type Props = {
   open: boolean;
-  type: 'complete' | 'cancel' | 'noshow' | 'refund' | 'cancel_refund';
+  type: 'complete' | 'cancel' | 'noshow' | 'refund' | 'cancel_refund' | 'edit';
   reservation: Reservation | null;
   onClose: () => void;
   onConfirm: (refundData?: {
@@ -94,7 +94,7 @@ export default function ReservationModal({
           </p>
         </div>
 
-        {(type === 'complete' || type === 'refund') && (
+        {(type === 'complete' || type === 'refund' || type === 'edit') && (
           <div className="mt-6 mb-6 rounded-xl bg-blue-50 px-5 py-4">
             <div className="flex items-center justify-between">
               <span className="text-lg font-semibold text-gray-700">
@@ -195,7 +195,7 @@ export default function ReservationModal({
           <button
             onClick={handleConfirm}
             disabled={isRefundInvalid}
-            className={`flex-1 rounded-lg py-2 text-xs font-medium text-white transition ${type === 'complete' ? 'bg-blue-600 hover:bg-blue-700' : ''} ${type === 'refund' ? 'bg-purple-600 hover:bg-purple-700' : ''} ${type === 'cancel' || type === 'noshow' || type === 'cancel_refund' ? 'bg-red-600 hover:bg-red-700' : ''} disabled:cursor-not-allowed disabled:bg-gray-400 disabled:text-gray-200 disabled:opacity-60`}
+            className={`flex-1 rounded-lg py-2 text-xs font-medium text-white transition ${type === 'complete' || type === 'edit' ? 'bg-blue-600 hover:bg-blue-700' : ''} ${type === 'refund' ? 'bg-purple-600 hover:bg-purple-700' : ''} ${type === 'cancel' || type === 'noshow' || type === 'cancel_refund' ? 'bg-red-600 hover:bg-red-700' : ''} disabled:cursor-not-allowed disabled:bg-gray-400 disabled:text-gray-200 disabled:opacity-60`}
           >
             {t(`reservations.modal.confirm.${type}`)}
           </button>
