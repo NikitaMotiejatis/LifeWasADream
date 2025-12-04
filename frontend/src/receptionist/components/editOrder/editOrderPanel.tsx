@@ -143,7 +143,6 @@ const handleAddItemFromGrid = (product: ExtendedProduct) => {
           <div className="w-1/3 max-w-md">
             <OrderSummaryView
               onBack={handleDoneAddingItems}
-              showPaymentSection={false}
             />
           </div>
         </div>
