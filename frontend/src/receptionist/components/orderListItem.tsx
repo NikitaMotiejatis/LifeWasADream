@@ -1,19 +1,22 @@
+import { useTranslation } from 'react-i18next';
 import { formatDateTime } from '@/utils/formatDateTime';
 
-interface Order {
+type Order = {
   id: string;
   total: number;
   createdAt: Date;
   status: 'active' | 'closed' | 'refund_pending';
-}
+};
 
-interface Props {
+type Props = {
   order: Order;
   formatPrice: (value: number) => string;
   onAction: (type: 'edit' | 'pay' | 'refund' | 'cancel', order: Order) => void;
-}
+};
 
 export default function OrderListItem({ order, formatPrice, onAction }: Props) {
+  const { t } = useTranslation();
+
   return (
     <div className="group rounded-lg bg-white p-5 shadow-sm transition-all hover:shadow-lg hover:ring-2 hover:ring-blue-500/20">
       <div className="flex items-center justify-between gap-4">
@@ -38,14 +41,15 @@ export default function OrderListItem({ order, formatPrice, onAction }: Props) {
               <button
                 onClick={() => onAction('edit', order)}
                 className="rounded-lg border border-gray-300 px-4 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50"
+                aria-label={t('orders.actions.edit')}
               >
-                Edit
+                {t('orders.actions.edit')}
               </button>
               <button
                 onClick={() => onAction('pay', order)}
                 className="rounded-lg bg-blue-600 px-5 py-2 text-xs font-medium text-white shadow-sm hover:bg-blue-700"
               >
-                Close
+                {t('orders.actions.close')}
               </button>
             </>
           ) : order.status === 'closed' ? (
@@ -53,18 +57,18 @@ export default function OrderListItem({ order, formatPrice, onAction }: Props) {
               onClick={() => onAction('refund', order)}
               className="rounded-lg border border-purple-400 bg-purple-50 px-5 py-2 text-xs font-medium text-purple-700 hover:bg-purple-100"
             >
-              Refund
+              {t('orders.actions.refund')}
             </button>
           ) : (
             <div className="flex items-center gap-3">
               <span className="text-sm font-medium text-orange-600">
-                Refund in progress
+                {t('orders.status.refundInProgress')}
               </span>
               <button
                 onClick={() => onAction('cancel', order)}
                 className="rounded-lg border border-orange-400 bg-orange-50 px-5 py-2 text-xs font-medium text-orange-700 hover:bg-orange-100"
               >
-                Cancel
+                {t('orders.actions.cancelRefund')}
               </button>
             </div>
           )}

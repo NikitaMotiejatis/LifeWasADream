@@ -1,13 +1,19 @@
-import { Reservation, servicesMap } from '@/receptionist/components/reservationList';
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import {
+  Reservation,
+  servicesMap,
+} from '@/receptionist/components/reservationList';
 import { useCurrency } from '@/global/contexts/currencyContext';
-import { useNameValidation } from '@/utils/useNameValidation';
-import { usePhoneValidation } from '@/utils/usePhoneValidation';
+import {
+  useNameValidation,
+  usePhoneValidation,
+} from '@/utils/useInputValidation';
 import { formatDateTime } from '@/utils/formatDateTime';
 
-interface Props {
+type Props = {
   open: boolean;
-  type: 'start' | 'complete' | 'cancel' | 'noshow' | 'refund' | 'cancel_refund';
+  type: 'complete' | 'cancel' | 'noshow' | 'refund' | 'cancel_refund';
   reservation: Reservation | null;
   onClose: () => void;
   onConfirm: (refundData?: {
@@ -16,7 +22,7 @@ interface Props {
     email: string;
     reason: string;
   }) => void;
-}
+};
 
 export default function ReservationModal({
   open,
@@ -25,6 +31,7 @@ export default function ReservationModal({
   onClose,
   onConfirm,
 }: Props) {
+  const { t } = useTranslation();
   const { formatPrice } = useCurrency();
 
   const name = useNameValidation(reservation?.customerName ?? '');
@@ -48,15 +55,6 @@ export default function ReservationModal({
   }, [open, reservation]);
 
   if (!open || !reservation) return null;
-
-  const titles = {
-    start: 'Start Service',
-    complete: 'Complete Service',
-    cancel: 'Cancel Reservation',
-    noshow: 'Mark as No-Show',
-    refund: 'Request Refund',
-    cancel_refund: 'Cancel Refund Request',
-  };
 
   const servicePrice = servicesMap[reservation.serviceId]?.price || 0;
 
@@ -85,7 +83,7 @@ export default function ReservationModal({
 
       <div className="relative w-full max-w-md rounded-2xl bg-white p-7 shadow-2xl">
         <h3 className="mb-5 text-xl font-bold text-gray-900">
-          {titles[type]} #{reservation.id}
+          {t(`reservations.modal.title.${type}`)} #{reservation.id}
         </h3>
 
         <div className="flex justify-evenly text-sm text-gray-700">
@@ -100,7 +98,7 @@ export default function ReservationModal({
           <div className="mt-6 mb-6 rounded-xl bg-blue-50 px-5 py-4">
             <div className="flex items-center justify-between">
               <span className="text-lg font-semibold text-gray-700">
-                Total Amount
+                {t('reservations.modal.totalAmount')}
               </span>
               <span className="text-2xl font-bold text-blue-600">
                 {formatPrice(servicePrice)}
@@ -113,7 +111,8 @@ export default function ReservationModal({
           <div className="mb-6 space-y-5">
             <div>
               <label className="mb-1 block text-sm font-medium text-gray-700">
-                Customer's Full Name <span className="text-red-500">*</span>
+                {t('reservations.modal.refund.name')}{' '}
+                <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -124,18 +123,19 @@ export default function ReservationModal({
                     ? 'border-red-500 focus:border-red-500'
                     : 'border-gray-300 focus:border-blue-500'
                 }`}
-                placeholder="John Doe"
+                placeholder={t('reservations.modal.refund.namePlaceholder')}
               />
               {name.error && (
                 <p className="animate-in fade-in mt-1 text-xs text-red-600 duration-200">
-                  Only letters, spaces, hyphens and apostrophes allowed
+                  {t('validation.name')}
                 </p>
               )}
             </div>
 
             <div>
               <label className="mb-1 block text-sm font-medium text-gray-700">
-                Customer's Phone Number <span className="text-red-500">*</span>
+                {t('reservations.modal.refund.phone')}{' '}
+                <span className="text-red-500">*</span>
               </label>
               <input
                 type="tel"
@@ -146,38 +146,39 @@ export default function ReservationModal({
                     ? 'border-red-500 focus:border-red-500'
                     : 'border-gray-300 focus:border-blue-500'
                 }`}
-                placeholder="+37060000000"
+                placeholder={t('reservations.modal.refund.phonePlaceholder')}
               />
               {phone.error && (
                 <p className="animate-in fade-in mt-1 text-xs text-red-600 duration-200">
-                  Only numbers and optional "+" at the beginning
+                  {t('validation.phone')}
                 </p>
               )}
             </div>
 
             <div>
               <label className="mb-1 block text-sm font-medium text-gray-700">
-                Customer's Email
+                {t('reservations.modal.refund.email')}
               </label>
               <input
                 type="email"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
-                placeholder="john@example.com"
+                placeholder={t('reservations.modal.refund.emailPlaceholder')}
               />
             </div>
 
             <div>
               <label className="mb-1 block text-sm font-medium text-gray-700">
-                Reason for Refund <span className="text-red-500">*</span>
+                {t('reservations.modal.refund.reason')}{' '}
+                <span className="text-red-500">*</span>
               </label>
               <textarea
                 rows={3}
                 value={reason}
                 onChange={e => setReason(e.target.value)}
                 className="w-full resize-none rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
-                placeholder="Please explain why Customer wants a refund..."
+                placeholder={t('reservations.modal.refund.reasonPlaceholder')}
               />
             </div>
           </div>
@@ -188,20 +189,15 @@ export default function ReservationModal({
             onClick={onClose}
             className="flex-1 rounded-lg border border-gray-400 py-2 text-xs font-medium transition hover:bg-gray-100"
           >
-            Cancel
+            {t('common.cancel')}
           </button>
 
           <button
             onClick={handleConfirm}
             disabled={isRefundInvalid}
-            className={`flex-1 rounded-lg py-2 text-xs font-medium text-white transition ${type === 'complete' ? 'bg-green-600 hover:bg-green-700' : ''} ${type === 'refund' ? 'bg-purple-600 hover:bg-purple-700' : ''} ${type === 'cancel' || type === 'noshow' || type === 'cancel_refund' ? 'bg-red-600 hover:bg-red-700' : ''} ${type === 'start' ? 'bg-blue-600 hover:bg-blue-700' : ''} disabled:cursor-not-allowed disabled:bg-gray-400 disabled:text-gray-200 disabled:opacity-60`}
+            className={`flex-1 rounded-lg py-2 text-xs font-medium text-white transition ${type === 'complete' ? 'bg-blue-600 hover:bg-blue-700' : ''} ${type === 'refund' ? 'bg-purple-600 hover:bg-purple-700' : ''} ${type === 'cancel' || type === 'noshow' || type === 'cancel_refund' ? 'bg-red-600 hover:bg-red-700' : ''} disabled:cursor-not-allowed disabled:bg-gray-400 disabled:text-gray-200 disabled:opacity-60`}
           >
-            {type === 'start' && 'Start Service'}
-            {type === 'complete' && 'Confirm Completion'}
-            {type === 'cancel' && 'Confirm Cancellation'}
-            {type === 'noshow' && 'Mark as No-Show'}
-            {type === 'refund' && 'Request Refund'}
-            {type === 'cancel_refund' && 'Cancel Refund Request'}
+            {t(`reservations.modal.confirm.${type}`)}
           </button>
         </div>
       </div>

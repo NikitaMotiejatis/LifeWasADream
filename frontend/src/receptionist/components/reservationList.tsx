@@ -1,30 +1,19 @@
 import { useState, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useCurrency } from '@/global/contexts/currencyContext';
 import ReservationFilters from '@/receptionist/components/reservationFilters';
 import ReservationListItem from '@/receptionist/components/reservationListItem';
 import ReservationModal from '@/receptionist/components/reservationModal';
 import Toast from '@/global/components/toast';
 
-export interface Reservation {
+export type Reservation = {
   id: string;
   customerName: string;
   customerPhone: string;
   staffId: string;
   serviceId: string;
   datetime: Date;
-  status:
-    | 'pending'
-    | 'in_service'
-    | 'completed'
-    | 'cancelled'
-    | 'no_show'
-    | 'refund_pending';
-}
-
-const staffMap: Record<string, string> = {
-  anyone: 'Any Staff',
-  james: 'James Chen',
-  sarah: 'Sarah Johnson',
+  status: 'pending' | 'completed' | 'cancelled' | 'no_show' | 'refund_pending';
 };
 
 export const servicesMap: Record<string, { title: string; price: number }> = {
@@ -35,6 +24,7 @@ export const servicesMap: Record<string, { title: string; price: number }> = {
 };
 
 export default function ReservationList() {
+  const { t } = useTranslation();
   const { formatPrice } = useCurrency();
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [loading, setLoading] = useState(true);
@@ -44,19 +34,13 @@ export default function ReservationList() {
   const [dateTo, setDateTo] = useState('');
   const [timeTo, setTimeTo] = useState('');
   const [statusFilter, setStatusFilter] = useState<
-    | 'all'
-    | 'pending'
-    | 'in_service'
-    | 'completed'
-    | 'cancelled'
-    | 'no_show'
-    | 'refund_pending'
+    'all' | 'pending' | 'completed' | 'cancelled' | 'no_show' | 'refund_pending'
   >('all');
 
   const [modalOpen, setModalOpen] = useState(false);
   const [modalType, setModalType] = useState<
-    'start' | 'complete' | 'cancel' | 'noshow' | 'refund' | 'cancel_refund'
-  >('start');
+    'complete' | 'cancel' | 'noshow' | 'refund' | 'cancel_refund'
+  >('complete');
   const [selectedReservation, setSelectedReservation] =
     useState<Reservation | null>(null);
   const [toast, setToast] = useState<{
@@ -66,7 +50,8 @@ export default function ReservationList() {
 
   useEffect(() => {
     const load = async () => {
-      await new Promise(r => setTimeout(r, 500));
+      // TODO: remove timeout
+      await new Promise(r => setTimeout(r, 300));
       const mock: Reservation[] = [
         {
           id: 'RES-301',
@@ -84,7 +69,7 @@ export default function ReservationList() {
           staffId: 'anyone',
           serviceId: '3',
           datetime: new Date('2025-11-30T14:30:00'),
-          status: 'in_service',
+          status: 'pending',
         },
         {
           id: 'RES-303',
@@ -102,7 +87,7 @@ export default function ReservationList() {
           staffId: 'james',
           serviceId: '2',
           datetime: new Date('2025-12-18T16:00:00'),
-          status: 'pending',
+          status: 'cancelled',
         },
         {
           id: 'RES-305',
@@ -121,72 +106,49 @@ export default function ReservationList() {
   }, []);
 
   const sortedAndFiltered = useMemo(() => {
-    const buildDateTime = (
-      dateStr: string,
-      timeStr: string,
-      isEnd: boolean = false,
-    ) => {
-      if (!dateStr) return null;
+    const from =
+      dateFrom && timeFrom
+        ? new Date(`${dateFrom}T${timeFrom}`)
+        : dateFrom
+          ? new Date(`${dateFrom}T00:00`)
+          : null;
+    const to =
+      dateTo && timeTo
+        ? new Date(`${dateTo}T${timeTo}`)
+        : dateTo
+          ? new Date(`${dateTo}T23:59:59`)
+          : null;
 
-      let time = timeStr;
-      if (!time) {
-        time = isEnd ? '23:59' : '00:00';
-      }
+    return reservations
+      .filter(r => {
+        if (statusFilter !== 'all' && r.status !== statusFilter) return false;
 
-      return new Date(`${dateStr}T${time}`);
-    };
+        if (searchTerm) {
+          const q = searchTerm.toLowerCase();
+          const searchable =
+            `${r.id} ${r.customerName} ${r.customerPhone} ${t(`reservations.services.${r.serviceId}`)} ${t(`reservations.staff.${r.staffId}`)}`.toLowerCase();
+          if (!searchable.includes(q)) return false;
+        }
 
-    const fromDateTime = buildDateTime(dateFrom, timeFrom, false);
-    const toDateTime = buildDateTime(dateTo, timeTo, true);
+        const time = r.datetime.getTime();
+        if (from && time < from.getTime()) return false;
+        if (to && time > to.getTime()) return false;
 
-    let filtered = reservations.filter(r => {
-      if (statusFilter === 'pending' && r.status !== 'pending') return false;
-      if (statusFilter === 'in_service' && r.status !== 'in_service')
-        return false;
-      if (statusFilter === 'completed' && r.status !== 'completed')
-        return false;
-      if (statusFilter === 'cancelled' && r.status !== 'cancelled')
-        return false;
-      if (statusFilter === 'no_show' && r.status !== 'no_show') return false;
-      if (statusFilter === 'refund_pending' && r.status !== 'refund_pending')
-        return false;
-
-      if (searchTerm) {
-        const query = searchTerm.toLowerCase().trim();
-
-        const searchable = [
-          r.id,
-          r.customerName,
-          r.customerPhone,
-          servicesMap[r.serviceId]?.title || '',
-          staffMap[r.staffId] ||
-            (r.staffId === 'anyone' ? 'any staff' : r.staffId),
-        ]
-          .join(' ')
-          .toLowerCase();
-
-        if (!searchable.includes(query)) return false;
-      }
-
-      const reservationTime = r.datetime.getTime();
-      if (fromDateTime && reservationTime < fromDateTime.getTime())
-        return false;
-      if (toDateTime && reservationTime > toDateTime.getTime()) return false;
-      return true;
-    });
-
-    return [...filtered].sort((a, b) => {
-      const reservation = {
-        in_service: 0,
-        pending: 1,
-        refund_pending: 2,
-        completed: 3,
-        cancelled: 4,
-        no_show: 5,
-      };
-      const diff = reservation[a.status] - reservation[b.status];
-      return diff !== 0 ? diff : parseInt(b.id) - parseInt(a.id);
-    });
+        return true;
+      })
+      .sort((a, b) => {
+        const order: Record<Reservation['status'], number> = {
+          pending: 0,
+          refund_pending: 1,
+          completed: 2,
+          cancelled: 3,
+          no_show: 4,
+        };
+        return (
+          order[a.status] - order[b.status] ||
+          parseInt(b.id.slice(4)) - parseInt(a.id.slice(4))
+        );
+      });
   }, [
     reservations,
     searchTerm,
@@ -195,20 +157,12 @@ export default function ReservationList() {
     timeFrom,
     dateTo,
     timeTo,
+    t,
   ]);
 
-  const openModal = (
-    type:
-      | 'start'
-      | 'complete'
-      | 'cancel'
-      | 'noshow'
-      | 'refund'
-      | 'cancel_refund',
-    reservation: Reservation,
-  ) => {
+  const openModal = (type: typeof modalType, res: Reservation) => {
     setModalType(type);
-    setSelectedReservation(reservation);
+    setSelectedReservation(res);
     setModalOpen(true);
   };
 
@@ -222,7 +176,7 @@ export default function ReservationList() {
   if (loading) {
     return (
       <div className="p-10 text-center text-gray-500">
-        Loading reservations...
+        {t('reservations.loading')}
       </div>
     );
   }
@@ -230,7 +184,6 @@ export default function ReservationList() {
   const counts = {
     all: reservations.length,
     pending: reservations.filter(r => r.status === 'pending').length,
-    in_service: reservations.filter(r => r.status === 'in_service').length,
     completed: reservations.filter(r => r.status === 'completed').length,
     cancelled: reservations.filter(r => r.status === 'cancelled').length,
     no_show: reservations.filter(r => r.status === 'no_show').length,
@@ -238,18 +191,17 @@ export default function ReservationList() {
       .length,
   };
 
-  const showToast = (
-    message: string,
-    type: 'success' | 'error' = 'success',
-  ) => {
-    setToast({ message, type });
-    setTimeout(() => setToast(null), 5800);
+  const showToast = (key: string) => {
+    setToast({ message: t(key), type: 'success' });
+    setTimeout(() => setToast(null), 5000);
   };
 
   return (
     <div className="space-y-6">
       <div className="rounded-lg bg-white p-5 shadow">
-        <h2 className="mb-5 text-xl font-bold text-gray-800">Reservations</h2>
+        <h2 className="mb-5 text-xl font-bold text-gray-800">
+          {t('reservations.title')}
+        </h2>
         <ReservationFilters
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
@@ -270,7 +222,7 @@ export default function ReservationList() {
       <div className="mt-6 space-y-3">
         {sortedAndFiltered.length === 0 ? (
           <p className="py-12 text-center text-gray-400">
-            No reservations found
+            {t('reservations.noReservations')}
           </p>
         ) : (
           sortedAndFiltered.map(res => (
@@ -278,8 +230,6 @@ export default function ReservationList() {
               key={res.id}
               reservation={res}
               formatPrice={formatPrice}
-              staffMap={staffMap}
-              servicesMap={servicesMap}
               onAction={openModal}
             />
           ))
@@ -295,28 +245,25 @@ export default function ReservationList() {
           if (!selectedReservation) return;
 
           const actions: Record<typeof modalType, () => void> = {
-            start: () => {
-              updateStatus(selectedReservation.id, 'in_service');
-              showToast('Service marked as started.');
-            },
             complete: () => {
               updateStatus(selectedReservation.id, 'completed');
+              showToast('reservations.toast.completed');
             },
             cancel: () => {
               updateStatus(selectedReservation.id, 'cancelled');
-              showToast('Reservation cancelled.');
+              showToast('reservations.toast.cancelled');
             },
             noshow: () => {
               updateStatus(selectedReservation.id, 'no_show');
-              showToast('Marked as No-Show.');
+              showToast('reservations.toast.noShow');
             },
             refund: () => {
               updateStatus(selectedReservation.id, 'refund_pending');
-              showToast('Refund request sent successfully.');
+              showToast('reservations.toast.refundRequested');
             },
             cancel_refund: () => {
               updateStatus(selectedReservation.id, 'completed');
-              showToast('Refund request cancelled.');
+              showToast('reservations.toast.refundCancelled');
             },
           };
 

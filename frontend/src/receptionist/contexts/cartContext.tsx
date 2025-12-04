@@ -3,12 +3,14 @@ import { Currency, useCurrency } from '@/global/contexts/currencyContext';
 
 export type Variation = {
   name: string;
+  nameKey?: string;
   priceModifier: number;
 };
 
 export type Product = {
   id: string;
   name: string;
+  nameKey?: string;
   basePrice: number;
   categories?: string[];
   variations?: Variation[];

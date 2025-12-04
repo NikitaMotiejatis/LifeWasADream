@@ -1,30 +1,39 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import Topbar from '@/global/components/topbar';
 import SidebarSupplier from '@/supplier/components/sidebarSupplier';
 import InvoiceCard from '@/supplier/components/invoiceCard';
+import { useCurrency } from '@/global/contexts/currencyContext';
 
-interface InvoiceItem {
-  productName: string;
+type InvoiceItem = {
+  productKey: string;
   quantity: number;
-  unit: string;
+  unit: 'kg' | 'liters' | 'pcs' | 'bottles';
   unitPrice: number;
   totalPrice: number;
-}
+};
 
-export interface Invoice {
-    id: string;
-    orderId: string;
-    branch: string;
-    status: 'PAID' | 'APPROVED' | 'PENDING' | 'OVERDUE';
-    amount: number;
-    invoiceDate: string;
-    dueDate: string;
-    items: InvoiceItem[];
-    note?: string;
-}
-
+export type Invoice = {
+  id: string;
+  orderId: string;
+  branch: string;
+  status: 'PAID' | 'APPROVED' | 'PENDING' | 'OVERDUE';
+  amount: number;
+  invoiceDate: string;
+  dueDate: string;
+  items: InvoiceItem[];
+  note?: string;
+};
 
 export default function InvoiceStatusPage() {
+  const { t, i18n } = useTranslation();
+  const { formatPrice } = useCurrency();
+  const tp = (key: string) =>
+    t(`invoices.products.${key}`, { defaultValue: key });
+  const tu = (unit: string) =>
+    t(`invoices.units.${unit}`, { defaultValue: unit });
+  const ts = (status: string) => t(`invoices.statuses.${status}`);
+
   const [invoices] = useState<Invoice[]>([
     {
       id: 'INV-2025-0847',
@@ -36,21 +45,21 @@ export default function InvoiceStatusPage() {
       dueDate: '2025-11-02',
       items: [
         {
-          productName: 'Coffee Beans (Arabica)',
+          productKey: 'Coffee Beans (Arabica)',
           quantity: 50,
           unit: 'kg',
           unitPrice: 35.0,
           totalPrice: 1750.0,
         },
         {
-          productName: 'Milk (Whole)',
+          productKey: 'Milk (Whole)',
           quantity: 40,
           unit: 'liters',
           unitPrice: 8.5,
           totalPrice: 340.0,
         },
         {
-          productName: 'Sugar',
+          productKey: 'Sugar',
           quantity: 25,
           unit: 'kg',
           unitPrice: 12.0,
@@ -69,14 +78,14 @@ export default function InvoiceStatusPage() {
       dueDate: '2025-11-03',
       items: [
         {
-          productName: 'Coffee Beans (Arabica)',
+          productKey: 'Coffee Beans (Arabica)',
           quantity: 40,
           unit: 'kg',
           unitPrice: 35.0,
           totalPrice: 1400.0,
         },
         {
-          productName: 'Paper Cups (12oz)',
+          productKey: 'Paper Cups (12oz)',
           quantity: 350,
           unit: 'pcs',
           unitPrice: 1.4,
@@ -94,14 +103,14 @@ export default function InvoiceStatusPage() {
       dueDate: '2025-11-04',
       items: [
         {
-          productName: 'Milk (Whole)',
+          productKey: 'Milk (Whole)',
           quantity: 100,
           unit: 'liters',
           unitPrice: 8.5,
           totalPrice: 850.0,
         },
         {
-          productName: 'Syrups (Assorted)',
+          productKey: 'Syrups (Assorted)',
           quantity: 50,
           unit: 'bottles',
           unitPrice: 47.0,
@@ -119,14 +128,14 @@ export default function InvoiceStatusPage() {
       dueDate: '2025-10-25',
       items: [
         {
-          productName: 'Sugar',
+          productKey: 'Sugar',
           quantity: 75,
           unit: 'kg',
           unitPrice: 12.0,
           totalPrice: 900.0,
         },
         {
-          productName: 'Paper Napkins',
+          productKey: 'Paper Napkins',
           quantity: 500,
           unit: 'pcs',
           unitPrice: 1.5,
@@ -136,7 +145,9 @@ export default function InvoiceStatusPage() {
     },
   ]);
 
-  const [selectedStatus, setSelectedStatus] = useState<'ALL' | 'PAID' | 'APPROVED' | 'PENDING' | 'OVERDUE'>('ALL');
+  const [selectedStatus, setSelectedStatus] = useState<
+    'ALL' | 'PAID' | 'APPROVED' | 'PENDING' | 'OVERDUE'
+  >('ALL');
 
   const paidCount = invoices.filter(i => i.status === 'PAID').length;
   const approvedCount = invoices.filter(i => i.status === 'APPROVED').length;
@@ -191,82 +202,123 @@ export default function InvoiceStatusPage() {
   return (
     <div className="flex h-screen w-full">
       <SidebarSupplier />
-
       <div className="flex flex-1 flex-col">
         <Topbar />
 
         <div className="flex-1 overflow-auto bg-gray-100 p-6">
           <div className="mb-6">
-            <h1 className="mb-2 text-3xl font-bold text-gray-900">Invoice Status</h1>
-            <p className="text-gray-600">Track payment status for all deliveries</p>
+            <h1 className="mb-2 text-3xl font-bold text-gray-900">
+              {t('invoices.pageTitle')}
+            </h1>
+            <p className="text-gray-600">{t('invoices.pageSubtitle')}</p>
           </div>
 
           {/* Summary Cards */}
           <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-5">
             <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-              <p className="text-sm font-semibold text-gray-600">TOTAL INVOICES</p>
-              <p className="mt-2 text-3xl font-bold text-gray-900">{invoices.length}</p>
-              <p className="mt-1 text-sm text-gray-600">This month</p>
+              <p className="text-sm font-semibold text-gray-600">
+                {t('invoices.summary.totalInvoices')}
+              </p>
+              <p className="mt-2 text-3xl font-bold text-gray-900">
+                {invoices.length}
+              </p>
+              <p className="mt-1 text-sm text-gray-600">
+                {t('invoices.summary.thisMonth')}
+              </p>
             </div>
             <div className="rounded-lg border border-green-200 bg-green-50 p-6 shadow-sm">
-              <p className="text-sm font-semibold text-green-600">PAID</p>
-              <p className="mt-2 text-3xl font-bold text-green-900">{paidCount}</p>
-              <p className="mt-1 text-sm text-green-700">Completed payments</p>
+              <p className="text-sm font-semibold text-green-600">
+                {t('invoices.summary.paid')}
+              </p>
+              <p className="mt-2 text-3xl font-bold text-green-900">
+                {paidCount}
+              </p>
+              <p className="mt-1 text-sm text-green-700">
+                {t('invoices.summary.paidDesc')}
+              </p>
             </div>
             <div className="rounded-lg border border-blue-200 bg-blue-50 p-6 shadow-sm">
-              <p className="text-sm font-semibold text-blue-600">APPROVED</p>
-              <p className="mt-2 text-3xl font-bold text-blue-900">{approvedCount}</p>
-              <p className="mt-1 text-sm text-blue-700">Awaiting approval</p>
+              <p className="text-sm font-semibold text-blue-600">
+                {t('invoices.summary.approved')}
+              </p>
+              <p className="mt-2 text-3xl font-bold text-blue-900">
+                {approvedCount}
+              </p>
+              <p className="mt-1 text-sm text-blue-700">
+                {t('invoices.summary.approvedDesc')}
+              </p>
             </div>
             <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-6 shadow-sm">
-              <p className="text-sm font-semibold text-yellow-600">PENDING</p>
-              <p className="mt-2 text-3xl font-bold text-yellow-900">{pendingCount}</p>
-              <p className="mt-1 text-sm text-yellow-700">Awaiting payment</p>
+              <p className="text-sm font-semibold text-yellow-600">
+                {t('invoices.summary.pending')}
+              </p>
+              <p className="mt-2 text-3xl font-bold text-yellow-900">
+                {pendingCount}
+              </p>
+              <p className="mt-1 text-sm text-yellow-700">
+                {t('invoices.summary.pendingDesc')}
+              </p>
             </div>
             <div className="rounded-lg border border-red-200 bg-red-50 p-6 shadow-sm">
-              <p className="text-sm font-semibold text-red-600">OVERDUE</p>
-              <p className="mt-2 text-3xl font-bold text-red-900">{overdueCount}</p>
-              <p className="mt-1 text-sm text-red-700">Requires attention</p>
+              <p className="text-sm font-semibold text-red-600">
+                {t('invoices.summary.overdue')}
+              </p>
+              <p className="mt-2 text-3xl font-bold text-red-900">
+                {overdueCount}
+              </p>
+              <p className="mt-1 text-sm text-red-700">
+                {t('invoices.summary.overdueDesc')}
+              </p>
             </div>
           </div>
 
-          {/* Total Invoice Value */}
+          {/* Total Value */}
           <div className="mb-6 rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-            <p className="text-sm font-semibold text-gray-600">TOTAL INVOICE VALUE</p>
-            <p className="mt-2 text-4xl font-bold text-gray-900">${totalAmount.toLocaleString()}</p>
+            <p className="text-sm font-semibold text-gray-600">
+              {t('invoices.totalValue')}
+            </p>
+            <p className="mt-2 text-4xl font-bold text-gray-900">
+              {formatPrice(totalAmount)}
+            </p>
           </div>
 
-          {/* Filter Tabs */} {/*TODO: Make filtration combinable */}
+          {/* Filter Tabs */}
           <div className="mb-6 flex gap-2 rounded-lg bg-white p-4 shadow-sm">
-            {(['ALL', 'PAID', 'APPROVED', 'PENDING', 'OVERDUE'] as const).map(status => (
-              <button
-                key={status}
-                onClick={() => setSelectedStatus(status)}
-                className={`rounded-lg px-4 py-2 font-medium transition-all ${
-                  selectedStatus === status
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                {status === 'ALL' ? 'All Statuses' : status}
-              </button>
+            {(['ALL', 'PAID', 'APPROVED', 'PENDING', 'OVERDUE'] as const).map(
+              status => (
+                <button
+                  key={status}
+                  onClick={() => setSelectedStatus(status)}
+                  className={`rounded-lg px-4 py-2 font-medium transition-all ${
+                    selectedStatus === status
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  {status === 'ALL'
+                    ? t('invoices.filters.all')
+                    : t(`invoices.filters.${status.toLowerCase()}`)}
+                </button>
+              ),
+            )}
+          </div>
+
+          {/* Invoices List */}
+          <div className="space-y-4">
+            {filteredInvoices.map(invoice => (
+              <InvoiceCard
+                key={invoice.id}
+                invoice={invoice}
+                translateProduct={tp}
+                translateUnit={tu}
+                onViewDetails={handleViewDetails}
+              />
             ))}
           </div>
 
-            {/* Invoices List */}
-            <div className="space-y-4">
-                {filteredInvoices.map(invoice => (
-                    <InvoiceCard
-                        key={invoice.id}
-                        invoice={invoice}
-                        onViewDetails={handleViewDetails}
-                    />
-                ))}
-            </div>
-
           {filteredInvoices.length === 0 && (
             <div className="rounded-lg border border-gray-200 bg-white p-12 text-center">
-              <p className="text-gray-600">No invoices found.</p>
+              <p className="text-gray-600">{t('invoices.noInvoices')}</p>
             </div>
           )}
         </div>
