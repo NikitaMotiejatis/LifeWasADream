@@ -849,6 +849,7 @@
     }
   },
   "orderPanel": {
+      "addItem": "Pridėti prekę",
   "cancel": "Atšaukti",
   "done": "Baigta",
   "change": "pakeisti",
@@ -890,7 +891,6 @@
   "subtitle": "Keisti prekes, mokėjimo būdą ir sąskaitą",
   "cancel": "Atšaukti",
   "save": "Išsaugoti pakeitimus",
-  "saveChanges": "Išsaugoti pakeitimus",
-  "addItem": "Pridėti prekę"
+  "saveChanges": "Išsaugoti pakeitimus"
 }
 }

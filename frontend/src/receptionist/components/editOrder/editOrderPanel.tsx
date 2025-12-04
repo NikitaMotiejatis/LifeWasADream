@@ -214,7 +214,7 @@ export function EditOrderPanel({
               onClick={handleStartAddingItems}
               className="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
             >
-              {t('addItem', 'Add Items')}
+               {t('orderPanel.addItem', 'Add Item')} 
             </button>
           </div>
         ) : (
@@ -259,7 +259,7 @@ export function EditOrderPanel({
                 d="M12 4v16m8-8H4"
               />
             </svg>
-            <span className="font-medium">{t('addItem', 'Add Items')}</span>
+            <span className="font-medium"> {t('orderPanel.addItem', 'Add Item')} </span>
           </button>
         </div>
       )}
@@ -324,7 +324,7 @@ export function EditOrderPanel({
           {t('editOrder.saveChanges', 'Save Changes')}
         </button>
       </div>
-
+              
       {/* 4. Complete Payment Button (at the bottom) */}
       <div className="border-t border-gray-300 pt-6">
         <button
