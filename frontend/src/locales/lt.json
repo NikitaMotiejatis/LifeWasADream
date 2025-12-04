@@ -848,17 +848,25 @@
       "Small": "Mažas"
     }
   },
+  "variations": {
+    "almondMilk": "Migdolų pienas",
+    "large": "Didelis",
+    "medium": "Vidutinis",
+    "oatMilk": "Avižų pienas",
+    "small": "Mažas"
+  }
+,
   "orderPanel": {
       "addItem": "Pridėti prekę",
   "cancel": "Atšaukti",
-  "done": "Baigta",
+  "done": "Išaugoti",
   "change": "pakeisti",
-  "selectSize": "Pasirinkite dydį:",
-  "selectMilk": "Pasirinkite pieną:",
-  "selectOptions": "Pasirinkite parinktis:",
+  "selectSize": "Dydis:",
+  "selectMilk": "Pienas:",
+  "selectOptions": "Pasirinkite:",
   "noSize": "Nepasirinktas dydis",
   "noMilk": "Nepasirinktas pienas",
-  "noOptions": "Nėra pasirinktų parinkčių",
+  "noOptions": "Nepasirinktia",
   "extra": "papildoma",
   "newItem": "Naujas",
   "originalItem": "Originalus",
