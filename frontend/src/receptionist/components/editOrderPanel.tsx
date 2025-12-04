@@ -1,6 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useCart, type Variation, type Product } from '@/receptionist/contexts/cartContext';
+import {
+  useCart,
+  type Variation,
+  type Product,
+} from '@/receptionist/contexts/cartContext';
 import { products as realProducts } from '@/locales/products';
 import TrashcanIcon from '@/icons/trashcanIcon';
 import SearchIcon from '@/icons/searchIcon';
@@ -31,20 +35,17 @@ export type EditOrderPanelProps = {
 const realMenu: ExtendedProduct[] = realProducts.map(product => ({
   ...product,
   categories: product.categories || [],
+  variations: product.variations?.map(v => ({
+    ...v,
+    nameKey: v.nameKey || `variationModal.variations.${v.name}`,
+  })) || [],
 }));
 
 const getVariationDisplayName = (t: any, variation: Variation): string => {
   if (!variation.nameKey) return variation.name;
-  
-  try {
-    const translated = t(variation.nameKey, { defaultValue: variation.name });
-    return translated;
-  } catch (error) {
-    console.error('Translation error for:', variation.nameKey, error);
-    return variation.name;
-  }
+  const translated = t(variation.nameKey);
+  return translated !== variation.nameKey ? translated : variation.name;
 };
-
 // Initial mock data
 const createMockOrderItems = (): OrderItem[] => [
   {
@@ -52,8 +53,12 @@ const createMockOrderItems = (): OrderItem[] => [
     product: realMenu.find(p => p.id === 'iced-coffee') || realMenu[0],
     quantity: 2,
     selectedVariations: [
-      { name: 'Large', nameKey: 'variations.large', priceModifier: 0.8 },
-      { name: 'Almond Milk', nameKey: 'variations.almondMilk', priceModifier: 0.5 },
+      { name: 'Large', nameKey: 'variationModal.variations.Large', priceModifier: 0.8 },
+      {
+        name: 'Almond Milk',
+        nameKey: 'variationModal.variations.Almond Milk',
+        priceModifier: 0.5,
+      },
     ],
     finalPrice: 4.5 + 0.8 + 0.5, // Base price + large + almond milk
   },
@@ -67,7 +72,11 @@ const createMockOrderItems = (): OrderItem[] => [
 ];
 
 // Product Grid Component
-function ProductGridView({ onProductClick }: { onProductClick: (product: Product) => void }) {
+function ProductGridView({
+  onProductClick,
+}: {
+  onProductClick: (product: Product) => void;
+}) {
   const { t } = useTranslation();
   const { formatPrice } = useCart();
 
@@ -128,7 +137,7 @@ function ProductGridView({ onProductClick }: { onProductClick: (product: Product
         </div>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
         {filteredProducts.map(product => (
           <button
             key={product.id}
@@ -139,7 +148,7 @@ function ProductGridView({ onProductClick }: { onProductClick: (product: Product
             <div className="mb-3 aspect-square w-full max-w-24 rounded-lg bg-gray-200 shadow-inner" />
 
             <div className="w-full px-2">
-              <p 
+              <p
                 className="line-clamp-2 text-center text-sm leading-snug font-medium"
                 title={product.nameKey ? t(product.nameKey) : product.name}
               >
@@ -163,29 +172,29 @@ function ProductGridView({ onProductClick }: { onProductClick: (product: Product
 }
 
 // Order Summary Component
-function OrderSummaryView({ 
-  onBack, 
+function OrderSummaryView({
+  onBack,
   showPaymentSection = false,
   paymentMethod,
-  setPaymentMethod 
-}: { 
+  setPaymentMethod,
+}: {
   onBack?: () => void;
   showPaymentSection?: boolean;
   paymentMethod?: 'Cash' | 'Card' | 'Gift card';
   setPaymentMethod?: (method: 'Cash' | 'Card' | 'Gift card') => void;
 }) {
   const { t } = useTranslation();
-  const { 
-    itemsList, 
-    formatPrice, 
-    clearCart, 
-    subtotal, 
-    discountTotal, 
+  const {
+    itemsList,
+    formatPrice,
+    clearCart,
+    subtotal,
+    discountTotal,
     total,
     updateQuantity,
     removeItem,
     getFinalPrice,
-    generateKey
+    generateKey,
   } = useCart();
 
   const hasItems = itemsList.length > 0;
@@ -210,33 +219,53 @@ function OrderSummaryView({
         {hasItems ? (
           <div className="max-h-150 flex-1 space-y-3 overflow-y-scroll">
             {itemsList.map(item => (
-              <div key={generateKey(item.product, item.selectedVariations)} className="rounded-lg border border-gray-200 bg-gray-50 p-3">
+              <div
+                key={generateKey(item.product, item.selectedVariations)}
+                className="rounded-lg border border-gray-200 bg-gray-50 p-3"
+              >
                 <div className="mb-3 flex items-start justify-between gap-3">
                   <div className="min-w-0 flex-1">
-                    <p 
+                    <p
                       className="font-semibold"
-                      title={item.product.nameKey ? t(item.product.nameKey) : item.product.name}
+                      title={
+                        item.product.nameKey
+                          ? t(item.product.nameKey)
+                          : item.product.name
+                      }
                     >
-                      {item.product.nameKey ? t(item.product.nameKey) : item.product.name}
+                      {item.product.nameKey
+                        ? t(item.product.nameKey)
+                        : item.product.name}
                     </p>
                     {item.selectedVariations.length > 0 && (
-                      <p 
+                      <p
                         className="text-sm text-gray-600"
                         title={item.selectedVariations
-                          .map(variation => getVariationDisplayName(t, variation))
+                          .map(variation =>
+                            getVariationDisplayName(t, variation),
+                          )
                           .join(', ')}
                       >
                         {item.selectedVariations
-                          .map(variation => getVariationDisplayName(t, variation))
+                          .map(variation =>
+                            getVariationDisplayName(t, variation),
+                          )
                           .join(', ')}
                       </p>
                     )}
                     <p className="text-xs text-gray-500">
-                      {formatPrice(getFinalPrice(item.product, item.selectedVariations))} × {item.quantity}
+                      {formatPrice(
+                        getFinalPrice(item.product, item.selectedVariations),
+                      )}{' '}
+                      × {item.quantity}
                     </p>
                   </div>
                   <button
-                    onClick={() => removeItem(generateKey(item.product, item.selectedVariations))}
+                    onClick={() =>
+                      removeItem(
+                        generateKey(item.product, item.selectedVariations),
+                      )
+                    }
                     aria-label={t('orderSummary.removeItem', 'Remove item')}
                   >
                     <TrashcanIcon className="h-5 w-5 text-gray-400 hover:text-red-600" />
@@ -246,9 +275,17 @@ function OrderSummaryView({
                 <div className="flex flex-col items-center gap-3 xl:flex-row xl:items-center xl:justify-between">
                   <div className="flex items-center gap-1">
                     <button
-                      onClick={() => updateQuantity(generateKey(item.product, item.selectedVariations), -1)}
+                      onClick={() =>
+                        updateQuantity(
+                          generateKey(item.product, item.selectedVariations),
+                          -1,
+                        )
+                      }
                       className="flex h-9 w-9 scale-70 items-center justify-center rounded-full border border-gray-400 text-sm font-light transition hover:bg-gray-200 active:scale-95 xl:scale-100"
-                      aria-label={t('orderSummary.decreaseQuantity', 'Decrease quantity')}
+                      aria-label={t(
+                        'orderSummary.decreaseQuantity',
+                        'Decrease quantity',
+                      )}
                     >
                       −
                     </button>
@@ -256,16 +293,27 @@ function OrderSummaryView({
                       {item.quantity}
                     </span>
                     <button
-                      onClick={() => updateQuantity(generateKey(item.product, item.selectedVariations), +1)}
+                      onClick={() =>
+                        updateQuantity(
+                          generateKey(item.product, item.selectedVariations),
+                          +1,
+                        )
+                      }
                       className="flex h-9 w-9 scale-70 items-center justify-center rounded-full bg-blue-600 font-bold text-white transition hover:bg-blue-700 active:scale-95 xl:scale-100"
-                      aria-label={t('orderSummary.increaseQuantity', 'Increase quantity')}
+                      aria-label={t(
+                        'orderSummary.increaseQuantity',
+                        'Increase quantity',
+                      )}
                     >
                       +
                     </button>
                   </div>
 
                   <div className="text-lg font-bold text-gray-900 xl:ml-auto">
-                    {formatPrice(getFinalPrice(item.product, item.selectedVariations) * item.quantity)}
+                    {formatPrice(
+                      getFinalPrice(item.product, item.selectedVariations) *
+                        item.quantity,
+                    )}
                   </div>
                 </div>
               </div>
@@ -324,7 +372,9 @@ function OrderSummaryView({
                   {(['Cash', 'Card', 'Gift card'] as const).map(method => (
                     <button
                       key={method}
-                      onClick={() => setPaymentMethod && setPaymentMethod(method)}
+                      onClick={() =>
+                        setPaymentMethod && setPaymentMethod(method)
+                      }
                       className={`rounded-lg py-2 text-xs font-medium transition ${
                         paymentMethod === method
                           ? 'bg-blue-600 text-white hover:bg-blue-700'
@@ -369,50 +419,77 @@ export function EditOrderPanel({
   const { addToCart, clearCart, itemsList } = useCart();
 
   const [items, setItems] = useState<OrderItem[]>(createMockOrderItems()); // Initialize directly
-  const [editingVariationsId, setEditingVariationsId] = useState<string | null>(null);
+  const [editingVariationsId, setEditingVariationsId] = useState<string | null>(
+    null,
+  );
   const [tempVariations, setTempVariations] = useState<Variation[]>([]);
-  const [paymentMethod, setPaymentMethod] = useState<'Cash' | 'Card' | 'Gift card'>('Card');
+  const [paymentMethod, setPaymentMethod] = useState<
+    'Cash' | 'Card' | 'Gift card'
+  >('Card');
   const [splitBill, setSplitBill] = useState(false);
   const [splitCount, setSplitCount] = useState(2);
   const [showProductGrid, setShowProductGrid] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
-
-
-  const total = items.reduce((sum, item) => sum + item.finalPrice * item.quantity, 0);
+  const total = items.reduce(
+    (sum, item) => sum + item.finalPrice * item.quantity,
+    0,
+  );
 
   const handleIncreaseQuantity = (id: string) => {
-    setItems(prev => prev.map(item => 
-      item.id === id ? { ...item, quantity: item.quantity + 1 } : item
-    ));
+    setItems(prev =>
+      prev.map(item =>
+        item.id === id ? { ...item, quantity: item.quantity + 1 } : item,
+      ),
+    );
   };
 
   const handleDecreaseQuantity = (id: string) => {
-    setItems(prev => prev.map(item => {
-      if (item.id === id) {
-        const newQty = item.quantity - 1;
-        return newQty > 0 ? { ...item, quantity: newQty } : null;
-      }
-      return item;
-    }).filter(Boolean) as OrderItem[]);
+    setItems(
+      prev =>
+        prev
+          .map(item => {
+            if (item.id === id) {
+              const newQty = item.quantity - 1;
+              return newQty > 0 ? { ...item, quantity: newQty } : null;
+            }
+            return item;
+          })
+          .filter(Boolean) as OrderItem[],
+    );
   };
 
-  const handleRemoveItem = (id: string) => setItems(prev => prev.filter(item => item.id !== id));
+  const handleRemoveItem = (id: string) =>
+    setItems(prev => prev.filter(item => item.id !== id));
 
-  const startEditingVariations = (id: string, current: Variation[]) => {
-    setEditingVariationsId(id);
-    setTempVariations([...current]);
-  };
+const startEditingVariations = (id: string, current: Variation[]) => {
+  setEditingVariationsId(id);
+  
+  const variationsWithKeys = current.map(v => ({
+    ...v,
+    nameKey: v.nameKey || `variationModal.variations.${v.name}`
+  }));
+  
+  setTempVariations(variationsWithKeys);
+};
 
   const confirmEditVariations = () => {
     if (editingVariationsId) {
-      setItems(prev => prev.map(item => {
-        if (item.id === editingVariationsId) {
-          const price = item.product.basePrice + tempVariations.reduce((a, v) => a + (v.priceModifier || 0), 0);
-          return { ...item, selectedVariations: tempVariations, finalPrice: price };
-        }
-        return item;
-      }));
+      setItems(prev =>
+        prev.map(item => {
+          if (item.id === editingVariationsId) {
+            const price =
+              item.product.basePrice +
+              tempVariations.reduce((a, v) => a + (v.priceModifier || 0), 0);
+            return {
+              ...item,
+              selectedVariations: tempVariations,
+              finalPrice: price,
+            };
+          }
+          return item;
+        }),
+      );
       setEditingVariationsId(null);
     }
   };
@@ -443,15 +520,23 @@ export function EditOrderPanel({
       product: cartItem.product as ExtendedProduct,
       quantity: cartItem.quantity,
       selectedVariations: cartItem.selectedVariations,
-      finalPrice: cartItem.product.basePrice + cartItem.selectedVariations.reduce((a, v) => a + (v.priceModifier || 0), 0),
+      finalPrice:
+        cartItem.product.basePrice +
+        cartItem.selectedVariations.reduce(
+          (a, v) => a + (v.priceModifier || 0),
+          0,
+        ),
     }));
-    
+
     setItems(newItems);
     setShowProductGrid(false);
   };
 
   const handlePayment = () => {
-    alert(t('processingPayment', 'Processing payment') + ` ${paymentMethod} - $${total.toFixed(2)}`);
+    alert(
+      t('processingPayment', 'Processing payment') +
+        ` ${paymentMethod} - $${total.toFixed(2)}`,
+    );
     onSave?.(items);
   };
 
@@ -475,7 +560,7 @@ export function EditOrderPanel({
 
           {/* Right: Order summary */}
           <div className="w-1/3 max-w-md">
-            <OrderSummaryView 
+            <OrderSummaryView
               onBack={handleDoneAddingItems}
               showPaymentSection={false}
             />
@@ -512,22 +597,22 @@ export function EditOrderPanel({
       <div className="mb-6 max-h-[50vh] overflow-y-auto">
         {items.length === 0 ? (
           <div className="py-10 text-center">
-            <div className="mx-auto h-16 w-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-              <svg 
-                className="h-8 w-8 text-gray-400" 
-                fill="none" 
-                stroke="currentColor" 
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
+              <svg
+                className="h-8 w-8 text-gray-400"
+                fill="none"
+                stroke="currentColor"
                 viewBox="0 0 24 24"
               >
-                <path 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round" 
-                  strokeWidth={2} 
-                  d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" 
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
                 />
               </svg>
             </div>
-            <p className="text-gray-400 mb-4">
+            <p className="mb-4 text-gray-400">
               {t('orderSummary.noItems', 'No items in order')}
             </p>
             <button
@@ -539,40 +624,40 @@ export function EditOrderPanel({
           </div>
         ) : (
           <div className="space-y-4">
-            {items.map((item) => {
+            {items.map(item => {
               const isEditingVariations = editingVariationsId === item.id;
-              
+
               return (
-                <div 
-                  key={item.id} 
-                  className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors"
+                <div
+                  key={item.id}
+                  className="rounded-lg border border-gray-200 p-4 transition-colors hover:bg-gray-50"
                 >
                   <div className="flex gap-4">
                     {/* Product Image */}
                     <div className="flex-shrink-0">
-                      <div className="w-24 h-24 rounded-lg bg-gray-200 shadow-inner" />
+                      <div className="h-24 w-24 rounded-lg bg-gray-200 shadow-inner" />
                     </div>
-                    
+
                     {/* Product Details */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex justify-between items-start">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-start justify-between">
                         <div>
-                          <h3 
-                            className="font-semibold text-gray-900"
-                            title={item.product.nameKey ? t(item.product.nameKey) : item.product.name}
-                          >
-                            {item.product.nameKey ? t(item.product.nameKey) : item.product.name}
-                          </h3>
-                          <p 
-                            className="text-sm text-gray-500"
-                            title={item.selectedVariations
-                              .map(v => getVariationDisplayName(t, v))
-                              .join(', ') || t('orderPanel.noOptions', 'No options')}
-                          >
-                            {item.selectedVariations
-                              .map(v => getVariationDisplayName(t, v))
-                              .join(', ') || t('orderPanel.noOptions', 'No options')}
-                          </p>
+      <h3 
+        className="font-semibold text-gray-900"
+        title={item.product.nameKey ? t(item.product.nameKey) : item.product.name}
+      >
+        {item.product.nameKey ? t(item.product.nameKey) : item.product.name}
+      </h3>
+      <p 
+        className="text-sm text-gray-500"
+        title={item.selectedVariations
+          .map(v => t(`variationModal.variations.${v.name}`, v.name))
+          .join(', ') || t('orderPanel.noOptions', 'No options')}
+      >
+        {item.selectedVariations
+          .map(v => t(`variationModal.variations.${v.name}`, v.name))
+          .join(', ') || t('orderPanel.noOptions', 'No options')}
+      </p>
                         </div>
                         <div className="text-right">
                           <div className="font-semibold">
@@ -583,14 +668,17 @@ export function EditOrderPanel({
                           </div>
                         </div>
                       </div>
-                      
+
                       {/* Quantity Controls */}
                       <div className="mt-3 flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <button
                             onClick={() => handleDecreaseQuantity(item.id)}
-                            className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100"
-                            title={t('orderSummary.decreaseQuantity', 'Decrease quantity')}
+                            className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-300 hover:bg-gray-100"
+                            title={t(
+                              'orderSummary.decreaseQuantity',
+                              'Decrease quantity',
+                            )}
                           >
                             −
                           </button>
@@ -599,24 +687,34 @@ export function EditOrderPanel({
                           </span>
                           <button
                             onClick={() => handleIncreaseQuantity(item.id)}
-                            className="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center hover:bg-blue-200"
-                            title={t('orderSummary.increaseQuantity', 'Increase quantity')}
+                            className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 text-blue-700 hover:bg-blue-200"
+                            title={t(
+                              'orderSummary.increaseQuantity',
+                              'Increase quantity',
+                            )}
                           >
                             +
                           </button>
                         </div>
-                        
+
                         <div className="flex gap-2">
                           {/* Change Variations Button */}
-                             {!isEditingVariations && item.product.variations && item.product.variations.length > 0 && (
-                                  <button
-                                    onClick={() => startEditingVariations(item.id, item.selectedVariations)}
-                                    className="text-sm text-blue-600 hover:text-blue-800"
-                                  >
-                                    {t('orderPanel.change', 'Change')}
-                                  </button>
-                                )}
-                          
+                          {!isEditingVariations &&
+                            item.product.variations &&
+                            item.product.variations.length > 0 && (
+                              <button
+                                onClick={() =>
+                                  startEditingVariations(
+                                    item.id,
+                                    item.selectedVariations,
+                                  )
+                                }
+                                className="text-sm text-blue-600 hover:text-blue-800"
+                              >
+                                {t('orderPanel.change', 'Change')}
+                              </button>
+                            )}
+
                           {/* Remove Button */}
                           <button
                             onClick={() => handleRemoveItem(item.id)}
@@ -627,49 +725,67 @@ export function EditOrderPanel({
                           </button>
                         </div>
                       </div>
-                      
-                      {/* Variations Edit - Old Design */}
+
+                      {/* Variations Edit */}
 {isEditingVariations && item.product.variations && item.product.variations.length > 0 && (
-  <div className="mt-3 p-3 bg-gray-50 rounded-lg">
-    <p className="text-sm font-medium text-gray-700 mb-2">
+  <div className="mt-3 rounded-lg bg-gray-50 p-3">
+    <p className="mb-2 text-sm font-medium text-gray-700">
       {t('orderPanel.selectOptions', 'Select options')}
     </p>
     <div className="space-y-3">
-      {/* Size Variations - Show only if product has size variations */}
-      {item.product.variations.some(v => 
-        ['Small', 'Medium', 'Large', 'Regular'].includes(v.name)
+      {/* Size Variations */}
+      {item.product.variations.some(v =>
+        ['Small', 'Medium', 'Large', 'Regular'].includes(v.name),
       ) && (
         <div>
-          <p className="text-xs font-medium text-gray-600 mb-1">
+          <p className="mb-1 text-xs font-medium text-gray-600">
             {t('variationModal.size', 'Size')}
           </p>
           <div className="flex flex-wrap gap-1">
             {item.product.variations
-              .filter(v => ['Small', 'Medium', 'Large', 'Regular'].includes(v.name))
-              .map((variation) => {
-                const isSelected = tempVariations.some(v => v.name === variation.name);
+              .filter(v =>
+                ['Small', 'Medium', 'Large', 'Regular'].includes(v.name),
+              )
+              .map(variation => {
+                const isSelected = tempVariations.some(
+                  v => v.name === variation.name,
+                );
                 return (
                   <button
                     key={variation.name}
                     onClick={() => {
                       // Remove any existing size variation before adding new one
-                      const newVariations = tempVariations
-                        .filter(v => !['Small', 'Medium', 'Large', 'Regular'].includes(v.name))
-                        .concat([variation]);
+                      const newVariations =
+                        tempVariations
+                          .filter(
+                            v =>
+                              ![
+                                'Small',
+                                'Medium',
+                                'Large',
+                                'Regular',
+                              ].includes(v.name),
+                          )
+                          .concat([variation]);
                       setTempVariations(newVariations);
                     }}
-                    className={`px-2 py-1 text-xs rounded border ${
+                    className={`rounded border px-2 py-1 text-xs ${
                       isSelected
-                        ? 'bg-blue-600 text-white border-blue-600'
-                        : 'bg-white text-gray-700 border-gray-300'
+                        ? 'border-blue-600 bg-blue-600 text-white'
+                        : 'border-gray-300 bg-white text-gray-700'
                     }`}
-                    title={getVariationDisplayName(t, variation)}
+                    title={t(`variationModal.variations.${variation.name}`, variation.name)}
                   >
-                    {getVariationDisplayName(t, variation)}
+                    {t(`variationModal.variations.${variation.name}`, variation.name)}
                     {variation.priceModifier !== 0 && (
                       <span className="ml-1">
-                        {variation.priceModifier > 0 ? '+' : ''}
-                        ${variation.priceModifier.toFixed(2)}
+                        {variation.priceModifier > 0
+                          ? '+'
+                          : ''}
+                        $
+                        {variation.priceModifier.toFixed(
+                          2,
+                        )}
                       </span>
                     )}
                   </button>
@@ -678,49 +794,59 @@ export function EditOrderPanel({
           </div>
         </div>
       )}
-      
-      {/* Milk Variations - Old Design */}
-      {item.product.variations.some(v => 
-        v.name.toLowerCase().includes('milk') || 
-        (v.nameKey && v.nameKey.toLowerCase().includes('milk'))
+
+      {/* Milk Variations */}
+      {item.product.variations.some(
+        v =>
+          v.name.toLowerCase().includes('milk'),
       ) ? (
         <div>
-          <p className="text-xs font-medium text-gray-600 mb-1">
+          <p className="mb-1 text-xs font-medium text-gray-600">
             {t('orderPanel.selectMilk', 'Select Milk')}
           </p>
           <div className="flex flex-wrap gap-1">
             {item.product.variations
-              .filter(v => 
-                v.name.toLowerCase().includes('milk') || 
-                (v.nameKey && v.nameKey.toLowerCase().includes('milk'))
+              .filter(
+                v =>
+                  v.name.toLowerCase().includes('milk'),
               )
-              .map((variation) => {
-                const isSelected = tempVariations.some(v => v.name === variation.name);
+              .map(variation => {
+                const isSelected = tempVariations.some(
+                  v => v.name === variation.name,
+                );
                 return (
                   <button
                     key={variation.name}
                     onClick={() => {
                       // Remove any existing milk variation before adding new one
-                      const newVariations = tempVariations
-                        .filter(v => 
-                          !v.name.toLowerCase().includes('milk') && 
-                          !(v.nameKey && v.nameKey.toLowerCase().includes('milk'))
-                        )
-                        .concat([variation]);
+                      const newVariations =
+                        tempVariations
+                          .filter(
+                            v =>
+                              !v.name
+                                .toLowerCase()
+                                .includes('milk'),
+                          )
+                          .concat([variation]);
                       setTempVariations(newVariations);
                     }}
-                    className={`px-2 py-1 text-xs rounded border ${
+                    className={`rounded border px-2 py-1 text-xs ${
                       isSelected
-                        ? 'bg-blue-600 text-white border-blue-600'
-                        : 'bg-white text-gray-700 border-gray-300'
+                        ? 'border-blue-600 bg-blue-600 text-white'
+                        : 'border-gray-300 bg-white text-gray-700'
                     }`}
-                    title={getVariationDisplayName(t, variation)}
+                    title={t(`variationModal.variations.${variation.name}`, variation.name)}
                   >
-                    {getVariationDisplayName(t, variation)}
+                    {t(`variationModal.variations.${variation.name}`, variation.name)}
                     {variation.priceModifier !== 0 && (
                       <span className="ml-1">
-                        {variation.priceModifier > 0 ? '+' : ''}
-                        ${variation.priceModifier.toFixed(2)}
+                        {variation.priceModifier > 0
+                          ? '+'
+                          : ''}
+                        $
+                        {variation.priceModifier.toFixed(
+                          2,
+                        )}
                       </span>
                     )}
                   </button>
@@ -739,7 +865,7 @@ export function EditOrderPanel({
       </button>
       <button
         onClick={confirmEditVariations}
-        className="text-sm bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
+        className="rounded bg-green-600 px-3 py-1 text-sm text-white hover:bg-green-700"
       >
         {t('orderPanel.done', 'Done')}
       </button>
@@ -760,99 +886,94 @@ export function EditOrderPanel({
         <div className="mb-6">
           <button
             onClick={handleStartAddingItems}
-            className="w-full rounded-lg border-2 border-blue-300 bg-blue-50 py-3 text-blue-600 hover:bg-blue-100 transition-colors flex items-center justify-center gap-2"
+            className="flex w-full items-center justify-center gap-2 rounded-lg border-2 border-blue-300 bg-blue-50 py-3 text-blue-600 transition-colors hover:bg-blue-100"
           >
-            <svg 
-              className="h-5 w-5" 
-              fill="none" 
-              stroke="currentColor" 
+            <svg
+              className="h-5 w-5"
+              fill="none"
+              stroke="currentColor"
               viewBox="0 0 24 24"
             >
-              <path 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
-                strokeWidth={2} 
-                d="M12 4v16m8-8H4" 
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 4v16m8-8H4"
               />
             </svg>
-            <span className="font-medium">
-              {t('addItem', 'Add Items')}
-            </span>
+            <span className="font-medium">{t('addItem', 'Add Items')}</span>
           </button>
         </div>
       )}
-{/* Total Section */}
-<div className="mb-6 border-t border-gray-300 pt-4">
-  <div className="flex justify-between text-xl font-bold">
-    <span>{t('orderSummary.total', 'Total')}</span>
-    <span className="text-blue-700">
-      ${total.toFixed(2)}
-    </span>
-  </div>
-  
-  <div className="text-xs text-gray-500 text-center mt-2">
-    {t('orderPanel.totalNote', 'Total amount for order')} #{orderId}
-  </div>
-</div>
+      {/* Total Section */}
+      <div className="mb-6 border-t border-gray-300 pt-4">
+        <div className="flex justify-between text-xl font-bold">
+          <span>{t('orderSummary.total', 'Total')}</span>
+          <span className="text-blue-700">${total.toFixed(2)}</span>
+        </div>
 
+        <div className="mt-2 text-center text-xs text-gray-500">
+          {t('orderPanel.totalNote', 'Total amount for order')} #{orderId}
+        </div>
+      </div>
 
-{/* Payment Method Section */}
-<div className="mb-6">
-  <div>
-    <p className="mb-1.5 text-xs font-medium text-gray-700 xl:text-sm">
-      {t('orderSummary.paymentMethod', 'Payment Method')}
-    </p>
-    <div className="grid grid-cols-3 gap-1.5">
-      {(['Cash', 'Card', 'Gift card'] as const).map(method => (
-        <button
-          key={method}
-          onClick={() => setPaymentMethod(method)}
-          className={`rounded-lg py-2 text-xs font-medium transition ${
-            paymentMethod === method
-              ? 'bg-blue-600 text-white hover:bg-blue-700'
-              : 'border border-gray-400 hover:bg-gray-100'
-          }`}
-        >
-          {t(`orderSummary.paymentMethods.${method}`, method)}
-        </button>
-      ))}
-    </div>
-  </div>
-</div>
+      {/* Payment Method Section */}
+      <div className="mb-6">
+        <div>
+          <p className="mb-1.5 text-xs font-medium text-gray-700 xl:text-sm">
+            {t('orderSummary.paymentMethod', 'Payment Method')}
+          </p>
+          <div className="grid grid-cols-3 gap-1.5">
+            {(['Cash', 'Card', 'Gift card'] as const).map(method => (
+              <button
+                key={method}
+                onClick={() => setPaymentMethod(method)}
+                className={`rounded-lg py-2 text-xs font-medium transition ${
+                  paymentMethod === method
+                    ? 'bg-blue-600 text-white hover:bg-blue-700'
+                    : 'border border-gray-400 hover:bg-gray-100'
+                }`}
+              >
+                {t(`orderSummary.paymentMethods.${method}`, method)}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
 
       {/* Split Bill */}
       <div className="mb-6">
-        <div className="flex items-center justify-between mb-3">
+        <div className="mb-3 flex items-center justify-between">
           <span className="text-sm font-medium text-gray-700">
             {t('orderSummary.splitBill', 'Split Bill')}
           </span>
-          <label className="relative inline-flex items-center cursor-pointer">
+          <label className="relative inline-flex cursor-pointer items-center">
             <input
               type="checkbox"
               checked={splitBill}
-              onChange={(e) => setSplitBill(e.target.checked)}
-              className="sr-only peer"
+              onChange={e => setSplitBill(e.target.checked)}
+              className="peer sr-only"
             />
-            <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+            <div className="peer h-6 w-11 rounded-full bg-gray-200 peer-checked:bg-blue-600 after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:border after:bg-white after:transition-all after:content-[''] peer-checked:after:translate-x-full peer-checked:after:border-white"></div>
           </label>
         </div>
-        
+
         {splitBill && (
           <div className="mt-3">
-            <label className="block text-sm text-gray-600 mb-2">
+            <label className="mb-2 block text-sm text-gray-600">
               {t('orderPanel.splitCount', 'Split between')}:
             </label>
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setSplitCount(Math.max(2, splitCount - 1))}
-                className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50"
+                className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-300 hover:bg-gray-50"
               >
                 −
               </button>
               <span className="text-lg font-medium">{splitCount}</span>
               <button
                 onClick={() => setSplitCount(splitCount + 1)}
-                className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50"
+                className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-300 hover:bg-gray-50"
               >
                 +
               </button>
@@ -861,7 +982,7 @@ export function EditOrderPanel({
         )}
       </div>
       {/* Action Buttons */}
-      <div className="flex gap-3 pt-4 border-t border-gray-300">
+      <div className="flex gap-3 border-t border-gray-300 pt-4">
         <button
           onClick={onCancel}
           className="flex-1 rounded-lg border border-gray-300 py-3 text-sm font-medium hover:bg-gray-50"
@@ -876,14 +997,14 @@ export function EditOrderPanel({
         </button>
       </div>
       {/* Payment Section */}
-<div className="mt-6 pt-6 border-t border-gray-300">
-  <button
-    onClick={handlePayment}
-    className="w-full rounded-lg bg-green-600 py-3 text-sm font-medium text-white hover:bg-green-700"
-  >
-    {t('orderSummary.completePayment', 'Complete Payment')}
-  </button>
-</div>
+      <div className="mt-6 border-t border-gray-300 pt-6">
+        <button
+          onClick={handlePayment}
+          className="w-full rounded-lg bg-green-600 py-3 text-sm font-medium text-white hover:bg-green-700"
+        >
+          {t('orderSummary.completePayment', 'Complete Payment')}
+        </button>
+      </div>
     </div>
   );
 }
@@ -892,10 +1013,10 @@ export function EditOrderPanel({
 export default function EditOrderPage() {
   return (
     <div className="p-6">
-      <EditOrderPanel 
-        orderId="123" 
+      <EditOrderPanel
+        orderId="123"
         mode="edit"
-        onSave={(items) => console.log('Save:', items)}
+        onSave={items => console.log('Save:', items)}
         onCancel={() => console.log('Cancel')}
       />
     </div>
