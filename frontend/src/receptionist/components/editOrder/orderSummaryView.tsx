@@ -23,7 +23,6 @@ export function OrderSummaryView({
     formatPrice,
     clearCart,
     subtotal,
-    discountTotal,
     total,
     updateQuantity,
     removeItem,
@@ -175,12 +174,6 @@ export function OrderSummaryView({
               <span>{t('orderSummary.subtotal', 'Subtotal')}</span>
               <span>{formatPrice(subtotal)}</span>
             </div>
-            {discountTotal > 0 && (
-              <div className="flex justify-between font-bold text-green-600">
-                <span>{t('orderSummary.discounts', 'Discounts')}</span>
-                <span>- {formatPrice(discountTotal)}</span>
-              </div>
-            )}
 
             <div className="flex flex-col items-center gap-1 xl:flex-row xl:justify-between xl:gap-0">
               <span className="text-xl font-bold text-gray-800 xl:text-2xl">
