@@ -848,11 +848,49 @@
       "Small": "Mažas"
     }
   },
-  "variations": {
-    "almondMilk": "Migdolų pienas",
-    "large": "Didelis",
-    "medium": "Vidutinis",
-    "oatMilk": "Avižų pienas",
-    "small": "Mažas"
-  }
+  "orderPanel": {
+  "cancel": "Atšaukti",
+  "done": "Baigta",
+  "change": "pakeisti",
+  "selectSize": "Pasirinkite dydį:",
+  "selectMilk": "Pasirinkite pieną:",
+  "selectOptions": "Pasirinkite parinktis:",
+  "noSize": "Nepasirinktas dydis",
+  "noMilk": "Nepasirinktas pienas",
+  "noOptions": "Nėra pasirinktų parinkčių",
+  "extra": "papildoma",
+  "newItem": "Naujas",
+  "originalItem": "Originalus",
+  "decreaseQuantity": "Sumažinti kiekį",
+  "increaseQuantity": "Padidinti kiekį",
+  "remove": "Pašalinti",
+  "clearAll": "Išvalyti viską",
+  "viewTitle": "Dabartinis užsakymas",
+  "originalItems": "Užsakymo prekės",
+  "newItems": "Naujos prekės",
+  "newItemsAdded": "Pridėtos naujos prekės",
+  "discounts": "Nuolaidos",
+  "newTotal": "Nauja suma",
+  "totalNote": "Pakeitimai atnaujins užsakymą #",
+  "subtotal": "Tarpinė suma",
+  "total": "Galutinė suma",
+  "paymentMethod": "Mokėjimo būdas",
+  "paymentMethods": {
+    "Cash": "Grynaisiais",
+    "Card": "Kortele",
+    "Gift card": "Dovanų kortele"
+  },
+  "splitBill": "Padalinti sąskaitą",
+  "splitCount": "Padalinti tarp:",
+  "completePayment": "Baigti apmokėjimą",
+  "updateOrder": "Atnaujinti užsakymą"
+},
+"editOrder": {
+  "title": "Redaguoti užsakymą",
+  "subtitle": "Keisti prekes, mokėjimo būdą ir sąskaitą",
+  "cancel": "Atšaukti",
+  "save": "Išsaugoti pakeitimus",
+  "saveChanges": "Išsaugoti pakeitimus",
+  "addItem": "Pridėti prekę"
+}
 }
