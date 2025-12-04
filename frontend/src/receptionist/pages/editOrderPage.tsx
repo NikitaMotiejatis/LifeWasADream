@@ -4,7 +4,7 @@ import SidebarCashier from '@/receptionist/components/sidebarCashier';
 import Topbar from '@/global/components/topbar';
 import { CartProvider, useCart } from '@/receptionist/contexts/cartContext';
 import { CurrencyProvider } from '@/global/contexts/currencyContext';
-import editOrderPanel, { EditOrderPanel } from '@/receptionist/components/editOrderPanel';
+import { EditOrderPanel } from '@/receptionist/components/editOrderPanel';
 
 type Order = {
   id: string;
@@ -28,58 +28,22 @@ function EditOrderContent() {
   const navigate = useNavigate();
   const [orderData, setOrderData] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
-  const [initialItems, setInitialItems] = useState<OrderItem[]>([]);
-  const { addToCart, clearCart } = useCart();
+  const { clearCart } = useCart();
 
   useEffect(() => {
     const fetchOrder = async () => {
       setLoading(true);
       try {
-        await new Promise(resolve => setTimeout(resolve, 300));
+        // TODO: Replace with your actual API call
+        console.warn('API endpoint not implemented. Using empty state.');
         
-        // Mock data - replace with your actual API call
-        const mockOrder: Order = {
+        setOrderData({
           id: orderId || '',
-          total: 87.4,
-          createdAt: new Date('2025-11-25T16:45:00'),
+          total: 0,
+          createdAt: new Date(),
           status: 'active',
           items: []
-        };
-        
-        // Mock initial items for the order
-        const mockItems: OrderItem[] = [
-          {
-            id: 'item1',
-            product: { 
-              id: 'iced-coffee', 
-              name: 'Iced Coffee', 
-              nameKey: 'products.icedCoffee',
-              basePrice: 4.5 
-            },
-            quantity: 2,
-            selectedVariations: [
-              { name: 'Large', nameKey: 'variations.large', priceModifier: 0.8 },
-              { name: 'Oat Milk', nameKey: 'variations.oatMilk', priceModifier: 0.6 },
-            ],
-            finalPrice: 4.5 + 0.8 + 0.6,
-            note: 'Extra ice please'
-          },
-          {
-            id: 'item2',
-            product: { 
-              id: 'croissant', 
-              name: 'Croissant', 
-              nameKey: 'products.croissant',
-              basePrice: 3.0 
-            },
-            quantity: 1,
-            selectedVariations: [],
-            finalPrice: 3.0,
-          }
-        ];
-        
-        setOrderData(mockOrder);
-        setInitialItems(mockItems);
+        });
       } catch (error) {
         console.error('Failed to fetch order:', error);
       } finally {
@@ -87,40 +51,41 @@ function EditOrderContent() {
       }
     };
 
-    fetchOrder();
+    if (orderId) {
+      fetchOrder();
+    }
   }, [orderId]);
 
-  const handleSave = (items: OrderItem[]) => {
-    console.log('Saving order changes...', items);
-    
-    // Here you would typically send the updated items to your backend
-    // Example API call:
-    // await updateOrderAPI(orderId, { items });
-    
-    // Show success message
-    alert('Order updated successfully!');
-    
-    navigate('/orders');
+  const handleSave = async (items: OrderItem[]) => {
+    try {
+      // TODO: Replace with your actual API call
+      console.log('Saving order changes...', items);
+      
+      alert('Order updated successfully!');
+      
+      navigate('/orders');
+    } catch (error) {
+      console.error('Failed to save order:', error);
+      alert('Failed to save order. Please try again.');
+    }
   };
 
   const handleCancel = () => {
-    // Confirm before canceling
     if (window.confirm('Are you sure you want to cancel? Changes will be lost.')) {
       navigate('/orders');
     }
   };
 
   const handleAddMoreItems = (items: OrderItem[]) => {
-    // Clear current cart and add items from edit order
     clearCart();
     
     // Add each item to cart
     items.forEach(item => {
       // Convert OrderItem format to cart format
-      addToCart(item.product, item.selectedVariations );
+      // This would need to be implemented based on your cart context
+      console.log('Adding item to cart:', item);
     });
     
-    // Navigate to new order page
     navigate('/receptionist/new-order');
   };
 
@@ -174,11 +139,6 @@ function EditOrderContent() {
               Created {orderData.createdAt.toLocaleDateString()} • {orderData.status.charAt(0).toUpperCase() + orderData.status.slice(1)}
             </p>
           </div>
-          <div className="ml-auto rounded-lg bg-gray-100 px-3 py-1">
-            <span className="text-sm font-medium text-gray-700">
-              Total: ${orderData.total.toFixed(2)}
-            </span>
-          </div>
         </div>
       </div>
 
@@ -217,13 +177,6 @@ export default function EditOrderPage() {
           </CartProvider>
         </CurrencyProvider>
       </div>
-
-      {/* Mobile Sidebar Toggle (optional) */}
-      <button className="fixed bottom-4 right-4 z-50 rounded-full bg-blue-600 p-4 shadow-lg md:hidden">
-        <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-        </svg>
-      </button>
     </div>
   );
 }
