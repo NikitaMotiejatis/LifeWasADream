@@ -5,6 +5,7 @@ import Topbar from '@/global/components/topbar';
 import { CartProvider, useCart } from '@/receptionist/contexts/cartContext';
 import { CurrencyProvider } from '@/global/contexts/currencyContext';
 import { EditOrderPanel } from '@/receptionist/components/editOrder/editOrderPanel';
+import { useTranslation } from 'react-i18next';
 
 type Order = {
   id: string;
@@ -26,6 +27,7 @@ type OrderItem = {
 function EditOrderContent() {
   const { orderId } = useParams<{ orderId: string }>();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [orderData, setOrderData] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const { clearCart } = useCart();
@@ -35,13 +37,13 @@ function EditOrderContent() {
       setLoading(true);
       try {
         console.warn('API endpoint not implemented. Using empty state.');
-        
+
         setOrderData({
           id: orderId || '',
           total: 0,
           createdAt: new Date(),
           status: 'active',
-          items: []
+          items: [],
         });
       } catch (error) {
         console.error('Failed to fetch order:', error);
@@ -57,7 +59,7 @@ function EditOrderContent() {
 
   const handleSave = async (items: OrderItem[]) => {
     try {
-   console.log('Saving order items:', items);
+      console.log('Saving order items:', items);
       navigate('/orders');
     } catch (error) {
       console.error('Failed to save order:', error);
@@ -65,17 +67,14 @@ function EditOrderContent() {
   };
 
   const handleCancel = () => {
-      navigate('/orders');
-
+    navigate('/orders');
   };
 
   const handleAddMoreItems = (items: OrderItem[]) => {
     clearCart();
-    
-    items.forEach(item => {
-  
-    });
-    
+
+    items.forEach(item => {});
+
     navigate('/receptionist/new-order');
   };
 
@@ -84,7 +83,7 @@ function EditOrderContent() {
       <div className="flex h-screen items-center justify-center">
         <div className="text-center">
           <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent"></div>
-          <p className="mt-4 text-gray-500">Loading order #{orderId}...</p>
+          <p className="mt-4 text-gray-500">{t('order.loading', 'loading')} #{orderId}...</p>
         </div>
       </div>
     );
@@ -96,15 +95,20 @@ function EditOrderContent() {
         <div className="text-center">
           <div className="mx-auto h-12 w-12 text-gray-400">
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
             </svg>
           </div>
-          <p className="mt-4 text-gray-500">Order #{orderId} not found</p>
+          <p className="mt-4 text-gray-500">{t('invoice.labels.order', 'order')} #{orderId} not found</p>
           <button
             onClick={() => navigate('/orders')}
             className="mt-4 rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
           >
-            Back to Orders
+            {t('editOrder.backToOrders', 'Back to Orders')}
           </button>
         </div>
       </div>
@@ -119,14 +123,32 @@ function EditOrderContent() {
             onClick={handleCancel}
             className="rounded-lg border border-gray-300 p-2 hover:bg-gray-50"
           >
-            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            <svg
+              className="h-5 w-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M10 19l-7-7m0 0l7-7m-7 7h18"
+              />
             </svg>
           </button>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Edit Order #{orderData.id}</h1>
+            <h1 className="text-2xl font-bold text-gray-900">
+              {t('editOrder.title', 'Edit Order')} #{orderData.id}
+            </h1>
             <p className="text-sm text-gray-600">
-              Created {orderData.createdAt.toLocaleDateString()} • {orderData.status.charAt(0).toUpperCase() + orderData.status.slice(1)}
+              {t('editOrder.created', 'Created')}:{' '}
+              {orderData.createdAt.toLocaleDateString()}   •
+              {t(
+                `editOrder.status.${orderData.status}`,
+                orderData.status.charAt(0).toUpperCase() +
+                  orderData.status.slice(1),
+              )}
             </p>
           </div>
         </div>
@@ -159,7 +181,7 @@ export default function EditOrderPage() {
       <div className="flex flex-1 flex-col md:ml-64">
         {/* Topbar */}
         <Topbar />
-        
+
         {/* */}
         <CurrencyProvider>
           <CartProvider>

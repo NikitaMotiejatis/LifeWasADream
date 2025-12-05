@@ -2,6 +2,9 @@ import { useTranslation } from 'react-i18next';
 import type { Variation } from '@/receptionist/contexts/cartContext';
 import type { OrderItem } from './types';
 import { EditVariationsForm } from './editVariationsForm';
+import { PlusIcon } from '@/icons/plusIcon';
+import { EditIcon } from '@/icons/editIcon';
+import { useCurrency } from '@/global/contexts/currencyContext';
 
 interface OrderItemRowProps {
   item: OrderItem;
@@ -29,17 +32,18 @@ export function OrderItemRow({
   onVariationChange,
 }: OrderItemRowProps) {
   const { t } = useTranslation();
+  const { formatPrice } = useCurrency();
 
-  const hasMilkVariations = item.product.variations?.some(
-    v => v.name.toLowerCase().includes('milk')
+  const hasMilkVariations = item.product.variations?.some(v =>
+    v.name.toLowerCase().includes('milk'),
   );
 
+  const hasRegularMilkSelected = !item.selectedVariations.some(v =>
+    v.name.toLowerCase().includes('milk'),
+  );
 
-  const hasRegularMilkSelected = 
-    !item.selectedVariations.some(v => v.name.toLowerCase().includes('milk'));
-
-  const hasSpecialMilkSelected = item.selectedVariations.some(
-    v => v.name.toLowerCase().includes('milk')
+  const hasSpecialMilkSelected = item.selectedVariations.some(v =>
+    v.name.toLowerCase().includes('milk'),
   );
 
   return (
@@ -67,75 +71,78 @@ export function OrderItemRow({
                   ? t(item.product.nameKey)
                   : item.product.name}
               </h3>
-              
-              {/* Edit variations button - now under the item name */}
-              {item.product.variations && item.product.variations.length > 0 && (
-                <div className="mt-2">
-                  <button
-                    onClick={onStartEditVariations}
-                    className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-sm transition-colors ${
-                      item.selectedVariations.length > 0
-                        ? 'bg-blue-100 text-blue-800 hover:bg-blue-200'
-                        : 'text-blue-600 hover:text-blue-800'
-                    }`}
-                    title={t('orderPanel.clickToChange', 'Click to change options')}
-                  >
-                    {item.selectedVariations.length > 0 ? (
-                      <>
-                        <span>
-                          {item.selectedVariations
-                            .map(v => t(`variationModal.variations.${v.name}`, v.name))
-                            .join(', ')}
-                        </span>
-                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                        </svg>
-                      </>
-                    ) : hasMilkVariations ? (
-                      <>
-                        <span className="flex items-center gap-1">
-                          {t('orderPanel.regularMilk', 'Regular Milk')}
-                        </span>
-                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                        </svg>
-                      </>
-                    ) : (
-                      <>
-                        {t('orderPanel.addOptions', 'Add Options')}
-                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                        </svg>
-                      </>
+
+              {item.product.variations &&
+                item.product.variations.length > 0 && (
+                  <div className="mt-2">
+                    <button
+                      onClick={onStartEditVariations}
+                      className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-sm transition-colors ${
+                        item.selectedVariations.length > 0
+                          ? 'bg-blue-100 text-blue-800 hover:bg-blue-200'
+                          : 'text-blue-600 hover:text-blue-800'
+                      }`}
+                      title={t(
+                        'orderPanel.clickToChange',
+                        'Click to change options',
+                      )}
+                    >
+                      {item.selectedVariations.length > 0 ? (
+                        <>
+                          <span>
+                            {item.selectedVariations
+                              .map(v =>
+                                t(
+                                  `variationModal.variations.${v.name}`,
+                                  v.name,
+                                ),
+                              )
+                              .join(', ')}
+                          </span>
+                          <EditIcon className="h-4 w-4" />
+                        </>
+                      ) : hasMilkVariations ? (
+                        <>
+                          <span className="flex items-center gap-1">
+                            {t('orderPanel.regularMilk', 'Regular Milk')}
+                          </span>
+                          <EditIcon className="h-4 w-4" />
+                        </>
+                      ) : (
+                        <>
+                          {t('orderPanel.addOptions', 'Add Options')}
+                          <PlusIcon className="h-4 w-4" />
+                        </>
+                      )}
+                    </button>
+                    {hasMilkVariations && !hasSpecialMilkSelected && (
+                      <p className="mt-1 text-xs text-gray-500">
+                        {t('orderPanel.includesRegularMilk', '')}
+                      </p>
                     )}
-                  </button>
-                  
-                  {/* Show regular milk as included by default for coffee products */}
-                  {hasMilkVariations && !hasSpecialMilkSelected && (
-                    <p className="mt-1 text-xs text-gray-500">
-                      {t('orderPanel.includesRegularMilk', '')}
-                    </p>
-                  )}
-                </div>
-              )}
-              
+                  </div>
+                )}
+
               {/* Show variations as text if product doesn't have variations config but has variations selected */}
-              {(!item.product.variations || item.product.variations.length === 0) && 
+              {(!item.product.variations ||
+                item.product.variations.length === 0) &&
                 item.selectedVariations.length > 0 && (
-                <div className="mt-2 text-sm text-gray-500">
-                  {item.selectedVariations
-                    .map(v => t(`variationModal.variations.${v.name}`, v.name))
-                    .join(', ')}
-                </div>
-              )}
+                  <div className="mt-2 text-sm text-gray-500">
+                    {item.selectedVariations
+                      .map(v =>
+                        t(`variationModal.variations.${v.name}`, v.name),
+                      )
+                      .join(', ')}
+                  </div>
+                )}
             </div>
             <div className="text-right">
-              <div className="font-semibold">
-                ${(item.finalPrice * item.quantity).toFixed(2)}
-              </div>
-              <div className="text-sm text-gray-500">
-                ${item.finalPrice.toFixed(2)} {t('each', 'each')}
-              </div>
+<div className="font-semibold">
+  {formatPrice(item.finalPrice * item.quantity)}
+</div>
+<div className="text-sm text-gray-500">
+  {formatPrice(item.finalPrice)} {t('editOrder.each', 'each')}
+</div>
             </div>
           </div>
 
