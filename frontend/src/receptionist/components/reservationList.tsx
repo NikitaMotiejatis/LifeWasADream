@@ -24,7 +24,6 @@ export const servicesMap: Record<string, { title: string; price: number }> = {
   '4': { title: 'Pedicure', price: 50 },
 };
 
-// Map EditReservationPanel service IDs to your service IDs
 const serviceIdMapping: Record<string, string> = {
   haircut: '1',
   color: '2',
@@ -32,29 +31,24 @@ const serviceIdMapping: Record<string, string> = {
   pedicure: '4',
 };
 
-// Map EditReservationPanel staff IDs to your staff IDs
 const staffIdMapping: Record<string, string> = {
   james: 'james',
   sarah: 'sarah',
   anyone: 'anyone',
 };
 
-// ADD THIS FUNCTION HERE - It formats reservation for EditReservationPanel
 const formatReservationForEdit = (res: Reservation): any => {
-  // Create reverse service mapping
   const reverseServiceMap: Record<string, string> = {};
   Object.entries(serviceIdMapping).forEach(([key, value]) => {
     reverseServiceMap[value] = key;
   });
   
-  // Staff mapping (same in both)
   const staffMap: Record<string, string> = {
     'james': 'james',
     'sarah': 'sarah',
     'anyone': 'anyone'
   };
 
-  // Service durations
   const serviceDurations: Record<string, number> = {
     'haircut': 60,
     'color': 120,
@@ -65,7 +59,6 @@ const formatReservationForEdit = (res: Reservation): any => {
   const serviceId = reverseServiceMap[res.serviceId] || 'haircut';
   const duration = serviceDurations[serviceId] || 60;
 
-  // Get service details for price
   const serviceInfo = servicesMap[res.serviceId];
   const price = serviceInfo?.price || 0;
 
@@ -104,7 +97,6 @@ export default function ReservationList() {
   const [selectedReservation, setSelectedReservation] =
     useState<Reservation | null>(null);
 
-  // States for edit functionality
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [reservationIdToEdit, setReservationIdToEdit] = useState<string | null>(
     null,
@@ -232,7 +224,6 @@ export default function ReservationList() {
     setModalOpen(true);
   };
 
-  // Handle edit click
 const handleEditClick = (reservation: Reservation) => {
   
   const formattedReservation = formatReservationForEdit(reservation);
@@ -263,10 +254,8 @@ const handleEditClick = (reservation: Reservation) => {
       throw new Error(`Reservation with ID ${reservationData.id} not found`);
     }
 
-    // reservationData.datetime is now a Date object
     const datetime = reservationData.datetime;
 
-    // Map service and staff IDs
     const serviceId =
       serviceIdMapping[reservationData.service] ||
       originalReservation.serviceId;
