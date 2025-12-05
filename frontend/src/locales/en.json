@@ -721,6 +721,7 @@
   "subtitle": "Modify items, payment method, and billing",
   "cancel": "Cancel",
   "save": "Save Changes",
+<<<<<<< HEAD
   "saveChanges": "Save Changes",
     "each": "each",
     "created": "Created",
@@ -731,4 +732,8 @@
       "closed": "Closed",
       "refund_pending": "Refund Pending"
     }
+=======
+  "saveChanges": "Save Changes"
+}
+>>>>>>> f20f1a78a72d21bfe5f94335a6650fb1b7522782
 }

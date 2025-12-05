@@ -73,7 +73,6 @@ export function EditVariationsForm({
               )
               .map(variation => {
                 const isSelected = isVariationSelected(variation);
-
                 return (
                   <button
                     key={variation.name}

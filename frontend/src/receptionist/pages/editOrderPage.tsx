@@ -37,7 +37,6 @@ function EditOrderContent() {
       setLoading(true);
       try {
         console.warn('API endpoint not implemented. Using empty state.');
-
         setOrderData({
           id: orderId || '',
           total: 0,
@@ -181,7 +180,6 @@ export default function EditOrderPage() {
       <div className="flex flex-1 flex-col md:ml-64">
         {/* Topbar */}
         <Topbar />
-
         {/* */}
         <CurrencyProvider>
           <CartProvider>
