@@ -57,7 +57,9 @@
   },
   "common": {
     "cancel": "Cancel",
-    "clear": "Clear"
+    "clear": "Clear",
+    "back": "Back",
+    "status": "Status"
   },
   "deliveries": {
     "buttons": {
