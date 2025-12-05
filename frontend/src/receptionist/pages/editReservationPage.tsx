@@ -6,7 +6,6 @@ import Topbar from '@/global/components/topbar';
 import { EditReservationPanel } from '@/receptionist/components/editReservation/editReservationPanel';
 import type { Reservation } from '@/receptionist/components/editReservation/types';
 
-// This function should be shared between ReservationList and EditReservationPage
 const mapReservationForEdit = (reservationFromList: any): Reservation => {
   // Map service IDs from your list (1,2,3,4) to edit panel (haircut,color,etc)
   const serviceMap: Record<string, string> = {
@@ -23,10 +22,6 @@ const mapReservationForEdit = (reservationFromList: any): Reservation => {
     'anyone': 'anyone'
   };
 
-  // Extract date and time from datetime object
-  const date = reservationFromList.datetime.toISOString().split('T')[0];
-  const time = reservationFromList.datetime.toTimeString().slice(0, 5);
-
   // Service prices and durations
   const serviceDetails: Record<string, { price: number; duration: number }> = {
     'haircut': { price: 65, duration: 60 },
@@ -42,12 +37,11 @@ const mapReservationForEdit = (reservationFromList: any): Reservation => {
     id: reservationFromList.id,
     service: serviceId,
     staff: staffMap[reservationFromList.staffId] || 'anyone',
-    date,
-    time,
+    datetime: reservationFromList.datetime, // <-- FIX: use reservationFromList.datetime
     duration: details.duration,
     customerName: reservationFromList.customerName,
     customerPhone: reservationFromList.customerPhone,
-    status: reservationFromList.status, // Keep the same status
+    status: reservationFromList.status,
     notes: '',
     price: details.price
   };
@@ -65,11 +59,6 @@ export default function EditReservationPage() {
       setLoading(true);
       try {
         if (reservationId) {
-          // In a real app, you would fetch from your API/state management
-          // For now, let's assume you have access to the reservations list
-          // You could pass it via context, props, or fetch from API
-          
-          // Example: Get from localStorage or global state
           const storedReservations = localStorage.getItem('reservations');
           if (storedReservations) {
             const reservations = JSON.parse(storedReservations);
@@ -94,9 +83,7 @@ export default function EditReservationPage() {
   const handleSave = async (updatedReservation: Reservation) => {
     try {
       console.log('Saving reservation:', updatedReservation);
-      
-      // In a real app, update via API
-      // For now, update localStorage or context
+
       const storedReservations = localStorage.getItem('reservations');
       if (storedReservations) {
         const reservations = JSON.parse(storedReservations);
