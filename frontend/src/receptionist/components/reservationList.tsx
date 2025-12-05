@@ -239,7 +239,6 @@ export default function ReservationList() {
 
   // Handle edit click
 const handleEditClick = (reservation: Reservation) => {
-  console.log('Edit clicked for reservation:', reservation);
   
   const formattedReservation = formatReservationForEdit(reservation);
   
