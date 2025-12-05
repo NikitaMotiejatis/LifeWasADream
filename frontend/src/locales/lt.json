@@ -899,6 +899,14 @@
   "subtitle": "Keisti prekes, mokėjimo būdą ir sąskaitą",
   "cancel": "Atšaukti",
   "save": "Išsaugoti pakeitimus",
-  "saveChanges": "Išsaugoti pakeitimus"
-}
+  "saveChanges": "Išsaugoti pakeitimus",
+      "each": "vnt.",
+    "created": "Sukurta", 
+    "active": "Aktyvus"
+,
+    "status": {
+      "active": "Aktyvus",
+      "closed": "Uždarytas",
+      "refund_pending": "Grąžinimas laukiamas"
+    }}
 }

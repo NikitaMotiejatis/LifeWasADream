@@ -32,6 +32,10 @@ export function OrderSummaryView({
 
   const hasItems = itemsList.length > 0;
 
+  function handleSave() {
+    throw new Error('Function not implemented.');
+  }
+
   return (
     <div className="max-h-full flex-1 flex-col overflow-hidden rounded-2xl bg-white p-4 shadow-xl xl:p-5">
       <div className="mb-4 flex items-center justify-between">
@@ -163,7 +167,13 @@ export function OrderSummaryView({
         <div className="space-y-3">
           {!showPaymentSection && !onBack && (
             <div className="mt-4 space-y-3 border-t border-gray-300 pt-4">
-              <button className="w-full rounded-lg border border-gray-400 py-2 text-xs font-medium hover:bg-gray-50">
+              <button
+                onClick={() => {
+                  handleSave();
+                  window.location.href = '/receptionist/orders';
+                }}
+                className="w-full rounded-lg border border-gray-400 py-2 text-xs font-medium hover:bg-gray-50"
+              >
                 {t('orderSummary.saveOrder', 'Save Order')}
               </button>
             </div>

@@ -11,6 +11,8 @@ import { OrderSummaryView } from './orderSummaryView';
 import { OrderItemRow } from './orderItemRow';  
 import type { EditOrderPanelProps, OrderItem, ExtendedProduct} from './types';
 import { createMockOrderItems } from './utils';
+import { ShoppingCartIcon } from '@/icons/shoppingCartItemIcon';
+import { PlusIcon } from '@/icons/plusIcon';
 
 export function EditOrderPanel({
   orderId,
@@ -168,19 +170,7 @@ const handleAddItemFromGrid = (product: ExtendedProduct) => {
         {items.length === 0 ? (
           <div className="py-10 text-center">
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
-              <svg
-                className="h-8 w-8 text-gray-400"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
-                />
-              </svg>
+<ShoppingCartIcon className="h-8 w-8 text-gray-400" />
             </div>
             <p className="mb-4 text-gray-400">
               {t('orderSummary.noItems', 'No items in order')}
@@ -216,28 +206,16 @@ const handleAddItemFromGrid = (product: ExtendedProduct) => {
       </div>
 
       {items.length > 0 && (
-        <div className="mb-6">
-          <button
-            onClick={handleStartAddingItems}
-            className="flex w-full items-center justify-center gap-2 rounded-lg border-2 border-blue-300 bg-blue-50 py-3 text-blue-600 transition-colors hover:bg-blue-100"
-          >
-            <svg
-              className="h-5 w-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 4v16m8-8H4"
-              />
-            </svg>
-            <span className="font-medium">{t('orderPanel.addItem', 'Add Item')}</span>
-          </button>
-        </div>
-      )}
+  <div className="mb-6">
+    <button
+      onClick={handleStartAddingItems}
+      className="flex w-full items-center justify-center gap-2 rounded-lg border-2 border-blue-300 bg-blue-50 py-3 text-blue-600 transition-colors hover:bg-blue-100"
+    >
+      <PlusIcon className="h-6 w-6 text-blue-600" />
+      <span className="font-medium">{t('orderPanel.addItem', 'Add Item')}</span>
+    </button>
+  </div>
+)}
 
       <div className="mb-6 border-t border-gray-300 pt-4">
         <div className="flex justify-between text-xl font-bold">
