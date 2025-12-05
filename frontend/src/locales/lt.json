@@ -481,8 +481,29 @@
     "smoothieBerry": "Kokteilis – Uogų sprogimas",
     "smoothieMango": "Kokteilis – Mangų rojus"
   },
-    "reservation": {
-      "selectTime": "Pasirinkite laiką",
+  "reservation": {
+        "selectStaffAndService": "Select staff and service",
+    "confirmationSms": "Confirmation will be sent via SMS",
+    "priceSummary": "Price Summary",
+    "createReservation": "Create Reservation",
+    "cancel": "Cancel",
+    "confirmButton": "Patvirtinti rezervaciją",
+    "dateTimeTitle": "Pasirinkite datą ir laiką",
+    "months": {
+      "0": "Sausis",
+      "1": "Vasaris",
+      "2": "Kovas",
+      "3": "Balandis",
+      "4": "Gegužė",
+      "5": "Birželis",
+      "6": "Liepa",
+      "7": "Rugpjūtis",
+      "8": "Rugsėjis",
+      "9": "Spalis",
+      "10": "Lapkritis",
+      "11": "Gruodis"
+    },
+    "selectTime": "Pasirinkite laiką",
     "customerInfo": "Kliento informacija",
     "customerName": "Kliento vardas",
     "customerNamePlaceholder": "Vardas Pavardė",
@@ -498,7 +519,7 @@
     "emailPlaceholder": "El. pašto adresas",
     "notes": "Pastabos",
     "notesPlaceholder": "Papildomos pastabos...",
-    
+
     "service": "Paslauga",
     "services": {
       "haircut": "Plaukų kirpimas ir stilizavimas",
@@ -506,7 +527,7 @@
       "manicure": "Manikiūras",
       "pedicure": "Pedikiūras"
     },
-    
+
     "staffMember": "Darbuotojas",
     "staff": {
       "james": "James Chen",
@@ -516,7 +537,7 @@
       "Colorist": "Spalvininkas",
       "Anyone": "Bet kas"
     },
-    
+
     "dateTime": "Data ir laikas",
     "date": "Data",
     "time": "Laikas",
@@ -527,70 +548,69 @@
       "60 min": "60 min",
       "min": "min"
     },
-    
+
     "bookingSummary": "Rezervacijos suvestinė",
     "total": "Iš viso",
-    
+
     "selected": "Pasirinkta",
     "selectedService": "Pasirinkta paslauga",
     "selectedStaff": "Pasirinktas darbuotojas"
   },
 
-    "nameError": "Galimos tik raidės, tarpai, brūkšneliai ir apostrofai",
-    "navigation": {
-      "next": "Kitas",
-      "previous": "Ankstesnis"
-    },
-    "pageTitle": "Nauja rezervacija",
-    "phoneError": "Galimi tik skaičiai ir neprivalomas \"+\" pradžioje",
-    "services": {
-      "Hair Color": "Dažymas",
-      "Haircut & Style": "Plaukų kirpimas ir stilizavimas",
-      "Manicure": "Manikiūras",
-      "Pedicure": "Pedikiūras"
-    },
-    "smsNote": "Patvirtinimas bus išsiųstas SMS žinute",
-    "staff": {
-      "Any available staff": "Bet kuris laisvas darbuotojas",
-      "Colorist": "Dažytojas",
-      "James Chen": "James Chen",
-      "Nail Technician": "Nagų meistrė",
-      "Sarah Johnson": "Sarah Johnson",
-      "Anyone": "Bet kas"
-    },
-    "staffMember": "Darbuotojas",
-    "staffServiceTitle": "Pasirinkite darbuotoją ir paslaugą",
-    "summary": {
-      "date": "Data",
-      "notSelected": "[Nepasirinkta]",
-      "service": "Paslauga",
-      "staff": "Darbuotojas",
-      "time": "Laikas",
-      "total": "Iš viso"
-    },
-    "toast": {
-      "incomplete": "Prašome užpildyti visus laukus: paslaugą, datą ir laiką.",
-      "missingInfo": "Trūksta kliento duomenų.\nĮveskite vardą ir telefono numerį.",
-      "success": "Rezervacija patvirtinta!\nKodas: {{code}}\nSMS išsiųsta į {{phone}}"
-    },
-    "weekdays": {
-      "mo": "Pr",
-      "tu": "An",
-      "we": "Tr",
-      "th": "Kt",
-      "fr": "Pn",
-      "sa": "Št",
-      "su": "Sk"
-    },
-    "customerInfo": "Kliento informacija",
-    "customerName": "Kliento vardas",
-    "customerPhone": "Telefono numeris",
-    "serviceDetails": "Paslaugos detalės",
+  "nameError": "Galimos tik raidės, tarpai, brūkšneliai ir apostrofai",
+  "navigation": {
+    "next": "Kitas",
+    "previous": "Ankstesnis"
+  },
+  "pageTitle": "Nauja rezervacija",
+  "phoneError": "Galimi tik skaičiai ir neprivalomas \"+\" pradžioje",
+  "services": {
+    "Hair Color": "Dažymas",
+    "Haircut & Style": "Plaukų kirpimas ir stilizavimas",
+    "Manicure": "Manikiūras",
+    "Pedicure": "Pedikiūras"
+  },
+  "smsNote": "Patvirtinimas bus išsiųstas SMS žinute",
+  "staff": {
+    "Any available staff": "Bet kuris laisvas darbuotojas",
+    "Colorist": "Dažytojas",
+    "Nail Technician": "Nagų meistrė",
+    "Anyone": "Bet kas",
+    "James Chen": "Jonas Petraitis",
+    "Sarah Johnsonh": "Ona Jonaitienė"
+  },
+  "staffMember": "Darbuotojas",
+  "staffServiceTitle": "Pasirinkite darbuotoją ir paslaugą",
+  "summary": {
     "date": "Data",
+    "notSelected": "[Nepasirinkta]",
+    "service": "Paslauga",
+    "staff": "Darbuotojas",
     "time": "Laikas",
-    "notes": "Pastabos",
-    "notesPlaceholder": "Papildomos pastabos..."
-  ,
+    "total": "Iš viso"
+  },
+  "toast": {
+    "incomplete": "Prašome užpildyti visus laukus: paslaugą, datą ir laiką.",
+    "missingInfo": "Trūksta kliento duomenų.\nĮveskite vardą ir telefono numerį.",
+    "success": "Rezervacija patvirtinta!\nKodas: {{code}}\nSMS išsiųsta į {{phone}}"
+  },
+  "weekdays": {
+    "mo": "Pr",
+    "tu": "An",
+    "we": "Tr",
+    "th": "Kt",
+    "fr": "Pn",
+    "sa": "Št",
+    "su": "Sk"
+  },
+  "customerInfo": "Kliento informacija",
+  "customerName": "Kliento vardas",
+  "customerPhone": "Telefono numeris",
+  "serviceDetails": "Paslaugos detalės",
+  "date": "Data",
+  "time": "Laikas",
+  "notes": "Pastabos",
+  "notesPlaceholder": "Papildomos pastabos...",
   "reservations": {
     "actions": {
       "cancel": "Atšaukti",
@@ -599,8 +619,7 @@
       "noShow": "Neatvyko",
       "refund": "Grąžinti pinigus",
       "start": "Pradėti aptarnavimą",
-      "edit" : "Redaguoti"
-
+      "edit": "Redaguoti"
     },
     "filters": {
       "all": "Visi ({{count}})",
