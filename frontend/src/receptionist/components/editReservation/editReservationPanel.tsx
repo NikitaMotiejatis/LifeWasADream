@@ -1,243 +1,218 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import type { Reservation, Service, Staff, EditReservationPanelProps } from './types';
 
-export type EditReservationPanelProps = {
-  mode: 'edit';
-  reservationId: string;
-  onSave?: (reservation: any) => void;
-  onCancel?: () => void;
-};
-
-// Mock services data
-const services = [
-  { id: 'haircut', name: 'Haircut & Style', duration: 60, price: 35 },
-  { id: 'color', name: 'Hair Color', duration: 120, price: 80 },
-  { id: 'manicure', name: 'Manicure', duration: 45, price: 25 },
-  { id: 'pedicure', name: 'Pedicure', duration: 60, price: 35 },
-];
-
-// Mock staff data
-const staffMembers = [
-  { id: 'james', name: 'James Chen', role: 'Stylist' },
-  { id: 'sarah', name: 'Sarah Johnson', role: 'Colorist' },
-  { id: 'anyone', name: 'Any Staff', role: 'Anyone' },
-];
+import { CustomerInfoSection } from './customerInfoSection';
+import { ServiceSection } from './serviceSection';
+import { StaffSection } from './staffSection';
+import { DateTimeSection } from './dateTimeSection';
+import { PriceSummarySection } from './priceSummarySection';
+import { ActionButtons } from './actionButtons';
 
 export function EditReservationPanel({
   reservationId,
+  services = [],
+  staffMembers = [],
+  initialReservation,
   onSave,
   onCancel,
 }: EditReservationPanelProps) {
   const { t } = useTranslation();
-  
-  // Mock reservation data
-  const [reservation, setReservation] = useState({
-    id: reservationId,
-    service: 'haircut',
-    staff: 'james',
-    date: new Date().toISOString().split('T')[0], // YYYY-MM-DD format
+
+  // Use provided services/staff or defaults with Lithuanian translations
+  const displayServices = services.length > 0 ? services : getDefaultServices(t);
+  const displayStaff = staffMembers.length > 0 ? staffMembers : getDefaultStaff(t);
+
+  const getDefaultReservation = (): Reservation => ({
+    id: reservationId || '',
+    service: '',
+    staff: '',
+    date: new Date().toISOString().split('T')[0],
     time: '14:30',
     duration: 60,
-    customerName: 'John Doe',
-    customerPhone: '+37060000000',
-    status: 'confirmed',
-    notes: 'Customer prefers side part',
-    price: 35,
+    customerName: '',
+    customerPhone: '',
+    status: 'pending',
+    notes: '',
+    price: 0,
   });
 
-  const handleSave = () => {
-    onSave?.(reservation);
-  };
+  const [reservation, setReservation] = useState<Reservation>(getDefaultReservation());
 
-  const handleChange = (field: string, value: any) => {
-    setReservation(prev => ({ ...prev, [field]: value }));
-    
-    // Update duration and price when service changes
-    if (field === 'service') {
-      const selectedService = services.find(s => s.id === value);
-      if (selectedService) {
-        setReservation(prev => ({
-          ...prev,
-          service: value,
-          duration: selectedService.duration,
-          price: selectedService.price,
-        }));
-      }
+  // Initialize with passed data
+  useEffect(() => {
+    if (initialReservation) {
+      console.log('Setting initial reservation:', initialReservation);
+      setReservation(initialReservation);
+    }
+  }, [initialReservation]);
+
+  const handleSave = () => {
+    if (onSave) {
+      onSave(reservation);
     }
   };
 
-  const selectedService = services.find(s => s.id === reservation.service);
-  const selectedStaff = staffMembers.find(s => s.id === reservation.staff);
+  const updateReservation = (updates: Partial<Reservation>) => {
+    setReservation(prev => {
+      const updated = { ...prev, ...updates };
+      
+      // Auto-update duration and price when service changes
+      if (updates.service !== undefined) {
+        const selectedService = displayServices.find(s => s.id === updates.service);
+        if (selectedService) {
+          updated.duration = selectedService.duration;
+          updated.price = selectedService.price;
+        }
+      }
+      
+      return updated;
+    });
+  };
+const getAvailableTimes = (): string[] => {
+  const times: string[] = [];
+  for (let hour = 9; hour <= 19; hour++) {
+    times.push(`${hour.toString().padStart(2, '0')}:00`);
+  }
+  return times;
+};
 
   return (
-    <div className="flex-1 flex-col overflow-hidden rounded-2xl bg-white p-6 shadow-xl">
-
-
-      {/* Reservation Details */}
-      <div className="space-y-6">
-        {/* Customer Information */}
-        <div className="rounded-lg border border-gray-200 p-4">
-          <h3 className="mb-3 text-lg font-semibold">
-            {t('reservation.customerInfo', 'Customer Information')}
-          </h3>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">
-                {t('reservation.customerName', 'Customer Name')}
-              </label>
-              <input
-                type="text"
-                value={reservation.customerName}
-                onChange={(e) => handleChange('customerName', e.target.value)}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2"
-                placeholder={t('reservation.customerNamePlaceholder', 'Customer name')}
-              />
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">
-                {t('reservation.customerPhone', 'Phone Number')}
-              </label>
-              <input
-                type="tel"
-                value={reservation.customerPhone}
-                onChange={(e) => handleChange('customerPhone', e.target.value)}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2"
-                placeholder={t('reservation.customerPhonePlaceholder', 'Phone number')}
-              />
-            </div>
+    <div className="space-y-6 p-6">
+      {/* Header */}
+      <div className="mb-4 border-b border-gray-200 pb-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900">
+              {t('editReservation.title', 'Redaguoti rezervaciją')} #{reservation.id}
+            </h2>
           </div>
-        </div>
-        {/* Service Details */}
-        <div className="rounded-xl bg-white p-5 shadow">
-          <h3 className="mb-3 text-sm font-medium text-gray-600 uppercase">
-            {t('reservation.service', 'Service')}
-          </h3>
-          <div className="space-y-2">
-            {services.map(service => (
-              <div
-                key={service.id}
-                onClick={() => handleChange('service', service.id)}
-                className={`flex cursor-pointer justify-between rounded-lg border p-4 transition ${
-                  reservation.service === service.id
-                    ? 'border-blue-500 bg-blue-50'
-                    : 'border-gray-300 hover:bg-gray-50'
-                }`}
-              >
-                <div>
-                  <div className="font-medium">
-                    {t(`reservation.services.${service.name}`, service.name)}
-                  </div>
-                  <div className="text-xs text-gray-500">
-                    {service.duration} min
-                  </div>
-                </div>
-                <div className="font-semibold text-blue-600">
-                  ${service.price}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Staff Details */}
-        <div className="rounded-xl bg-white p-5 shadow">
-          <h3 className="mb-3 text-sm font-medium text-gray-600 uppercase">
-            {t('reservation.staffMember', 'Staff Member')}
-          </h3>
-          <div className="space-y-2">
-            {staffMembers.map(staff => (
-              <div
-                key={staff.id}
-                onClick={() => handleChange('staff', staff.id)}
-                className={`flex cursor-pointer items-center justify-between rounded-lg border p-4 transition ${
-                  reservation.staff === staff.id
-                    ? 'border-blue-500 bg-blue-50'
-                    : 'border-gray-300 hover:bg-gray-50'
-                }`}
-              >
-                <div>
-                  <div className="font-medium">
-                    {t(`reservation.staff.${staff.name}`, staff.name)}
-                  </div>
-                  <div className="text-xs text-gray-500">
-                    {staff.role}
-                  </div>
-                </div>
-                {reservation.staff === staff.id && (
-                  <span className="text-xl text-blue-600">✓</span>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Date and Time */}
-        <div className="rounded-xl bg-white p-5 shadow">
-          <h3 className="mb-3 text-sm font-medium text-gray-600 uppercase">
-            {t('reservation.dateTime', 'Date & Time')}
-          </h3>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <div>
-              <label className="mb-2 block text-sm font-medium text-gray-700">
-                {t('reservation.date', 'Date')}
-              </label>
-              <input
-                type="date"
-                value={reservation.date}
-                onChange={(e) => handleChange('date', e.target.value)}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 focus:border-blue-500 focus:outline-none"
-              />
-            </div>
-            
-            <div>
-              <label className="mb-2 block text-sm font-medium text-gray-700">
-                {t('reservation.time', 'Time')}
-              </label>
-              <input
-                type="time"
-                value={reservation.time}
-                onChange={(e) => handleChange('time', e.target.value)}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 focus:border-blue-500 focus:outline-none"
-              />
-              <div className="mt-2 flex items-center gap-2">
-                <span className="text-sm text-gray-500">
-                  Duration:
-                </span>
-                <span className="text-sm font-medium text-gray-700">
-                  {reservation.duration} min
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Price Summary */}
-        <div className="rounded-lg border border-gray-200 p-4">
-          <h3 className="mb-3 text-lg font-semibold">
-            {t('reservation.bookingSummary', 'Reservation Summary')}
-          </h3>
-          <div className="flex justify-between">
-            <span className="text-gray-600">{t('reservation.total', 'Total')}</span>
-            <span className="text-xl font-bold">${reservation.price || 0}</span>
+          <div className={`rounded-lg px-4 py-2 ${
+            reservation.status === 'completed' 
+              ? 'bg-green-100 text-green-800' 
+              : reservation.status === 'pending' 
+              ? 'bg-yellow-100 text-yellow-800'
+              : reservation.status === 'refund_pending'
+              ? 'bg-orange-100 text-orange-800'
+              : 'bg-red-100 text-red-800'
+          }`}>
+            <span className="text-sm font-medium capitalize">
+              {t(`reservation.status.${reservation.status}`, reservation.status)}
+            </span>
           </div>
         </div>
       </div>
+
+      {/* Customer Information */}
+      <CustomerInfoSection
+        reservation={reservation}
+        handleChange={(field, value) => {
+          if (field === 'customerName' || field === 'customerPhone') {
+            updateReservation({ [field]: value });
+          }
+        }}
+      />
+
+      {/* Service Selection */}
+      <ServiceSection
+        services={displayServices}
+        reservation={reservation}
+        handleChange={(field, value) => {
+          if (field === 'service') {
+            updateReservation({ service: value });
+          }
+        }}
+      />
+
+      {/* Staff Selection */}
+      <StaffSection
+        staffMembers={displayStaff}
+        reservation={reservation}
+        handleChange={(field, value) => {
+          if (field === 'staff') {
+            updateReservation({ staff: value });
+          }
+        }}
+      />
+
+      {/* Date & Time */}
+      <DateTimeSection
+        reservation={reservation}
+        handleChange={(field, value) => {
+          if (field === 'date') updateReservation({ date: value });
+          if (field === 'time') updateReservation({ time: value });
+        }}
+        availableTimes={getAvailableTimes()}
+      />
+
+      {/* Price Summary */}
+      <PriceSummarySection reservation={reservation} />
 
       {/* Action Buttons */}
-      <div className="mt-8 flex gap-3 border-t border-gray-300 pt-6">
-        <button
-          onClick={onCancel}
-          className="flex-1 rounded-lg border border-gray-300 py-3 text-sm font-medium hover:bg-gray-50"
-        >
-          {t('common.cancel', 'Cancel')}
-        </button>
-        <button
-          onClick={handleSave}
-          className="flex-1 rounded-lg bg-blue-600 py-3 text-sm font-medium text-white hover:bg-blue-700"
-        >
-          {t('editReservation.saveChanges', 'Save Changes')}
-        </button>
-      </div>
+      <ActionButtons
+        onCancel={onCancel}
+        onSave={handleSave}
+      />
     </div>
   );
+}
+
+// Helper functions for default data with Lithuanian translations
+function getDefaultServices(t: any): Service[] {
+  return [
+    {
+      id: 'haircut',
+      name: t('reservations.services.1', 'Kirpimas ir šukavimas'),
+      nameKey: 'haircut',
+      duration: 60,
+      price: 65,
+    },
+    {
+      id: 'color',
+      name: t('reservations.services.2', 'Plaukų dažymas'),
+      nameKey: 'color',
+      duration: 120,
+      price: 120,
+    },
+    {
+      id: 'manicure',
+      name: t('reservations.services.3', 'Manikiūras'),
+      nameKey: 'manicure',
+      duration: 45,
+      price: 35,
+    },
+    {
+      id: 'pedicure',
+      name: t('reservations.services.4', 'Pedikiūras'),
+      nameKey: 'pedicure',
+      duration: 60,
+      price: 50,
+    },
+  ];
+}
+
+function getDefaultStaff(t: any): Staff[] {
+  return [
+    {
+      id: 'james',
+      name: t('reservations.staff.james', 'Jonas Petraitis'),
+      nameKey: 'james',
+      role: t('reservation.staff.Stylist', 'Kirpėjas'),
+      services: ['haircut', 'color'],
+    },
+    {
+      id: 'sarah',
+      name: t('reservations.staff.sarah', 'Ona Jonaitienė'),
+      nameKey: 'sarah',
+      role: t('reservation.staff.Colorist', 'Dažytoja'),
+      services: ['color'],
+    },
+    {
+      id: 'anyone',
+      name: t('reservations.staff.anyone', 'Bet kuris darbuotojas'),
+      nameKey: 'anyone',
+      role: t('reservation.staff.Anyone', 'Bet kas'),
+      services: ['haircut', 'color', 'manicure', 'pedicure'],
+    },
+  ];
 }

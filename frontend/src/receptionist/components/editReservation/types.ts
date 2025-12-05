@@ -1,20 +1,22 @@
+// In your types.ts file
+export type ReservationStatus = 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'no_show' | 'refund_pending';
+
+// For EditReservationPanel
 export type Reservation = {
   id: string;
   service: string;
-  serviceKey?: string;
   staff: string;
-  staffKey?: string;
-  date: Date | string;
-  time: string;
+  date: string; // YYYY-MM-DD format
+  time: string; // HH:MM format
   duration: number;
   customerName: string;
   customerPhone: string;
-  email?: string;
-  status: 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'no_show' | 'refund_pending';
-  notes?: string;
-  price?: number;
+  status: ReservationStatus; // Use the union type
+  notes: string;
+  price: number;
 };
 
+// For Service
 export type Service = {
   id: string;
   name: string;
@@ -23,6 +25,7 @@ export type Service = {
   price: number;
 };
 
+// For Staff
 export type Staff = {
   id: string;
   name: string;
@@ -31,9 +34,13 @@ export type Staff = {
   services: string[];
 };
 
+// For EditReservationPanel props
 export type EditReservationPanelProps = {
-  mode: 'edit';
-  reservationId: string;
+  mode: 'create' | 'edit';
+  reservationId?: string;
+  initialReservation?: Reservation;
   onSave?: (reservation: Reservation) => void;
   onCancel?: () => void;
+  services?: Service[];
+  staffMembers?: Staff[];
 };

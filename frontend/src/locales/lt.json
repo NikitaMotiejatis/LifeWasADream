@@ -481,32 +481,54 @@
     "smoothieBerry": "Kokteilis – Uogų sprogimas",
     "smoothieMango": "Kokteilis – Mangų rojus"
   },
-  "reservation": {
-    "service": "Paslauga",
-    "bookingSummary": "Rezervacijos santrauka",
-    "confirmButton": "Patvirtinti rezervaciją",
-    "customerNamePlaceholder": "Kliento vardas ir pavardė",
+    "reservation": {
+    "customerInfo": "Kliento informacija",
+    "customerName": "Kliento vardas",
+    "customerPhone": "Telefono numeris",
+    "customerNamePlaceholder": "Kliento vardas",
     "customerPhonePlaceholder": "Telefono numeris",
-    "dateTimeTitle": "Pasirinkite datą ir laiką",
+    "email": "El. paštas",
+    "emailPlaceholder": "El. pašto adresas",
+    "notes": "Pastabos",
+    "notesPlaceholder": "Papildomos pastabos...",
+    
+    "service": "Paslauga",
+    "services": {
+      "haircut": "Plaukų kirpimas ir stilizavimas",
+      "color": "Plaukų dažymas",
+      "manicure": "Manikiūras",
+      "pedicure": "Pedikiūras"
+    },
+    
+    "staffMember": "Darbuotojas",
+    "staff": {
+      "james": "James Chen",
+      "sarah": "Sarah Johnson",
+      "anyone": "Bet kuris darbuotojas",
+      "Stylist": "Stylistas",
+      "Colorist": "Spalvininkas",
+      "Anyone": "Bet kas"
+    },
+    
+    "dateTime": "Data ir laikas",
+    "date": "Data",
+    "time": "Laikas",
+    "duration": "Trukmė",
     "durations": {
       "120 min": "120 min",
       "45 min": "45 min",
-      "60 min": "60 min"
+      "60 min": "60 min",
+      "min": "min"
     },
-    "months": {
-      "0": "Sausis",
-      "1": "Vasaris",
-      "2": "Kovas",
-      "3": "Balandis",
-      "4": "Gegužė",
-      "5": "Birželis",
-      "6": "Liepa",
-      "7": "Rugpjūtis",
-      "8": "Rugsėjis",
-      "9": "Spalis",
-      "10": "Lapkritis",
-      "11": "Gruodis"
-    },
+    
+    "bookingSummary": "Rezervacijos suvestinė",
+    "total": "Iš viso",
+    
+    "selected": "Pasirinkta",
+    "selectedService": "Pasirinkta paslauga",
+    "selectedStaff": "Pasirinktas darbuotojas"
+  },
+
     "nameError": "Galimos tik raidės, tarpai, brūkšneliai ir apostrofai",
     "navigation": {
       "next": "Kitas",
@@ -561,7 +583,7 @@
     "time": "Laikas",
     "notes": "Pastabos",
     "notesPlaceholder": "Papildomos pastabos..."
-  },
+  ,
   "reservations": {
     "actions": {
       "cancel": "Atšaukti",
