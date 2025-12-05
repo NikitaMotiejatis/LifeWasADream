@@ -482,11 +482,18 @@
     "smoothieMango": "Kokteilis – Mangų rojus"
   },
     "reservation": {
+      "selectTime": "Pasirinkite laiką",
     "customerInfo": "Kliento informacija",
     "customerName": "Kliento vardas",
+    "customerNamePlaceholder": "Vardas Pavardė",
     "customerPhone": "Telefono numeris",
-    "customerNamePlaceholder": "Kliento vardas",
-    "customerPhonePlaceholder": "Telefono numeris",
+    "customerPhonePlaceholder": "+123 XXX XXXXX arba 1XX XXXXX",
+    "phoneFormat": "Formatas: +123 456 78910 arba 12 345 6789",
+    "nameRequired": "Vardas yra privalomas",
+    "phoneRequired": "Telefono numeris yra privalomas",
+    "invalidPhone": "Netinkamas telefono numerio formatas. Naudokite +123XXXXXXXXX arba 1XXXXXXXXX",
+    "fixErrors": "Pataisykite validacijos klaidas prieš išsaugant",
+    "validationErrors": "Prašome pataisyti šias klaidas:",
     "email": "El. paštas",
     "emailPlaceholder": "El. pašto adresas",
     "notes": "Pastabos",
@@ -538,7 +545,7 @@
     "phoneError": "Galimi tik skaičiai ir neprivalomas \"+\" pradžioje",
     "services": {
       "Hair Color": "Dažymas",
-      "Haircut & Style": "Kirpimas ir šukavimas",
+      "Haircut & Style": "Plaukų kirpimas ir stilizavimas",
       "Manicure": "Manikiūras",
       "Pedicure": "Pedikiūras"
     },
@@ -641,7 +648,7 @@
     },
     "noReservations": "Rezervacijų nerasta",
     "services": {
-      "1": "Kirpimas ir šukavimas",
+      "1": "Plaukų kirpimas ir stilizavimas",
       "2": "Plaukų dažymas",
       "3": "Manikiūras",
       "4": "Pedikiūras"

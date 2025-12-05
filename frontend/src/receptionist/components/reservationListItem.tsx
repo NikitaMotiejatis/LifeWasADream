@@ -10,7 +10,7 @@ type Props = {
     type: 'complete' | 'cancel' | 'noshow' | 'refund' | 'cancel_refund',
     reservation: Reservation,
   ) => void;
-  onEdit: (reservation: Reservation) => void; // Separate handler for edit
+  onEdit: (reservation: Reservation) => void; 
 };
 
 export default function ReservationListItem({
@@ -69,9 +69,8 @@ export default function ReservationListItem({
                 {t('reservations.actions.complete')}
               </button>
               
-              {/* EDIT BUTTON - Uses onEdit NOT onAction */}
               <button
-                onClick={() => onEdit(reservation)} // Directly calls onEdit
+                onClick={() => onEdit(reservation)} 
                 className="flex items-center gap-1.5 rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 text-xs text-gray-700 hover:bg-gray-100 transition-colors"
                 title={t('reservations.actions.edit')}
               >
