@@ -307,10 +307,27 @@
     "smoothieMango": "Smoothie – Mango Paradise"
   },
   "reservation": {
+
+    "customerInfo": "Customer Information",
+    "customerName": "Customer Name",
+    "customerNamePlaceholder": "Full Name",
+    "customerPhone": "Phone Number",
+    "customerPhonePlaceholder": "+123 XXX XXXXX or 8XX XXXXX",
+    "phoneFormat": "Format: +123 456 78910 or 12 345 6789",
+    "nameRequired": "Name is required",
+    "phoneRequired": "Phone number is required",
+    "invalidPhone": "Invalid phone number format. Use +123XXXXXXXXX or 1XXXXXXXXX",
+    "fixErrors": "Please fix validation errors before saving",
+    "validationErrors": "Please fix the following errors:",
+    "status": {
+      "pending": "pending",
+      "confirmed": "confirmed",
+      "completed": "completed",
+      "cancelled": "cancelled",
+      "refund_pending": "refund pending"
+    },
     "service": "Service",
     "confirmButton": "Confirm Reservation",
-    "customerNamePlaceholder": "Customer name",
-    "customerPhonePlaceholder": "Phone number",
     "dateTimeTitle": "Select Date & Time",
     "bookingSummary": "Reservation Summary",
     "durations": {
@@ -378,9 +395,7 @@
       "sa": "Sa",
       "su": "Su"
     },
-        "customerInfo": "Customer Information",
-    "customerName": "Customer Name",
-    "customerPhone": "Phone Number",
+
     "serviceDetails": "Service Details",
 
     "date": "Date",

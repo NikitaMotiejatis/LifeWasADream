@@ -36,7 +36,7 @@ const serviceIdMapping: Record<string, string> = {
 const staffIdMapping: Record<string, string> = {
   james: 'james',
   sarah: 'sarah',
-  any: 'anyone',
+  anyone: 'anyone',
 };
 
 // ADD THIS FUNCTION HERE - It formats reservation for EditReservationPanel
@@ -54,14 +54,6 @@ const formatReservationForEdit = (res: Reservation): any => {
     'anyone': 'anyone'
   };
 
-  // Extract date and time from datetime object
-  const date = res.datetime.toISOString().split('T')[0];
-  const time = res.datetime.toTimeString().slice(0, 5); // HH:MM format
-
-  // Get service details
-  const serviceInfo = servicesMap[res.serviceId];
-  const price = serviceInfo?.price || 0;
-
   // Service durations
   const serviceDurations: Record<string, number> = {
     'haircut': 60,
@@ -73,18 +65,21 @@ const formatReservationForEdit = (res: Reservation): any => {
   const serviceId = reverseServiceMap[res.serviceId] || 'haircut';
   const duration = serviceDurations[serviceId] || 60;
 
+  // Get service details for price
+  const serviceInfo = servicesMap[res.serviceId];
+  const price = serviceInfo?.price || 0;
+
   return {
     id: res.id,
     service: serviceId,
     staff: staffMap[res.staffId] || 'anyone',
-    date,
-    time,
-    duration,
+    datetime: res.datetime, 
+    duration: duration,
     customerName: res.customerName,
     customerPhone: res.customerPhone,
     status: res.status,
     notes: '',
-    price
+    price: price
   };
 };
 
@@ -130,14 +125,14 @@ export default function ReservationList() {
           customerPhone: '+1234567890',
           staffId: 'james',
           serviceId: '1',
-          datetime: new Date('2025-11-28T10:00:00'),
+          datetime: new Date('2026-11-28T10:00:00'),
           status: 'completed',
         },
         {
           id: 'RES-302',
           customerName: 'Liam Chen',
           customerPhone: '+1987654321',
-          staffId: 'anyone',
+          staffId: 'anyone',  
           serviceId: '3',
           datetime: new Date('2025-11-30T14:30:00'),
           status: 'pending',
@@ -148,7 +143,7 @@ export default function ReservationList() {
           customerPhone: '+1555123456',
           staffId: 'sarah',
           serviceId: '4',
-          datetime: new Date('2025-12-05T11:00:00'),
+          datetime: new Date('2025-12-20T11:00:00'),
           status: 'pending',
         },
         {
@@ -254,74 +249,62 @@ const handleEditClick = (reservation: Reservation) => {
     setModalOpen(false);
   };
 
-  // Handle saving edits - with better error handling
   const handleSaveEdit = (reservationData: any) => {
-    try {
-      if (!reservationData) {
-        throw new Error('No reservation data received');
-      }
-
-      // Find original reservation to preserve its status
-      const originalReservation = reservations.find(
-        r => r.id === reservationData.id,
-      );
-
-      if (!originalReservation) {
-        throw new Error(`Reservation with ID ${reservationData.id} not found`);
-      }
-
-      // Create datetime safely
-      let datetime: Date;
-      if (reservationData.date && reservationData.time) {
-        datetime = new Date(`${reservationData.date}T${reservationData.time}`);
-        if (isNaN(datetime.getTime())) {
-          // If date is invalid, use original datetime
-          datetime = originalReservation.datetime;
-        }
-      } else {
-        datetime = originalReservation.datetime;
-      }
-
-      // Map service and staff IDs using mapping objects
-      const serviceId =
-        serviceIdMapping[reservationData.service] ||
-        originalReservation.serviceId;
-      const staffId =
-        staffIdMapping[reservationData.staff] || originalReservation.staffId;
-
-      const updatedReservation: Reservation = {
-        id: reservationData.id,
-        customerName:
-          reservationData.customerName || originalReservation.customerName,
-        customerPhone:
-          reservationData.customerPhone || originalReservation.customerPhone,
-        staffId: staffId,
-        serviceId: serviceId,
-        datetime: datetime,
-        status: originalReservation.status, // Keep original status
-      };
-
-      setReservations(prev =>
-        prev.map(r =>
-          r.id === updatedReservation.id ? updatedReservation : r,
-        ),
-      );
-      setEditModalOpen(false);
-      setToast({
-        message: t('reservations.toast.updated'),
-        type: 'success',
-      });
-    } catch (error: any) {
-      console.error('Error saving reservation:', error);
-      setToast({
-        message: `Error: ${error.message}`,
-        type: 'error',
-      });
+  try {
+    if (!reservationData) {
+      throw new Error('No reservation data received');
     }
 
-    setTimeout(() => setToast(null), 5000);
-  };
+    const originalReservation = reservations.find(
+      r => r.id === reservationData.id,
+    );
 
+    if (!originalReservation) {
+      throw new Error(`Reservation with ID ${reservationData.id} not found`);
+    }
+
+    // reservationData.datetime is now a Date object
+    const datetime = reservationData.datetime;
+
+    // Map service and staff IDs
+    const serviceId =
+      serviceIdMapping[reservationData.service] ||
+      originalReservation.serviceId;
+    const staffId =
+      staffIdMapping[reservationData.staff] || originalReservation.staffId;
+
+    const updatedReservation: Reservation = {
+      id: reservationData.id,
+      customerName:
+        reservationData.customerName || originalReservation.customerName,
+      customerPhone:
+        reservationData.customerPhone || originalReservation.customerPhone,
+      staffId: staffId,
+      serviceId: serviceId,
+      datetime: datetime, 
+      status: originalReservation.status,
+    };
+
+    setReservations(prev =>
+      prev.map(r =>
+        r.id === updatedReservation.id ? updatedReservation : r,
+      ),
+    );
+    setEditModalOpen(false);
+    setToast({
+      message: t('reservations.toast.updated'),
+      type: 'success',
+    });
+  } catch (error: any) {
+    console.error('Error saving reservation:', error);
+    setToast({
+      message: `Error: ${error.message}`,
+      type: 'error',
+    });
+  }
+
+  setTimeout(() => setToast(null), 5000);
+};
   const handleCancelEdit = () => {
     setEditModalOpen(false);
     setReservationIdToEdit(null);
