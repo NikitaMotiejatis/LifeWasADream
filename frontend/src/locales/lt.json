@@ -305,8 +305,12 @@
     "smoothieMango": "Kokteilis – Mangų rojus"
   },
   "reservation": {
-        "selectStaffAndService": "Select staff and service",
-    "confirmationSms": "Confirmation will be sent via SMS",
+    "invalidName": "Tik raidės, tarpai, brūkšneliai ir apostrofai leidžiami",
+    "smsNote": "Patvirtinimas bus išsiųstas SMS žinute",
+    "invalidPrefix": "Turi prasidėti su + arba skaičiumi",
+    "invalidLength": "Telefono numeris turi būti 7-15 skaitmenų ilgumo",
+
+    "selectStaffAndService": "Pasirinkti darbuotoją ir paslaugą",
     "priceSummary": "Price Summary",
     "createReservation": "Create Reservation",
     "cancel": "Cancel",
@@ -345,20 +349,20 @@
 
     "service": "Paslauga",
     "services": {
-      "haircut": "Plaukų kirpimas ir stilizavimas",
-      "color": "Plaukų dažymas",
-      "manicure": "Manikiūras",
-      "pedicure": "Pedikiūras"
+      "Haircut & Style": "Plaukų kirpimas ir stilizavimas",
+      "Hair Color": "Plaukų dažymas",
+      "Manicure": "Manikiūras",
+      "Pedicure": "Pedikiūras"
     },
 
     "staffMember": "Darbuotojas",
     "staff": {
-      "james": "James Chen",
-      "sarah": "Sarah Johnson",
-      "anyone": "Bet kuris darbuotojas",
-      "Stylist": "Stylistas",
+      "James Chen": "Jonas Petraitis",
+      "Sarah Johnson": "Ona Jonaitienė",
+      "Anyone": "Bet kas",
       "Colorist": "Spalvininkas",
-      "Anyone": "Bet kas"
+      "Nail Technician": "Nagų meistrė",
+      "Any available staff": "Bet kuris darbuotojas"
     },
 
     "dateTime": "Data ir laikas",
@@ -377,7 +381,15 @@
 
     "selected": "Pasirinkta",
     "selectedService": "Pasirinkta paslauga",
-    "selectedStaff": "Pasirinktas darbuotojas"
+    "selectedStaff": "Pasirinktas darbuotojas",
+    "summary": {
+      "date": "Data",
+      "notSelected": "[Nepasirinkta]",
+      "service": "Paslauga",
+      "staff": "Darbuotojas",
+      "time": "Laikas",
+      "total": "Iš viso"
+    }
   },
 
   "nameError": "Galimos tik raidės, tarpai, brūkšneliai ir apostrofai",
@@ -404,14 +416,7 @@
   },
   "staffMember": "Darbuotojas",
   "staffServiceTitle": "Pasirinkite darbuotoją ir paslaugą",
-  "summary": {
-    "date": "Data",
-    "notSelected": "[Nepasirinkta]",
-    "service": "Paslauga",
-    "staff": "Darbuotojas",
-    "time": "Laikas",
-    "total": "Iš viso"
-  },
+
   "toast": {
     "incomplete": "Prašome užpildyti visus laukus: paslaugą, datą ir laiką.",
     "missingInfo": "Trūksta kliento duomenų.\nĮveskite vardą ir telefono numerį.",
@@ -717,7 +722,7 @@
   },
   "validation": {
     "name": "Galimos tik raidės, tarpai, brūkšneliai ir apostrofai",
-    "phone": "Galimi tik skaičiai ir pasirenkamas \"+\" pradžioje"
+    "phone": "Galimi tik skaičiai ir pasirenkamas \"+\" pradžioje neilgesnis 16 skaitmenų"
   },
   "variationModal": {
     "addToOrder": "Pridėti į užsakymą",

@@ -307,7 +307,10 @@
     "smoothieMango": "Smoothie – Mango Paradise"
   },
   "reservation": {
-
+    "invalidName": "Only letters, spaces, hyphens, and apostrophes allowed",
+    "invalidPrefix": "Must start with + or a digit",
+    "invalidLength": "Phone number must be 7-15 digits",
+    "selectStaffAndService": "Select staff and service",
     "customerInfo": "Customer Information",
     "customerName": "Customer Name",
     "customerNamePlaceholder": "Full Name",
@@ -364,12 +367,12 @@
     },
     "smsNote": "Confirmation will be sent via SMS",
     "staff": {
-      "Any available staff": "Any available staff",
-      "Colorist": "Colorist",
       "James Chen": "James Chen",
-      "Nail Technician": "Nail Technician",
       "Sarah Johnson": "Sarah Johnson",
-      "Anyone": "Anyone"
+      "Anyone": "Anyone",
+      "Colorist": "Colorist",
+      "Nail Technician": "Nail Technician",
+      "Any available staff": "Any available staff"
     },
     "staffMember": "Staff Member",
     "staffServiceTitle": "Select Staff & Service",
@@ -402,8 +405,6 @@
     "time": "Time",
     "notes": "Notes",
     "notesPlaceholder": "Additional notes..."
-
-
   },
   "reservations": {
     "actions": {
@@ -413,7 +414,7 @@
       "noShow": "No-Show",
       "refund": "Refund",
       "start": "Start",
-      "edit" : "Edit"
+      "edit": "Edit"
     },
     "filters": {
       "all": "All ({{count}})",
@@ -436,7 +437,7 @@
         "noshow": "Mark as No-Show",
         "refund": "Request Refund",
         "start": "Start Service",
-        "edit" : "Edit"
+        "edit": "Edit"
       },
       "refund": {
         "email": "Customer's Email",
@@ -455,7 +456,7 @@
         "noshow": "Mark as No-Show",
         "refund": "Request Refund",
         "start": "Start Service",
-        "edit" : "Edit"
+        "edit": "Edit"
       },
       "totalAmount": "Total Amount"
     },
@@ -685,7 +686,7 @@
   },
   "validation": {
     "name": "Only letters, spaces, hyphens and apostrophes allowed",
-    "phone": "Only numbers and optional \"+\" at the beginning"
+    "phone": "Only numbers and optional \"+\" at the beginning no longer than 16 digits"
   },
   "variationModal": {
     "addToOrder": "Add to Order",
@@ -711,50 +712,50 @@
     "small": "Small"
   },
   "orderPanel": {
-  "addItem": "Add item",
-  "cancel": "Cancel",
-  "done": "Done",
-  "change": "change",
-  "selectSize": "Select size:",
-  "selectMilk": "Select milk:",
-  "selectOptions": "Select options:",
-  "noSize": "No size selected",
-  "noMilk": "No milk selected",
-  "noOptions": "No options selected",
-  "extra": "extra",
-  "newItem": "New",
-  "originalItem": "Original",
-  "decreaseQuantity": "Decrease quantity",
-  "increaseQuantity": "Increase quantity",
-  "remove": "Remove",
-  "clearAll": "Clear All",
-  "viewTitle": "Current Order",
-  "originalItems": "Order Items",
-  "newItems": "New Items",
-  "newItemsAdded": "New Items Added",
-  "discounts": "Discounts",
-  "newTotal": "New Total",
-  "totalNote": "Changes will update order #",
-  "subtotal": "Subtotal",
-  "total": "Total",
-  "paymentMethod": "Payment Method",
-  "paymentMethods": {
-    "Cash": "Cash",
-    "Card": "Card",
-    "Gift card": "Gift Card"
+    "addItem": "Add item",
+    "cancel": "Cancel",
+    "done": "Done",
+    "change": "change",
+    "selectSize": "Select size:",
+    "selectMilk": "Select milk:",
+    "selectOptions": "Select options:",
+    "noSize": "No size selected",
+    "noMilk": "No milk selected",
+    "noOptions": "No options selected",
+    "extra": "extra",
+    "newItem": "New",
+    "originalItem": "Original",
+    "decreaseQuantity": "Decrease quantity",
+    "increaseQuantity": "Increase quantity",
+    "remove": "Remove",
+    "clearAll": "Clear All",
+    "viewTitle": "Current Order",
+    "originalItems": "Order Items",
+    "newItems": "New Items",
+    "newItemsAdded": "New Items Added",
+    "discounts": "Discounts",
+    "newTotal": "New Total",
+    "totalNote": "Changes will update order #",
+    "subtotal": "Subtotal",
+    "total": "Total",
+    "paymentMethod": "Payment Method",
+    "paymentMethods": {
+      "Cash": "Cash",
+      "Card": "Card",
+      "Gift card": "Gift Card"
+    },
+    "splitBill": "Split Bill",
+    "splitCount": "Split between:",
+    "completePayment": "Complete Payment",
+    "updateOrder": "Update Order"
   },
-  "splitBill": "Split Bill",
-  "splitCount": "Split between:",
-  "completePayment": "Complete Payment",
-  "updateOrder": "Update Order"
-},
-"editOrder": {
-  "title": "Edit Order",
-  "subtitle": "Modify items, payment method, and billing",
-  "cancel": "Cancel",
-  "save": "Save Changes",
-  "saveChanges": "Save Changes"
-},
+  "editOrder": {
+    "title": "Edit Order",
+    "subtitle": "Modify items, payment method, and billing",
+    "cancel": "Cancel",
+    "save": "Save Changes",
+    "saveChanges": "Save Changes"
+  },
 
   "editReservation": {
     "title": "Edit Reservation",
