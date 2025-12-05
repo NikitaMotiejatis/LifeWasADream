@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import type { Variation, Product } from '@/receptionist/contexts/cartContext';
-
+import { useCurrency } from '@/global/contexts/currencyContext';
 interface EditVariationsFormProps {
   product: Product;
   currentVariations: Variation[];
@@ -17,6 +17,7 @@ export function EditVariationsForm({
   onCancel,
 }: EditVariationsFormProps) {
   const { t } = useTranslation();
+  const { formatPrice } = useCurrency();
 
   if (!product.variations) return null;
 
@@ -72,13 +73,6 @@ export function EditVariationsForm({
               )
               .map(variation => {
                 const isSelected = isVariationSelected(variation);
-                function formatPrice(
-                  priceModifier: number,
-                ):
-                  | import('react').ReactNode
-                  | Iterable<import('react').ReactNode> {
-                  throw new Error('Function not implemented.');
-                }
 
                 return (
                   <button
@@ -129,9 +123,7 @@ export function EditVariationsForm({
             {/* Bigger gap */}
             {allMilkVariations.map(variation => {
               const isSelected = isVariationSelected(variation);
-              function formatPrice(priceModifier: number): import("react").ReactNode | Iterable<import("react").ReactNode> {
-                throw new Error('Function not implemented.');
-              }
+
 
               return (
                 <button

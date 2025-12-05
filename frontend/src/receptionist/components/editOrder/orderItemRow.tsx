@@ -77,7 +77,7 @@ export function OrderItemRow({
                   <div className="mt-2">
                     <button
                       onClick={onStartEditVariations}
-                      className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-sm transition-colors ${
+                      className={`inline-flex items-center gap-2 rounded-full px-4 py-1 text-sm transition-colors ${
                         item.selectedVariations.length > 0
                           ? 'bg-blue-100 text-blue-800 hover:bg-blue-200'
                           : 'text-blue-600 hover:text-blue-800'
@@ -137,12 +137,12 @@ export function OrderItemRow({
                 )}
             </div>
             <div className="text-right">
-<div className="font-semibold">
-  {formatPrice(item.finalPrice * item.quantity)}
-</div>
-<div className="text-sm text-gray-500">
-  {formatPrice(item.finalPrice)} {t('editOrder.each', 'each')}
-</div>
+              <div className="font-semibold">
+                {formatPrice(item.finalPrice * item.quantity)}
+              </div>
+              <div className="text-sm text-gray-500">
+                {formatPrice(item.finalPrice)} {t('editOrder.each', 'each')}
+              </div>
             </div>
           </div>
 
