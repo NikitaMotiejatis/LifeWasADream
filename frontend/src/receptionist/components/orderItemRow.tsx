@@ -78,10 +78,7 @@ export function OrderItemRow({
                           ? 'bg-blue-100 text-blue-800 hover:bg-blue-200'
                           : 'text-blue-600 hover:text-blue-800'
                       }`}
-                      title={t(
-                        'orderPanel.clickToChange',
-                        'Click to change options',
-                      )}
+                      title={t('orderPanel.clickToChange')}
                     >
                       {item.selectedVariations.length > 0 ? (
                         <>
@@ -100,20 +97,20 @@ export function OrderItemRow({
                       ) : hasMilkVariations ? (
                         <>
                           <span className="flex items-center gap-1">
-                            {t('orderPanel.regularMilk', 'Regular Milk')}
+                            {t('orderPanel.regularMilk')}
                           </span>
                           <EditIcon className="h-4 w-4" />
                         </>
                       ) : (
                         <>
-                          {t('orderPanel.addOptions', 'Add Options')}
+                          {t('orderPanel.addOptions')}
                           <PlusIcon className="h-4 w-4" />
                         </>
                       )}
                     </button>
                     {hasMilkVariations && !hasSpecialMilkSelected && (
                       <p className="mt-1 text-xs text-gray-500">
-                        {t('orderPanel.includesRegularMilk', '')}
+                        {t('orderPanel.includesRegularMilk')}
                       </p>
                     )}
                   </div>
@@ -136,7 +133,7 @@ export function OrderItemRow({
                 {formatPrice(item.finalPrice * item.quantity)}
               </div>
               <div className="text-sm text-gray-500">
-                {formatPrice(item.finalPrice)} {t('editOrder.each', 'each')}
+                {formatPrice(item.finalPrice)} / {t('editOrder.each')}
               </div>
             </div>
           </div>
@@ -146,7 +143,7 @@ export function OrderItemRow({
               <button
                 onClick={onDecrease}
                 className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-300 hover:bg-gray-100"
-                title={t('orderSummary.decreaseQuantity', 'Decrease quantity')}
+                title={t('orderSummary.decreaseQuantity')}
               >
                 −
               </button>
@@ -156,7 +153,7 @@ export function OrderItemRow({
               <button
                 onClick={onIncrease}
                 className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 text-blue-700 hover:bg-blue-200"
-                title={t('orderSummary.increaseQuantity', 'Increase quantity')}
+                title={t('orderSummary.increaseQuantity')}
               >
                 +
               </button>
@@ -166,9 +163,9 @@ export function OrderItemRow({
               <button
                 onClick={onRemove}
                 className="text-sm text-red-600 hover:text-red-800"
-                title={t('orderSummary.removeItem', 'Remove item')}
+                title={t('orderSummary.removeItem')}
               >
-                {t('orderPanel.remove', 'Remove')}
+                {t('orderPanel.remove')}
               </button>
             </div>
           </div>
@@ -178,7 +175,7 @@ export function OrderItemRow({
             item.product.variations.length > 0 && (
               <div className="mt-3 rounded-lg bg-gray-50 p-3">
                 <p className="mb-2 text-sm font-medium text-gray-700">
-                  {t('orderPanel.selectOptions', 'Select options')}
+                  {t('orderPanel.selectOptions')}
                 </p>
                 <EditVariationsForm
                   product={item.product}

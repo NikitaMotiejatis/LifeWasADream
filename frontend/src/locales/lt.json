@@ -127,7 +127,8 @@
       "items_many": "{{count}} prekių",
       "items_one": "{{count}} prekė",
       "note": "Pastaba:",
-      "order": "Užsakymas"
+      "order": "Užsakymas",
+      "notFound": "nerastas"
     },
     "status": {
       "approved": "Patvirtinta",
