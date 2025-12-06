@@ -137,11 +137,16 @@ export default function OrderSummary({
               onClick={onBack}
               className="w-full rounded-xl bg-blue-600 py-4 text-lg font-bold text-white shadow-md transition hover:bg-blue-700"
             >
-              {t('orderPanel.done', 'Done')}
+              {t('orderPanel.done')}
             </button>
           ) : (
-            <button className="w-full rounded-xl bg-blue-600 py-4 text-lg font-bold text-white shadow-md transition hover:bg-blue-700">
-              {t('orderSummary.completePayment', 'Complete Payment')}
+            <button
+              onClick={() => {
+                navigate('/orders');
+              }}
+              className="w-full rounded-xl bg-blue-600 py-4 text-lg font-bold text-white shadow-md transition hover:bg-blue-700"
+            >
+              {t('orderSummary.completePayment')}
             </button>
           )}
         </div>

@@ -9,6 +9,7 @@ import type { EditOrderPanelProps, OrderItem, ExtendedProduct } from './types';
 import { createMockOrderItems } from './utils';
 import { ShoppingCartIcon } from '@/icons/shoppingCartItemIcon';
 import { PlusIcon } from '@/icons/plusIcon';
+import { useCurrency } from '@/global/contexts/currencyContext';
 
 export function EditOrderPanel({
   orderId,
@@ -16,6 +17,7 @@ export function EditOrderPanel({
   onCancel,
 }: EditOrderPanelProps) {
   const { t } = useTranslation();
+  const { formatPrice } = useCurrency();
   const { addToCart, clearCart, itemsList } = useCart();
 
   const [items, setItems] = useState<OrderItem[]>(createMockOrderItems());
@@ -207,20 +209,20 @@ export function EditOrderPanel({
             className="flex w-full items-center justify-center gap-2 rounded-lg border-2 border-blue-300 bg-blue-50 py-3 text-blue-600 transition-colors hover:bg-blue-100"
           >
             <PlusIcon className="h-6 w-6 text-blue-600" />
-            <span className="font-medium">
-              {t('orderPanel.addItem', 'Add Item')}
-            </span>
+            <span className="font-medium">{t('orderPanel.addItem')}</span>
           </button>
         </div>
       )}
 
       <div className="mb-6 border-t border-gray-300 pt-4">
         <div className="flex justify-between text-xl font-bold">
-          <span>{t('orderSummary.total', 'Total')}</span>
-          <span className="text-blue-700">${total.toFixed(2)}</span>
+          <span>{t('orderSummary.total')}</span>
+          <span className="text-blue-700">
+            {formatPrice(total).toLocaleString()}
+          </span>
         </div>
         <div className="mt-2 text-center text-xs text-gray-500">
-          {t('orderPanel.totalNote', 'Total amount for order')} {orderId}
+          {t('orderPanel.totalNote')} {orderId}
         </div>
       </div>
 
@@ -229,13 +231,13 @@ export function EditOrderPanel({
           onClick={onCancel}
           className="flex-1 rounded-lg border border-gray-300 py-3 text-sm font-medium hover:bg-gray-50"
         >
-          {t('orderPanel.cancel', 'Cancel')}
+          {t('orderPanel.cancel')}
         </button>
         <button
           onClick={() => onSave?.(items)}
           className="flex-1 rounded-lg bg-blue-600 py-3 text-sm font-medium text-white hover:bg-blue-700"
         >
-          {t('editOrder.saveChanges', 'Save Changes')}
+          {t('editOrder.saveChanges')}
         </button>
       </div>
     </div>

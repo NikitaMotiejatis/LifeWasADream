@@ -128,7 +128,8 @@
       "items_many": "{{count}} items",
       "items_one": "{{count}} item",
       "note": "Note:",
-      "order": "Order"
+      "order": "Order",
+      "notFound": "not found"
     },
     "status": {
       "approved": "Approved",

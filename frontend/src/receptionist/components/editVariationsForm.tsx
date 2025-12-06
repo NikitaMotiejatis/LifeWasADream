@@ -60,7 +60,7 @@ export function EditVariationsForm({
         <div>
           <p className="mb-2 text-sm font-medium text-gray-700">
             {' '}
-            {t('variationModal.size', 'Size')}
+            {t('variationModal.size')}
           </p>
           <div className="flex flex-wrap gap-2">
             {' '}
@@ -110,7 +110,7 @@ export function EditVariationsForm({
         <div>
           <p className="mb-2 text-sm font-medium text-gray-700">
             {' '}
-            {t('orderPanel.selectMilk', 'Select Milk')}
+            {t('orderPanel.selectMilk')}
           </p>
 
           <div className="flex flex-wrap gap-2">
@@ -161,13 +161,13 @@ export function EditVariationsForm({
           onClick={onCancel}
           className="flex-1 rounded-lg border-2 border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:border-gray-400 hover:bg-gray-50"
         >
-          {t('orderPanel.cancel', 'Cancel')}
+          {t('orderPanel.cancel')}
         </button>
         <button
           onClick={onSave}
           className="flex-1 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
         >
-          {t('orderPanel.done', 'Done')}
+          {t('orderPanel.done')}
         </button>
       </div>
     </div>

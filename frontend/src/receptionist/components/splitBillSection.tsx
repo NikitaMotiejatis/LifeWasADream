@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import DropdownSelector from '@/global/components/dropdownSelector';
 import { useCart, type CartItem } from '@/receptionist/contexts/cartContext';
+import { useNavigate } from 'react-router-dom';
 
 type PaymentMethod = 'Cash' | 'Card' | 'Gift card';
 
@@ -21,6 +22,7 @@ export const SplitBillSection: React.FC<SplitBillSectionProps> = ({
   onCompletePayment,
 }) => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const { setIsPaymentStarted } = useCart();
 
   const [isSplitEnabled, setIsSplitEnabled] = useState(false);
@@ -115,8 +117,13 @@ export const SplitBillSection: React.FC<SplitBillSectionProps> = ({
           </div>
         </div>
 
-        <button className="w-full rounded-xl bg-blue-600 py-4 text-lg font-bold text-white shadow-md transition hover:bg-blue-700">
-          {t('orderSummary.completePayment', 'Complete Payment')}
+        <button
+          onClick={() => {
+            navigate('/orders');
+          }}
+          className="w-full rounded-xl bg-blue-600 py-4 text-lg font-bold text-white shadow-md transition hover:bg-blue-700"
+        >
+          {t('orderSummary.completePayment')}
         </button>
       </>
     );

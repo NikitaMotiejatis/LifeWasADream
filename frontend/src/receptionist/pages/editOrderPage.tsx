@@ -81,7 +81,7 @@ function EditOrderContent() {
         <div className="text-center">
           <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent"></div>
           <p className="mt-4 text-gray-500">
-            {t('order.loading', 'loading')} #{orderId}...
+            {t('order.loading')} #{orderId}...
           </p>
         </div>
       </div>
@@ -103,7 +103,8 @@ function EditOrderContent() {
             </svg>
           </div>
           <p className="mt-4 text-gray-500">
-            {t('invoice.labels.order', 'order')} #{orderId} not found
+            {t('invoice.labels.order')} #{orderId}{' '}
+            {t('invoice.labels.notFound')}
           </p>
           <button
             onClick={() => navigate('/orders')}
@@ -140,10 +141,10 @@ function EditOrderContent() {
           </button>
           <div>
             <h1 className="text-2xl font-bold text-gray-900">
-              {t('editOrder.title', 'Edit Order')} #{orderData.id}
+              {t('editOrder.title')} #{orderData.id}
             </h1>
             <p className="text-sm text-gray-600">
-              {t('editOrder.created', 'Created')}:{' '}
+              {t('editOrder.created')}:{' '}
               {orderData.createdAt.toLocaleDateString()}
               {' • '}
               {t(
