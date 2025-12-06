@@ -1,13 +1,9 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  useCart,
-  type Variation,
-  type Product,
-} from '@/receptionist/contexts/cartContext';
+import { useCart, type Variation } from '@/receptionist/contexts/cartContext';
 import VariationModal from '@/receptionist/components/variationModal';
-import { ProductGridView } from './productGridView';
-import { OrderSummaryView } from './orderSummaryView';
+import ProductGrid from './productGrid';
+import OrderSummary from './orderSummary';
 import { OrderItemRow } from './orderItemRow';
 import type { EditOrderPanelProps, OrderItem, ExtendedProduct } from './types';
 import { createMockOrderItems } from './utils';
@@ -18,7 +14,6 @@ export function EditOrderPanel({
   orderId,
   onSave,
   onCancel,
-  onAddMoreItems,
 }: EditOrderPanelProps) {
   const { t } = useTranslation();
   const { addToCart, clearCart, itemsList } = useCart();
@@ -142,11 +137,11 @@ export function EditOrderPanel({
       <div className="flex-1 flex-col overflow-hidden rounded-2xl bg-white p-6 shadow-xl">
         <div className="flex gap-6">
           <div className="flex-1">
-            <ProductGridView onProductClick={handleAddItemFromGrid} />
+            <ProductGrid onProductClick={handleAddItemFromGrid} />
           </div>
 
           <div className="w-1/3 max-w-md">
-            <OrderSummaryView onBack={handleDoneAddingItems} />
+            <OrderSummary onBack={handleDoneAddingItems} />
           </div>
         </div>
 
@@ -229,7 +224,6 @@ export function EditOrderPanel({
         </div>
       </div>
 
-      {/* Save/Cancel Buttons */}
       <div className="flex gap-3 border-t border-gray-300 pt-6">
         <button
           onClick={onCancel}

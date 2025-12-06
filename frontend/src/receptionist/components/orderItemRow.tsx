@@ -38,10 +38,6 @@ export function OrderItemRow({
     v.name.toLowerCase().includes('milk'),
   );
 
-  const hasRegularMilkSelected = !item.selectedVariations.some(v =>
-    v.name.toLowerCase().includes('milk'),
-  );
-
   const hasSpecialMilkSelected = item.selectedVariations.some(v =>
     v.name.toLowerCase().includes('milk'),
   );
@@ -123,7 +119,6 @@ export function OrderItemRow({
                   </div>
                 )}
 
-              {/* Show variations as text if product doesn't have variations config but has variations selected */}
               {(!item.product.variations ||
                 item.product.variations.length === 0) &&
                 item.selectedVariations.length > 0 && (
@@ -168,7 +163,6 @@ export function OrderItemRow({
             </div>
 
             <div className="flex items-center gap-4">
-              {/* Remove button */}
               <button
                 onClick={onRemove}
                 className="text-sm text-red-600 hover:text-red-800"
