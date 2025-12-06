@@ -17,7 +17,7 @@ export function TimePickerDropdown({
   
 const defaultHours = Array.from({ length: 11 }, (_, i) => {
   const hour = i + 9; // 9 AM to 7 PM
-  return `${hour.toString().padStart(2, '0')}:00`; // Only :00 (full hours)
+  return `${hour.toString().padStart(2, '0')}:00`;
 });
   
   const hours = availableHours || defaultHours;

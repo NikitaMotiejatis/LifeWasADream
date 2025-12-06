@@ -23,7 +23,7 @@ export type Reservation = {
   status: 'pending' | 'completed' | 'cancelled' | 'no_show' | 'refund_pending';
 };
 
-export { servicesMap }; // Re-export for other components
+export { servicesMap }; 
 
 export default function ReservationList() {
   const { t } = useTranslation();
@@ -354,9 +354,7 @@ export default function ReservationList() {
           />
 
           <div className="relative max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-2xl bg-white p-7 shadow-2xl">
-            {/* Removed the X button for consistency */}
 
-            {/* Pass the selectedReservation as initialReservation */}
             <EditReservationPanel
               mode="edit"
               reservationId={reservationIdToEdit}

@@ -216,7 +216,7 @@ export function EditReservationPanel({
       <DateTimeSection
         datetime={reservation.datetime}
         onDateTimeChange={handleDateTimeChange}
-        availableTimes={DEFAULT_AVAILABLE_TIMES} // Use the imported constant
+        availableTimes={DEFAULT_AVAILABLE_TIMES} 
       />
 
       {/* Price Summary */}
