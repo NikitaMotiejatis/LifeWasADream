@@ -13,7 +13,7 @@ export function StaffSection({ staffMembers, reservation, handleChange }: StaffS
   return (
     <div className="rounded-xl bg-white p-5 shadow">
       <h3 className="mb-3 text-sm font-medium text-gray-600 uppercase">
-        {t('reservation.staffMember', 'Staff Member')}
+        {t('reservation.staffMember')}
       </h3>
       <div className="space-y-2">
         {staffMembers.map(staff => (

@@ -56,7 +56,7 @@ export function ServiceSection({
                   {t(`reservation.services.${service.id}`, service.name)}
                 </h3>
                 <p className="text-sm text-gray-500 mt-1">
-                  {service.duration} {t('reservation.durations.min', 'min')}
+                  {service.duration} {t('reservation.durations.min')}
                 </p>
               </div>
               <span className="font-bold text-blue-600">

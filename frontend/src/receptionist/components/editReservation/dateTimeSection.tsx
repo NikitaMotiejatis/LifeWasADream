@@ -9,6 +9,8 @@ interface DateTimeSectionProps {
   availableTimes: string[];
 }
 
+type WeekdayKey = 'mo' | 'tu' | 'we' | 'th' | 'fr' | 'sa' | 'su';
+
 export function DateTimeSection({
   datetime,
   onDateTimeChange,
@@ -37,24 +39,38 @@ export function DateTimeSection({
     onDateTimeChange(newDate);
   };
 
-  // Calendar logic from New Reservations
+  // Calendar logic
   const year = currentMonth.getFullYear();
   const month = currentMonth.getMonth();
-  const firstDayOriginal = new Date(year, month, 1).getDay();
+  const firstDayOfMonth = new Date(year, month, 1);
   const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-  // Language-specific calendar adjustments
-  const isLT = i18n.language.startsWith('lt');
-  let weekdayKeys: string[] = isLT
-    ? ['mo', 'tu', 'we', 'th', 'fr', 'sa', 'su']
-    : ['su', 'mo', 'tu', 'we', 'th', 'fr', 'sa'];
+  // Monday as first day (default for Lithuania/Europe)
+  const weekdayKeys: WeekdayKey[] = ['mo', 'tu', 'we', 'th', 'fr', 'sa', 'su'];
+  
+  // Get weekday translations
+  const weekdayTranslations: Record<WeekdayKey, string> = {
+    'mo': t('reservation.weekdays.mo'),
+    'tu': t('reservation.weekdays.tu'),
+    'we': t('reservation.weekdays.we'),
+    'th': t('reservation.weekdays.th'),
+    'fr': t('reservation.weekdays.fr'),
+    'sa': t('reservation.weekdays.sa'),
+    'su': t('reservation.weekdays.su')
+  };
 
-  let firstDay = firstDayOriginal;
-  if (isLT) firstDay = (firstDay + 6) % 7;
+ 
+  const firstDayOffset = (firstDayOfMonth.getDay() + 6) % 7;
 
   const days: (number | null)[] = [];
-  for (let i = 0; i < firstDay; i++) days.push(null);
-  for (let d = 1; d <= daysInMonth; d++) days.push(d);
+  
+  for (let i = 0; i < firstDayOffset; i++) {
+    days.push(null);
+  }
+  
+  for (let d = 1; d <= daysInMonth; d++) {
+    days.push(d);
+  }
 
   const handleDateClick = (day: number) => {
     const [hours, minutes] = timeStr.split(':').map(Number);
@@ -73,9 +89,7 @@ export function DateTimeSection({
         {t('reservation.dateTime')}
       </h3>
       
-      {/* Two-column layout: Calendar on left, Time on right */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Calendar - Left side */}
         <div className="rounded-lg border border-gray-200 p-4">
           <div className="mb-4 flex items-center justify-between">
             <button
@@ -98,8 +112,10 @@ export function DateTimeSection({
           </div>
 
           <div className="grid grid-cols-7 text-center text-xs font-medium text-gray-600">
-            {weekdayKeys.map(key => (
-              <div key={key} className="text-xs">{t(`reservation.weekdays.${key}`)}</div>
+            {weekdayKeys.map((key: WeekdayKey) => (
+              <div key={key} className="text-xs">
+                {weekdayTranslations[key]}
+              </div>
             ))}
           </div>
 
@@ -140,7 +156,7 @@ export function DateTimeSection({
           </div>
         </div>
 
-        <div className="flex flex-col gap-4"> {/* Changed from justify-center to gap-4 */}
+        <div className="flex flex-col gap-4">
           <div>
             <label className="mb-2 block text-sm font-medium text-gray-700">
               {t('reservation.time')}
@@ -154,7 +170,6 @@ export function DateTimeSection({
             />
           </div>
 
-          {/* Selected date/time summary */}
           <div className="mt-auto rounded-lg bg-gray-50 p-4">
             <div className="space-y-1 text-sm">
               <div className="flex justify-between">
