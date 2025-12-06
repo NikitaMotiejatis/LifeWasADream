@@ -60,6 +60,7 @@
     "clear": "Clear",
     "back": "Back",
     "status": "Status"
+    "review": "Review"
   },
   "deliveries": {
     "buttons": {
@@ -202,6 +203,164 @@
     "usernameLabel": "USERNAME",
     "usernamePlaceholder": "Enter username...",
     "usernameRequired": "Username is required"
+  },
+  "manager": {
+    "dashboard": {
+      "pageTitle": "Manager Dashboard",
+      "pageSubtitle": "Business insights at a glance",
+      "salesTrendHeading": "Sales Trends",
+      "salesTrendPlaceholder": "[Graph Placeholder – 7-day sales comparison]",
+      "cards": {
+        "todaysSales": {
+          "title": "Today's Sales",
+          "subtext": "+12% vs yesterday"
+        },
+        "orders": {
+          "title": "Orders",
+          "subtext": "+8% vs yesterday"
+        },
+        "lowStock": {
+          "title": "Low Stock Items",
+          "subtext": "Requires attention"
+        },
+        "pendingRefunds": {
+          "title": "Pending Refunds",
+          "subtext": "Awaiting approval"
+        }
+      },
+      "lowStockAlerts": {
+        "title": "Low Stock Alerts",
+        "cta": "Order All",
+        "table": {
+          "item": "Item",
+          "current": "Current",
+          "min": "Minimum",
+          "status": "Status"
+        },
+        "items": {
+          "coffeeBeans": "Coffee Beans (1kg)",
+          "oatMilk": "Oat Milk (1L)",
+          "paperCups": "Paper Cups (12oz)"
+        },
+        "statuses": {
+          "urgent": "Urgent",
+          "low": "Low"
+        }
+      },
+      "refundQueue": {
+        "title": "Refund Approval Queue",
+        "cta": "See All",
+        "empty": "No pending refunds.",
+        "review": "Review",
+        "table": {
+          "refId": "Ref ID",
+          "date": "Date",
+          "amount": "Amount",
+          "reason": "Reason",
+          "action": "Action"
+        }
+      }
+    },
+    "inventory": {
+      "pageTitle": "Inventory overview",
+      "pageSubtitle": "Stock levels across branches",
+      "detailsTitle": "Inventory Details",
+      "stats": {
+        "totalItems": {
+          "title": "Total Unique Items",
+          "subtitle": "Across all branches"
+        },
+        "lowStock": {
+          "title": "Low Stock Alerts",
+          "subtitle": "Requires immediate attention"
+        }
+      },
+      "table": {
+        "sku": "SKU",
+        "product": "Product",
+        "branch": "Branch",
+        "inStock": "In stock",
+        "unit": "Unit",
+        "status": "Status"
+      },
+      "ok": "Healthy",
+      "low": "Low",
+      "critical": "Critical",
+      "allBranches": "All Branches",
+      "allStatuses": "All Statuses"
+    },
+    "refunds": {
+      "pageTitle": "Refund approvals",
+      "pageSubtitle": "Review and process refund requests",
+      "noRefunds": "No pending refund requests",
+      "stats": {
+        "pendingRequests": {
+          "title": "Pending Requests",
+          "subtext": "Awaiting your decision"
+        },
+        "totalAmount": {
+          "title": "Total Amount",
+          "subtext": "Pending refunds"
+        },
+        "avgResponse": {
+          "title": "Avg. Response Time",
+          "subtext": "Target: < 15 minutes"
+        }
+      },
+      "card": {
+        "orderTitle": "Refund Request: {{orderId}}",
+        "requestMeta": "Request ID: {{id}} | {{date}}",
+        "status": "Pending",
+        "customerInfo": "Customer Information",
+        "requestedBy": "Requested by: {{user}}",
+        "refundAmount": "Refund Amount",
+        "branch": "Downtown Branch",
+        "reasonTitle": "Reason for refund",
+        "itemsTitle": "Order items"
+      },
+      "table": {
+        "orderId": "Order ID",
+        "customer": "Customer",
+        "amount": "Amount",
+        "reason": "Reason",
+        "requestedBy": "Requested by",
+        "date": "Date",
+        "actions": "Actions"
+      },
+      "rejectionReason": "Rejection reason",
+      "rejectionPlaceholder": "Describe why the refund is rejected...",
+      "reasonRequired": "Reason is required",
+      "approve": "Approve",
+      "reject": "Reject",
+      "confirmReject": "Confirm rejection",
+      "modal": {
+        "title": "Refund Request Review",
+        "subtitle": "Detailed information for refund request {{orderId}}",
+        "customerInfo": "Customer Information",
+        "requestedBy": "Requested by",
+        "refundAmount": "Refund Amount",
+        "reason": "Reason for Refund",
+        "orderItems": "Order Items"
+      },
+      "review": "Review"
+    },
+    "reports": {
+      "pageTitle": "Reports & analytics",
+      "pageSubtitle": "Business performance reports",
+      "selectReport": "Select report",
+      "salesReport": "Sales report",
+      "employeeReport": "Employee performance",
+      "export": "Export report",
+      "exporting": "Exporting {{report}}...",
+      "employeeLabel": "{{name}} ({{orders}} orders)",
+      "categories": {},
+      "timePeriod": {
+        "month": "This Month",
+        "quarter": "Last Quarter",
+        "year": "Last Year"
+      }
+    },
+    "subtitle": "Manager portal overview"
   },
   "menu": {
     "categories": {
@@ -488,6 +647,7 @@
     }
   },
   "sidebar": {
+    "subtitle": "Unified system",
     "orders": {
       "group": "Orders",
       "list": "Orders list",
@@ -501,15 +661,21 @@
     "stock": {
       "alerts": "Stock Alerts",
       "auditHistory": "Audit History",
-      "group": "Inventory",
+      "group": "Stock Management",
       "transferRequests": "Transfer Requests",
       "updates": "Stock Updates"
     },
-    "subtitle": "Unified system",
     "supplier": {
       "deliveries": "Deliveries",
-      "group": "Business",
-      "invoiceStatus": "Invoice Status"
+      "group": "Supplier Portal",
+      "invoices": "Invoice Status"
+    },
+    "manager": {
+      "group": "Manager Portal",
+      "dashboard": "Dashboard",
+      "refunds": "Refund Approvals",
+      "reports": "Reports & Analytics",
+      "inventory": "Inventory Overview"
     }
   },
   "stockAlerts": {
