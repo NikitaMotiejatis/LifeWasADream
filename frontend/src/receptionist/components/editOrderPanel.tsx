@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useCart, type Variation } from '@/receptionist/contexts/cartContext';
 import VariationModal from '@/receptionist/components/variationModal';
@@ -18,7 +18,14 @@ export function EditOrderPanel({
 }: EditOrderPanelProps) {
   const { t } = useTranslation();
   const { formatPrice } = useCurrency();
-  const { addToCart, clearCart, itemsList } = useCart();
+  const {
+    addToCart,
+    clearCart,
+    itemsList,
+    promotions,
+    cartDiscount,
+    getFinalPrice,
+  } = useCart();
 
   const [items, setItems] = useState<OrderItem[]>(createMockOrderItems());
   const [editingVariationsId, setEditingVariationsId] = useState<string | null>(
@@ -29,10 +36,52 @@ export function EditOrderPanel({
   const [selectedProduct, setSelectedProduct] =
     useState<ExtendedProduct | null>(null);
 
-  const total = items.reduce(
-    (sum, item) => sum + item.finalPrice * item.quantity,
-    0,
+  const { subtotal, itemDiscountsTotal, cartDiscountAmount, total } = useMemo(
+    () => {
+      let subtotal = 0;
+      let itemDiscountsTotal = 0;
+      let afterItemsTotal = 0;
+
+      items.forEach(item => {
+        const basePrice = getFinalPrice(item.product, item.selectedVariations);
+        const promo = promotions[item.product.id];
+
+        let priceAfterPromo = basePrice;
+
+        if (promo) {
+          if (promo.type === 'percent') {
+            priceAfterPromo *= 1 - promo.value / 100;
+          } else if (promo.type === 'fixed') {
+            priceAfterPromo = Math.max(0, priceAfterPromo - promo.value);
+          } else if (promo.type === 'price') {
+            priceAfterPromo = promo.value;
+          }
+        }
+
+        const itemDiscount = basePrice - priceAfterPromo;
+
+        subtotal += basePrice * item.quantity;
+        itemDiscountsTotal += itemDiscount * item.quantity;
+        afterItemsTotal += priceAfterPromo * item.quantity;
+      });
+
+      let cartDiscountAmount = 0;
+      if (cartDiscount && afterItemsTotal > 0) {
+        if (cartDiscount.type === 'percent') {
+          cartDiscountAmount = afterItemsTotal * (cartDiscount.value / 100);
+        } else if (cartDiscount.type === 'fixed') {
+          cartDiscountAmount = Math.min(afterItemsTotal, cartDiscount.value);
+        }
+      }
+
+      const total = Math.max(0, afterItemsTotal - cartDiscountAmount);
+
+      return { subtotal, itemDiscountsTotal, cartDiscountAmount, total };
+    },
+    [items, promotions, cartDiscount, getFinalPrice],
   );
+
+  const discountTotal = itemDiscountsTotal + cartDiscountAmount;
 
   const handleIncreaseQuantity = (id: string) => {
     setItems(prev =>
@@ -215,11 +264,21 @@ export function EditOrderPanel({
       )}
 
       <div className="mb-6 border-t border-gray-300 pt-4">
-        <div className="flex justify-between text-xl font-bold">
-          <span>{t('orderSummary.total')}</span>
-          <span className="text-blue-700">
-            {formatPrice(total).toLocaleString()}
-          </span>
+        <div className="space-y-2">
+          <div className="flex justify-between text-sm">
+            <span>{t('orderSummary.subtotal')}</span>
+            <span>{formatPrice(subtotal)}</span>
+          </div>
+          {discountTotal > 0 && (
+            <div className="flex justify-between text-sm font-bold text-green-600">
+              <span>{t('orderSummary.discounts')}</span>
+              <span>- {formatPrice(discountTotal)}</span>
+            </div>
+          )}
+          <div className="flex justify-between text-xl font-bold">
+            <span>{t('orderSummary.total')}</span>
+            <span className="text-blue-700">{formatPrice(total)}</span>
+          </div>
         </div>
         <div className="mt-2 text-center text-xs text-gray-500">
           {t('orderPanel.totalNote')} {orderId}
