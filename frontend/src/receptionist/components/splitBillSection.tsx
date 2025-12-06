@@ -119,7 +119,11 @@ export const SplitBillSection: React.FC<SplitBillSectionProps> = ({
 
         <button
           onClick={() => {
-            navigate('/orders');
+            if (onCompletePayment) {
+              onCompletePayment([{ amount: total, method: paymentMethod }]);
+            } else {
+              navigate('/orders');
+            }
           }}
           className="w-full rounded-xl bg-blue-600 py-4 text-lg font-bold text-white shadow-md transition hover:bg-blue-700"
         >

@@ -128,9 +128,9 @@ export default function OrderSummary({
                 formatPrice={formatPrice}
                 onCompletePayment={payments => {
                   console.log('All paid:', payments);
+                  showToast(t('orderSummary.allPaid'));
                   clearCart();
-                  //navigate('/orders');
-                  showToast(t('orderSummary.allPaid')); //TODO: currently doesn't work
+                  setTimeout(() => navigate('/orders'), 600);
                 }}
               />
             </>
@@ -144,7 +144,9 @@ export default function OrderSummary({
           ) : (
             <button
               onClick={() => {
-                navigate('/orders');
+                showToast(t('orderSummary.allPaid'));
+                clearCart();
+                setTimeout(() => navigate('/orders'), 600);
               }}
               className="w-full rounded-xl bg-blue-600 py-4 text-lg font-bold text-white shadow-md transition hover:bg-blue-700"
             >
