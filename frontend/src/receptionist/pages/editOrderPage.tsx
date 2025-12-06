@@ -4,7 +4,7 @@ import SidebarCashier from '@/receptionist/components/sidebarCashier';
 import Topbar from '@/global/components/topbar';
 import { CartProvider, useCart } from '@/receptionist/contexts/cartContext';
 import { CurrencyProvider } from '@/global/contexts/currencyContext';
-import { EditOrderPanel } from '@/receptionist/components/editOrder/editOrderPanel';
+import { EditOrderPanel } from '@/receptionist/components/editOrderPanel';
 import { useTranslation } from 'react-i18next';
 
 type Order = {
@@ -71,8 +71,6 @@ function EditOrderContent() {
 
   const handleAddMoreItems = (items: OrderItem[]) => {
     clearCart();
-
-    items.forEach(item => {});
 
     navigate('/receptionist/new-order');
   };
@@ -176,16 +174,12 @@ function EditOrderContent() {
 export default function EditOrderPage() {
   return (
     <div className="flex h-screen bg-gray-50">
-      {/* Sidebar */}
       <div className="fixed inset-y-0 left-0 z-50 hidden w-64 md:block">
         <SidebarCashier />
       </div>
 
-      {/* Main Content */}
       <div className="flex flex-1 flex-col md:ml-64">
-        {/* Topbar */}
         <Topbar />
-        {/* */}
         <CurrencyProvider>
           <CartProvider>
             <EditOrderContent />
