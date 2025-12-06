@@ -140,10 +140,7 @@ export function EditVariationsForm({
                       : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400 hover:bg-gray-50'
                   }`}
                 >
-                  {t(
-                    `variationModal.variations.${variation.name}`,
-                    variation.name,
-                  )}
+                  {t(`${variation.nameKey}`, variation.name)}
                   {variation.priceModifier !== 0 && (
                     <span className="ml-2">
                       {variation.priceModifier > 0 ? '+' : ''}
