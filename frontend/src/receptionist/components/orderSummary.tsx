@@ -8,6 +8,7 @@ import TrashcanIcon from '@/icons/trashcanIcon';
 import { useNavigate } from 'react-router-dom';
 import { SplitBillSection } from './splitBillSection';
 import { useState } from 'react';
+import Toast from '@/global/components/toast';
 
 type OrderSummaryProps = {
   onBack?: () => void;
@@ -32,7 +33,7 @@ export default function OrderSummary({
 
   const navigate = useNavigate();
 
-  const [, setToast] = useState<{
+  const [toast, setToast] = useState<{
     message: string;
     type: 'success' | 'error';
   } | null>(null);
@@ -42,16 +43,17 @@ export default function OrderSummary({
     type: 'success' | 'error' = 'success',
   ) => {
     setToast({ message, type });
-    setTimeout(() => setToast(null), 5800);
+    setTimeout(() => setToast(null), 1800);
   };
 
   function handleSave(): void {
-    // TODO: do something real
-    navigate('/orders');
+    showToast(t('orderSummary.orderSaved', 'Order saved'));
+    //setTimeout(() => navigate('/orders'), 600);
   }
 
   return (
     <div className="max-h-full flex-1 flex-col overflow-hidden rounded-2xl bg-white p-4 shadow-xl xl:p-5">
+      <Toast toast={toast} />
       <div className="mb-4 flex items-center justify-between">
         <h3 className="text-lg font-bold xl:text-xl">
           {t('orderSummary.title')}
@@ -127,7 +129,7 @@ export default function OrderSummary({
                 onCompletePayment={payments => {
                   console.log('All paid:', payments);
                   clearCart();
-                  navigate('/orders');
+                  //navigate('/orders');
                   showToast(t('orderSummary.allPaid')); //TODO: currently doesn't work
                 }}
               />
