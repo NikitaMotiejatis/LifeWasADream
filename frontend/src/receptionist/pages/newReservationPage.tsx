@@ -406,11 +406,11 @@ function BookingSummary({
           value={selectedTime || t('reservation.summary.notSelected')}
         />
         <SummaryRow
-          label={t('reservation.summary.staff')}
-          value={t(
-            `reservation.staff.${staff.find(s => s.id === selectedStaff)?.name || 'Anyone'}`,
-          )}
-        />
+  label={t('reservation.summary.staff')}
+  value={t(
+    `reservation.staff.${staff.find(s => s.id === selectedStaff)?.name || 'Anyone'}`,
+  )}
+/>
         <SummaryRow
           label={t('reservation.summary.service')}
           value={

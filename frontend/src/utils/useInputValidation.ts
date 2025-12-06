@@ -1,5 +1,21 @@
 import { useState, ChangeEvent, useEffect } from 'react';
 
+export const formatName = (value: string): string => {
+  return value
+    .replace(/[^\p{L}\s'-]/gu, '')
+    .replace(/\s+/g, ' ')
+    .replace(/-+/g, '-')
+    .replace(/'+/g, "'")
+    .trimStart();
+};
+
+export const formatPhone = (value: string): string => {
+  return value
+    .replace(/[^0-9+]/g, '')
+    .replace(/\+/g, (match, offset) => (offset === 0 ? '+' : ''))
+    .slice(0, 16);
+};
+
 function useInputValidation({
   initialValue = '',
   format,
@@ -35,21 +51,11 @@ function useInputValidation({
 export const useNameValidation = (initialValue = '') =>
   useInputValidation({
     initialValue,
-    format: v =>
-      v
-        .replace(/[^\p{L}\s'-]/gu, '')
-        .replace(/\s+/g, ' ')
-        .replace(/-+/g, '-')
-        .replace(/'+/g, "'")
-        .trimStart(),
+    format: formatName, 
   });
 
 export const usePhoneValidation = (initialValue = '') =>
   useInputValidation({
     initialValue,
-    format: v =>
-      v
-        .replace(/[^0-9+]/g, '')
-        .replace(/\+/g, (m, offset) => (offset === 0 ? '+' : ''))
-        .slice(0, 16),
+    format: formatPhone, 
   });

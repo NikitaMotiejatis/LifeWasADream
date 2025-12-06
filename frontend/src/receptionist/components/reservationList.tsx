@@ -4,7 +4,14 @@ import { useCurrency } from '@/global/contexts/currencyContext';
 import ReservationFilters from '@/receptionist/components/reservationFilters';
 import ReservationListItem from '@/receptionist/components/reservationListItem';
 import ReservationModal from '@/receptionist/components/reservationModal';
+import { EditReservationPanel } from '@/receptionist/components/editReservation/editReservationPanel';
 import Toast from '@/global/components/toast';
+import { 
+  servicesMap, 
+  serviceIdMapping, 
+  staffIdMapping,
+  mapReservationForEdit 
+} from '@/utils/reservationMappings';
 
 export type Reservation = {
   id: string;
@@ -16,12 +23,7 @@ export type Reservation = {
   status: 'pending' | 'completed' | 'cancelled' | 'no_show' | 'refund_pending';
 };
 
-export const servicesMap: Record<string, { title: string; price: number }> = {
-  '1': { title: 'Haircut & Style', price: 65 },
-  '2': { title: 'Hair Color', price: 120 },
-  '3': { title: 'Manicure', price: 35 },
-  '4': { title: 'Pedicure', price: 50 },
-};
+export { servicesMap }; 
 
 export default function ReservationList() {
   const { t } = useTranslation();
@@ -43,6 +45,12 @@ export default function ReservationList() {
   >('complete');
   const [selectedReservation, setSelectedReservation] =
     useState<Reservation | null>(null);
+
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [reservationIdToEdit, setReservationIdToEdit] = useState<string | null>(
+    null,
+  );
+
   const [toast, setToast] = useState<{
     message: string;
     type: 'success' | 'error';
@@ -50,7 +58,6 @@ export default function ReservationList() {
 
   useEffect(() => {
     const load = async () => {
-      // TODO: remove timeout
       await new Promise(r => setTimeout(r, 300));
       const mock: Reservation[] = [
         {
@@ -59,7 +66,7 @@ export default function ReservationList() {
           customerPhone: '+1234567890',
           staffId: 'james',
           serviceId: '1',
-          datetime: new Date('2025-11-28T10:00:00'),
+          datetime: new Date('2026-11-28T10:00:00'),
           status: 'completed',
         },
         {
@@ -77,7 +84,7 @@ export default function ReservationList() {
           customerPhone: '+1555123456',
           staffId: 'sarah',
           serviceId: '4',
-          datetime: new Date('2025-12-05T11:00:00'),
+          datetime: new Date('2025-12-20T11:00:00'),
           status: 'pending',
         },
         {
@@ -166,11 +173,83 @@ export default function ReservationList() {
     setModalOpen(true);
   };
 
+  const handleEditClick = (reservation: Reservation) => {
+    const formattedReservation = mapReservationForEdit(reservation);
+
+    setReservationIdToEdit(reservation.id);
+    setSelectedReservation(formattedReservation as any);
+    setEditModalOpen(true);
+  };
+
   const updateStatus = (id: string, newStatus: Reservation['status']) => {
     setReservations(prev =>
       prev.map(r => (r.id === id ? { ...r, status: newStatus } : r)),
     );
     setModalOpen(false);
+  };
+
+  const handleSaveEdit = (reservationData: any) => {
+    try {
+      if (!reservationData) {
+        throw new Error('No reservation data received');
+      }
+
+      const originalReservation = reservations.find(
+        r => r.id === reservationData.id,
+      );
+
+      if (!originalReservation) {
+        throw new Error(`Reservation with ID ${reservationData.id} not found`);
+      }
+
+      const datetime = reservationData.datetime;
+
+      const serviceId =
+        serviceIdMapping[reservationData.service] ||
+        originalReservation.serviceId;
+      const staffId =
+        staffIdMapping[reservationData.staff] || originalReservation.staffId;
+
+      const updatedReservation: Reservation = {
+        id: reservationData.id,
+        customerName:
+          reservationData.customerName || originalReservation.customerName,
+        customerPhone:
+          reservationData.customerPhone || originalReservation.customerPhone,
+        staffId: staffId,
+        serviceId: serviceId,
+        datetime: datetime,
+        status: originalReservation.status,
+      };
+
+      setReservations(prev =>
+        prev.map(r =>
+          r.id === updatedReservation.id ? updatedReservation : r,
+        ),
+      );
+      setEditModalOpen(false);
+      setToast({
+        message: t('reservations.toast.updated'),
+        type: 'success',
+      });
+    } catch (error: any) {
+      console.error('Error saving reservation:', error);
+      setToast({
+        message: `Error: ${error.message}`,
+        type: 'error',
+      });
+    }
+
+    setTimeout(() => setToast(null), 5000);
+  };
+  const handleCancelEdit = () => {
+    setEditModalOpen(false);
+    setReservationIdToEdit(null);
+  };
+
+  const showToast = (key: string) => {
+    setToast({ message: t(key), type: 'success' });
+    setTimeout(() => setToast(null), 5000);
   };
 
   if (loading) {
@@ -189,11 +268,6 @@ export default function ReservationList() {
     no_show: reservations.filter(r => r.status === 'no_show').length,
     refund_pending: reservations.filter(r => r.status === 'refund_pending')
       .length,
-  };
-
-  const showToast = (key: string) => {
-    setToast({ message: t(key), type: 'success' });
-    setTimeout(() => setToast(null), 5000);
   };
 
   return (
@@ -231,6 +305,7 @@ export default function ReservationList() {
               reservation={res}
               formatPrice={formatPrice}
               onAction={openModal}
+              onEdit={handleEditClick}
             />
           ))
         )}
@@ -271,7 +346,26 @@ export default function ReservationList() {
         }}
       />
 
+      {editModalOpen && reservationIdToEdit && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div
+            className="absolute inset-0 bg-black/50"
+            onClick={handleCancelEdit}
+          />
+
+          <div className="relative max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-2xl bg-white p-7 shadow-2xl">
+
+            <EditReservationPanel
+              mode="edit"
+              reservationId={reservationIdToEdit}
+              initialReservation={selectedReservation as any}
+              onSave={handleSaveEdit}
+              onCancel={handleCancelEdit}
+            />
+          </div>
+        </div>
+      )}
       <Toast toast={toast} />
     </div>
   );
-}
+} 
