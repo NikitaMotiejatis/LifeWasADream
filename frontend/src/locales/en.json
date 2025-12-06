@@ -59,7 +59,7 @@
     "cancel": "Cancel",
     "clear": "Clear",
     "back": "Back",
-    "status": "Status"
+    "status": "Status",
     "review": "Review"
   },
   "deliveries": {
@@ -766,8 +766,16 @@
     "currentStock": "Current Stock",
     "daysAgo_one": "yesterday",
     "daysAgo_other": "{{count}} days ago",
-    "hoursAgo_one": "{{count}} hour ago",
-    "hoursAgo_other": "{{count}} hours ago",
+    "detailPanel": {
+      "pendingTag": "Pending update",
+      "subtitle": "Review and confirm the adjustment",
+      "currentStockLabel": "Current stock",
+      "minimumStockLabel": "Minimum",
+      "skuLabel": "SKU",
+      "lastUpdatedLabel": "Last updated",
+      "hint": "Use the update workflow to confirm received inventory or adjustments."
+    },
+    "clearSelection": "Clear selection",
     "lastUpdated": "Last updated",
     "minimumLevel": "Minimum Level",
     "noItems": "No items match your search or filter.",
@@ -782,6 +790,7 @@
       "Syrup - Vanilla": "Vanilla Syrup"
     },
     "searchPlaceholder": "Search by name or SKU...",
+    "selectedButtonLabel": "Selected",
     "units": {
       "kg": "kg",
       "bottles_few": "{{count}} bottles",
@@ -797,7 +806,25 @@
       "pcs_one": "{{count}} pc",
       "pcs_other": "{{count}} pcs"
     },
-    "updateStockButton": "Update Stock"
+    "updateStockButton": "Update Stock",
+    "form": {
+      "quantityLabel": "New quantity",
+      "quantityHelper": "Enter the confirmed stock on hand.",
+      "noteLabel": "Note",
+      "notePlaceholder": "Optional note (delivery, wastage, recount…)",
+      "applyButton": "Save update",
+      "savingLabel": "Saving…",
+      "resetButton": "Reset",
+      "hint": "These changes are stored locally for demo purposes.",
+      "successMessage": "Stock level updated.",
+      "errors": {
+        "requiredQuantity": "Quantity is required",
+        "invalidQuantity": "Enter a valid quantity",
+        "sameQuantity": "Please change the quantity before saving",
+        "generic": "Something went wrong. Please try again."
+      }
+    },
+    "justNow": "just now"
   },
   "topbar": {
     "branchSelect": "Downtown Branch",
@@ -941,7 +968,7 @@
   "status": {
     "active": "Active",
     "closed": "Closed",
-    "refund_pending": "Refund Pending"
+    "refund_pending": "Refund Pending",
     "saveChanges": "Save Changes"
   },
 
