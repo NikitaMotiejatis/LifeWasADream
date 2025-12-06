@@ -13,7 +13,7 @@ import { StaffSection } from './staffSection';
 import { DateTimeSection } from './dateTimeSection';
 import { PriceSummarySection } from './priceSummarySection';
 import { ActionButtons } from './actionButtons';
-import { formatPhone } from '@/utils/useInputValidation';
+import { formatPhone } from '@/utils/useInputValidation'; 
 import {
   getDefaultServices,
   getDefaultStaff,
@@ -73,19 +73,8 @@ export function EditReservationPanel({
 
   const validatePhoneNumber = (phone: string): boolean => {
     if (!phone) return false;
-
     const formattedPhone = formatPhone(phone);
-
-    if (formattedPhone !== phone) {
-      return false;
-    }
-
-    if (!phone.startsWith('+') && !/^\d/.test(phone)) {
-      return false;
-    }
-
-    const digitsOnly = phone.replace(/\D/g, '');
-    return digitsOnly.length >= 7 && digitsOnly.length <= 15;
+    return formattedPhone === phone; 
   };
 
   const validateForm = (): boolean => {
@@ -137,6 +126,15 @@ export function EditReservationPanel({
     updateReservation({ datetime: newDateTime });
   };
 
+  const handleCustomerInfoChange = (field: string, value: string) => {
+    if (field === 'customerPhone') {
+      const formattedPhone = formatPhone(value);
+      updateReservation({ customerPhone: formattedPhone });
+    } else {
+      updateReservation({ [field]: value });
+    }
+  };
+
   return (
     <div className="space-y-2 p-6">
       {/* Header */}
@@ -182,12 +180,10 @@ export function EditReservationPanel({
         </div>
       )}
 
-      {/* Customer Information */}
+      {/* Customer Information  */}
       <CustomerInfoSection
         reservation={reservation}
-        handleChange={(field, value) => {
-          updateReservation({ [field]: value });
-        }}
+        handleChange={handleCustomerInfoChange}
       />
 
       {/* Service Selection */}
@@ -222,7 +218,7 @@ export function EditReservationPanel({
       {/* Price Summary */}
       <PriceSummarySection reservation={reservation} />
 
-      {/* Action Buttons - Just remove the wrapper div, keep everything else the same */}
+      {/* Action Buttons */}
       <ActionButtons onCancel={onCancel} onSave={handleSave} />
     </div>
   );
