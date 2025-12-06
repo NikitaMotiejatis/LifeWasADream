@@ -1,13 +1,10 @@
 import { SVGProps } from 'react';
 
-interface EditIconProps extends SVGProps<SVGSVGElement> {
+interface PlusIconProps extends SVGProps<SVGSVGElement> {
   className?: string;
 }
 
-export const EditIcon = ({
-  className = 'h-5 w-5',
-  ...props
-}: EditIconProps) => (
+export const PlusIcon = ({ className = '', ...props }: PlusIconProps) => (
   <svg
     className={className}
     fill="none"
@@ -19,7 +16,7 @@ export const EditIcon = ({
       strokeLinecap="round"
       strokeLinejoin="round"
       strokeWidth={2}
-      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+      d="M12 4v16m8-8H4"
     />
   </svg>
 );

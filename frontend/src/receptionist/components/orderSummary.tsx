@@ -1,19 +1,54 @@
-import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { generateKey, useCart } from '@/receptionist/contexts/cartContext';
-import type { CartItem } from '@/receptionist/contexts/cartContext';
+import {
+  CartItem,
+  generateKey,
+  useCart,
+} from '@/receptionist/contexts/cartContext';
 import TrashcanIcon from '@/icons/trashcanIcon';
+import { useNavigate } from 'react-router-dom';
+import { SplitBillSection } from './splitBillSection';
+import { useState } from 'react';
 
-export default function OrderSummary() {
+type OrderSummaryProps = {
+  onBack?: () => void;
+  showPaymentSection?: boolean;
+};
+
+export default function OrderSummary({
+  onBack,
+  showPaymentSection = false,
+}: OrderSummaryProps) {
   const { t } = useTranslation();
-  const { itemsList, formatPrice, clearCart, subtotal, discountTotal, total } =
-    useCart();
-
-  const [paymentMethod, setPaymentMethod] = useState<
-    'Cash' | 'Card' | 'Gift card'
-  >('Card');
-
+  const {
+    itemsList,
+    formatPrice,
+    clearCart,
+    subtotal,
+    discountTotal,
+    total,
+    generateKey,
+  } = useCart();
   const hasItems = itemsList.length > 0;
+
+  const navigate = useNavigate();
+
+  const [, setToast] = useState<{
+    message: string;
+    type: 'success' | 'error';
+  } | null>(null);
+
+  const showToast = (
+    message: string,
+    type: 'success' | 'error' = 'success',
+  ) => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 5800);
+  };
+
+  function handleSave(): void {
+    // TODO: do something real
+    navigate('/orders');
+  }
 
   return (
     <div className="max-h-full flex-1 flex-col overflow-hidden rounded-2xl bg-white p-4 shadow-xl xl:p-5">
@@ -21,7 +56,7 @@ export default function OrderSummary() {
         <h3 className="text-lg font-bold xl:text-xl">
           {t('orderSummary.title')}
         </h3>
-        {hasItems && (
+        {!onBack && hasItems && (
           <button
             onClick={clearCart}
             className="text-xs font-medium text-red-600 xl:text-sm"
@@ -50,11 +85,16 @@ export default function OrderSummary() {
 
       {hasItems && (
         <div className="space-y-3">
-          <div className="mt-4 space-y-3 border-t border-gray-300 pt-4">
-            <button className="w-full rounded-lg border border-gray-400 py-2 text-xs font-medium hover:bg-gray-50">
-              {t('orderSummary.saveOrder')}
-            </button>
-          </div>
+          {!onBack && (
+            <div className="mt-4 space-y-3 border-t border-gray-300 pt-4">
+              <button
+                className="w-full rounded-lg border border-gray-400 py-2 text-xs font-medium hover:bg-gray-50"
+                onClick={handleSave}
+              >
+                {t('orderSummary.saveOrder')}
+              </button>
+            </div>
+          )}
 
           <div className="mt-4 space-y-3 border-t border-gray-300 pt-4">
             <div className="flex justify-between">
@@ -78,34 +118,37 @@ export default function OrderSummary() {
             </div>
           </div>
 
-          <button className="w-full rounded-lg border border-gray-400 py-2 text-xs font-medium hover:bg-gray-50">
-            {t('orderSummary.splitBill')}
-          </button>
-
-          <div>
-            <p className="mb-1.5 text-xs font-medium text-gray-700 xl:text-sm">
-              {t('orderSummary.paymentMethod')}
-            </p>
-            <div className="grid grid-cols-3 gap-1.5">
-              {(['Cash', 'Card', 'Gift card'] as const).map(method => (
-                <button
-                  key={method}
-                  onClick={() => setPaymentMethod(method)}
-                  className={`rounded-lg py-2 text-xs font-medium transition ${
-                    paymentMethod === method
-                      ? 'bg-blue-600 text-white hover:bg-blue-700'
-                      : 'border border-gray-400 hover:bg-gray-100'
-                  }`}
-                >
-                  {t(`orderSummary.paymentMethods.${method}`)}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <button className="w-full rounded-xl bg-blue-600 py-4 text-lg font-bold text-white shadow-md transition hover:bg-blue-700">
-            {t('orderSummary.completePayment')}
-          </button>
+          {showPaymentSection ? (
+            <>
+              <SplitBillSection
+                total={total}
+                items={itemsList}
+                formatPrice={formatPrice}
+                onCompletePayment={payments => {
+                  console.log('All paid:', payments);
+                  clearCart();
+                  navigate('/orders');
+                  showToast(t('orderSummary.allPaid')); //TODO: currently doesn't work
+                }}
+              />
+            </>
+          ) : onBack ? (
+            <button
+              onClick={onBack}
+              className="w-full rounded-xl bg-blue-600 py-4 text-lg font-bold text-white shadow-md transition hover:bg-blue-700"
+            >
+              {t('orderPanel.done')}
+            </button>
+          ) : (
+            <button
+              onClick={() => {
+                navigate('/orders');
+              }}
+              className="w-full rounded-xl bg-blue-600 py-4 text-lg font-bold text-white shadow-md transition hover:bg-blue-700"
+            >
+              {t('orderSummary.completePayment')}
+            </button>
+          )}
         </div>
       )}
     </div>

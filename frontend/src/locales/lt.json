@@ -128,7 +128,8 @@
       "items_many": "{{count}} prekių",
       "items_one": "{{count}} prekė",
       "note": "Pastaba:",
-      "order": "Užsakymas"
+      "order": "Užsakymas",
+      "notFound": "nerastas"
     },
     "status": {
       "approved": "Patvirtinta",
@@ -388,6 +389,15 @@
     "discounts": "Nuolaidos",
     "increaseQuantity": "Padidinti kiekį",
     "noItems": "Dar nėra prekių",
+    "people": "žmonės",
+    "peopleCount": "Žmonių",
+    "splitEqually": "Dalinti po lygiai",
+    "splitByItems": "Kiekvienas moka už savo",
+    "payer": "Asmuo",
+    "selectMethod": "Pasirinkite mokėjimo būdą",
+    "payWith": "Mokėti su {{method}}",
+    "allPaid": "Visi sumokėjo – ačiū!",
+    "paid": "Sumokėjo",
     "paymentMethod": "Mokėjimo būdas",
     "paymentMethods": {
       "Card": "Kortele",
@@ -914,10 +924,12 @@
       "Large": "Didelis",
       "Medium": "Vidutinis",
       "Oat Milk": "Avižų pienas",
-      "Small": "Mažas"
+      "Small": "Mažas",
+      "regularMilk": "Įprastas pienas"
     }
   },
   "variations": {
+    "regularMilk": "Įprastas pienas",
     "almondMilk": "Migdolų pienas",
     "large": "Didelis",
     "medium": "Vidutinis",
@@ -967,7 +979,15 @@
     "subtitle": "Keisti prekes, mokėjimo būdą ir sąskaitą",
     "cancel": "Atšaukti",
     "save": "Išsaugoti pakeitimus",
-    "saveChanges": "Išsaugoti pakeitimus"
+    "saveChanges": "Išsaugoti pakeitimus",
+    "each": "vnt.",
+    "created": "Sukurta",
+    "active": "Aktyvus",
+    "status": {
+      "active": "Aktyvus",
+      "closed": "Uždarytas",
+      "refund_pending": "Grąžinimas laukiamas"
+    }
   },
   "editReservation": {
     "title": "Redaguoti rezervaciją",
