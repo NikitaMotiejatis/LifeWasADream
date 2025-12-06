@@ -307,7 +307,15 @@
     "smoothieMango": "Smoothie – Mango Paradise"
   },
   "reservation": {
-    
+        "weekdays": {
+      "mo": "Mo",
+      "tu": "Tu",
+      "we": "We",
+      "th": "Th",
+      "fr": "Fr",
+      "sa": "Sa",
+      "su": "Su"
+    },
     "invalidName": "Only letters, spaces, hyphens, and apostrophes allowed",
     "invalidPrefix": "Must start with + or a digit",
     "invalidLength": "Phone number must be 7-15 digits",
@@ -390,15 +398,7 @@
       "missingInfo": "Missing customer information.\nPlease enter customer name and phone number.",
       "success": "Reservation confirmed!\nConfirmation code: {{code}}\nSMS sent to {{phone}}"
     },
-    "weekdays": {
-      "mo": "Mo",
-      "tu": "Tu",
-      "we": "We",
-      "th": "Th",
-      "fr": "Fr",
-      "sa": "Sa",
-      "su": "Su"
-    },
+
 
     "serviceDetails": "Service Details",
 
