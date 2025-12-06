@@ -2,6 +2,7 @@ import ChevronDownIcon from '@/icons/chevronDownIcon';
 import LogoutIcon from '@/icons/logoutIcon';
 import SearchIcon from '@/icons/searchIcon';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import BranchSelector from './branchSelector';
 import LanguageSwitcher from './languageSwitcher';
 
