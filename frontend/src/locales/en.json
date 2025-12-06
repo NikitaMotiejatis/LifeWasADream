@@ -678,10 +678,12 @@
       "Large": "Large",
       "Medium": "Medium",
       "Oat Milk": "Oat Milk",
-      "Small": "Small"
+      "Small": "Small",
+      "regularMilk": "Regular Milk"
     }
   },
   "variations": {
+    "regularMilk": "Regular Milk",
     "almondMilk": "Almond Milk",
     "large": "Large",
     "medium": "Medium",

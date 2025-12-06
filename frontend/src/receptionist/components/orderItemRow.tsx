@@ -110,7 +110,7 @@ export function OrderItemRow({
                     </button>
                     {hasMilkVariations && !hasSpecialMilkSelected && (
                       <p className="mt-1 text-xs text-gray-500">
-                        {t('orderPanel.includesRegularMilk')}
+                        {t('variationModal.regularMilk')}
                       </p>
                     )}
                   </div>
@@ -121,9 +121,7 @@ export function OrderItemRow({
                 item.selectedVariations.length > 0 && (
                   <div className="mt-2 text-sm text-gray-500">
                     {item.selectedVariations
-                      .map(v =>
-                        t(`variationModal.variations.${v.name}`, v.name),
-                      )
+                      .map(v => t(`variationModal.${v.nameKey}`, v.name))
                       .join(', ')}
                   </div>
                 )}

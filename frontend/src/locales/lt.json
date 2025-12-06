@@ -681,10 +681,12 @@
       "Large": "Didelis",
       "Medium": "Vidutinis",
       "Oat Milk": "Avižų pienas",
-      "Small": "Mažas"
+      "Small": "Mažas",
+      "regularMilk": "Įprastas pienas"
     }
   },
   "variations": {
+    "regularMilk": "Įprastas pienas",
     "almondMilk": "Migdolų pienas",
     "large": "Didelis",
     "medium": "Vidutinis",
