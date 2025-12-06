@@ -14,13 +14,13 @@ export function ActionButtons({ onCancel, onSave }: ActionButtonsProps) {
         onClick={onCancel}
         className="flex-1 rounded-lg border border-gray-300 py-3 text-sm font-medium hover:bg-gray-50"
       >
-        {t('common.cancel', 'Cancel')}
+        {t('common.cancel')}
       </button>
       <button
         onClick={onSave}
         className="flex-1 rounded-lg bg-blue-600 py-3 text-sm font-medium text-white hover:bg-blue-700"
       >
-        {t('editReservation.saveChanges', 'Save Changes')}
+        {t('editReservation.saveChanges')}
       </button>
     </div>
   );

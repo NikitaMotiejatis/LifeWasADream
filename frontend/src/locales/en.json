@@ -476,6 +476,7 @@
     "smoothieMango": "Smoothie – Mango Paradise"
   },
   "reservation": {
+    
     "invalidName": "Only letters, spaces, hyphens, and apostrophes allowed",
     "invalidPrefix": "Must start with + or a digit",
     "invalidLength": "Phone number must be 7-15 digits",

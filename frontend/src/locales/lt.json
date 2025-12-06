@@ -482,7 +482,16 @@
     "smoothieMango": "Kokteilis – Mangų rojus"
   },
   "reservation": {
-        "staffServiceTitle": "Pasitinkite darbuotoją ir paslaugą",
+    "weekdays": {
+      "mo": "Pr",
+      "tu": "An",
+      "we": "Tr",
+      "th": "Kt",
+      "fr": "Pn",
+      "sa": "Št",
+      "su": "Sk"
+    },
+    "staffServiceTitle": "Pasitinkite darbuotoją ir paslaugą",
 
     "invalidName": "Tik raidės, tarpai, brūkšneliai ir apostrofai leidžiami",
     "smsNote": "Patvirtinimas bus išsiųstas SMS žinute",
@@ -601,15 +610,7 @@
     "missingInfo": "Trūksta kliento duomenų.\nĮveskite vardą ir telefono numerį.",
     "success": "Rezervacija patvirtinta!\nKodas: {{code}}\nSMS išsiųsta į {{phone}}"
   },
-  "weekdays": {
-    "mo": "Pr",
-    "tu": "An",
-    "we": "Tr",
-    "th": "Kt",
-    "fr": "Pn",
-    "sa": "Št",
-    "su": "Sk"
-  },
+
   "customerInfo": "Kliento informacija",
   "customerName": "Kliento vardas",
   "customerPhone": "Telefono numeris",
