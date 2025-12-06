@@ -108,11 +108,6 @@ export function OrderItemRow({
                         </>
                       )}
                     </button>
-                    {hasMilkVariations && !hasSpecialMilkSelected && (
-                      <p className="mt-1 text-xs text-gray-500">
-                        {t('variationModal.regularMilk')}
-                      </p>
-                    )}
                   </div>
                 )}
 
