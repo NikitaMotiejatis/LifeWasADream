@@ -105,6 +105,8 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     }));
   };
 
+  const MAX_QUANTITY = 9999;
+
   const updateQuantity = (key: CartKey, delta: number) => {
     setItems(prev => {
       const item = prev[key];
@@ -114,7 +116,22 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         const { [key]: _, ...rest } = prev;
         return rest;
       }
-      return { ...prev, [key]: { ...item, quantity: newQty } };
+
+      if (newQty > MAX_QUANTITY) {
+        return {
+          ...prev,
+          [key]: { ...item, quantity: MAX_QUANTITY },
+        };
+      }
+
+      if (newQty > Number.MAX_SAFE_INTEGER) {
+        return prev;
+      }
+
+      return {
+        ...prev,
+        [key]: { ...item, quantity: newQty },
+      };
     });
   };
 
