@@ -29,6 +29,10 @@ export default function LoginPage() {
           redirectPath = '/stockUpdates';
       } else if (login.includes('supplier')) {
           redirectPath = '/invoiceStatus';
+      } else if (login.includes('manager')) {
+          redirectPath = '/dashboard';
+      } else {
+          redirectPath = '/newOrder';
       }
       setTimeout(() => navigate(redirectPath), 250);
   };
@@ -42,6 +46,10 @@ export default function LoginPage() {
               redirectPath = '/stockUpdates';
           } else if (username.includes('supplier')) {
               redirectPath = '/invoiceStatus';
+          } else if (username.includes('manager')) {
+              redirectPath = '/dashboard';
+          } else {
+              redirectPath = '/newOrder';
           }
           navigate(redirectPath);
       }
