@@ -472,17 +472,28 @@
     "smoothieMango": "Kokteilis – Mangų rojus"
   },
   "reservation": {
-    "service": "Paslauga",
-    "bookingSummary": "Rezervacijos santrauka",
-    "confirmButton": "Patvirtinti rezervaciją",
-    "customerNamePlaceholder": "Kliento vardas ir pavardė",
-    "customerPhonePlaceholder": "Telefono numeris",
-    "dateTimeTitle": "Pasirinkite datą ir laiką",
-    "durations": {
-      "120 min": "120 min",
-      "45 min": "45 min",
-      "60 min": "60 min"
+    "weekdays": {
+      "mo": "Pr",
+      "tu": "An",
+      "we": "Tr",
+      "th": "Kt",
+      "fr": "Pn",
+      "sa": "Št",
+      "su": "Sk"
     },
+    "staffServiceTitle": "Pasitinkite darbuotoją ir paslaugą",
+
+    "invalidName": "Tik raidės, tarpai, brūkšneliai ir apostrofai leidžiami",
+    "smsNote": "Patvirtinimas bus išsiųstas SMS žinute",
+    "invalidPrefix": "Turi prasidėti su + arba skaičiumi",
+    "invalidLength": "Telefono numeris turi būti 7-15 skaitmenų ilgumo",
+
+    "selectStaffAndService": "Pasirinkti darbuotoją ir paslaugą",
+    "priceSummary": "Price Summary",
+    "createReservation": "Create Reservation",
+    "cancel": "Cancel",
+    "confirmButton": "Patvirtinti rezervaciją",
+    "dateTimeTitle": "Pasirinkite datą ir laiką",
     "months": {
       "0": "Sausis",
       "1": "Vasaris",
@@ -497,30 +508,58 @@
       "10": "Lapkritis",
       "11": "Gruodis"
     },
-    "nameError": "Galimos tik raidės, tarpai, brūkšneliai ir apostrofai",
-    "navigation": {
-      "next": "Kitas",
-      "previous": "Ankstesnis"
-    },
-    "pageTitle": "Nauja rezervacija",
-    "phoneError": "Galimi tik skaičiai ir neprivalomas \"+\" pradžioje",
+    "selectTime": "Pasirinkite laiką",
+    "customerInfo": "Kliento informacija",
+    "customerName": "Kliento vardas",
+    "customerNamePlaceholder": "Vardas Pavardė",
+    "customerPhone": "Telefono numeris",
+    "customerPhonePlaceholder": "+123 XXX XXXXX arba 1XX XXXXX",
+    "phoneFormat": "Formatas: +123 456 78910 arba 12 345 6789",
+    "nameRequired": "Vardas yra privalomas",
+    "phoneRequired": "Telefono numeris yra privalomas",
+    "invalidPhone": "Netinkamas telefono numerio formatas. Naudokite +123XXXXXXXXX arba 1XXXXXXXXX",
+    "fixErrors": "Pataisykite validacijos klaidas prieš išsaugant",
+    "validationErrors": "Prašome pataisyti šias klaidas:",
+    "email": "El. paštas",
+    "emailPlaceholder": "El. pašto adresas",
+    "notes": "Pastabos",
+    "notesPlaceholder": "Papildomos pastabos...",
+
+    "service": "Paslauga",
     "services": {
-      "Hair Color": "Dažymas",
-      "Haircut & Style": "Kirpimas ir šukavimas",
+      "Haircut & Style": "Plaukų kirpimas ir stilizavimas",
+      "Hair Color": "Plaukų dažymas",
       "Manicure": "Manikiūras",
       "Pedicure": "Pedikiūras"
     },
-    "smsNote": "Patvirtinimas bus išsiųstas SMS žinute",
-    "staff": {
-      "Any available staff": "Bet kuris laisvas darbuotojas",
-      "Colorist": "Dažytojas",
-      "James Chen": "James Chen",
-      "Nail Technician": "Nagų meistrė",
-      "Sarah Johnson": "Sarah Johnson",
-      "Anyone": "Bet kas"
-    },
+
     "staffMember": "Darbuotojas",
-    "staffServiceTitle": "Pasirinkite darbuotoją ir paslaugą",
+    "staff": {
+      "James Chen": "Jonas Petraitis",
+      "Sarah Johnson": "Ona Jonaitienė",
+      "Anyone": "Bet kas",
+      "Colorist": "Spalvininkas",
+      "Nail Technician": "Nagų meistrė",
+      "Any available staff": "Bet kuris darbuotojas"
+    },
+
+    "dateTime": "Data ir laikas",
+    "date": "Data",
+    "time": "Laikas",
+    "duration": "Trukmė",
+    "durations": {
+      "120 min": "120 min",
+      "45 min": "45 min",
+      "60 min": "60 min",
+      "min": "min"
+    },
+
+    "bookingSummary": "Rezervacijos suvestinė",
+    "total": "Iš viso",
+
+    "selected": "Pasirinkta",
+    "selectedService": "Pasirinkta paslauga",
+    "selectedStaff": "Pasirinktas darbuotojas",
     "summary": {
       "date": "Data",
       "notSelected": "[Nepasirinkta]",
@@ -528,22 +567,48 @@
       "staff": "Darbuotojas",
       "time": "Laikas",
       "total": "Iš viso"
-    },
-    "toast": {
-      "incomplete": "Prašome užpildyti visus laukus: paslaugą, datą ir laiką.",
-      "missingInfo": "Trūksta kliento duomenų.\nĮveskite vardą ir telefono numerį.",
-      "success": "Rezervacija patvirtinta!\nKodas: {{code}}\nSMS išsiųsta į {{phone}}"
-    },
-    "weekdays": {
-      "mo": "Pr",
-      "tu": "An",
-      "we": "Tr",
-      "th": "Kt",
-      "fr": "Pn",
-      "sa": "Št",
-      "su": "Sk"
     }
   },
+
+  "nameError": "Galimos tik raidės, tarpai, brūkšneliai ir apostrofai",
+  "navigation": {
+    "next": "Kitas",
+    "previous": "Ankstesnis"
+  },
+  "pageTitle": "Nauja rezervacija",
+  "phoneError": "Galimi tik skaičiai ir neprivalomas \"+\" pradžioje",
+  "services": {
+    "Hair Color": "Dažymas",
+    "Haircut & Style": "Plaukų kirpimas ir stilizavimas",
+    "Manicure": "Manikiūras",
+    "Pedicure": "Pedikiūras"
+  },
+  "smsNote": "Patvirtinimas bus išsiųstas SMS žinute",
+  "staff": {
+    "Any available staff": "Bet kuris laisvas darbuotojas",
+    "Colorist": "Dažytojas",
+    "Nail Technician": "Nagų meistrė",
+    "Anyone": "Bet kas",
+    "James Chen": "Jonas Petraitis",
+    "Sarah Johnsonh": "Ona Jonaitienė"
+  },
+  "staffMember": "Darbuotojas",
+  "staffServiceTitle": "Pasirinkite darbuotoją ir paslaugą",
+
+  "toast": {
+    "incomplete": "Prašome užpildyti visus laukus: paslaugą, datą ir laiką.",
+    "missingInfo": "Trūksta kliento duomenų.\nĮveskite vardą ir telefono numerį.",
+    "success": "Rezervacija patvirtinta!\nKodas: {{code}}\nSMS išsiųsta į {{phone}}"
+  },
+
+  "customerInfo": "Kliento informacija",
+  "customerName": "Kliento vardas",
+  "customerPhone": "Telefono numeris",
+  "serviceDetails": "Paslaugos detalės",
+  "date": "Data",
+  "time": "Laikas",
+  "notes": "Pastabos",
+  "notesPlaceholder": "Papildomos pastabos...",
   "reservations": {
     "actions": {
       "cancel": "Atšaukti",
@@ -551,7 +616,8 @@
       "complete": "Baigti aptarnavimą",
       "noShow": "Neatvyko",
       "refund": "Grąžinti pinigus",
-      "start": "Pradėti aptarnavimą"
+      "start": "Pradėti aptarnavimą",
+      "edit": "Redaguoti"
     },
     "filters": {
       "all": "Visi ({{count}})",
@@ -573,7 +639,8 @@
         "complete": "Patvirtinti baigimą",
         "noshow": "Pažymėti kaip neatvykusį",
         "refund": "Prašyti grąžinimo",
-        "start": "Pradėti aptarnavimą"
+        "start": "Pradėti aptarnavimą",
+        "edit": "Redaguoti"
       },
       "refund": {
         "email": "Kliento el. paštas",
@@ -591,13 +658,14 @@
         "complete": "Baigti aptarnavimą",
         "noshow": "Pažymėti kaip neatvykusį",
         "refund": "Prašyti pinigų grąžinimo",
-        "start": "Pradėti aptarnavimą"
+        "start": "Pradėti aptarnavimą",
+        "edit": "Redaguoti"
       },
       "totalAmount": "Bendra suma"
     },
     "noReservations": "Rezervacijų nerasta",
     "services": {
-      "1": "Kirpimas ir šukavimas",
+      "1": "Plaukų kirpimas ir stilizavimas",
       "2": "Plaukų dažymas",
       "3": "Manikiūras",
       "4": "Pedikiūras"
@@ -617,7 +685,8 @@
       "noShow": "Pažymėta kaip neatvykęs",
       "refundCancelled": "Grąžinimo prašymas atšauktas",
       "refundRequested": "Grąžinimo prašymas išsiųstas",
-      "started": "Paslauga pradėta"
+      "started": "Paslauga pradėta",
+      "updated": "Rezervacija sėkmingai atnaujinta"
     }
   },
   "sidebar": {
@@ -830,7 +899,7 @@
   },
   "validation": {
     "name": "Galimos tik raidės, tarpai, brūkšneliai ir apostrofai",
-    "phone": "Galimi tik skaičiai ir pasirenkamas \"+\" pradžioje"
+    "phone": "Galimi tik skaičiai ir pasirenkamas \"+\" pradžioje neilgesnis 16 skaitmenų"
   },
   "variationModal": {
     "addToOrder": "Pridėti į užsakymą",
@@ -854,5 +923,55 @@
     "medium": "Vidutinis",
     "oatMilk": "Avižų pienas",
     "small": "Mažas"
+  },
+  "orderPanel": {
+    "addItem": "Pridėti prekę",
+    "cancel": "Atšaukti",
+    "done": "Išaugoti",
+    "change": "pakeisti",
+    "selectSize": "Dydis:",
+    "selectMilk": "Pienas:",
+    "selectOptions": "Pasirinkite:",
+    "noSize": "Nepasirinktas dydis",
+    "noMilk": "Nepasirinktas pienas",
+    "noOptions": "Nepasirinktia",
+    "extra": "papildoma",
+    "newItem": "Naujas",
+    "originalItem": "Originalus",
+    "decreaseQuantity": "Sumažinti kiekį",
+    "increaseQuantity": "Padidinti kiekį",
+    "remove": "Pašalinti",
+    "clearAll": "Išvalyti viską",
+    "viewTitle": "Dabartinis užsakymas",
+    "originalItems": "Užsakymo prekės",
+    "newItems": "Naujos prekės",
+    "newItemsAdded": "Pridėtos naujos prekės",
+    "discounts": "Nuolaidos",
+    "newTotal": "Nauja suma",
+    "totalNote": "Pakeitimai atnaujins užsakymą #",
+    "subtotal": "Tarpinė suma",
+    "total": "Galutinė suma",
+    "paymentMethod": "Mokėjimo būdas",
+    "paymentMethods": {
+      "Cash": "Grynaisiais",
+      "Card": "Kortele",
+      "Gift card": "Dovanų kortele"
+    },
+    "splitBill": "Padalinti sąskaitą",
+    "splitCount": "Padalinti tarp:",
+    "completePayment": "Baigti apmokėjimą",
+    "updateOrder": "Atnaujinti užsakymą"
+  },
+  "editOrder": {
+    "title": "Redaguoti užsakymą",
+    "subtitle": "Keisti prekes, mokėjimo būdą ir sąskaitą",
+    "cancel": "Atšaukti",
+    "save": "Išsaugoti pakeitimus",
+    "saveChanges": "Išsaugoti pakeitimus"
+  },
+  "editReservation": {
+    "title": "Redaguoti rezervaciją",
+    "subtitle": "Keisti rezervacijos detales",
+    "saveChanges": "Išsaugoti pakeitimus"
   }
 }

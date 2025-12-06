@@ -58,6 +58,8 @@
   "common": {
     "cancel": "Cancel",
     "clear": "Clear",
+    "back": "Back",
+    "status": "Status"
     "review": "Review"
   },
   "deliveries": {
@@ -464,10 +466,39 @@
     "smoothieMango": "Smoothie – Mango Paradise"
   },
   "reservation": {
+        "weekdays": {
+      "mo": "Mo",
+      "tu": "Tu",
+      "we": "We",
+      "th": "Th",
+      "fr": "Fr",
+      "sa": "Sa",
+      "su": "Su"
+    },
+    "invalidName": "Only letters, spaces, hyphens, and apostrophes allowed",
+    "invalidPrefix": "Must start with + or a digit",
+    "invalidLength": "Phone number must be 7-15 digits",
+    "selectStaffAndService": "Select staff and service",
+    "customerInfo": "Customer Information",
+    "customerName": "Customer Name",
+    "customerNamePlaceholder": "Full Name",
+    "customerPhone": "Phone Number",
+    "customerPhonePlaceholder": "+123 XXX XXXXX or 8XX XXXXX",
+    "phoneFormat": "Format: +123 456 78910 or 12 345 6789",
+    "nameRequired": "Name is required",
+    "phoneRequired": "Phone number is required",
+    "invalidPhone": "Invalid phone number format. Use +123XXXXXXXXX or 1XXXXXXXXX",
+    "fixErrors": "Please fix validation errors before saving",
+    "validationErrors": "Please fix the following errors:",
+    "status": {
+      "pending": "pending",
+      "confirmed": "confirmed",
+      "completed": "completed",
+      "cancelled": "cancelled",
+      "refund_pending": "refund pending"
+    },
     "service": "Service",
     "confirmButton": "Confirm Reservation",
-    "customerNamePlaceholder": "Customer name",
-    "customerPhonePlaceholder": "Phone number",
     "dateTimeTitle": "Select Date & Time",
     "bookingSummary": "Reservation Summary",
     "durations": {
@@ -504,12 +535,12 @@
     },
     "smsNote": "Confirmation will be sent via SMS",
     "staff": {
-      "Any available staff": "Any available staff",
-      "Colorist": "Colorist",
       "James Chen": "James Chen",
-      "Nail Technician": "Nail Technician",
       "Sarah Johnson": "Sarah Johnson",
-      "Anyone": "Anyone"
+      "Anyone": "Anyone",
+      "Colorist": "Colorist",
+      "Nail Technician": "Nail Technician",
+      "Any available staff": "Any available staff"
     },
     "staffMember": "Staff Member",
     "staffServiceTitle": "Select Staff & Service",
@@ -526,15 +557,14 @@
       "missingInfo": "Missing customer information.\nPlease enter customer name and phone number.",
       "success": "Reservation confirmed!\nConfirmation code: {{code}}\nSMS sent to {{phone}}"
     },
-    "weekdays": {
-      "mo": "Mo",
-      "tu": "Tu",
-      "we": "We",
-      "th": "Th",
-      "fr": "Fr",
-      "sa": "Sa",
-      "su": "Su"
-    }
+
+
+    "serviceDetails": "Service Details",
+
+    "date": "Date",
+    "time": "Time",
+    "notes": "Notes",
+    "notesPlaceholder": "Additional notes..."
   },
   "reservations": {
     "actions": {
@@ -543,7 +573,8 @@
       "complete": "Complete",
       "noShow": "No-Show",
       "refund": "Refund",
-      "start": "Start"
+      "start": "Start",
+      "edit": "Edit"
     },
     "filters": {
       "all": "All ({{count}})",
@@ -565,7 +596,8 @@
         "complete": "Confirm Completion",
         "noshow": "Mark as No-Show",
         "refund": "Request Refund",
-        "start": "Start Service"
+        "start": "Start Service",
+        "edit": "Edit"
       },
       "refund": {
         "email": "Customer's Email",
@@ -583,7 +615,8 @@
         "complete": "Complete Service",
         "noshow": "Mark as No-Show",
         "refund": "Request Refund",
-        "start": "Start Service"
+        "start": "Start Service",
+        "edit": "Edit"
       },
       "totalAmount": "Total Amount"
     },
@@ -609,7 +642,8 @@
       "noShow": "Marked as No-Show",
       "refundCancelled": "Refund request cancelled",
       "refundRequested": "Refund request sent",
-      "started": "Service started"
+      "started": "Service started",
+      "updated": "Reservation updated successfully"
     }
   },
   "sidebar": {
@@ -819,7 +853,7 @@
   },
   "validation": {
     "name": "Only letters, spaces, hyphens and apostrophes allowed",
-    "phone": "Only numbers and optional \"+\" at the beginning"
+    "phone": "Only numbers and optional \"+\" at the beginning no longer than 16 digits"
   },
   "variationModal": {
     "addToOrder": "Add to Order",
@@ -843,5 +877,56 @@
     "medium": "Medium",
     "oatMilk": "Oat Milk",
     "small": "Small"
+  },
+  "orderPanel": {
+    "addItem": "Add item",
+    "cancel": "Cancel",
+    "done": "Done",
+    "change": "change",
+    "selectSize": "Select size:",
+    "selectMilk": "Select milk:",
+    "selectOptions": "Select options:",
+    "noSize": "No size selected",
+    "noMilk": "No milk selected",
+    "noOptions": "No options selected",
+    "extra": "extra",
+    "newItem": "New",
+    "originalItem": "Original",
+    "decreaseQuantity": "Decrease quantity",
+    "increaseQuantity": "Increase quantity",
+    "remove": "Remove",
+    "clearAll": "Clear All",
+    "viewTitle": "Current Order",
+    "originalItems": "Order Items",
+    "newItems": "New Items",
+    "newItemsAdded": "New Items Added",
+    "discounts": "Discounts",
+    "newTotal": "New Total",
+    "totalNote": "Changes will update order #",
+    "subtotal": "Subtotal",
+    "total": "Total",
+    "paymentMethod": "Payment Method",
+    "paymentMethods": {
+      "Cash": "Cash",
+      "Card": "Card",
+      "Gift card": "Gift Card"
+    },
+    "splitBill": "Split Bill",
+    "splitCount": "Split between:",
+    "completePayment": "Complete Payment",
+    "updateOrder": "Update Order"
+  },
+  "editOrder": {
+    "title": "Edit Order",
+    "subtitle": "Modify items, payment method, and billing",
+    "cancel": "Cancel",
+    "save": "Save Changes",
+    "saveChanges": "Save Changes"
+  },
+
+  "editReservation": {
+    "title": "Edit Reservation",
+    "subtitle": "Modify reservation details",
+    "saveChanges": "Save Changes"
   }
 }

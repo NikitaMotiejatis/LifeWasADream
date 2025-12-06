@@ -14,6 +14,7 @@ import StockAlertsPage from '@/stock/pages/stockAlertsPage';
 import AuditHistoryPage from '@/stock/pages/auditHistoryPage';
 import InvoiceStatusPage from '@/supplier/pages/invoiceStatusPage';
 import DeliveriesPage from '@/supplier/pages/deliveriesPage';
+import EditReservationPage from '@/receptionist/pages/editReservationPage';
 import DashboardPage from '@/manager/pages/dashboardPage';
 import RefundApprovalsPage from '@/manager/pages/refundApprovalsPage';
 import ReportsAnalyticsPage from '@/manager/pages/reportsAnalyticsPage';
@@ -33,6 +34,8 @@ const router = createBrowserRouter(
     { path: '/auditHistory', element: <AuditHistoryPage /> },
     { path: '/invoiceStatus', element: <InvoiceStatusPage /> },
     { path: '/deliveries', element: <DeliveriesPage /> },
+    { path: '/edit-reservation/:reservationId',  element: <EditReservationPage />,
+    },
     { path: '/dashboard', element: <DashboardPage /> },
     { path: '/refunds', element: <RefundApprovalsPage /> },
     { path: '/reports', element: <ReportsAnalyticsPage /> },

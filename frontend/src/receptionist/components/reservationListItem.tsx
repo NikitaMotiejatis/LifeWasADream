@@ -10,12 +10,14 @@ type Props = {
     type: 'complete' | 'cancel' | 'noshow' | 'refund' | 'cancel_refund',
     reservation: Reservation,
   ) => void;
+  onEdit: (reservation: Reservation) => void;
 };
 
 export default function ReservationListItem({
   reservation,
   formatPrice,
   onAction,
+  onEdit,
 }: Props) {
   const { t } = useTranslation();
   const service = servicesMap[reservation.serviceId];
@@ -62,19 +64,28 @@ export default function ReservationListItem({
             <>
               <button
                 onClick={() => onAction('complete', reservation)}
-                className="rounded-lg bg-blue-600 px-5 py-2 text-xs font-medium text-white shadow-sm hover:bg-blue-700"
+                className="rounded-lg bg-blue-600 px-5 py-2 text-xs font-medium text-white shadow-sm transition-colors hover:bg-blue-700"
               >
                 {t('reservations.actions.complete')}
               </button>
+
+              <button
+                onClick={() => onEdit(reservation)}
+                className="bg-white-50 text-black-700 flex items-center gap-1.5 rounded-lg border border-gray-400 px-3 py-2 text-xs transition-colors hover:bg-gray-100"
+                title={t('reservations.actions.edit')}
+              >
+                <span>{t('reservations.actions.edit')}</span>
+              </button>
+
               <button
                 onClick={() => onAction('cancel', reservation)}
-                className="rounded-lg border border-red-500 bg-red-50 px-3 py-2 text-xs text-red-600 hover:bg-red-100"
+                className="rounded-lg border border-red-500 bg-red-50 px-3 py-2 text-xs text-red-600 transition-colors hover:bg-red-100"
               >
                 {t('reservations.actions.cancel')}
               </button>
               <button
                 onClick={() => onAction('noshow', reservation)}
-                className="rounded-lg border border-orange-500 bg-orange-50 px-3 py-2 text-xs text-orange-600 hover:bg-orange-100"
+                className="rounded-lg border border-orange-500 bg-orange-50 px-3 py-2 text-xs text-orange-600 transition-colors hover:bg-orange-100"
               >
                 {t('reservations.actions.noShow')}
               </button>
@@ -83,7 +94,7 @@ export default function ReservationListItem({
           {reservation.status === 'completed' && (
             <button
               onClick={() => onAction('refund', reservation)}
-              className="rounded-lg border border-purple-400 bg-purple-50 px-5 py-2 text-xs font-medium text-purple-700 hover:bg-purple-100"
+              className="rounded-lg border border-purple-400 bg-purple-50 px-5 py-2 text-xs font-medium text-purple-700 transition-colors hover:bg-purple-100"
             >
               {t('reservations.actions.refund')}
             </button>
@@ -95,7 +106,7 @@ export default function ReservationListItem({
               </span>
               <button
                 onClick={() => onAction('cancel_refund', reservation)}
-                className="rounded-lg border border-orange-400 bg-orange-50 px-5 py-2 text-xs font-medium text-orange-700 hover:bg-orange-100"
+                className="rounded-lg border border-orange-400 bg-orange-50 px-5 py-2 text-xs font-medium text-orange-700 transition-colors hover:bg-orange-100"
               >
                 {t('reservations.actions.cancelRefund')}
               </button>
