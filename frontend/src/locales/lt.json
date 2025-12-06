@@ -843,7 +843,25 @@
       "pcs_many": "{{count}} vnt.",
       "pcs_one": "{{count}} vnt."
     },
-    "updateStockButton": "Atnaujinti kiekį"
+    "updateStockButton": "Atnaujinti kiekį",
+    "form": {
+      "quantityLabel": "Naujas kiekis",
+      "quantityHelper": "Įveskite patvirtintą atsargų kiekį.",
+      "noteLabel": "Pastaba",
+      "notePlaceholder": "Pasirinktinė pastaba (pristatymas, nurašymas...)",
+      "applyButton": "Išsaugoti",
+      "savingLabel": "Saugoma…",
+      "resetButton": "Atstatyti",
+      "hint": "Šie pakeitimai saugomi tik lokaliai demonstracijai.",
+      "successMessage": "Atsargų kiekis atnaujintas.",
+      "errors": {
+        "requiredQuantity": "Kiekis yra privalomas",
+        "invalidQuantity": "Įveskite galiojantį kiekį",
+        "sameQuantity": "Pakeiskite kiekį prieš saugodami",
+        "generic": "Įvyko klaida. Bandykite dar kartą."
+      }
+    },
+    "justNow": "ką tik"
   },
   "topbar": {
     "branchSelect": "Centrinis padalinys",
