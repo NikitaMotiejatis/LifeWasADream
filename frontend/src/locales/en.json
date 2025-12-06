@@ -476,7 +476,7 @@
     "smoothieMango": "Smoothie – Mango Paradise"
   },
   "reservation": {
-        "weekdays": {
+    "weekdays": {
       "mo": "Mo",
       "tu": "Tu",
       "we": "We",
@@ -567,7 +567,6 @@
       "missingInfo": "Missing customer information.\nPlease enter customer name and phone number.",
       "success": "Reservation confirmed!\nConfirmation code: {{code}}\nSMS sent to {{phone}}"
     },
-
 
     "serviceDetails": "Service Details",
 
@@ -678,7 +677,7 @@
     "supplier": {
       "deliveries": "Deliveries",
       "group": "Supplier Portal",
-      "invoices": "Invoice Status"
+      "invoiceStatus": "Invoice Status"
     },
     "manager": {
       "group": "Manager Portal",
@@ -766,6 +765,10 @@
     "currentStock": "Current Stock",
     "daysAgo_one": "yesterday",
     "daysAgo_other": "{{count}} days ago",
+    "hoursAgo": "{{count}} hours ago",
+    "hoursAgo_few": "{{count}} hours ago",
+    "hoursAgo_many": "{{count}} hours ago",
+    "hoursAgo_one": "{{count}} hour ago",
     "detailPanel": {
       "pendingTag": "Pending update",
       "subtitle": "Review and confirm the adjustment",
