@@ -13,7 +13,7 @@ export function StaffSection({ staffMembers, reservation, handleChange }: StaffS
   return (
     <div className="rounded-xl bg-white p-5 shadow">
       <h3 className="mb-3 text-sm font-medium text-gray-600 uppercase">
-        {t('reservation.staffMember', 'Staff Member')} {/* Fixed */}
+        {t('reservation.staffMember', 'Staff Member')}
       </h3>
       <div className="space-y-2">
         {staffMembers.map(staff => (
@@ -28,10 +28,10 @@ export function StaffSection({ staffMembers, reservation, handleChange }: StaffS
           >
             <div>
               <div className="font-medium">
-                {staff.name} {/* Already using translated name */}
+                {staff.name} 
               </div>
               <div className="text-xs text-gray-500">
-                {staff.role} {/* Already using translated role */}
+                {staff.role}
               </div>
             </div>
             {reservation.staff === staff.id && (

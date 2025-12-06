@@ -305,6 +305,8 @@
     "smoothieMango": "Kokteilis – Mangų rojus"
   },
   "reservation": {
+        "staffServiceTitle": "Pasitinkite darbuotoją ir paslaugą",
+
     "invalidName": "Tik raidės, tarpai, brūkšneliai ir apostrofai leidžiami",
     "smsNote": "Patvirtinimas bus išsiųstas SMS žinute",
     "invalidPrefix": "Turi prasidėti su + arba skaičiumi",

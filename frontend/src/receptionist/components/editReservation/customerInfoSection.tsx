@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Reservation } from './types';
+import { formatName, formatPhone } from '@/utils/useInputValidation';
 
 type CustomerInfoSectionProps = {
   reservation: Reservation;
@@ -12,22 +13,6 @@ export function CustomerInfoSection({
   handleChange,
 }: CustomerInfoSectionProps) {
   const { t } = useTranslation();
-
-  const formatName = (value: string): string => {
-    return value
-      .replace(/[^\p{L}\s'-]/gu, '')
-      .replace(/\s+/g, ' ')
-      .replace(/-+/g, '-')
-      .replace(/'+/g, "'")
-      .trimStart();
-  };
-
-  const formatPhone = (value: string): string => {
-    return value
-      .replace(/[^0-9+]/g, '')
-      .replace(/\+/g, (match, offset) => (offset === 0 ? '+' : ''))
-      .slice(0, 16);
-  };
 
   const [nameValue, setNameValue] = useState(reservation.customerName || '');
   const [phoneValue, setPhoneValue] = useState(reservation.customerPhone || '');
@@ -64,8 +49,6 @@ export function CustomerInfoSection({
     handleChange('customerPhone', filtered);
   };
 
-  const isPhoneValidLength = phoneValue.replace('+', '').length >= 6 && phoneValue.replace('+', '').length <= 15;
-
   return (
     <div className="rounded-lg border border-gray-200 p-4">
       <h3 className="mb-3 text-lg font-semibold">
@@ -74,7 +57,7 @@ export function CustomerInfoSection({
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div>
           <label className="mb-1 block text-sm font-medium text-gray-700">
-            {t('reservation.customerName')} *
+            {t('reservation.customerName')} <span className="text-red-500">*</span>
           </label>
           <input
             type="text"
@@ -96,7 +79,7 @@ export function CustomerInfoSection({
         </div>
         <div>
           <label className="mb-1 block text-sm font-medium text-gray-700">
-            {t('reservation.customerPhone')} *
+            {t('reservation.customerPhone')} <span className="text-red-500">*</span>
           </label>
           <input
             type="tel"
@@ -115,7 +98,6 @@ export function CustomerInfoSection({
               {t('validation.phone')}
             </p>
           )}
-
         </div>
       </div>
     </div>

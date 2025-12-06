@@ -6,6 +6,12 @@ import ReservationListItem from '@/receptionist/components/reservationListItem';
 import ReservationModal from '@/receptionist/components/reservationModal';
 import { EditReservationPanel } from '@/receptionist/components/editReservation/editReservationPanel';
 import Toast from '@/global/components/toast';
+import { 
+  servicesMap, 
+  serviceIdMapping, 
+  staffIdMapping,
+  mapReservationForEdit 
+} from '@/utils/reservationMappings';
 
 export type Reservation = {
   id: string;
@@ -17,64 +23,7 @@ export type Reservation = {
   status: 'pending' | 'completed' | 'cancelled' | 'no_show' | 'refund_pending';
 };
 
-export const servicesMap: Record<string, { title: string; price: number }> = {
-  '1': { title: 'Haircut & Style', price: 65 },
-  '2': { title: 'Hair Color', price: 120 },
-  '3': { title: 'Manicure', price: 35 },
-  '4': { title: 'Pedicure', price: 50 },
-};
-
-const serviceIdMapping: Record<string, string> = {
-  haircut: '1',
-  color: '2',
-  manicure: '3',
-  pedicure: '4',
-};
-
-const staffIdMapping: Record<string, string> = {
-  james: 'james',
-  sarah: 'sarah',
-  anyone: 'anyone',
-};
-
-const formatReservationForEdit = (res: Reservation): any => {
-  const reverseServiceMap: Record<string, string> = {};
-  Object.entries(serviceIdMapping).forEach(([key, value]) => {
-    reverseServiceMap[value] = key;
-  });
-  
-  const staffMap: Record<string, string> = {
-    'james': 'james',
-    'sarah': 'sarah',
-    'anyone': 'anyone'
-  };
-
-  const serviceDurations: Record<string, number> = {
-    'haircut': 60,
-    'color': 120,
-    'manicure': 45,
-    'pedicure': 60
-  };
-
-  const serviceId = reverseServiceMap[res.serviceId] || 'haircut';
-  const duration = serviceDurations[serviceId] || 60;
-
-  const serviceInfo = servicesMap[res.serviceId];
-  const price = serviceInfo?.price || 0;
-
-  return {
-    id: res.id,
-    service: serviceId,
-    staff: staffMap[res.staffId] || 'anyone',
-    datetime: res.datetime, 
-    duration: duration,
-    customerName: res.customerName,
-    customerPhone: res.customerPhone,
-    status: res.status,
-    notes: '',
-    price: price
-  };
-};
+export { servicesMap }; // Re-export for other components
 
 export default function ReservationList() {
   const { t } = useTranslation();
@@ -124,7 +73,7 @@ export default function ReservationList() {
           id: 'RES-302',
           customerName: 'Liam Chen',
           customerPhone: '+1987654321',
-          staffId: 'anyone',  
+          staffId: 'anyone',
           serviceId: '3',
           datetime: new Date('2025-11-30T14:30:00'),
           status: 'pending',
@@ -224,14 +173,13 @@ export default function ReservationList() {
     setModalOpen(true);
   };
 
-const handleEditClick = (reservation: Reservation) => {
-  
-  const formattedReservation = formatReservationForEdit(reservation);
-  
-  setReservationIdToEdit(reservation.id);
-  setSelectedReservation(formattedReservation as any);
-  setEditModalOpen(true);
-};
+  const handleEditClick = (reservation: Reservation) => {
+    const formattedReservation = mapReservationForEdit(reservation);
+
+    setReservationIdToEdit(reservation.id);
+    setSelectedReservation(formattedReservation as any);
+    setEditModalOpen(true);
+  };
 
   const updateStatus = (id: string, newStatus: Reservation['status']) => {
     setReservations(prev =>
@@ -241,59 +189,59 @@ const handleEditClick = (reservation: Reservation) => {
   };
 
   const handleSaveEdit = (reservationData: any) => {
-  try {
-    if (!reservationData) {
-      throw new Error('No reservation data received');
+    try {
+      if (!reservationData) {
+        throw new Error('No reservation data received');
+      }
+
+      const originalReservation = reservations.find(
+        r => r.id === reservationData.id,
+      );
+
+      if (!originalReservation) {
+        throw new Error(`Reservation with ID ${reservationData.id} not found`);
+      }
+
+      const datetime = reservationData.datetime;
+
+      const serviceId =
+        serviceIdMapping[reservationData.service] ||
+        originalReservation.serviceId;
+      const staffId =
+        staffIdMapping[reservationData.staff] || originalReservation.staffId;
+
+      const updatedReservation: Reservation = {
+        id: reservationData.id,
+        customerName:
+          reservationData.customerName || originalReservation.customerName,
+        customerPhone:
+          reservationData.customerPhone || originalReservation.customerPhone,
+        staffId: staffId,
+        serviceId: serviceId,
+        datetime: datetime,
+        status: originalReservation.status,
+      };
+
+      setReservations(prev =>
+        prev.map(r =>
+          r.id === updatedReservation.id ? updatedReservation : r,
+        ),
+      );
+      setEditModalOpen(false);
+      setToast({
+        message: t('reservations.toast.updated'),
+        type: 'success',
+      });
+    } catch (error: any) {
+      console.error('Error saving reservation:', error);
+      setToast({
+        message: `Error: ${error.message}`,
+        type: 'error',
+      });
     }
 
-    const originalReservation = reservations.find(
-      r => r.id === reservationData.id,
-    );
-
-    if (!originalReservation) {
-      throw new Error(`Reservation with ID ${reservationData.id} not found`);
-    }
-
-    const datetime = reservationData.datetime;
-
-    const serviceId =
-      serviceIdMapping[reservationData.service] ||
-      originalReservation.serviceId;
-    const staffId =
-      staffIdMapping[reservationData.staff] || originalReservation.staffId;
-
-    const updatedReservation: Reservation = {
-      id: reservationData.id,
-      customerName:
-        reservationData.customerName || originalReservation.customerName,
-      customerPhone:
-        reservationData.customerPhone || originalReservation.customerPhone,
-      staffId: staffId,
-      serviceId: serviceId,
-      datetime: datetime, 
-      status: originalReservation.status,
-    };
-
-    setReservations(prev =>
-      prev.map(r =>
-        r.id === updatedReservation.id ? updatedReservation : r,
-      ),
-    );
-    setEditModalOpen(false);
-    setToast({
-      message: t('reservations.toast.updated'),
-      type: 'success',
-    });
-  } catch (error: any) {
-    console.error('Error saving reservation:', error);
-    setToast({
-      message: `Error: ${error.message}`,
-      type: 'error',
-    });
-  }
-
-  setTimeout(() => setToast(null), 5000);
-};
+    setTimeout(() => setToast(null), 5000);
+  };
   const handleCancelEdit = () => {
     setEditModalOpen(false);
     setReservationIdToEdit(null);
@@ -398,7 +346,6 @@ const handleEditClick = (reservation: Reservation) => {
         }}
       />
 
-      {/* Edit Reservation Modal */}
       {editModalOpen && reservationIdToEdit && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div
@@ -407,28 +354,7 @@ const handleEditClick = (reservation: Reservation) => {
           />
 
           <div className="relative max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-2xl bg-white p-7 shadow-2xl">
-            <div className="mb-6 flex items-center justify-between">
-
-              <button
-                onClick={handleCancelEdit}
-                className="rounded-lg p-2 text-gray-500 hover:bg-gray-100"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </button>
-            </div>
+            {/* Removed the X button for consistency */}
 
             {/* Pass the selectedReservation as initialReservation */}
             <EditReservationPanel
@@ -444,4 +370,4 @@ const handleEditClick = (reservation: Reservation) => {
       <Toast toast={toast} />
     </div>
   );
-}
+} 

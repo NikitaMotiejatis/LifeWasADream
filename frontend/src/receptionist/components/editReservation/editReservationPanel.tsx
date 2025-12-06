@@ -13,6 +13,12 @@ import { StaffSection } from './staffSection';
 import { DateTimeSection } from './dateTimeSection';
 import { PriceSummarySection } from './priceSummarySection';
 import { ActionButtons } from './actionButtons';
+import { formatPhone } from '@/utils/useInputValidation';
+import {
+  getDefaultServices,
+  getDefaultStaff,
+  DEFAULT_AVAILABLE_TIMES,
+} from '@/utils/reservationMappings';
 
 export function EditReservationPanel({
   reservationId,
@@ -24,31 +30,35 @@ export function EditReservationPanel({
 }: EditReservationPanelProps) {
   const { t } = useTranslation();
 
-  const displayServices = services.length > 0 ? services : getDefaultServices(t);
-  const displayStaff = staffMembers.length > 0 ? staffMembers : getDefaultStaff(t);
-const [reservation, setReservation] = useState<Reservation>(() => {
-  if (initialReservation) {
-    const datetime = new Date(initialReservation.datetime);
-    
+  const displayServices =
+    services.length > 0 ? services : getDefaultServices(t);
+  const displayStaff =
+    staffMembers.length > 0 ? staffMembers : getDefaultStaff(t);
+
+  const [reservation, setReservation] = useState<Reservation>(() => {
+    if (initialReservation) {
+      const datetime = new Date(initialReservation.datetime);
+
+      return {
+        ...initialReservation,
+        datetime: isNaN(datetime.getTime()) ? new Date() : datetime,
+      };
+    }
+
     return {
-      ...initialReservation,
-      datetime: isNaN(datetime.getTime()) ? new Date() : datetime
+      id: reservationId || '',
+      service: '',
+      staff: '',
+      datetime: new Date(),
+      duration: 60,
+      customerName: '',
+      customerPhone: '',
+      status: 'pending',
+      notes: '',
+      price: 0,
     };
-  }
-    
-  return {
-    id: reservationId || '',
-    service: '',
-    staff: '',
-    datetime: new Date(),
-    duration: 60,
-    customerName: '',
-    customerPhone: '',
-    status: 'pending',
-    notes: '',
-    price: 0,
-  };
-});
+  });
+
   const [validationErrors, setValidationErrors] = useState<{
     customerName?: string;
     customerPhone?: string;
@@ -64,12 +74,17 @@ const [reservation, setReservation] = useState<Reservation>(() => {
   const validatePhoneNumber = (phone: string): boolean => {
     if (!phone) return false;
 
+    const formattedPhone = formatPhone(phone);
+
+    if (formattedPhone !== phone) {
+      return false;
+    }
+
     if (!phone.startsWith('+') && !/^\d/.test(phone)) {
       return false;
     }
 
     const digitsOnly = phone.replace(/\D/g, '');
-
     return digitsOnly.length >= 7 && digitsOnly.length <= 15;
   };
 
@@ -77,19 +92,13 @@ const [reservation, setReservation] = useState<Reservation>(() => {
     const errors: { customerName?: string; customerPhone?: string } = {};
 
     if (!reservation.customerName?.trim()) {
-      errors.customerName = t('reservation.nameRequired', 'Name is required');
+      errors.customerName = t('reservation.nameRequired');
     }
 
     if (!reservation.customerPhone?.trim()) {
-      errors.customerPhone = t(
-        'reservation.phoneRequired',
-        'Phone number is required',
-      );
+      errors.customerPhone = t('reservation.phoneRequired');
     } else if (!validatePhoneNumber(reservation.customerPhone)) {
-      errors.customerPhone = t(
-        'reservation.invalidPhone',
-        'Phone number must be 7-15 digits and start with + or a digit',
-      );
+      errors.customerPhone = t('reservation.invalidPhone');
     }
 
     setValidationErrors(errors);
@@ -98,12 +107,6 @@ const [reservation, setReservation] = useState<Reservation>(() => {
 
   const handleSave = () => {
     if (!validateForm()) {
-      alert(
-        t(
-          'reservation.fixErrors',
-          'Please fix validation errors before saving',
-        ),
-      );
       return;
     }
 
@@ -130,34 +133,18 @@ const [reservation, setReservation] = useState<Reservation>(() => {
     });
   };
 
-
-
-//--------------------------------------------------------------------------------------------
-//----------------------------------------------DATE-----------------------------------------------
-//---------------------------------------------------------------------------------------------
-
-const getAvailableTimes = (): string[] => {
-  const times: string[] = [];
-  for (let hour = 8; hour <= 18; hour++) {
-    times.push(`${hour.toString().padStart(2, '0')}:00`);
-  }
-  return times;
-};
-
-const handleDateTimeChange = (newDateTime: Date) => {
-  updateReservation({ datetime: newDateTime });
-};
-
+  const handleDateTimeChange = (newDateTime: Date) => {
+    updateReservation({ datetime: newDateTime });
+  };
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-2 p-6">
       {/* Header */}
       <div className="mb-4 border-b border-gray-200 pb-4">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-bold text-gray-900">
-              {t('editReservation.title', 'Redaguoti rezervaciją')} #
-              {reservation.id}
+              {t('editReservation.title')} #{reservation.id}
             </h2>
           </div>
           <div
@@ -172,10 +159,7 @@ const handleDateTimeChange = (newDateTime: Date) => {
             }`}
           >
             <span className="text-sm font-medium capitalize">
-              {t(
-                `reservation.status.${reservation.status}`,
-                reservation.status,
-              )}
+              {t(`reservation.status.${reservation.status}`)}
             </span>
           </div>
         </div>
@@ -185,10 +169,7 @@ const handleDateTimeChange = (newDateTime: Date) => {
       {Object.keys(validationErrors).length > 0 && (
         <div className="rounded-lg border border-red-300 bg-red-50 p-4">
           <h4 className="mb-2 font-medium text-red-800">
-            {t(
-              'reservation.validationErrors',
-              'Please fix the following errors:',
-            )}
+            {t('reservation.validationErrors')}
           </h4>
           <ul className="list-disc pl-5 text-sm text-red-700">
             {validationErrors.customerName && (
@@ -232,11 +213,11 @@ const handleDateTimeChange = (newDateTime: Date) => {
       />
 
       {/* Date & Time */}
-<DateTimeSection
-  datetime={reservation.datetime} 
-  onDateTimeChange={handleDateTimeChange}
-  availableTimes={getAvailableTimes()}
-/>
+      <DateTimeSection
+        datetime={reservation.datetime}
+        onDateTimeChange={handleDateTimeChange}
+        availableTimes={DEFAULT_AVAILABLE_TIMES} // Use the imported constant
+      />
 
       {/* Price Summary */}
       <PriceSummarySection reservation={reservation} />
@@ -245,63 +226,4 @@ const handleDateTimeChange = (newDateTime: Date) => {
       <ActionButtons onCancel={onCancel} onSave={handleSave} />
     </div>
   );
-}
-
-function getDefaultServices(t: any): Service[] {
-  return [
-    {
-      id: 'haircut',
-      name: t('reservations.services.1', 'Plaukų kirpimas ir stilizavimas'),
-      nameKey: 'haircut',
-      duration: 60,
-      price: 65,
-    },
-    {
-      id: 'color',
-      name: t('reservations.services.2', 'Plaukų dažymas'),
-      nameKey: 'color',
-      duration: 120,
-      price: 120,
-    },
-    {
-      id: 'manicure',
-      name: t('reservations.services.3', 'Manikiūras'),
-      nameKey: 'manicure',
-      duration: 45,
-      price: 35,
-    },
-    {
-      id: 'pedicure',
-      name: t('reservations.services.4', 'Pedikiūras'),
-      nameKey: 'pedicure',
-      duration: 60,
-      price: 50,
-    },
-  ];
-}
-
-function getDefaultStaff(t: any): Staff[] {
-  return [
-    {
-      id: 'james',
-      name: t('reservations.staff.james', 'Jonas Petraitis'),
-      nameKey: 'james',
-      role: t('reservation.staff.Stylist', 'Kirpėjas'),
-      services: ['haircut', 'color'],
-    },
-    {
-      id: 'sarah',
-      name: t('reservations.staff.sarah', 'Ona Jonaitienė'),
-      nameKey: 'sarah',
-      role: t('reservation.staff.Colorist', 'Dažytoja'),
-      services: ['color'],
-    },
-    {
-      id: 'anyone',
-      name: t('reservations.staff.anyone', 'Bet kuris darbuotojas'),
-      nameKey: 'anyone',
-      role: t('reservation.staff.Anyone', 'Bet kas'),
-      services: ['haircut', 'color', 'manicure', 'pedicure'],
-    },
-  ];
 }

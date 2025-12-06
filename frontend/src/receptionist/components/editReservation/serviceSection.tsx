@@ -10,12 +10,11 @@ type ServiceSectionProps = {
     export function ServiceSection({ services, reservation, handleChange }: ServiceSectionProps) {
     const { t } = useTranslation();
 
-    // If services is empty, show a message
     if (services.length === 0) {
         return (
         <div className="rounded-xl bg-white p-5 shadow">
             <h3 className="mb-3 text-sm font-medium text-gray-600 uppercase">
-            {t('reservation.service', 'Service')}
+            {t('reservation.service')}
             </h3>
             <div className="text-center py-8">
             <div className="mx-auto h-10 w-10 text-gray-400 mb-3">
@@ -32,7 +31,7 @@ type ServiceSectionProps = {
     return (
         <div className="rounded-xl bg-white p-5 shadow">
         <h3 className="mb-3 text-sm font-medium text-gray-600 uppercase">
-            {t('reservation.service', 'Service')}
+            {t('reservation.service')}
         </h3>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
