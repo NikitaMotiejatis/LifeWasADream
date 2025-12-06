@@ -57,7 +57,8 @@
   },
   "common": {
     "cancel": "Atšaukti",
-    "clear": "Išvalyti"
+    "clear": "Išvalyti",
+    "review": "Peržiūrėti"
   },
   "deliveries": {
     "buttons": {
@@ -202,6 +203,172 @@
     "usernamePlaceholder": "Įveskite vartotojo vardą...",
     "usernameRequired": "Vartotojo vardas privalomas"
   },
+  "manager": {
+    "dashboard": {
+      "pageTitle": "Vadovo suvestinė",
+      "pageSubtitle": "Svarbiausi rodikliai vienoje vietoje",
+      "salesTrendHeading": "Pardavimų dinamika",
+      "salesTrendPlaceholder": "[Grafiko vieta – 7 dienų lyginamoji apžvalga]",
+      "cards": {
+        "todaysSales": {
+          "title": "Šiandienos pardavimai",
+          "subtext": "+12 % lyginant su vakar"
+        },
+        "orders": {
+          "title": "Užsakymai",
+          "subtext": "+8 % lyginant su vakar"
+        },
+        "lowStock": {
+          "title": "Mažos atsargos",
+          "subtext": "Reikalauja dėmesio"
+        },
+        "pendingRefunds": {
+          "title": "Laukiantys grąžinimai",
+          "subtext": "Laukiama patvirtinimo"
+        }
+      },
+      "lowStockAlerts": {
+        "title": "Mažų atsargų įspėjimai",
+        "cta": "Užsakyti viską",
+        "table": {
+          "item": "Prekė",
+          "current": "Esamas",
+          "min": "Minimalus",
+          "status": "Būsena"
+        },
+        "items": {
+          "coffeeBeans": "Kavos pupelės (1 kg)",
+          "oatMilk": "Avižų pienas (1 l)",
+          "paperCups": "Popieriniai puodeliai (12 oz)"
+        },
+        "statuses": {
+          "urgent": "Skubu",
+          "low": "Maža"
+        }
+      },
+      "refundQueue": {
+        "title": "Grąžinimų eilė",
+        "cta": "Rodyti visus",
+        "empty": "Nėra laukiančių grąžinimų.",
+        "review": "Peržiūrėti",
+        "table": {
+          "refId": "Nuor. ID",
+          "date": "Data",
+          "amount": "Suma",
+          "reason": "Priežastis",
+          "action": "Veiksmas"
+        }
+      },
+      "totalSales": "Bendra pardavimų suma",
+      "inventoryValue": "Atsargų vertė",
+      "pendingRefunds": "Laukiantys grąžinimai",
+      "thisMonth": "Šį mėnesį",
+      "current": "Dabartinė",
+      "requests": "prašymai",
+      "salesTrend": "Pardavimų dinamika",
+      "topProducts": "Populiariausios prekės"
+    },
+    "refunds": {
+      "pageTitle": "Grąžinimų tvirtinimai",
+      "pageSubtitle": "Peržiūrėkite ir apdorokite prašymus",
+      "noRefunds": "Nėra laukiančių grąžinimo prašymų",
+      "review": "Peržiūrėti",
+      "stats": {
+        "pendingRequests": {
+          "title": "Laukiantys prašymai",
+          "subtext": "Laukia jūsų sprendimo"
+        },
+        "totalAmount": {
+          "title": "Bendra suma",
+          "subtext": "Laukiantys grąžinimai"
+        },
+        "avgResponse": {
+          "title": "Vid. reagavimo laikas",
+          "subtext": "Tikslas: < 15 min"
+        }
+      },
+      "card": {
+        "orderTitle": "Grąžinimo prašymas: {{orderId}}",
+        "requestMeta": "Prašymo ID: {{id}} | {{date}}",
+        "status": "LAUKIA",
+        "customerInfo": "Kliento informacija",
+        "requestedBy": "Pateikė: {{user}}",
+        "refundAmount": "Grąžinimo suma",
+        "branch": "Centrinis filialas",
+        "reasonTitle": "Grąžinimo priežastis",
+        "itemsTitle": "Užsakymo prekės"
+      },
+      "table": {
+        "orderId": "Užsakymo ID",
+        "customer": "Klientas",
+        "amount": "Suma",
+        "reason": "Priežastis",
+        "requestedBy": "Pateikė",
+        "date": "Data",
+        "actions": "Veiksmai"
+      },
+      "rejectionReason": "Atmetimo priežastis",
+      "rejectionPlaceholder": "Paaiškinkite, kodėl grąžinimas atmetamas...",
+      "reasonRequired": "Priežastis yra privaloma",
+      "approve": "Patvirtinti",
+      "reject": "Atmesti",
+      "confirmReject": "Patvirtinti atmetimą",
+      "modal": {
+        "title": "Grąžinimo Prašymo Peržiūra",
+        "subtitle": "Detali informacija apie grąžinimo prašymą {{orderId}}",
+        "customerInfo": "Kliento Informacija",
+        "requestedBy": "Pateikė",
+        "refundAmount": "Grąžinimo Suma",
+        "reason": "Grąžinimo Priežastis",
+        "orderItems": "Užsakymo Prekės"
+      }
+    },
+    "reports": {
+      "pageTitle": "Ataskaitos ir analizė",
+      "pageSubtitle": "Verslo našumo ataskaitos",
+      "selectReport": "Pasirinkite ataskaitą",
+      "salesReport": "Pardavimų ataskaita",
+      "employeeReport": "Darbuotojų rezultatai",
+      "export": "Eksportuoti ataskaitą",
+      "exporting": "Eksportuojama: {{report}}...",
+      "employeeLabel": "{{name}} ({{orders}} užsakymai)",
+      "categories": {},
+      "timePeriod": {
+        "month": "Šis Mėnuo",
+        "quarter": "Praėjęs Ketvirtis",
+        "year": "Praėję Metai"
+      }
+    },
+    "inventory": {
+      "pageTitle": "Atsargų apžvalga",
+      "pageSubtitle": "Filialų likučiai",
+      "detailsTitle": "Atsargų detalės",
+      "stats": {
+        "totalItems": {
+          "title": "Unikalių prekių skaičius",
+          "subtitle": "Visuose filialuose"
+        },
+        "lowStock": {
+          "title": "Mažų atsargų įspėjimai",
+          "subtitle": "Reikia skubaus dėmesio"
+        }
+      },
+      "table": {
+        "sku": "SKU",
+        "product": "Produktas",
+        "branch": "Filialas",
+        "inStock": "Kiekis",
+        "unit": "Matas",
+        "status": "Būsena"
+      },
+      "ok": "Normalu",
+      "low": "Mažas",
+      "critical": "Kritinis",
+      "allBranches": "Visi Filialai",
+      "allStatuses": "Visos Būsenos"
+    },
+    "subtitle": "Vadovo portalas"
+  },
   "menu": {
     "categories": {
       "all": "Visi",
@@ -315,17 +482,28 @@
     "smoothieMango": "Kokteilis – Mangų rojus"
   },
   "reservation": {
-    "service": "Paslauga",
-    "bookingSummary": "Rezervacijos santrauka",
-    "confirmButton": "Patvirtinti rezervaciją",
-    "customerNamePlaceholder": "Kliento vardas ir pavardė",
-    "customerPhonePlaceholder": "Telefono numeris",
-    "dateTimeTitle": "Pasirinkite datą ir laiką",
-    "durations": {
-      "120 min": "120 min",
-      "45 min": "45 min",
-      "60 min": "60 min"
+    "weekdays": {
+      "mo": "Pr",
+      "tu": "An",
+      "we": "Tr",
+      "th": "Kt",
+      "fr": "Pn",
+      "sa": "Št",
+      "su": "Sk"
     },
+    "staffServiceTitle": "Pasitinkite darbuotoją ir paslaugą",
+
+    "invalidName": "Tik raidės, tarpai, brūkšneliai ir apostrofai leidžiami",
+    "smsNote": "Patvirtinimas bus išsiųstas SMS žinute",
+    "invalidPrefix": "Turi prasidėti su + arba skaičiumi",
+    "invalidLength": "Telefono numeris turi būti 7-15 skaitmenų ilgumo",
+
+    "selectStaffAndService": "Pasirinkti darbuotoją ir paslaugą",
+    "priceSummary": "Price Summary",
+    "createReservation": "Create Reservation",
+    "cancel": "Cancel",
+    "confirmButton": "Patvirtinti rezervaciją",
+    "dateTimeTitle": "Pasirinkite datą ir laiką",
     "months": {
       "0": "Sausis",
       "1": "Vasaris",
@@ -340,30 +518,58 @@
       "10": "Lapkritis",
       "11": "Gruodis"
     },
-    "nameError": "Galimos tik raidės, tarpai, brūkšneliai ir apostrofai",
-    "navigation": {
-      "next": "Kitas",
-      "previous": "Ankstesnis"
-    },
-    "pageTitle": "Nauja rezervacija",
-    "phoneError": "Galimi tik skaičiai ir neprivalomas \"+\" pradžioje",
+    "selectTime": "Pasirinkite laiką",
+    "customerInfo": "Kliento informacija",
+    "customerName": "Kliento vardas",
+    "customerNamePlaceholder": "Vardas Pavardė",
+    "customerPhone": "Telefono numeris",
+    "customerPhonePlaceholder": "+123 XXX XXXXX arba 1XX XXXXX",
+    "phoneFormat": "Formatas: +123 456 78910 arba 12 345 6789",
+    "nameRequired": "Vardas yra privalomas",
+    "phoneRequired": "Telefono numeris yra privalomas",
+    "invalidPhone": "Netinkamas telefono numerio formatas. Naudokite +123XXXXXXXXX arba 1XXXXXXXXX",
+    "fixErrors": "Pataisykite validacijos klaidas prieš išsaugant",
+    "validationErrors": "Prašome pataisyti šias klaidas:",
+    "email": "El. paštas",
+    "emailPlaceholder": "El. pašto adresas",
+    "notes": "Pastabos",
+    "notesPlaceholder": "Papildomos pastabos...",
+
+    "service": "Paslauga",
     "services": {
-      "Hair Color": "Dažymas",
-      "Haircut & Style": "Kirpimas ir šukavimas",
+      "Haircut & Style": "Plaukų kirpimas ir stilizavimas",
+      "Hair Color": "Plaukų dažymas",
       "Manicure": "Manikiūras",
       "Pedicure": "Pedikiūras"
     },
-    "smsNote": "Patvirtinimas bus išsiųstas SMS žinute",
-    "staff": {
-      "Any available staff": "Bet kuris laisvas darbuotojas",
-      "Colorist": "Dažytojas",
-      "James Chen": "James Chen",
-      "Nail Technician": "Nagų meistrė",
-      "Sarah Johnson": "Sarah Johnson",
-      "Anyone": "Bet kas"
-    },
+
     "staffMember": "Darbuotojas",
-    "staffServiceTitle": "Pasirinkite darbuotoją ir paslaugą",
+    "staff": {
+      "James Chen": "Jonas Petraitis",
+      "Sarah Johnson": "Ona Jonaitienė",
+      "Anyone": "Bet kas",
+      "Colorist": "Spalvininkas",
+      "Nail Technician": "Nagų meistrė",
+      "Any available staff": "Bet kuris darbuotojas"
+    },
+
+    "dateTime": "Data ir laikas",
+    "date": "Data",
+    "time": "Laikas",
+    "duration": "Trukmė",
+    "durations": {
+      "120 min": "120 min",
+      "45 min": "45 min",
+      "60 min": "60 min",
+      "min": "min"
+    },
+
+    "bookingSummary": "Rezervacijos suvestinė",
+    "total": "Iš viso",
+
+    "selected": "Pasirinkta",
+    "selectedService": "Pasirinkta paslauga",
+    "selectedStaff": "Pasirinktas darbuotojas",
     "summary": {
       "date": "Data",
       "notSelected": "[Nepasirinkta]",
@@ -371,22 +577,48 @@
       "staff": "Darbuotojas",
       "time": "Laikas",
       "total": "Iš viso"
-    },
-    "toast": {
-      "incomplete": "Prašome užpildyti visus laukus: paslaugą, datą ir laiką.",
-      "missingInfo": "Trūksta kliento duomenų.\nĮveskite vardą ir telefono numerį.",
-      "success": "Rezervacija patvirtinta!\nKodas: {{code}}\nSMS išsiųsta į {{phone}}"
-    },
-    "weekdays": {
-      "mo": "Pr",
-      "tu": "An",
-      "we": "Tr",
-      "th": "Kt",
-      "fr": "Pn",
-      "sa": "Št",
-      "su": "Sk"
     }
   },
+
+  "nameError": "Galimos tik raidės, tarpai, brūkšneliai ir apostrofai",
+  "navigation": {
+    "next": "Kitas",
+    "previous": "Ankstesnis"
+  },
+  "pageTitle": "Nauja rezervacija",
+  "phoneError": "Galimi tik skaičiai ir neprivalomas \"+\" pradžioje",
+  "services": {
+    "Hair Color": "Dažymas",
+    "Haircut & Style": "Plaukų kirpimas ir stilizavimas",
+    "Manicure": "Manikiūras",
+    "Pedicure": "Pedikiūras"
+  },
+  "smsNote": "Patvirtinimas bus išsiųstas SMS žinute",
+  "staff": {
+    "Any available staff": "Bet kuris laisvas darbuotojas",
+    "Colorist": "Dažytojas",
+    "Nail Technician": "Nagų meistrė",
+    "Anyone": "Bet kas",
+    "James Chen": "Jonas Petraitis",
+    "Sarah Johnsonh": "Ona Jonaitienė"
+  },
+  "staffMember": "Darbuotojas",
+  "staffServiceTitle": "Pasirinkite darbuotoją ir paslaugą",
+
+  "toast": {
+    "incomplete": "Prašome užpildyti visus laukus: paslaugą, datą ir laiką.",
+    "missingInfo": "Trūksta kliento duomenų.\nĮveskite vardą ir telefono numerį.",
+    "success": "Rezervacija patvirtinta!\nKodas: {{code}}\nSMS išsiųsta į {{phone}}"
+  },
+
+  "customerInfo": "Kliento informacija",
+  "customerName": "Kliento vardas",
+  "customerPhone": "Telefono numeris",
+  "serviceDetails": "Paslaugos detalės",
+  "date": "Data",
+  "time": "Laikas",
+  "notes": "Pastabos",
+  "notesPlaceholder": "Papildomos pastabos...",
   "reservations": {
     "actions": {
       "cancel": "Atšaukti",
@@ -394,7 +626,8 @@
       "complete": "Baigti aptarnavimą",
       "noShow": "Neatvyko",
       "refund": "Grąžinti pinigus",
-      "start": "Pradėti aptarnavimą"
+      "start": "Pradėti aptarnavimą",
+      "edit": "Redaguoti"
     },
     "filters": {
       "all": "Visi ({{count}})",
@@ -416,7 +649,8 @@
         "complete": "Patvirtinti baigimą",
         "noshow": "Pažymėti kaip neatvykusį",
         "refund": "Prašyti grąžinimo",
-        "start": "Pradėti aptarnavimą"
+        "start": "Pradėti aptarnavimą",
+        "edit": "Redaguoti"
       },
       "refund": {
         "email": "Kliento el. paštas",
@@ -434,13 +668,14 @@
         "complete": "Baigti aptarnavimą",
         "noshow": "Pažymėti kaip neatvykusį",
         "refund": "Prašyti pinigų grąžinimo",
-        "start": "Pradėti aptarnavimą"
+        "start": "Pradėti aptarnavimą",
+        "edit": "Redaguoti"
       },
       "totalAmount": "Bendra suma"
     },
     "noReservations": "Rezervacijų nerasta",
     "services": {
-      "1": "Kirpimas ir šukavimas",
+      "1": "Plaukų kirpimas ir stilizavimas",
       "2": "Plaukų dažymas",
       "3": "Manikiūras",
       "4": "Pedikiūras"
@@ -460,7 +695,8 @@
       "noShow": "Pažymėta kaip neatvykęs",
       "refundCancelled": "Grąžinimo prašymas atšauktas",
       "refundRequested": "Grąžinimo prašymas išsiųstas",
-      "started": "Paslauga pradėta"
+      "started": "Paslauga pradėta",
+      "updated": "Rezervacija sėkmingai atnaujinta"
     }
   },
   "sidebar": {
@@ -481,12 +717,19 @@
       "transferRequests": "Perkėlimo prašymai",
       "updates": "Atsargų atnaujinimai"
     },
-    "subtitle": "Vientisa sistema",
     "supplier": {
       "deliveries": "Pristatymai",
       "group": "Verslas",
       "invoiceStatus": "Sąskaitų būsenos"
-    }
+    },
+    "manager": {
+      "group": "Vadovo portalas",
+      "dashboard": "Suvestinė",
+      "refunds": "Grąžinimų tvirtinimai",
+      "reports": "Ataskaitos ir analizė",
+      "inventory": "Atsargų apžvalga"
+    },
+    "subtitle": "Vientisa sistema"
   },
   "stockAlerts": {
     "acknowledge": "Patvirtinti",
@@ -631,7 +874,7 @@
       "from": "IŠ",
       "quantity": "KIEKIS",
       "requestId": "Prašymo Nr.",
-      "requestedBy": "Prašė",
+      "requestedBy": "Pateikė",
       "to": "Į"
     },
     "newButton": "Naujas perkėlimo prašymas",
@@ -666,7 +909,7 @@
   },
   "validation": {
     "name": "Galimos tik raidės, tarpai, brūkšneliai ir apostrofai",
-    "phone": "Galimi tik skaičiai ir pasirenkamas \"+\" pradžioje"
+    "phone": "Galimi tik skaičiai ir pasirenkamas \"+\" pradžioje neilgesnis 16 skaitmenų"
   },
   "variationModal": {
     "addToOrder": "Pridėti į užsakymą",
@@ -745,5 +988,10 @@
       "closed": "Uždarytas",
       "refund_pending": "Grąžinimas laukiamas"
     }
+  },
+  "editReservation": {
+    "title": "Redaguoti rezervaciją",
+    "subtitle": "Keisti rezervacijos detales",
+    "saveChanges": "Išsaugoti pakeitimus"
   }
 }
