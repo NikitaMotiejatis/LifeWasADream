@@ -24,7 +24,7 @@ export default function LoginPage() {
 
     setTimeout(() => {
       if (login === 'cashier1') window.location.href = '/newOrder';
-      else if (login === 'manager1') window.location.href = '/newOrder';
+      else if (login === 'manager1') window.location.href = '/dashboard';
       else if (login === 'clerk1') window.location.href = '/stockUpdates';
       else if (login === 'supplier1') window.location.href = '/invoiceStatus';
     }, 250);
@@ -36,7 +36,7 @@ export default function LoginPage() {
     if (username.trim() === 'cashier1' && password.trim() === 'demo123')
       window.location.href = '/newOrder';
     else if (username.trim() === 'manager1' && password.trim() === 'demo123')
-      window.location.href = '/newOrder';
+      window.location.href = '/dashboard';
     else if (username.trim() === 'clerk1' && password.trim() === 'demo123')
       window.location.href = '/stockUpdates';
     else if (username.trim() === 'supplier1' && password.trim() === 'demo123')
