@@ -59,7 +59,7 @@
     "cancel": "Cancel",
     "clear": "Clear",
     "back": "Back",
-    "status": "Status"
+    "status": "Status",
     "review": "Review"
   },
   "deliveries": {
@@ -941,7 +941,7 @@
   "status": {
     "active": "Active",
     "closed": "Closed",
-    "refund_pending": "Refund Pending"
+    "refund_pending": "Refund Pending",
     "saveChanges": "Save Changes"
   },
 
