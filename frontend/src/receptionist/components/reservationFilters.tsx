@@ -1,6 +1,7 @@
+import { useTranslation } from 'react-i18next';
 import SearchIcon from '@/icons/searchIcon';
 
-interface Props {
+type Props = {
   searchTerm: string;
   setSearchTerm: (v: string) => void;
   dateFrom: string;
@@ -16,13 +17,12 @@ interface Props {
   counts: {
     all: number;
     pending: number;
-    in_service: number;
     completed: number;
     cancelled: number;
     no_show: number;
     refund_pending: number;
   };
-}
+};
 
 export default function ReservationFilters({
   searchTerm,
@@ -39,6 +39,8 @@ export default function ReservationFilters({
   setStatusFilter,
   counts,
 }: Props) {
+  const { t } = useTranslation();
+
   return (
     <div className="space-y-5">
       <div className="flex flex-wrap gap-2">
@@ -46,7 +48,6 @@ export default function ReservationFilters({
           [
             'all',
             'pending',
-            'in_service',
             'completed',
             'cancelled',
             'no_show',
@@ -62,14 +63,7 @@ export default function ReservationFilters({
                 : 'border border-gray-300 hover:bg-gray-100'
             }`}
           >
-            {status === 'all' && `All (${counts.all})`}
-            {status === 'pending' && `Pending (${counts.pending})`}
-            {status === 'in_service' && `In Service (${counts.in_service})`}
-            {status === 'completed' && `Completed (${counts.completed})`}
-            {status === 'cancelled' && `Cancelled (${counts.cancelled})`}
-            {status === 'no_show' && `No Show (${counts.no_show})`}
-            {status === 'refund_pending' &&
-              `Refund Pending (${counts.refund_pending})`}
+            {t(`reservations.filters.${status}`, { count: counts[status] })}
           </button>
         ))}
       </div>
@@ -77,7 +71,7 @@ export default function ReservationFilters({
       <div className="relative">
         <input
           type="text"
-          placeholder="Search by name, phone, code, service or staff..."
+          placeholder={t('reservations.filters.searchPlaceholder')}
           value={searchTerm}
           onChange={e => setSearchTerm(e.target.value)}
           className="w-full rounded-lg border border-gray-300 py-2.5 pr-10 pl-10 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
@@ -87,6 +81,7 @@ export default function ReservationFilters({
           <button
             onClick={() => setSearchTerm('')}
             className="absolute top-1/2 right-2 -translate-y-1/2 rounded-full bg-gray-200 px-2 py-0.5 text-xs font-bold hover:bg-gray-300"
+            aria-label={t('common.clear')}
           >
             ×
           </button>
@@ -95,7 +90,9 @@ export default function ReservationFilters({
 
       <div className="flex flex-wrap items-center gap-6 text-xs">
         <div className="flex items-center gap-3">
-          <span className="font-medium text-gray-600">From:</span>
+          <span className="font-medium text-gray-600">
+            {t('reservations.filters.from')}:
+          </span>
           <input
             type="date"
             value={dateFrom}
@@ -111,7 +108,9 @@ export default function ReservationFilters({
         </div>
 
         <div className="flex items-center gap-3">
-          <span className="font-medium text-gray-600">To:</span>
+          <span className="font-medium text-gray-600">
+            {t('reservations.filters.to')}:
+          </span>
           <input
             type="date"
             value={dateTo}
@@ -136,7 +135,7 @@ export default function ReservationFilters({
             }}
             className="p-2 text-sm font-medium text-red-600"
           >
-            Clear
+            {t('common.clear')}
           </button>
         )}
       </div>

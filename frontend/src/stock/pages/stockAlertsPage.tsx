@@ -1,21 +1,22 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import Topbar from '@/global/components/topbar';
 import SidebarStockClerk from '@/stock/components/sidebarStockClerk';
 import StockAlertCard from '@/stock/components/stockAlertCard';
 
-
-export interface StockAlert {
-    id: string;
-    productName: string;
-    sku: string;
-    currentStock: number;
-    minimumStock: number;
-    unit: string;
-    severity: 'CRITICAL' | 'WARNING' | 'MONITOR';
-    lastOrdered: string;
-}
+export type StockAlert = {
+  id: string;
+  productName: string;
+  sku: string;
+  currentStock: number;
+  minimumStock: number;
+  unit: string;
+  severity: 'CRITICAL' | 'WARNING' | 'MONITOR';
+  lastOrderedDaysAgo: number;
+};
 
 export default function StockAlertsPage() {
+  const { t } = useTranslation();
   const [alerts] = useState<StockAlert[]>([
     {
       id: '1',
@@ -25,7 +26,7 @@ export default function StockAlertsPage() {
       minimumStock: 25,
       unit: 'liters',
       severity: 'CRITICAL',
-      lastOrdered: '3 days ago',
+      lastOrderedDaysAgo: 3,
     },
     {
       id: '2',
@@ -35,7 +36,7 @@ export default function StockAlertsPage() {
       minimumStock: 200,
       unit: 'pcs',
       severity: 'CRITICAL',
-      lastOrdered: '5 days ago',
+      lastOrderedDaysAgo: 5,
     },
     {
       id: '3',
@@ -45,7 +46,7 @@ export default function StockAlertsPage() {
       minimumStock: 15,
       unit: 'bottles',
       severity: 'WARNING',
-      lastOrdered: '2 days ago',
+      lastOrderedDaysAgo: 2,
     },
     {
       id: '4',
@@ -55,11 +56,13 @@ export default function StockAlertsPage() {
       minimumStock: 20,
       unit: 'kg',
       severity: 'MONITOR',
-      lastOrdered: '1 day ago',
+      lastOrderedDaysAgo: 1,
     },
   ]);
 
-  const [selectedSeverity, setSelectedSeverity] = useState<'ALL' | 'CRITICAL' | 'WARNING' | 'MONITOR'>('ALL');
+  const [selectedSeverity, setSelectedSeverity] = useState<
+    'ALL' | 'CRITICAL' | 'WARNING' | 'MONITOR'
+  >('ALL');
 
   const criticalCount = alerts.filter(a => a.severity === 'CRITICAL').length;
   const warningCount = alerts.filter(a => a.severity === 'WARNING').length;
@@ -121,44 +124,68 @@ export default function StockAlertsPage() {
 
         <div className="flex-1 overflow-auto bg-gray-100 p-6">
           <div className="mb-6">
-            <h1 className="mb-2 text-3xl font-bold text-gray-900">Stock Alerts</h1>
-            <p className="text-gray-600">Low stock warnings and reorder notifications</p>
+            <h1 className="mb-2 text-3xl font-bold text-gray-900">
+              {t('stockAlerts.pageTitle')}
+            </h1>
+            <p className="text-gray-600">{t('stockAlerts.pageSubtitle')}</p>
           </div>
 
           {/* Alert Summary Cards */}
           <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-3">
             <div className="rounded-lg border border-red-200 bg-red-50 p-6">
-              <p className="text-sm font-semibold text-red-600">CRITICAL</p>
-              <p className="mt-2 text-4xl font-bold text-red-900">{criticalCount}</p>
-              <p className="mt-1 text-sm text-red-700">Immediate action needed</p>
+              <p className="text-sm font-semibold text-red-600">
+                {t('stockAlerts.summary.critical')}
+              </p>
+              <p className="mt-2 text-4xl font-bold text-red-900">
+                {criticalCount}
+              </p>
+              <p className="mt-1 text-sm text-red-700">
+                {t('stockAlerts.summary.criticalDesc')}
+              </p>
             </div>
             <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-6">
-              <p className="text-sm font-semibold text-yellow-600">WARNING</p>
-              <p className="mt-2 text-4xl font-bold text-yellow-900">{warningCount}</p>
-              <p className="mt-1 text-sm text-yellow-700">Reorder soon</p>
+              <p className="text-sm font-semibold text-yellow-600">
+                {t('stockAlerts.summary.warning')}
+              </p>
+              <p className="mt-2 text-4xl font-bold text-yellow-900">
+                {warningCount}
+              </p>
+              <p className="mt-1 text-sm text-yellow-700">
+                {t('stockAlerts.summary.warningDesc')}
+              </p>
             </div>
             <div className="rounded-lg border border-blue-200 bg-blue-50 p-6">
-              <p className="text-sm font-semibold text-blue-600">MONITOR</p>
-              <p className="mt-2 text-4xl font-bold text-blue-900">{monitorCount}</p>
-              <p className="mt-1 text-sm text-blue-700">Monitor levels</p>
+              <p className="text-sm font-semibold text-blue-600">
+                {t('stockAlerts.summary.monitor')}
+              </p>
+              <p className="mt-2 text-4xl font-bold text-blue-900">
+                {monitorCount}
+              </p>
+              <p className="mt-1 text-sm text-blue-700">
+                {t('stockAlerts.summary.monitorDesc')}
+              </p>
             </div>
           </div>
 
           {/* Filter Tabs */}
           <div className="mb-6 flex gap-2 rounded-lg bg-white p-4 shadow-sm">
-            {(['ALL', 'CRITICAL', 'WARNING', 'MONITOR'] as const).map(severity => (
-              <button
-                key={severity}
-                onClick={() => setSelectedSeverity(severity)}
-                className={`rounded-lg px-4 py-2 font-medium transition-all ${
-                  selectedSeverity === severity
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                {severity === 'ALL' ? 'All Alerts' : severity}
-              </button>
-            ))}
+            {(['ALL', 'CRITICAL', 'WARNING', 'MONITOR'] as const).map(
+              severity => (
+                <button
+                  key={severity}
+                  onClick={() => setSelectedSeverity(severity)}
+                  className={`rounded-lg px-4 py-2 font-medium transition-all ${
+                    selectedSeverity === severity
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  {severity === 'ALL'
+                    ? t('stockAlerts.filters.all')
+                    : t(`stockAlerts.filters.${severity}`)}
+                </button>
+              ),
+            )}
           </div>
 
           {/* Alerts List */}
@@ -166,7 +193,12 @@ export default function StockAlertsPage() {
             {filteredAlerts.map(alert => (
               <StockAlertCard
                 key={alert.id}
-                alert={alert}
+                alert={{
+                  ...alert,
+                  productName: t(`stockAlerts.products.${alert.productName}`),
+                  unit: t(`stockAlerts.units.${alert.unit}`),
+                  severity: alert.severity,
+                }}
                 onReorder={handleReorderNow}
                 onAcknowledge={handleAcknowledge}
               />
@@ -175,7 +207,7 @@ export default function StockAlertsPage() {
 
           {filteredAlerts.length === 0 && (
             <div className="rounded-lg border border-gray-200 bg-white p-12 text-center">
-              <p className="text-gray-600">No alerts found.</p>
+              <p className="text-gray-600">{t('stockAlerts.noAlerts')}</p>
             </div>
           )}
         </div>

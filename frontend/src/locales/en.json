@@ -1,0 +1,953 @@
+{
+  "auditHistory": {
+    "actions": {
+      "Add": "Add",
+      "Correction": "Correction",
+      "Remove": "Remove",
+      "Update": "Update"
+    },
+    "exportReport": "Export Report",
+    "filters": {
+      "actionLabel": "Filter by Action",
+      "add": "Add",
+      "allActions": "All Actions",
+      "allTime": "All Time",
+      "correction": "Correction",
+      "remove": "Remove",
+      "search": "Search",
+      "searchPlaceholder": "Product, SKU, or user...",
+      "thisMonth": "This Month",
+      "thisWeek": "This Week",
+      "timePeriodLabel": "Time Period",
+      "today": "Today",
+      "update": "Update"
+    },
+    "sku": "SKU:",
+    "noRecords": "No audit records found matching your criteria.",
+    "pageSubtitle": "Complete inventory change tracking",
+    "pageTitle": "Audit History",
+    "products": {
+      "Coffee Beans (Arabica)": "Coffee Beans (Arabica)",
+      "Croissants": "Croissants",
+      "Milk (Whole)": "Milk (Whole)",
+      "Paper Cups (12oz": "Paper Cups (12oz)",
+      "Sugar": "Sugar"
+    },
+    "reasons": {
+      "Delivery Received": "Delivery Received",
+      "Stock Recount": "Stock Recount",
+      "Transfer In": "Transfer In",
+      "Waste/Spoilage": "Waste/Spoilage"
+    },
+    "table": {
+      "action": "Action",
+      "change": "Change",
+      "newQty": "New Qty",
+      "previousQty": "Previous Qty",
+      "product": "Product",
+      "reason": "Reason",
+      "timestamp": "Timestamp",
+      "user": "User"
+    },
+    "units": {
+      "kg": "kg",
+      "liters": "l",
+      "pcs": "pcs"
+    }
+  },
+  "common": {
+    "cancel": "Cancel",
+    "clear": "Clear",
+    "back": "Back",
+    "status": "Status",
+    "review": "Review"
+  },
+  "deliveries": {
+    "buttons": {
+      "confirmReceipt": "Confirm Receipt",
+      "viewDetails": "View Details"
+    },
+    "card": {
+      "at": "at",
+      "deliveryDate": "DELIVERY DATE",
+      "deliveryItems": "DELIVERY ITEMS",
+      "destination": "DESTINATION",
+      "items": "ITEMS",
+      "itemsCount": "products",
+      "note": "Note",
+      "order": "Order",
+      "receivedBy": "RECEIVED BY"
+    },
+    "filters": {
+      "all": "All Deliveries",
+      "delivered": "Delivered",
+      "in_transit": "In Transit",
+      "scheduled": "Scheduled"
+    },
+    "noDeliveries": "No deliveries found.",
+    "pageSubtitle": "Track and confirm delivery processing",
+    "pageTitle": "Deliveries",
+    "products": {
+      "Coffee Beans (Arabica)": "Coffee Beans (Arabica)",
+      "Croissants": "Croissants",
+      "Milk (Whole)": "Milk (Whole)",
+      "Paper Cups (12oz)": "Paper Cups (12oz)",
+      "Paper Napkins": "Paper Napkins",
+      "Sugar": "Sugar",
+      "Syrups (Assorted)": "Syrups (Assorted)"
+    },
+    "statuses": {
+      "DELIVERED": "Delivered",
+      "IN_TRANSIT": "In Transit",
+      "SCHEDULED": "Scheduled"
+    },
+    "summary": {
+      "delivered": "DELIVERED",
+      "deliveredDesc": "Completed",
+      "inTransit": "IN TRANSIT",
+      "inTransitDesc": "On the way",
+      "scheduled": "SCHEDULED",
+      "scheduledDesc": "Upcoming",
+      "total": "TOTAL DELIVERIES",
+      "totalThisWeek": "This week"
+    },
+    "units": {
+      "bottles": "bottles",
+      "kg": "kg",
+      "liters": "l",
+      "pcs": "pcs"
+    }
+  },
+  "invoice": {
+    "labels": {
+      "dueDate": "Due Date",
+      "invoiceAmount": "Invoice Amount",
+      "invoiceDate": "Invoice Date",
+      "invoiceItems": "INVOICE ITEMS",
+      "items": "{{count}} items",
+      "itemsText": "Items",
+      "items_few": "{{count}} items",
+      "items_many": "{{count}} items",
+      "items_one": "{{count}} item",
+      "note": "Note:",
+      "order": "Order",
+      "notFound": "not found"
+    },
+    "status": {
+      "approved": "Approved",
+      "overdue": "Overdue",
+      "paid": "Paid",
+      "pending": "Pending"
+    },
+    "viewDetails": "View Details"
+  },
+  "invoices": {
+    "filters": {
+      "all": "All Statuses",
+      "approved": "Approved",
+      "overdue": "Overdue",
+      "paid": "Paid",
+      "pending": "Pending"
+    },
+    "noInvoices": "No invoices found.",
+    "pageSubtitle": "Track payment status for all deliveries",
+    "pageTitle": "Invoice Status",
+    "products": {
+      "Coffee Beans (Arabica)": "Coffee Beans (Arabica)",
+      "Milk (Whole)": "Milk (Whole)",
+      "Paper Cups (12oz)": "Paper Cups (12oz)",
+      "Paper Napkins": "Paper Napkins",
+      "Sugar": "Sugar",
+      "Syrups (Assorted)": "Syrups (Assorted)"
+    },
+    "statuses": {
+      "APPROVED": "Approved",
+      "OVERDUE": "Overdue",
+      "PAID": "Paid",
+      "PENDING": "Pending"
+    },
+    "summary": {
+      "approved": "APPROVED",
+      "approvedDesc": "Awaiting approval",
+      "overdue": "OVERDUE",
+      "overdueDesc": "Requires attention",
+      "paid": "PAID",
+      "paidDesc": "Completed payments",
+      "pending": "PENDING",
+      "pendingDesc": "Awaiting payment",
+      "thisMonth": "This month",
+      "totalInvoices": "TOTAL INVOICES"
+    },
+    "totalValue": "TOTAL INVOICE VALUE",
+    "units": {
+      "bottles": "bottles",
+      "kg": "kg",
+      "liters": "l",
+      "pcs": "pcs"
+    }
+  },
+  "login": {
+    "demoRoles": {
+      "Cashier / Receptionist": "Cashier / Receptionist",
+      "Manager": "Manager",
+      "Stock Clerk": "Stock Clerk",
+      "Supplier": "Supplier"
+    },
+    "demoTitle": "Demo accounts – click to log in instantly",
+    "formTitle": "LOGIN",
+    "loginButton": "Login",
+    "passwordLabel": "PASSWORD",
+    "passwordPlaceholder": "Enter password...",
+    "passwordRequired": "Password is required",
+    "subtitle": "Unified Point-of-Sale System",
+    "title": "DreamPoS",
+    "usernameLabel": "USERNAME",
+    "usernamePlaceholder": "Enter username...",
+    "usernameRequired": "Username is required"
+  },
+  "manager": {
+    "dashboard": {
+      "pageTitle": "Manager Dashboard",
+      "pageSubtitle": "Business insights at a glance",
+      "salesTrendHeading": "Sales Trends",
+      "salesTrendPlaceholder": "[Graph Placeholder – 7-day sales comparison]",
+      "cards": {
+        "todaysSales": {
+          "title": "Today's Sales",
+          "subtext": "+12% vs yesterday"
+        },
+        "orders": {
+          "title": "Orders",
+          "subtext": "+8% vs yesterday"
+        },
+        "lowStock": {
+          "title": "Low Stock Items",
+          "subtext": "Requires attention"
+        },
+        "pendingRefunds": {
+          "title": "Pending Refunds",
+          "subtext": "Awaiting approval"
+        }
+      },
+      "lowStockAlerts": {
+        "title": "Low Stock Alerts",
+        "cta": "Order All",
+        "table": {
+          "item": "Item",
+          "current": "Current",
+          "min": "Minimum",
+          "status": "Status"
+        },
+        "items": {
+          "coffeeBeans": "Coffee Beans (1kg)",
+          "oatMilk": "Oat Milk (1L)",
+          "paperCups": "Paper Cups (12oz)"
+        },
+        "statuses": {
+          "urgent": "Urgent",
+          "low": "Low"
+        }
+      },
+      "refundQueue": {
+        "title": "Refund Approval Queue",
+        "cta": "See All",
+        "empty": "No pending refunds.",
+        "review": "Review",
+        "table": {
+          "refId": "Ref ID",
+          "date": "Date",
+          "amount": "Amount",
+          "reason": "Reason",
+          "action": "Action"
+        }
+      }
+    },
+    "inventory": {
+      "pageTitle": "Inventory overview",
+      "pageSubtitle": "Stock levels across branches",
+      "detailsTitle": "Inventory Details",
+      "stats": {
+        "totalItems": {
+          "title": "Total Unique Items",
+          "subtitle": "Across all branches"
+        },
+        "lowStock": {
+          "title": "Low Stock Alerts",
+          "subtitle": "Requires immediate attention"
+        }
+      },
+      "table": {
+        "sku": "SKU",
+        "product": "Product",
+        "branch": "Branch",
+        "inStock": "In stock",
+        "unit": "Unit",
+        "status": "Status"
+      },
+      "ok": "Healthy",
+      "low": "Low",
+      "critical": "Critical",
+      "allBranches": "All Branches",
+      "allStatuses": "All Statuses"
+    },
+    "refunds": {
+      "pageTitle": "Refund approvals",
+      "pageSubtitle": "Review and process refund requests",
+      "noRefunds": "No pending refund requests",
+      "stats": {
+        "pendingRequests": {
+          "title": "Pending Requests",
+          "subtext": "Awaiting your decision"
+        },
+        "totalAmount": {
+          "title": "Total Amount",
+          "subtext": "Pending refunds"
+        },
+        "avgResponse": {
+          "title": "Avg. Response Time",
+          "subtext": "Target: < 15 minutes"
+        }
+      },
+      "card": {
+        "orderTitle": "Refund Request: {{orderId}}",
+        "requestMeta": "Request ID: {{id}} | {{date}}",
+        "status": "Pending",
+        "customerInfo": "Customer Information",
+        "requestedBy": "Requested by: {{user}}",
+        "refundAmount": "Refund Amount",
+        "branch": "Downtown Branch",
+        "reasonTitle": "Reason for refund",
+        "itemsTitle": "Order items"
+      },
+      "table": {
+        "orderId": "Order ID",
+        "customer": "Customer",
+        "amount": "Amount",
+        "reason": "Reason",
+        "requestedBy": "Requested by",
+        "date": "Date",
+        "actions": "Actions"
+      },
+      "rejectionReason": "Rejection reason",
+      "rejectionPlaceholder": "Describe why the refund is rejected...",
+      "reasonRequired": "Reason is required",
+      "approve": "Approve",
+      "reject": "Reject",
+      "confirmReject": "Confirm rejection",
+      "modal": {
+        "title": "Refund Request Review",
+        "subtitle": "Detailed information for refund request {{orderId}}",
+        "customerInfo": "Customer Information",
+        "requestedBy": "Requested by",
+        "refundAmount": "Refund Amount",
+        "reason": "Reason for Refund",
+        "orderItems": "Order Items"
+      },
+      "review": "Review"
+    },
+    "reports": {
+      "pageTitle": "Reports & analytics",
+      "pageSubtitle": "Business performance reports",
+      "selectReport": "Select report",
+      "salesReport": "Sales report",
+      "employeeReport": "Employee performance",
+      "export": "Export report",
+      "exporting": "Exporting {{report}}...",
+      "employeeLabel": "{{name}} ({{orders}} orders)",
+      "categories": {},
+      "timePeriod": {
+        "month": "This Month",
+        "quarter": "Last Quarter",
+        "year": "Last Year"
+      }
+    },
+    "subtitle": "Manager portal overview"
+  },
+  "menu": {
+    "categories": {
+      "all": "All",
+      "cold drinks": "Cold Drinks",
+      "hot drinks": "Hot Drinks",
+      "pastries": "Pastries",
+      "popular": "Popular"
+    },
+    "customizable": "Customizable",
+    "fromPrice": "from {{price}}",
+    "searchPlaceholder": "Search items...",
+    "title": "Menu"
+  },
+  "orderSummary": {
+    "clearAll": "Clear all",
+    "completePayment": "Complete Payment",
+    "decreaseQuantity": "Decrease quantity",
+    "discounts": "Discounts",
+    "increaseQuantity": "Increase quantity",
+    "noItems": "No items yet",
+    "paymentMethod": "Payment method",
+    "people": "people",
+    "peopleCount": "People",
+    "splitEqually": "Split equally",
+    "splitByItems": "Each pays for own items",
+    "payer": "Person",
+    "selectMethod": "Select payment method",
+    "payWith": "Pay with {{method}}",
+    "allPaid": "All paid – thank you!",
+    "paid": "Paid",
+    "paymentMethods": {
+      "Card": "Card",
+      "Cash": "Cash",
+      "Gift card": "Gift Card"
+    },
+    "removeItem": "Remove item",
+    "saveOrder": "Save Order",
+    "splitBill": "Split Bill",
+    "subtotal": "Subtotal",
+    "title": "Current Order",
+    "total": "Total"
+  },
+  "orders": {
+    "actions": {
+      "cancelRefund": "Cancel refund",
+      "close": "Close order",
+      "edit": "Edit",
+      "refund": "Refund"
+    },
+    "filters": {
+      "all": "All ({{count}})",
+      "closed": "Closed ({{count}})",
+      "from": "From",
+      "open": "Open ({{count}})",
+      "pending": "Refund Pending ({{count}})",
+      "searchPlaceholder": "Search by order #...",
+      "to": "To"
+    },
+    "loading": "Loading orders...",
+    "modal": {
+      "confirmButton": {
+        "cancel": "Confirm Cancellation",
+        "edit": "Save Changes",
+        "pay": "Confirm Payment",
+        "refund": "Issue Refund"
+      },
+      "emailLabel": "Customer's Email",
+      "emailPlaceholder": "john@example.com",
+      "nameError": "Only letters, spaces, hyphens and apostrophes allowed",
+      "nameLabel": "Customer's Full Name",
+      "namePlaceholder": "John Doe",
+      "phoneError": "Only numbers and optional '+' at the beginning",
+      "phoneLabel": "Customer's Phone Number",
+      "phonePlaceholder": "+37060000000",
+      "reasonLabel": "Reason for Refund",
+      "reasonPlaceholder": "Please explain why the customer wants a refund...",
+      "title": {
+        "cancel": "Cancel Refund Request",
+        "edit": "Edit Order",
+        "pay": "Complete Payment",
+        "refund": "Refund Order"
+      },
+      "totalAmount": "Total Amount"
+    },
+    "noOrders": "No orders found",
+    "status": {
+      "refundInProgress": "Refund in progress"
+    },
+    "title": "Orders",
+    "toast": {
+      "paid": "Order successfully paid",
+      "refundCancelled": "Refund request cancelled",
+      "refundRequested": "Refund request sent successfully"
+    }
+  },
+  "products": {
+    "blueberryMuffin": "Blueberry Muffin",
+    "cappuccino": "Cappuccino",
+    "caramelFrappuccino": "Caramel Frappuccino",
+    "chocolateCroissant": "Chocolate Croissant",
+    "chocolateMilkshake": "Chocolate Milkshake",
+    "cinnamonRoll": "Cinnamon Roll",
+    "croissant": "Butter Croissant",
+    "hotCoffee": "Hot Coffee",
+    "icedCoffee": "Iced Coffee",
+    "icedLatte": "Iced Latte",
+    "icedTea": "Iced Tea",
+    "lemonade": "Fresh Lemonade",
+    "orangeJuice": "Orange Juice",
+    "smoothieBerry": "Smoothie – Berry Blast",
+    "smoothieMango": "Smoothie – Mango Paradise"
+  },
+  "reservation": {
+        "weekdays": {
+      "mo": "Mo",
+      "tu": "Tu",
+      "we": "We",
+      "th": "Th",
+      "fr": "Fr",
+      "sa": "Sa",
+      "su": "Su"
+    },
+    "invalidName": "Only letters, spaces, hyphens, and apostrophes allowed",
+    "invalidPrefix": "Must start with + or a digit",
+    "invalidLength": "Phone number must be 7-15 digits",
+    "selectStaffAndService": "Select staff and service",
+    "customerInfo": "Customer Information",
+    "customerName": "Customer Name",
+    "customerNamePlaceholder": "Full Name",
+    "customerPhone": "Phone Number",
+    "customerPhonePlaceholder": "+123 XXX XXXXX or 8XX XXXXX",
+    "phoneFormat": "Format: +123 456 78910 or 12 345 6789",
+    "nameRequired": "Name is required",
+    "phoneRequired": "Phone number is required",
+    "invalidPhone": "Invalid phone number format. Use +123XXXXXXXXX or 1XXXXXXXXX",
+    "fixErrors": "Please fix validation errors before saving",
+    "validationErrors": "Please fix the following errors:",
+    "status": {
+      "pending": "pending",
+      "confirmed": "confirmed",
+      "completed": "completed",
+      "cancelled": "cancelled",
+      "refund_pending": "refund pending"
+    },
+    "service": "Service",
+    "confirmButton": "Confirm Reservation",
+    "dateTimeTitle": "Select Date & Time",
+    "bookingSummary": "Reservation Summary",
+    "durations": {
+      "120 min": "120 min",
+      "45 min": "45 min",
+      "60 min": "60 min"
+    },
+    "months": {
+      "0": "January",
+      "1": "February",
+      "2": "March",
+      "3": "April",
+      "4": "May",
+      "5": "June",
+      "6": "July",
+      "7": "August",
+      "8": "September",
+      "9": "October",
+      "10": "November",
+      "11": "December"
+    },
+    "nameError": "Only letters, spaces, hyphens and apostrophes allowed",
+    "navigation": {
+      "next": "Next",
+      "previous": "Previous"
+    },
+    "pageTitle": "New Reservation",
+    "phoneError": "Only numbers and optional \"+\" at the beginning",
+    "services": {
+      "Hair Color": "Hair Color",
+      "Haircut & Style": "Haircut & Style",
+      "Manicure": "Manicure",
+      "Pedicure": "Pedicure"
+    },
+    "smsNote": "Confirmation will be sent via SMS",
+    "staff": {
+      "James Chen": "James Chen",
+      "Sarah Johnson": "Sarah Johnson",
+      "Anyone": "Anyone",
+      "Colorist": "Colorist",
+      "Nail Technician": "Nail Technician",
+      "Any available staff": "Any available staff"
+    },
+    "staffMember": "Staff Member",
+    "staffServiceTitle": "Select Staff & Service",
+    "summary": {
+      "date": "Date",
+      "notSelected": "[Not selected]",
+      "service": "Service",
+      "staff": "Staff",
+      "time": "Time",
+      "total": "Total"
+    },
+    "toast": {
+      "incomplete": "Please complete all booking details: service, date and time.",
+      "missingInfo": "Missing customer information.\nPlease enter customer name and phone number.",
+      "success": "Reservation confirmed!\nConfirmation code: {{code}}\nSMS sent to {{phone}}"
+    },
+
+
+    "serviceDetails": "Service Details",
+
+    "date": "Date",
+    "time": "Time",
+    "notes": "Notes",
+    "notesPlaceholder": "Additional notes..."
+  },
+  "reservations": {
+    "actions": {
+      "cancel": "Cancel",
+      "cancelRefund": "Cancel Refund",
+      "complete": "Complete",
+      "noShow": "No-Show",
+      "refund": "Refund",
+      "start": "Start",
+      "edit": "Edit"
+    },
+    "filters": {
+      "all": "All ({{count}})",
+      "cancelled": "Cancelled ({{count}})",
+      "completed": "Completed ({{count}})",
+      "from": "From",
+      "in_service": "In Service ({{count}})",
+      "no_show": "No Show ({{count}})",
+      "pending": "Pending ({{count}})",
+      "refund_pending": "Refund Pending ({{count}})",
+      "searchPlaceholder": "Search by name, phone, code, service or staff...",
+      "to": "To"
+    },
+    "loading": "Loading reservations...",
+    "modal": {
+      "confirm": {
+        "cancel": "Confirm Cancellation",
+        "cancel_refund": "Cancel Refund Request",
+        "complete": "Confirm Completion",
+        "noshow": "Mark as No-Show",
+        "refund": "Request Refund",
+        "start": "Start Service",
+        "edit": "Edit"
+      },
+      "refund": {
+        "email": "Customer's Email",
+        "emailPlaceholder": "john@example.com",
+        "name": "Customer's Full Name",
+        "namePlaceholder": "John Doe",
+        "phone": "Customer's Phone Number",
+        "phonePlaceholder": "+37060000000",
+        "reason": "Reason for Refund",
+        "reasonPlaceholder": "Please explain why customer wants a refund..."
+      },
+      "title": {
+        "cancel": "Cancel Reservation",
+        "cancel_refund": "Cancel Refund Request",
+        "complete": "Complete Service",
+        "noshow": "Mark as No-Show",
+        "refund": "Request Refund",
+        "start": "Start Service",
+        "edit": "Edit"
+      },
+      "totalAmount": "Total Amount"
+    },
+    "noReservations": "No reservations found",
+    "services": {
+      "1": "Haircut & Style",
+      "2": "Hair Color",
+      "3": "Manicure",
+      "4": "Pedicure"
+    },
+    "staff": {
+      "anyone": "Any Staff",
+      "james": "James Chen",
+      "sarah": "Sarah Johnson"
+    },
+    "status": {
+      "refundInProgress": "Refund in progress"
+    },
+    "title": "Reservations",
+    "toast": {
+      "cancelled": "Reservation cancelled",
+      "completed": "Service completed",
+      "noShow": "Marked as No-Show",
+      "refundCancelled": "Refund request cancelled",
+      "refundRequested": "Refund request sent",
+      "started": "Service started",
+      "updated": "Reservation updated successfully"
+    }
+  },
+  "sidebar": {
+    "subtitle": "Unified system",
+    "orders": {
+      "group": "Orders",
+      "list": "Orders list",
+      "new": "New order"
+    },
+    "reservations": {
+      "group": "Reservations",
+      "list": "Reservations list",
+      "new": "New reservation"
+    },
+    "stock": {
+      "alerts": "Stock Alerts",
+      "auditHistory": "Audit History",
+      "group": "Stock Management",
+      "transferRequests": "Transfer Requests",
+      "updates": "Stock Updates"
+    },
+    "supplier": {
+      "deliveries": "Deliveries",
+      "group": "Supplier Portal",
+      "invoices": "Invoice Status"
+    },
+    "manager": {
+      "group": "Manager Portal",
+      "dashboard": "Dashboard",
+      "refunds": "Refund Approvals",
+      "reports": "Reports & Analytics",
+      "inventory": "Inventory Overview"
+    }
+  },
+  "stockAlerts": {
+    "acknowledge": "Acknowledge",
+    "actions": {
+      "acknowledge": "Acknowledge",
+      "reorder": "Reorder Now"
+    },
+    "current": "Current",
+    "currentBig": "CURRENT",
+    "currentStock": "Current stock:",
+    "daysAgo": "{{count}} days ago",
+    "daysAgo_few": "{{count}} days ago",
+    "daysAgo_many": "prieš {{count}} days ago",
+    "daysAgo_one": "{{count}} day ago",
+    "filters": {
+      "CRITICAL": "Critical",
+      "MONITOR": "Monitor",
+      "WARNING": "Warning",
+      "all": "All Alerts"
+    },
+    "labels": {
+      "currentStock": "Current stock:",
+      "lastOrdered": "Last ordered:",
+      "minimumStock": "Minimum required:",
+      "shortage": "Shortage:",
+      "sku": "SKU:"
+    },
+    "lastOrdered": "Last Ordered",
+    "lastOrderedBig": "LAST ORDERED",
+    "minimum": "Minimum",
+    "minimumBig": "MINIMUM",
+    "minimumStock": "Minimum required:",
+    "never": "Never",
+    "noAlerts": "No alerts found.",
+    "pageSubtitle": "Low stock warnings and reorder notifications",
+    "pageTitle": "Stock Alerts",
+    "products": {
+      "Coffee Beans (Arabica)": "Coffee Beans (Arabica)",
+      "Milk (Whole)": "Milk (Whole)",
+      "Paper Napkins": "Paper Napkins",
+      "Syrup - Vanilla": "Syrup - Vanilla"
+    },
+    "reorderNow": "Reorder Now",
+    "severity": {
+      "CRITICAL": "Critical",
+      "MONITOR": "Monitor",
+      "WARNING": "Warning"
+    },
+    "shortage": "Shortage:",
+    "shortageBig": "SHORTAGE",
+    "sku": "SKU",
+    "summary": {
+      "critical": "CRITICAL",
+      "criticalDesc": "Immediate action needed",
+      "monitor": "MONITOR",
+      "monitorDesc": "Monitor levels",
+      "warning": "WARNING",
+      "warningDesc": "Reorder soon"
+    },
+    "units": {
+      "bottles": "btl",
+      "kg": "kg",
+      "liters": "L",
+      "pcs": "pcs"
+    }
+  },
+  "stockUpdates": {
+    "allCategories": "All Categories",
+    "categories": {
+      "All Categories": "All Categories",
+      "Bakery": "Bakery",
+      "Dairy": "Dairy",
+      "Ingredients": "Ingredients",
+      "Packaging": "Packaging",
+      "Raw Materials": "Raw Materials"
+    },
+    "currentStock": "Current Stock",
+    "daysAgo_one": "yesterday",
+    "daysAgo_other": "{{count}} days ago",
+    "hoursAgo_one": "{{count}} hour ago",
+    "hoursAgo_other": "{{count}} hours ago",
+    "lastUpdated": "Last updated",
+    "minimumLevel": "Minimum Level",
+    "noItems": "No items match your search or filter.",
+    "pageSubtitle": "Real-time inventory management",
+    "pageTitle": "Stock Updates",
+    "products": {
+      "Coffee Beans (Arabica)": "Coffee Beans (Arabica)",
+      "Croissants": "Croissants",
+      "Milk (Whole)": "Milk (Whole)",
+      "Paper Cups (12oz)": "Paper Cups (12oz)",
+      "Sugar": "Sugar",
+      "Syrup - Vanilla": "Vanilla Syrup"
+    },
+    "searchPlaceholder": "Search by name or SKU...",
+    "units": {
+      "kg": "kg",
+      "bottles_few": "{{count}} bottles",
+      "bottles_many": "{{count}} bottles",
+      "bottles_one": "{{count}} bottle",
+      "bottles_other": "{{count}} bottles",
+      "liters_few": "{{count}} liters",
+      "liters_many": "{{count}} liters",
+      "liters_one": "{{count}} liter",
+      "liters_other": "{{count}} liters",
+      "pcs_few": "{{count}} pcs",
+      "pcs_many": "{{count}} pcs",
+      "pcs_one": "{{count}} pc",
+      "pcs_other": "{{count}} pcs"
+    },
+    "updateStockButton": "Update Stock"
+  },
+  "topbar": {
+    "branchSelect": "Downtown Branch",
+    "logout": "Logout",
+    "northBranch": "North Branch",
+    "searchPlaceholder": "Search products, orders...",
+    "userName": "John Doe",
+    "westBranch": "West Branch"
+  },
+  "transferRequests": {
+    "branches": {
+      "Downtown Branch": "Downtown Branch",
+      "Eastside Branch": "Eastside Branch",
+      "North Branch": "North Branch",
+      "Westside Branch": "Westside Branch"
+    },
+    "date": {
+      "today": "Today, {{time}}",
+      "yesterday": "Yesterday"
+    },
+    "filters": {
+      "ALL": "All Requests",
+      "APPROVED": "Approved",
+      "COMPLETED": "Completed",
+      "PENDING": "Pending"
+    },
+    "labels": {
+      "from": "FROM",
+      "quantity": "QUANTITY",
+      "requestId": "Request ID",
+      "requestedBy": "REQUESTED BY",
+      "to": "TO"
+    },
+    "newButton": "New Transfer Request",
+    "noRequests": "No transfer requests found.",
+    "pageSubtitle": "Manage inter-branch stock transfers",
+    "pageTitle": "Transfer Requests",
+    "products": {
+      "Coffee Beans": "Coffee Beans",
+      "Milk": "Milk",
+      "Paper Cups": "Paper Cups",
+      "Sugar": "Sugar"
+    },
+    "status": {
+      "APPROVED": "Approved",
+      "COMPLETED": "Completed",
+      "PENDING": "Pending Approval"
+    },
+    "units": {
+      "kg_few": "{{count}} kilograms",
+      "kg_many": "{{count}} kilograms",
+      "kg_one": "{{count}} kilogram",
+      "kg_other": "{{count}} kilograms",
+      "liters_few": "{{count}} liters",
+      "liters_many": "{{count}} liters",
+      "liters_one": "{{count}} liter",
+      "liters_other": "{{count}} liters",
+      "pcs_few": "{{count}} pcs",
+      "pcs_many": "{{count}} pcs",
+      "pcs_one": "{{count}} pc",
+      "pcs_other": "{{count}} pcs"
+    }
+  },
+  "validation": {
+    "name": "Only letters, spaces, hyphens and apostrophes allowed",
+    "phone": "Only numbers and optional \"+\" at the beginning no longer than 16 digits"
+  },
+  "variationModal": {
+    "addToOrder": "Add to Order",
+    "cancel": "Cancel",
+    "free": "Free",
+    "milk": "Milk",
+    "regularMilk": "Regular Milk",
+    "size": "Size",
+    "total": "Total",
+    "variations": {
+      "Almond Milk": "Almond Milk",
+      "Large": "Large",
+      "Medium": "Medium",
+      "Oat Milk": "Oat Milk",
+      "Small": "Small",
+      "regularMilk": "Regular Milk"
+    }
+  },
+  "variations": {
+    "regularMilk": "Regular Milk",
+    "almondMilk": "Almond Milk",
+    "large": "Large",
+    "medium": "Medium",
+    "oatMilk": "Oat Milk",
+    "small": "Small"
+  },
+  "orderPanel": {
+    "addItem": "Add item",
+    "cancel": "Cancel",
+    "done": "Done",
+    "change": "change",
+    "selectSize": "Select size:",
+    "selectMilk": "Select milk:",
+    "selectOptions": "Select options:",
+    "noSize": "No size selected",
+    "noMilk": "No milk selected",
+    "noOptions": "No options selected",
+    "extra": "extra",
+    "newItem": "New",
+    "originalItem": "Original",
+    "decreaseQuantity": "Decrease quantity",
+    "increaseQuantity": "Increase quantity",
+    "remove": "Remove",
+    "clearAll": "Clear All",
+    "viewTitle": "Current Order",
+    "originalItems": "Order Items",
+    "newItems": "New Items",
+    "newItemsAdded": "New Items Added",
+    "discounts": "Discounts",
+    "newTotal": "New Total",
+    "totalNote": "Changes will update order #",
+    "subtotal": "Subtotal",
+    "total": "Total",
+    "paymentMethod": "Payment Method",
+    "paymentMethods": {
+      "Cash": "Cash",
+      "Card": "Card",
+      "Gift card": "Gift Card"
+    },
+    "splitBill": "Split Bill",
+    "splitCount": "Split between:",
+    "completePayment": "Complete Payment",
+    "updateOrder": "Update Order"
+  },
+  "editOrder": {
+    "title": "Edit Order",
+    "subtitle": "Modify items, payment method, and billing",
+    "cancel": "Cancel",
+    "save": "Save Changes",
+    "saveChanges": "Save Changes",
+    "each": "each",
+    "created": "Created",
+    "active": "Active"
+  },
+  "status": {
+    "active": "Active",
+    "closed": "Closed",
+    "refund_pending": "Refund Pending",
+    "saveChanges": "Save Changes"
+  },
+
+  "editReservation": {
+    "title": "Edit Reservation",
+    "subtitle": "Modify reservation details",
+    "saveChanges": "Save Changes"
+  }
+}

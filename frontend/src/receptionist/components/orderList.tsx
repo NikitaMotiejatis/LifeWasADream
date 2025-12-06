@@ -1,19 +1,23 @@
 import { useState, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useCurrency } from '@/global/contexts/currencyContext';
 import OrderFilters from '@/receptionist/components/orderFilters';
 import OrderListItem from '@/receptionist/components/orderListItem';
 import OrderModal from '@/receptionist/components/orderModal';
 import Toast from '@/global/components/toast';
+import { useNavigate } from 'react-router-dom';
 
-interface Order {
+type Order = {
   id: string;
   total: number;
   createdAt: Date;
   status: 'active' | 'closed' | 'refund_pending';
-}
+};
 
 export default function OrderList() {
+  const { t } = useTranslation();
   const { formatPrice } = useCurrency();
+  const navigate = useNavigate();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -36,7 +40,8 @@ export default function OrderList() {
 
   useEffect(() => {
     const load = async () => {
-      await new Promise(r => setTimeout(r, 500));
+      // TODO: remove timeout
+      await new Promise(r => setTimeout(r, 300));
       const mock: Order[] = [
         {
           id: '1821',
@@ -129,9 +134,13 @@ export default function OrderList() {
     type: 'edit' | 'pay' | 'refund' | 'cancel',
     order: Order,
   ) => {
-    setModalType(type);
-    setSelectedOrder(order);
-    setModalOpen(true);
+    if (type === 'edit') {
+      navigate(`/edit-order/${order.id}`);
+    } else {
+      setModalType(type);
+      setSelectedOrder(order);
+      setModalOpen(true);
+    }
   };
 
   const closeModal = () => {
@@ -146,7 +155,9 @@ export default function OrderList() {
 
   if (loading)
     return (
-      <div className="p-10 text-center text-gray-500">Loading orders...</div>
+      <div className="p-10 text-center text-gray-500">
+        {t('orders.loading')}
+      </div>
     );
 
   const counts = {
@@ -168,7 +179,9 @@ export default function OrderList() {
     <>
       <div className="space-y-6">
         <div className="rounded-lg bg-white p-5 shadow">
-          <h2 className="mb-5 text-xl font-bold text-gray-800">Orders</h2>
+          <h2 className="mb-5 text-xl font-bold text-gray-800">
+            {t('orders.title')}
+          </h2>
 
           <OrderFilters
             filterStatus={filterStatus}
@@ -189,7 +202,9 @@ export default function OrderList() {
 
         <div className="mt-6 space-y-3">
           {sortedAndFiltered.length === 0 ? (
-            <p className="py-12 text-center text-gray-400">No orders found</p>
+            <p className="py-12 text-center text-gray-400">
+              {t('orders.noOrders')}
+            </p>
           ) : (
             sortedAndFiltered.map(order => (
               <OrderListItem
@@ -217,11 +232,11 @@ export default function OrderList() {
               break;
             case 'refund':
               updateOrderStatus(selectedOrder.id, 'refund_pending');
-              showToast('Refund request sent successfully.');
+              showToast(t('orders.toast.refundRequested'));
               break;
             case 'cancel':
               updateOrderStatus(selectedOrder.id, 'closed');
-              showToast('Refund request cancelled.');
+              showToast(t('orders.toast.refundCancelled'));
               break;
             default:
               break;

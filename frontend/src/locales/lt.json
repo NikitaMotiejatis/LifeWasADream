@@ -1,0 +1,997 @@
+{
+  "auditHistory": {
+    "actions": {
+      "Add": "Pridėjimas",
+      "Correction": "Korekcija",
+      "Remove": "Nurašymas",
+      "Update": "Atnaujinimas"
+    },
+    "exportReport": "Eksportuoti ataskaitą",
+    "filters": {
+      "actionLabel": "Filtruoti pagal veiksmą",
+      "add": "Pridėjimas",
+      "allActions": "Visi veiksmai",
+      "allTime": "Visas laikas",
+      "correction": "Korekcija",
+      "remove": "Nurašymas",
+      "search": "Paieška",
+      "searchPlaceholder": "Produktas, SKU arba darbuotojas...",
+      "thisMonth": "Šį mėnesį",
+      "thisWeek": "Šią savaitę",
+      "timePeriodLabel": "Laikotarpis",
+      "today": "Šiandien",
+      "update": "Atnaujinimas"
+    },
+    "sku": "SKU:",
+    "noRecords": "Nerasta jokių įrašų pagal jūsų kriterijus.",
+    "pageSubtitle": "Visiškas atsargų pokyčių sekimas",
+    "pageTitle": "Atsargų pokyčių istorija",
+    "products": {
+      "Coffee Beans (Arabica)": "Kavos pupelės (Arabika)",
+      "Croissants": "Kruasanai",
+      "Milk (Whole)": "Pienas (pilnas riebumas)",
+      "Paper Cups12oz": "Popieriniai puodeliai (350ml)",
+      "Sugar": "Cukrus"
+    },
+    "reasons": {
+      "Delivery Received": "Gautas pristatymas",
+      "Stock Recount": "Perskaičiavimas",
+      "Transfer In": "Perkėlimas iš kito padalinio",
+      "Waste/Spoilage": "Sugedimas / nurašymas"
+    },
+    "table": {
+      "action": "Veiksmas",
+      "change": "Pokytis",
+      "newQty": "Naujas kiekis",
+      "previousQty": "Ankstesnis kiekis",
+      "product": "Produktas",
+      "reason": "Priežastis",
+      "timestamp": "Laikas",
+      "user": "Darbuotojas"
+    },
+    "units": {
+      "kg": "kg",
+      "liters": "l",
+      "pcs": "vnt."
+    }
+  },
+  "common": {
+    "cancel": "Atšaukti",
+    "clear": "Išvalyti",
+    "review": "Peržiūrėti"
+  },
+  "deliveries": {
+    "buttons": {
+      "confirmReceipt": "Patvirtinti gavimą",
+      "viewDetails": "Peržiūrėti detaliau"
+    },
+    "card": {
+      "at": "laiku",
+      "deliveryDate": "PRISTATYMO DATA",
+      "deliveryItems": "PRISTATYTOS PREKĖS",
+      "destination": "FILIALAS",
+      "items": "PREKĖS",
+      "itemsCount": "prekės(-ių)",
+      "note": "Pastaba",
+      "order": "Užsakymas",
+      "receivedBy": "PRIĖMĖ"
+    },
+    "filters": {
+      "all": "Visi pristatymai",
+      "delivered": "Pristatyta",
+      "in_transit": "Kelyje",
+      "scheduled": "Suplanuoti"
+    },
+    "noDeliveries": "Pristatymų nerasta.",
+    "pageSubtitle": "Sekite ir patvirtinkite pristatymų gavimą",
+    "pageTitle": "Pristatymai",
+    "products": {
+      "Coffee Beans (Arabica)": "Kavos pupelės (Arabika)",
+      "Croissants": "Kruasanai",
+      "Milk (Whole)": "Pienas (pilnas riebumas)",
+      "Paper Cups (12oz)": "Popieriniai puodeliai (350ml)",
+      "Paper Napkins": "Popierinės servetėlės",
+      "Sugar": "Cukrus",
+      "Syrups (Assorted)": "Sirupai (įvairūs)"
+    },
+    "statuses": {
+      "DELIVERED": "Pristatyta",
+      "IN_TRANSIT": "Kelyje",
+      "SCHEDULED": "Suplanuota"
+    },
+    "summary": {
+      "delivered": "PRISTATYTA",
+      "deliveredDesc": "Užbaigta",
+      "inTransit": "KELYJE",
+      "inTransitDesc": "Vykdoma",
+      "scheduled": "SUPLANUOTA",
+      "scheduledDesc": "Artimiausi",
+      "total": "VISI PRISTATYMAI",
+      "totalThisWeek": "Šią savaitę"
+    },
+    "units": {
+      "bottles": "but.",
+      "kg": "kg",
+      "liters": "l",
+      "pcs": "vnt."
+    }
+  },
+  "invoice": {
+    "labels": {
+      "dueDate": "Mokėjimo terminas",
+      "invoiceAmount": "Sąskaitos suma",
+      "invoiceDate": "Sąskaitos data",
+      "invoiceItems": "SĄSKAITOS PREKĖS",
+      "items": "{{count}} prekių",
+      "itemsText": "Prekės",
+      "items_few": "{{count}} prekės",
+      "items_many": "{{count}} prekių",
+      "items_one": "{{count}} prekė",
+      "note": "Pastaba:",
+      "order": "Užsakymas",
+      "notFound": "nerastas"
+    },
+    "status": {
+      "approved": "Patvirtinta",
+      "overdue": "Pradelsta",
+      "paid": "Apmokėta",
+      "pending": "Laukiama"
+    },
+    "viewDetails": "Peržiūrėti detaliau"
+  },
+  "invoices": {
+    "filters": {
+      "all": "Visos būsenos",
+      "approved": "Patvirtinta",
+      "overdue": "Vėluojama",
+      "paid": "Apmokėta",
+      "pending": "Laukia apmokėjimo"
+    },
+    "noInvoices": "Sąskaitų nerasta.",
+    "pageSubtitle": "Sekite visų pristatymų apmokėjimo būseną",
+    "pageTitle": "Sąskaitų būsena",
+    "products": {
+      "Coffee Beans (Arabica)": "Kavos pupelės (Arabika)",
+      "Milk (Whole)": "Pienas (pilnas riebumas)",
+      "Paper Cups (12oz)": "Popieriniai puodeliai (350ml)",
+      "Paper Napkins": "Popierinės servetėlės",
+      "Sugar": "Cukrus",
+      "Syrups (Assorted)": "Sirupai (įvairūs)"
+    },
+    "statuses": {
+      "APPROVED": "Patvirtinta",
+      "OVERDUE": "Vėluojama",
+      "PAID": "Apmokėta",
+      "PENDING": "Laukia apmokėjimo"
+    },
+    "summary": {
+      "approved": "PATVIRTINTA",
+      "approvedDesc": "Laukia patvirtinimo",
+      "overdue": "VĖLUOJAMA",
+      "overdueDesc": "Reikia dėmesio",
+      "paid": "APMOKĖTA",
+      "paidDesc": "Apmokėta",
+      "pending": "LAUKIA APMOKĖJIMO",
+      "pendingDesc": "Laukia apmokėjimo",
+      "thisMonth": "Šį mėnesį",
+      "totalInvoices": "VISOS SĄSKAITOS"
+    },
+    "totalValue": "BENDRA SĄSKAITŲ VERTĖ",
+    "units": {
+      "bottles": "but.",
+      "kg": "kg",
+      "liters": "l",
+      "pcs": "vnt."
+    }
+  },
+  "login": {
+    "demoRoles": {
+      "Cashier / Receptionist": "Kasos darbuotojas / Administratorius",
+      "Manager": "Vadovas",
+      "Stock Clerk": "Sandėlio darbuotojas",
+      "Supplier": "Tiekėjas"
+    },
+    "demoTitle": "Demo paskyros – spauskite norėdami prisijungti iškart",
+    "formTitle": "PRISIJUNGIMAS",
+    "loginButton": "Prisijungti",
+    "passwordLabel": "SLAPTAŽODIS",
+    "passwordPlaceholder": "Įveskite slaptažodį...",
+    "passwordRequired": "Slaptažodis privalomas",
+    "subtitle": "Vieninga pardavimo sistema",
+    "title": "DreamPoS",
+    "usernameLabel": "VARTOTOJO VARDAS",
+    "usernamePlaceholder": "Įveskite vartotojo vardą...",
+    "usernameRequired": "Vartotojo vardas privalomas"
+  },
+  "manager": {
+    "dashboard": {
+      "pageTitle": "Vadovo suvestinė",
+      "pageSubtitle": "Svarbiausi rodikliai vienoje vietoje",
+      "salesTrendHeading": "Pardavimų dinamika",
+      "salesTrendPlaceholder": "[Grafiko vieta – 7 dienų lyginamoji apžvalga]",
+      "cards": {
+        "todaysSales": {
+          "title": "Šiandienos pardavimai",
+          "subtext": "+12 % lyginant su vakar"
+        },
+        "orders": {
+          "title": "Užsakymai",
+          "subtext": "+8 % lyginant su vakar"
+        },
+        "lowStock": {
+          "title": "Mažos atsargos",
+          "subtext": "Reikalauja dėmesio"
+        },
+        "pendingRefunds": {
+          "title": "Laukiantys grąžinimai",
+          "subtext": "Laukiama patvirtinimo"
+        }
+      },
+      "lowStockAlerts": {
+        "title": "Mažų atsargų įspėjimai",
+        "cta": "Užsakyti viską",
+        "table": {
+          "item": "Prekė",
+          "current": "Esamas",
+          "min": "Minimalus",
+          "status": "Būsena"
+        },
+        "items": {
+          "coffeeBeans": "Kavos pupelės (1 kg)",
+          "oatMilk": "Avižų pienas (1 l)",
+          "paperCups": "Popieriniai puodeliai (12 oz)"
+        },
+        "statuses": {
+          "urgent": "Skubu",
+          "low": "Maža"
+        }
+      },
+      "refundQueue": {
+        "title": "Grąžinimų eilė",
+        "cta": "Rodyti visus",
+        "empty": "Nėra laukiančių grąžinimų.",
+        "review": "Peržiūrėti",
+        "table": {
+          "refId": "Nuor. ID",
+          "date": "Data",
+          "amount": "Suma",
+          "reason": "Priežastis",
+          "action": "Veiksmas"
+        }
+      },
+      "totalSales": "Bendra pardavimų suma",
+      "inventoryValue": "Atsargų vertė",
+      "pendingRefunds": "Laukiantys grąžinimai",
+      "thisMonth": "Šį mėnesį",
+      "current": "Dabartinė",
+      "requests": "prašymai",
+      "salesTrend": "Pardavimų dinamika",
+      "topProducts": "Populiariausios prekės"
+    },
+    "refunds": {
+      "pageTitle": "Grąžinimų tvirtinimai",
+      "pageSubtitle": "Peržiūrėkite ir apdorokite prašymus",
+      "noRefunds": "Nėra laukiančių grąžinimo prašymų",
+      "review": "Peržiūrėti",
+      "stats": {
+        "pendingRequests": {
+          "title": "Laukiantys prašymai",
+          "subtext": "Laukia jūsų sprendimo"
+        },
+        "totalAmount": {
+          "title": "Bendra suma",
+          "subtext": "Laukiantys grąžinimai"
+        },
+        "avgResponse": {
+          "title": "Vid. reagavimo laikas",
+          "subtext": "Tikslas: < 15 min"
+        }
+      },
+      "card": {
+        "orderTitle": "Grąžinimo prašymas: {{orderId}}",
+        "requestMeta": "Prašymo ID: {{id}} | {{date}}",
+        "status": "LAUKIA",
+        "customerInfo": "Kliento informacija",
+        "requestedBy": "Pateikė: {{user}}",
+        "refundAmount": "Grąžinimo suma",
+        "branch": "Centrinis filialas",
+        "reasonTitle": "Grąžinimo priežastis",
+        "itemsTitle": "Užsakymo prekės"
+      },
+      "table": {
+        "orderId": "Užsakymo ID",
+        "customer": "Klientas",
+        "amount": "Suma",
+        "reason": "Priežastis",
+        "requestedBy": "Pateikė",
+        "date": "Data",
+        "actions": "Veiksmai"
+      },
+      "rejectionReason": "Atmetimo priežastis",
+      "rejectionPlaceholder": "Paaiškinkite, kodėl grąžinimas atmetamas...",
+      "reasonRequired": "Priežastis yra privaloma",
+      "approve": "Patvirtinti",
+      "reject": "Atmesti",
+      "confirmReject": "Patvirtinti atmetimą",
+      "modal": {
+        "title": "Grąžinimo Prašymo Peržiūra",
+        "subtitle": "Detali informacija apie grąžinimo prašymą {{orderId}}",
+        "customerInfo": "Kliento Informacija",
+        "requestedBy": "Pateikė",
+        "refundAmount": "Grąžinimo Suma",
+        "reason": "Grąžinimo Priežastis",
+        "orderItems": "Užsakymo Prekės"
+      }
+    },
+    "reports": {
+      "pageTitle": "Ataskaitos ir analizė",
+      "pageSubtitle": "Verslo našumo ataskaitos",
+      "selectReport": "Pasirinkite ataskaitą",
+      "salesReport": "Pardavimų ataskaita",
+      "employeeReport": "Darbuotojų rezultatai",
+      "export": "Eksportuoti ataskaitą",
+      "exporting": "Eksportuojama: {{report}}...",
+      "employeeLabel": "{{name}} ({{orders}} užsakymai)",
+      "categories": {},
+      "timePeriod": {
+        "month": "Šis Mėnuo",
+        "quarter": "Praėjęs Ketvirtis",
+        "year": "Praėję Metai"
+      }
+    },
+    "inventory": {
+      "pageTitle": "Atsargų apžvalga",
+      "pageSubtitle": "Filialų likučiai",
+      "detailsTitle": "Atsargų detalės",
+      "stats": {
+        "totalItems": {
+          "title": "Unikalių prekių skaičius",
+          "subtitle": "Visuose filialuose"
+        },
+        "lowStock": {
+          "title": "Mažų atsargų įspėjimai",
+          "subtitle": "Reikia skubaus dėmesio"
+        }
+      },
+      "table": {
+        "sku": "SKU",
+        "product": "Produktas",
+        "branch": "Filialas",
+        "inStock": "Kiekis",
+        "unit": "Matas",
+        "status": "Būsena"
+      },
+      "ok": "Normalu",
+      "low": "Mažas",
+      "critical": "Kritinis",
+      "allBranches": "Visi Filialai",
+      "allStatuses": "Visos Būsenos"
+    },
+    "subtitle": "Vadovo portalas"
+  },
+  "menu": {
+    "categories": {
+      "all": "Visi",
+      "cold drinks": "Šalti gėrimai",
+      "hot drinks": "Karšti gėrimai",
+      "pastries": "Kepiniai",
+      "popular": "Populiarūs"
+    },
+    "customizable": "Galima pritaikyti",
+    "fromPrice": "nuo {{price}}",
+    "searchPlaceholder": "Ieškoti prekių...",
+    "title": "Meniu"
+  },
+  "orderSummary": {
+    "clearAll": "Išvalyti viską",
+    "completePayment": "Baigti apmokėjimą",
+    "decreaseQuantity": "Sumažinti kiekį",
+    "discounts": "Nuolaidos",
+    "increaseQuantity": "Padidinti kiekį",
+    "noItems": "Dar nėra prekių",
+    "people": "žmonės",
+    "peopleCount": "Žmonių",
+    "splitEqually": "Dalinti po lygiai",
+    "splitByItems": "Kiekvienas moka už savo",
+    "payer": "Asmuo",
+    "selectMethod": "Pasirinkite mokėjimo būdą",
+    "payWith": "Mokėti su {{method}}",
+    "allPaid": "Visi sumokėjo – ačiū!",
+    "paid": "Sumokėjo",
+    "paymentMethod": "Mokėjimo būdas",
+    "paymentMethods": {
+      "Card": "Kortele",
+      "Cash": "Grynaisiais",
+      "Gift card": "Dovanų kortele"
+    },
+    "removeItem": "Pašalinti prekę",
+    "saveOrder": "Išsaugoti užsakymą",
+    "splitBill": "Padalinti sąskaitą",
+    "subtotal": "Tarpinė suma",
+    "title": "Dabartinis užsakymas",
+    "total": "Galutinė suma"
+  },
+  "orders": {
+    "actions": {
+      "cancelRefund": "Atšaukti grąžinimą",
+      "close": "Uždaryti",
+      "edit": "Redaguoti",
+      "refund": "Grąžinti pinigus"
+    },
+    "filters": {
+      "all": "Visi ({{count}})",
+      "closed": "Uždaryti ({{count}})",
+      "from": "Nuo",
+      "open": "Atviri ({{count}})",
+      "pending": "Laukia grąžinimo ({{count}})",
+      "searchPlaceholder": "Ieškoti pagal užsakymo nr....",
+      "to": "Iki"
+    },
+    "loading": "Kraunamas užsakymų sąrašas...",
+    "modal": {
+      "confirmButton": {
+        "cancel": "Patvirtinti atšaukimą",
+        "edit": "Išsaugoti pakeitimus",
+        "pay": "Patvirtinti apmokėjimą",
+        "refund": "Vykdyti grąžinimą"
+      },
+      "emailLabel": "Kliento el. paštas",
+      "emailPlaceholder": "jonas@pavyzdys.lt",
+      "nameError": "Leidžiami tik raidės, tarpai, brūkšneliai ir apostrofai",
+      "nameLabel": "Kliento vardas ir pavardė",
+      "namePlaceholder": "Jonas Jonaitis",
+      "phoneError": "Leidžiami tik skaičiai ir pasirinktinai '+' pradžioje",
+      "phoneLabel": "Kliento telefono numeris",
+      "phonePlaceholder": "+37060000000",
+      "reasonLabel": "Grąžinimo priežastis",
+      "reasonPlaceholder": "Prašome nurodyti, kodėl klientas nori grąžinti pinigus...",
+      "title": {
+        "cancel": "Atšaukti grąžinimą",
+        "edit": "Redaguoti užsakymą",
+        "pay": "Užbaigti apmokėjimą",
+        "refund": "Grąžinti pinigus"
+      },
+      "totalAmount": "Bendra suma"
+    },
+    "noOrders": "Užsakymų nerasta",
+    "status": {
+      "refundInProgress": "Grąžinimas vykdomas"
+    },
+    "title": "Užsakymai",
+    "toast": {
+      "paid": "Užsakymas sėkmingai apmokėtas",
+      "refundCancelled": "Grąžinimo prašymas atšauktas",
+      "refundRequested": "Grąžinimo prašymas sėkmingai išsiųstas"
+    }
+  },
+  "products": {
+    "blueberryMuffin": "Mėlynių keksiukas",
+    "cappuccino": "Kapučino",
+    "caramelFrappuccino": "Karamelinis Frapučino",
+    "chocolateCroissant": "Šokoladinis kruasanas",
+    "chocolateMilkshake": "Šokoladinis kokteilis",
+    "cinnamonRoll": "Cinamoninė bandelė",
+    "croissant": "Sviestinis kruasanas",
+    "hotCoffee": "Karšta kava",
+    "icedCoffee": "Šalta kava",
+    "icedLatte": "Ledinė latė",
+    "icedTea": "Šalta arbata",
+    "lemonade": "Šviežias limonadas",
+    "orangeJuice": "Apelsinų sultys",
+    "smoothieBerry": "Kokteilis – Uogų sprogimas",
+    "smoothieMango": "Kokteilis – Mangų rojus"
+  },
+  "reservation": {
+    "weekdays": {
+      "mo": "Pr",
+      "tu": "An",
+      "we": "Tr",
+      "th": "Kt",
+      "fr": "Pn",
+      "sa": "Št",
+      "su": "Sk"
+    },
+    "staffServiceTitle": "Pasitinkite darbuotoją ir paslaugą",
+
+    "invalidName": "Tik raidės, tarpai, brūkšneliai ir apostrofai leidžiami",
+    "smsNote": "Patvirtinimas bus išsiųstas SMS žinute",
+    "invalidPrefix": "Turi prasidėti su + arba skaičiumi",
+    "invalidLength": "Telefono numeris turi būti 7-15 skaitmenų ilgumo",
+
+    "selectStaffAndService": "Pasirinkti darbuotoją ir paslaugą",
+    "priceSummary": "Price Summary",
+    "createReservation": "Create Reservation",
+    "cancel": "Cancel",
+    "confirmButton": "Patvirtinti rezervaciją",
+    "dateTimeTitle": "Pasirinkite datą ir laiką",
+    "months": {
+      "0": "Sausis",
+      "1": "Vasaris",
+      "2": "Kovas",
+      "3": "Balandis",
+      "4": "Gegužė",
+      "5": "Birželis",
+      "6": "Liepa",
+      "7": "Rugpjūtis",
+      "8": "Rugsėjis",
+      "9": "Spalis",
+      "10": "Lapkritis",
+      "11": "Gruodis"
+    },
+    "selectTime": "Pasirinkite laiką",
+    "customerInfo": "Kliento informacija",
+    "customerName": "Kliento vardas",
+    "customerNamePlaceholder": "Vardas Pavardė",
+    "customerPhone": "Telefono numeris",
+    "customerPhonePlaceholder": "+123 XXX XXXXX arba 1XX XXXXX",
+    "phoneFormat": "Formatas: +123 456 78910 arba 12 345 6789",
+    "nameRequired": "Vardas yra privalomas",
+    "phoneRequired": "Telefono numeris yra privalomas",
+    "invalidPhone": "Netinkamas telefono numerio formatas. Naudokite +123XXXXXXXXX arba 1XXXXXXXXX",
+    "fixErrors": "Pataisykite validacijos klaidas prieš išsaugant",
+    "validationErrors": "Prašome pataisyti šias klaidas:",
+    "email": "El. paštas",
+    "emailPlaceholder": "El. pašto adresas",
+    "notes": "Pastabos",
+    "notesPlaceholder": "Papildomos pastabos...",
+
+    "service": "Paslauga",
+    "services": {
+      "Haircut & Style": "Plaukų kirpimas ir stilizavimas",
+      "Hair Color": "Plaukų dažymas",
+      "Manicure": "Manikiūras",
+      "Pedicure": "Pedikiūras"
+    },
+
+    "staffMember": "Darbuotojas",
+    "staff": {
+      "James Chen": "Jonas Petraitis",
+      "Sarah Johnson": "Ona Jonaitienė",
+      "Anyone": "Bet kas",
+      "Colorist": "Spalvininkas",
+      "Nail Technician": "Nagų meistrė",
+      "Any available staff": "Bet kuris darbuotojas"
+    },
+
+    "dateTime": "Data ir laikas",
+    "date": "Data",
+    "time": "Laikas",
+    "duration": "Trukmė",
+    "durations": {
+      "120 min": "120 min",
+      "45 min": "45 min",
+      "60 min": "60 min",
+      "min": "min"
+    },
+
+    "bookingSummary": "Rezervacijos suvestinė",
+    "total": "Iš viso",
+
+    "selected": "Pasirinkta",
+    "selectedService": "Pasirinkta paslauga",
+    "selectedStaff": "Pasirinktas darbuotojas",
+    "summary": {
+      "date": "Data",
+      "notSelected": "[Nepasirinkta]",
+      "service": "Paslauga",
+      "staff": "Darbuotojas",
+      "time": "Laikas",
+      "total": "Iš viso"
+    }
+  },
+
+  "nameError": "Galimos tik raidės, tarpai, brūkšneliai ir apostrofai",
+  "navigation": {
+    "next": "Kitas",
+    "previous": "Ankstesnis"
+  },
+  "pageTitle": "Nauja rezervacija",
+  "phoneError": "Galimi tik skaičiai ir neprivalomas \"+\" pradžioje",
+  "services": {
+    "Hair Color": "Dažymas",
+    "Haircut & Style": "Plaukų kirpimas ir stilizavimas",
+    "Manicure": "Manikiūras",
+    "Pedicure": "Pedikiūras"
+  },
+  "smsNote": "Patvirtinimas bus išsiųstas SMS žinute",
+  "staff": {
+    "Any available staff": "Bet kuris laisvas darbuotojas",
+    "Colorist": "Dažytojas",
+    "Nail Technician": "Nagų meistrė",
+    "Anyone": "Bet kas",
+    "James Chen": "Jonas Petraitis",
+    "Sarah Johnsonh": "Ona Jonaitienė"
+  },
+  "staffMember": "Darbuotojas",
+  "staffServiceTitle": "Pasirinkite darbuotoją ir paslaugą",
+
+  "toast": {
+    "incomplete": "Prašome užpildyti visus laukus: paslaugą, datą ir laiką.",
+    "missingInfo": "Trūksta kliento duomenų.\nĮveskite vardą ir telefono numerį.",
+    "success": "Rezervacija patvirtinta!\nKodas: {{code}}\nSMS išsiųsta į {{phone}}"
+  },
+
+  "customerInfo": "Kliento informacija",
+  "customerName": "Kliento vardas",
+  "customerPhone": "Telefono numeris",
+  "serviceDetails": "Paslaugos detalės",
+  "date": "Data",
+  "time": "Laikas",
+  "notes": "Pastabos",
+  "notesPlaceholder": "Papildomos pastabos...",
+  "reservations": {
+    "actions": {
+      "cancel": "Atšaukti",
+      "cancelRefund": "Atšaukti grąžinimą",
+      "complete": "Baigti aptarnavimą",
+      "noShow": "Neatvyko",
+      "refund": "Grąžinti pinigus",
+      "start": "Pradėti aptarnavimą",
+      "edit": "Redaguoti"
+    },
+    "filters": {
+      "all": "Visi ({{count}})",
+      "cancelled": "Atšaukti ({{count}})",
+      "completed": "Baigti ({{count}})",
+      "from": "Nuo",
+      "in_service": "Aptarnaujami ({{count}})",
+      "no_show": "Neatvyko ({{count}})",
+      "pending": "Laukiantys ({{count}})",
+      "refund_pending": "Laukia grąžinimo ({{count}})",
+      "searchPlaceholder": "Ieškoti pagal vardą, telefoną, kodą, paslaugą ar darbuotoją...",
+      "to": "Iki"
+    },
+    "loading": "Kraunamos rezervacijos...",
+    "modal": {
+      "confirm": {
+        "cancel": "Patvirtinti atšaukimą",
+        "cancel_refund": "Atšaukti grąžinimą",
+        "complete": "Patvirtinti baigimą",
+        "noshow": "Pažymėti kaip neatvykusį",
+        "refund": "Prašyti grąžinimo",
+        "start": "Pradėti aptarnavimą",
+        "edit": "Redaguoti"
+      },
+      "refund": {
+        "email": "Kliento el. paštas",
+        "emailPlaceholder": "jonas@pavyzdys.com",
+        "name": "Kliento vardas ir pavardė",
+        "namePlaceholder": "Jonas Petrauskas",
+        "phone": "Kliento telefono numeris",
+        "phonePlaceholder": "+37060000000",
+        "reason": "Grąžinimo priežastis",
+        "reasonPlaceholder": "Prašome paaiškinti, kodėl klientas nori grąžinimo..."
+      },
+      "title": {
+        "cancel": "Atšaukti rezervaciją",
+        "cancel_refund": "Atšaukti grąžinimo prašymą",
+        "complete": "Baigti aptarnavimą",
+        "noshow": "Pažymėti kaip neatvykusį",
+        "refund": "Prašyti pinigų grąžinimo",
+        "start": "Pradėti aptarnavimą",
+        "edit": "Redaguoti"
+      },
+      "totalAmount": "Bendra suma"
+    },
+    "noReservations": "Rezervacijų nerasta",
+    "services": {
+      "1": "Plaukų kirpimas ir stilizavimas",
+      "2": "Plaukų dažymas",
+      "3": "Manikiūras",
+      "4": "Pedikiūras"
+    },
+    "staff": {
+      "anyone": "Bet kuris darbuotojas",
+      "james": "Jonas Petraitis",
+      "sarah": "Ona Jonaitienė"
+    },
+    "status": {
+      "refundInProgress": "Grąžinimas vykdomas"
+    },
+    "title": "Rezervacijos",
+    "toast": {
+      "cancelled": "Rezervacija atšaukta",
+      "completed": "Paslauga baigta",
+      "noShow": "Pažymėta kaip neatvykęs",
+      "refundCancelled": "Grąžinimo prašymas atšauktas",
+      "refundRequested": "Grąžinimo prašymas išsiųstas",
+      "started": "Paslauga pradėta",
+      "updated": "Rezervacija sėkmingai atnaujinta"
+    }
+  },
+  "sidebar": {
+    "orders": {
+      "group": "Užsakymai",
+      "list": "Užsakymų sąrašas",
+      "new": "Naujas užsakymas"
+    },
+    "reservations": {
+      "group": "Rezervacijos",
+      "list": "Rezervacijų sąrašas",
+      "new": "Nauja rezervacija"
+    },
+    "stock": {
+      "alerts": "Atsargų įspėjimai",
+      "auditHistory": "Audito istorija",
+      "group": "Sandėlis",
+      "transferRequests": "Perkėlimo prašymai",
+      "updates": "Atsargų atnaujinimai"
+    },
+    "supplier": {
+      "deliveries": "Pristatymai",
+      "group": "Verslas",
+      "invoiceStatus": "Sąskaitų būsenos"
+    },
+    "manager": {
+      "group": "Vadovo portalas",
+      "dashboard": "Suvestinė",
+      "refunds": "Grąžinimų tvirtinimai",
+      "reports": "Ataskaitos ir analizė",
+      "inventory": "Atsargų apžvalga"
+    },
+    "subtitle": "Vientisa sistema"
+  },
+  "stockAlerts": {
+    "acknowledge": "Patvirtinti",
+    "actions": {
+      "acknowledge": "Patvirtinti",
+      "reorder": "Užsakyti dabar"
+    },
+    "current": "Turima",
+    "currentBig": "TURIMA",
+    "currentStock": "Dabartinis likutis:",
+    "daysAgo": "prieš {{count}} dienų",
+    "daysAgo_few": "prieš {{count}} dienas",
+    "daysAgo_many": "prieš {{count}} dienų",
+    "daysAgo_one": "prieš {{count}} dieną",
+    "filters": {
+      "CRITICAL": "Kritinė",
+      "MONITOR": "Stebėti",
+      "WARNING": "Įspėjimas",
+      "all": "Visi įspėjimai"
+    },
+    "labels": {
+      "currentStock": "Dabartinis likutis:",
+      "lastOrdered": "Paskutinį kartą užsakyta:",
+      "minimumStock": "Minimalus kiekis:",
+      "shortage": "Trūksta:",
+      "sku": "SKU:"
+    },
+    "lastOrdered": "Pask. užsakyta",
+    "lastOrderedBig": "PASKUTINIS UŽSAKYMAS",
+    "minimum": "Minimalus kiekis",
+    "minimumBig": "MINIMALUS",
+    "minimumStock": "Minimalus kiekis:",
+    "never": "Niekada",
+    "noAlerts": "Įspėjimų nerasta.",
+    "pageSubtitle": "Mažų atsargų įspėjimai ir užsakymo priminimai",
+    "pageTitle": "Atsargų įspėjimai",
+    "products": {
+      "Coffee Beans (Arabica)": "Kavos pupelės (Arabica)",
+      "Milk (Whole)": "Pienas (riebus)",
+      "Paper Napkins": "Popierinės servetėlės",
+      "Syrup - Vanilla": "Sirupas – vanilinis"
+    },
+    "reorderNow": "Užsakyti dabar",
+    "severity": {
+      "CRITICAL": "Kritinė",
+      "MONITOR": "Stebėti",
+      "WARNING": "Įspėjimas"
+    },
+    "shortage": "Trūksta:",
+    "shortageBig": "TRŪKUMAS",
+    "sku": "Kodas",
+    "summary": {
+      "critical": "KRITINĖ",
+      "criticalDesc": "Reikia skubiai veikti",
+      "monitor": "STEBĖTI",
+      "monitorDesc": "Stebėti atsargų lygį",
+      "warning": "ĮSPĖJIMAS",
+      "warningDesc": "Užsakyti artimiausiu metu"
+    },
+    "units": {
+      "bottles": "but.",
+      "kg": "kg",
+      "liters": "L",
+      "pcs": "vnt."
+    }
+  },
+  "stockUpdates": {
+    "allCategories": "Visos kategorijos",
+    "categories": {
+      "All Categories": "Visos kategorijos",
+      "Bakery": "Kepykla",
+      "Dairy": "Pieno produktai",
+      "Ingredients": "Ingredientai",
+      "Packaging": "Pakuotė",
+      "Raw Materials": "Žaliavos"
+    },
+    "currentStock": "Dabartinis kiekis",
+    "daysAgo_one": "vakar",
+    "daysAgo_few": "prieš {{count}} dienas",
+    "daysAgo_many": "prieš {{count}} dienų",
+    "hoursAgo": "prieš {{count}} valandų",
+    "hoursAgo_few": "prieš {{count}} valandas",
+    "hoursAgo_many": "prieš {{count}} valandų",
+    "hoursAgo_one": "prieš {{count}} valandą",
+    "lastUpdated": "Pask. atnaujinta",
+    "minimumLevel": "Minimalus kiekis",
+    "noItems": "Nerasta prekių pagal jūsų paiešką ar filtrą.",
+    "pageSubtitle": "Realaus laiko sandėlio valdymas",
+    "pageTitle": "Atsargų atnaujinimai",
+    "products": {
+      "Coffee Beans (Arabica)": "Kavos pupelės (Arabika)",
+      "Croissants": "Kruasanai",
+      "Milk (Whole)": "Pienas (riebus)",
+      "Paper Cups (12oz)": "Popieriniai puodeliai (350ml)",
+      "Sugar": "Cukrus",
+      "Syrup - Vanilla": "Vanilinis sirupas"
+    },
+    "searchPlaceholder": "Ieškoti pagal pavadinimą ar SKU...",
+    "units": {
+      "kg": "kg",
+      "bottles": "{{count}} butelių",
+      "bottles_few": "{{count}} buteliai",
+      "bottles_many": "{{count}} butelių",
+      "bottles_one": "{{count}} butelis",
+      "liters": "{{count}} litrų",
+      "liters_few": "{{count}} litrai",
+      "liters_many": "{{count}} litrų",
+      "liters_one": "{{count}} litras",
+      "pcs": "{{count}} vnt.",
+      "pcs_few": "{{count}} vnt.",
+      "pcs_many": "{{count}} vnt.",
+      "pcs_one": "{{count}} vnt."
+    },
+    "updateStockButton": "Atnaujinti kiekį"
+  },
+  "topbar": {
+    "branchSelect": "Centrinis padalinys",
+    "logout": "Atsijungti",
+    "northBranch": "Šiaurinis padalinys",
+    "searchPlaceholder": "Ieškoti prekių, užsakymų...",
+    "userName": "Jonas Petrauskas",
+    "westBranch": "Vakarinis padalinys"
+  },
+  "transferRequests": {
+    "branches": {
+      "Downtown Branch": "Centrinis filialas",
+      "Eastside Branch": "Rytinis filialas",
+      "North Branch": "Šiaurinis filialas",
+      "Westside Branch": "Vakarinis filialas"
+    },
+    "date": {
+      "today": "Šiandien, {{time}}",
+      "yesterday": "Vakar"
+    },
+    "filters": {
+      "ALL": "Visi prašymai",
+      "APPROVED": "Patvirtinti",
+      "COMPLETED": "Įvykdyti",
+      "PENDING": "Laukiantys"
+    },
+    "labels": {
+      "from": "IŠ",
+      "quantity": "KIEKIS",
+      "requestId": "Prašymo Nr.",
+      "requestedBy": "Pateikė",
+      "to": "Į"
+    },
+    "newButton": "Naujas perkėlimo prašymas",
+    "noRequests": "Perkėlimo prašymų nerasta.",
+    "pageSubtitle": "Tarpfilialinių atsargų perkėlimų valdymas",
+    "pageTitle": "Perkėlimo prašymai",
+    "products": {
+      "Coffee Beans": "Kavos pupelės",
+      "Milk": "Pienas",
+      "Paper Cups": "Popieriniai puodeliai",
+      "Sugar": "Cukrus"
+    },
+    "status": {
+      "APPROVED": "Patvirtinta",
+      "COMPLETED": "Įvykdyta",
+      "PENDING": "Laukia patvirtinimo"
+    },
+    "units": {
+      "kg": "{{count}} kilogramų",
+      "kg_few": "{{count}} kilogramai",
+      "kg_many": "{{count}} kilogramų",
+      "kg_one": "{{count}} kilogramas",
+      "liters": "{{count}} litrų",
+      "liters_few": "{{count}} litrai",
+      "liters_many": "{{count}} litrų",
+      "liters_one": "{{count}} litras",
+      "pcs": "{{count}} vnt.",
+      "pcs_few": "{{count}} vnt.",
+      "pcs_many": "{{count}} vnt.",
+      "pcs_one": "{{count}} vnt."
+    }
+  },
+  "validation": {
+    "name": "Galimos tik raidės, tarpai, brūkšneliai ir apostrofai",
+    "phone": "Galimi tik skaičiai ir pasirenkamas \"+\" pradžioje neilgesnis 16 skaitmenų"
+  },
+  "variationModal": {
+    "addToOrder": "Pridėti į užsakymą",
+    "cancel": "Atšaukti",
+    "free": "Nemokamai",
+    "milk": "Pienas",
+    "regularMilk": "Įprastas pienas",
+    "size": "Dydis",
+    "total": "Iš viso",
+    "variations": {
+      "Almond Milk": "Migdolų pienas",
+      "Large": "Didelis",
+      "Medium": "Vidutinis",
+      "Oat Milk": "Avižų pienas",
+      "Small": "Mažas",
+      "regularMilk": "Įprastas pienas"
+    }
+  },
+  "variations": {
+    "regularMilk": "Įprastas pienas",
+    "almondMilk": "Migdolų pienas",
+    "large": "Didelis",
+    "medium": "Vidutinis",
+    "oatMilk": "Avižų pienas",
+    "small": "Mažas"
+  },
+  "orderPanel": {
+    "addItem": "Pridėti prekę",
+    "cancel": "Atšaukti",
+    "done": "Išaugoti",
+    "change": "pakeisti",
+    "selectSize": "Dydis:",
+    "selectMilk": "Pienas:",
+    "selectOptions": "Pasirinkite:",
+    "noSize": "Nepasirinktas dydis",
+    "noMilk": "Nepasirinktas pienas",
+    "noOptions": "Nepasirinktia",
+    "extra": "papildoma",
+    "newItem": "Naujas",
+    "originalItem": "Originalus",
+    "decreaseQuantity": "Sumažinti kiekį",
+    "increaseQuantity": "Padidinti kiekį",
+    "remove": "Pašalinti",
+    "clearAll": "Išvalyti viską",
+    "viewTitle": "Dabartinis užsakymas",
+    "originalItems": "Užsakymo prekės",
+    "newItems": "Naujos prekės",
+    "newItemsAdded": "Pridėtos naujos prekės",
+    "discounts": "Nuolaidos",
+    "newTotal": "Nauja suma",
+    "totalNote": "Pakeitimai atnaujins užsakymą #",
+    "subtotal": "Tarpinė suma",
+    "total": "Galutinė suma",
+    "paymentMethod": "Mokėjimo būdas",
+    "paymentMethods": {
+      "Cash": "Grynaisiais",
+      "Card": "Kortele",
+      "Gift card": "Dovanų kortele"
+    },
+    "splitBill": "Padalinti sąskaitą",
+    "splitCount": "Padalinti tarp:",
+    "completePayment": "Baigti apmokėjimą",
+    "updateOrder": "Atnaujinti užsakymą"
+  },
+  "editOrder": {
+    "title": "Redaguoti užsakymą",
+    "subtitle": "Keisti prekes, mokėjimo būdą ir sąskaitą",
+    "cancel": "Atšaukti",
+    "save": "Išsaugoti pakeitimus",
+    "saveChanges": "Išsaugoti pakeitimus",
+    "each": "vnt.",
+    "created": "Sukurta",
+    "active": "Aktyvus",
+    "status": {
+      "active": "Aktyvus",
+      "closed": "Uždarytas",
+      "refund_pending": "Grąžinimas laukiamas"
+    }
+  },
+  "editReservation": {
+    "title": "Redaguoti rezervaciją",
+    "subtitle": "Keisti rezervacijos detales",
+    "saveChanges": "Išsaugoti pakeitimus"
+  }
+}

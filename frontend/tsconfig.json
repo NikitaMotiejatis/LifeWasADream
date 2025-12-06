@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
-    "baseUrl": "./src", 
+    "baseUrl": "./src",
     "paths": {
-        "@/*": ["./*"],
+      "@/*": ["./*"]
     },
     "target": "ESNext",
     "useDefineForClassFields": true,
@@ -25,11 +25,11 @@
     "extends": ["react-app", "airbnb"],
     "settings": {
       "import/resolver": {
-        "node": {          
+        "node": {
           "paths": ["src"],
           "extensions": [".js", ".jsx", ".ts", ".tsx"]
         }
       }
     }
-  },
+  }
 }

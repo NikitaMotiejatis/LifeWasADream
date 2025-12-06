@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Product, useCart, Variation } from '../contexts/cartContext';
 
 export default function VariationModal({
@@ -10,6 +11,7 @@ export default function VariationModal({
   onClose: () => void;
   onAdd: (variations: Variation[]) => void;
 }) {
+  const { t } = useTranslation();
   const { formatPrice, getFinalPrice } = useCart();
 
   const sizeOptions =
@@ -22,8 +24,8 @@ export default function VariationModal({
       ['Oat Milk', 'Almond Milk'].includes(v.name),
     ) || [];
 
-  const [selectedSize, setSelectedSize] = useState<Variation>(
-    sizeOptions.find(s => s.name === 'Small') || sizeOptions[0],
+  const [selectedSize, setSelectedSize] = useState<Variation | null>(
+    sizeOptions.find(s => s.name === 'Small') || sizeOptions[0] || null,
   );
   const [selectedMilk, setSelectedMilk] = useState<Variation | null>(null);
 
@@ -33,26 +35,32 @@ export default function VariationModal({
 
   const finalPrice = getFinalPrice(product, selectedVariations);
 
+  const tv = (key: string) => t(`variationModal.variations.${key}`);
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <div className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-2xl">
-        <h3 className="mb-4 text-xl font-bold">{product.name}</h3>
+        <h3 className="mb-4 text-xl font-bold">
+          {product.nameKey ? t(product.nameKey) : product.name}
+        </h3>
 
         {sizeOptions.length > 0 && (
           <div className="mb-6">
-            <h4 className="mb-2 text-sm font-semibold text-gray-700">Size</h4>
+            <h4 className="mb-2 text-sm font-semibold text-gray-700">
+              {t('variationModal.size')}
+            </h4>
             <div className="grid grid-cols-3 gap-2">
               {sizeOptions.map(size => (
                 <button
                   key={size.name}
                   onClick={() => setSelectedSize(size)}
                   className={`rounded-lg border-2 py-3 text-sm font-medium transition-all ${
-                    selectedSize.name === size.name
+                    selectedSize?.name === size.name
                       ? 'border-blue-600 bg-blue-50 text-blue-600'
                       : 'border-gray-300 hover:border-gray-400'
                   }`}
                 >
-                  <div>{size.name}</div>
+                  <div>{tv(size.name)}</div>
                   {size.priceModifier > 0 && (
                     <div className="text-xs opacity-80">
                       +{formatPrice(size.priceModifier)}
@@ -66,7 +74,9 @@ export default function VariationModal({
 
         {milkOptions.length > 0 && (
           <div className="mb-6">
-            <h4 className="mb-2 text-sm font-semibold text-gray-700">Milk</h4>
+            <h4 className="mb-2 text-sm font-semibold text-gray-700">
+              {t('variationModal.milk')}
+            </h4>
             <div className="space-y-2">
               <button
                 onClick={() => setSelectedMilk(null)}
@@ -76,8 +86,10 @@ export default function VariationModal({
                     : 'border-gray-300 hover:border-gray-400'
                 }`}
               >
-                Regular Milk
-                <span className="float-right text-xs text-gray-500">Free</span>
+                {t('variationModal.regularMilk')}
+                <span className="float-right text-xs text-gray-500">
+                  {t('variationModal.free')}
+                </span>
               </button>
 
               {milkOptions.map(milk => (
@@ -90,7 +102,7 @@ export default function VariationModal({
                       : 'border-gray-300 hover:border-gray-400'
                   }`}
                 >
-                  {milk.name}
+                  {tv(milk.name)}
                   <span className="float-right text-xs">
                     +{formatPrice(milk.priceModifier)}
                   </span>
@@ -101,7 +113,9 @@ export default function VariationModal({
         )}
 
         <div className="mb-5 flex justify-between border-t border-gray-200 pt-4">
-          <span className="text-sm font-semibold">Total</span>
+          <span className="text-sm font-semibold">
+            {t('variationModal.total')}
+          </span>
           <span className="text-lg font-bold text-blue-600">
             {formatPrice(finalPrice)}
           </span>
@@ -112,13 +126,13 @@ export default function VariationModal({
             onClick={onClose}
             className="flex-1 rounded-lg border border-gray-300 py-2.5 text-sm font-medium hover:bg-gray-50"
           >
-            Cancel
+            {t('variationModal.cancel')}
           </button>
           <button
             onClick={() => onAdd(selectedVariations)}
             className="flex-1 rounded-lg bg-blue-600 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700"
           >
-            Add to Order
+            {t('variationModal.addToOrder')}
           </button>
         </div>
       </div>

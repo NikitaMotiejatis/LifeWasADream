@@ -3,12 +3,14 @@ import { Currency, useCurrency } from '@/global/contexts/currencyContext';
 
 export type Variation = {
   name: string;
+  nameKey?: string;
   priceModifier: number;
 };
 
 export type Product = {
   id: string;
   name: string;
+  nameKey?: string;
   basePrice: number;
   categories?: string[];
   variations?: Variation[];
@@ -62,6 +64,9 @@ type CartContextType = {
   ) => { amount: number; formatted: string } | null;
 
   generateKey: (product: Product, variations: Variation[]) => CartKey;
+
+  isPaymentStarted: boolean;
+  setIsPaymentStarted: (isPaymentStarted: boolean) => void;
 };
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -85,6 +90,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     'iced-latte': { type: 'percent', value: 50 },
   });
   const [cartDiscount, setCartDiscount] = useState<CartDiscount | null>(null);
+  const [isPaymentStarted, setIsPaymentStarted] = useState<boolean>(false);
 
   const addToCart = (
     product: Product,
@@ -99,6 +105,8 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     }));
   };
 
+  const MAX_QUANTITY = 9999;
+
   const updateQuantity = (key: CartKey, delta: number) => {
     setItems(prev => {
       const item = prev[key];
@@ -108,7 +116,22 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         const { [key]: _, ...rest } = prev;
         return rest;
       }
-      return { ...prev, [key]: { ...item, quantity: newQty } };
+
+      if (newQty > MAX_QUANTITY) {
+        return {
+          ...prev,
+          [key]: { ...item, quantity: MAX_QUANTITY },
+        };
+      }
+
+      if (newQty > Number.MAX_SAFE_INTEGER) {
+        return prev;
+      }
+
+      return {
+        ...prev,
+        [key]: { ...item, quantity: newQty },
+      };
     });
   };
 
@@ -220,6 +243,8 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         getFinalPrice,
         getDiscountFor,
         generateKey,
+        isPaymentStarted,
+        setIsPaymentStarted,
       }}
     >
       {children}

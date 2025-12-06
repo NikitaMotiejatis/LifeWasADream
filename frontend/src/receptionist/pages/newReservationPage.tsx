@@ -1,10 +1,16 @@
 'use client';
 
-import React, { useState } from 'react';
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import i18n from '@/i18n';
 import { useCurrency } from '@/global/contexts/currencyContext';
 import SidebarCashier from '@/receptionist/components/sidebarCashier';
 import Topbar from '@/global/components/topbar';
 import Toast from '@/global/components/toast';
+import {
+  useNameValidation,
+  usePhoneValidation,
+} from '@/utils/useInputValidation';
 
 type Staff = { id: string; name: string; role: string };
 type Service = { id: string; title: string; price: number; duration: string };
@@ -35,29 +41,13 @@ const timeSlots = [
   '18:00',
 ];
 
-const monthNames = [
-  'January',
-  'February',
-  'March',
-  'April',
-  'May',
-  'June',
-  'July',
-  'August',
-  'September',
-  'October',
-  'November',
-  'December',
-];
-
 export default function NewReservationPage() {
+  const { t } = useTranslation();
   const { formatPrice } = useCurrency();
   const [selectedStaff, setSelectedStaff] = useState<string>('anyone');
   const [selectedService, setSelectedService] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
-  const [customerName, setCustomerName] = useState('');
-  const [customerPhone, setCustomerPhone] = useState('');
   const [toast, setToast] = useState<{
     message: string;
     type: 'success' | 'error';
@@ -72,41 +62,38 @@ export default function NewReservationPage() {
   };
 
   const handleConfirm = () => {
-    if (!customerName.trim() || !customerPhone.trim()) {
-      showToast(
-        'Missing customer information.\nPlease enter customer name and phone number.',
-        'error',
-      );
+    if (!customerName.value.trim() || !customerPhone.value.trim()) {
+      showToast(t('reservation.toast.missingInfo'), 'error');
       return;
     }
     if (!selectedService || !selectedDate || !selectedTime) {
-      showToast(
-        'Please complete all booking details: service, date and time.',
-        'error',
-      );
+      showToast(t('reservation.toast.incomplete'), 'error');
       return;
     }
 
     const code = generateCode();
-    const formattedPhone = customerPhone.trim();
-
     showToast(
-      `Reservation confirmed!\nConfirmation code: ${code}\nSMS sent to ${formattedPhone}`,
+      t('reservation.toast.success', {
+        code,
+        phone: customerPhone.value.trim(),
+      }),
       'success',
     );
 
-    setCustomerName('');
-    setCustomerPhone('');
+    customerName.reset();
+    customerPhone.reset();
     setSelectedStaff('anyone');
     setSelectedService(null);
     setSelectedDate(null);
     setSelectedTime(null);
   };
 
+  const customerName = useNameValidation();
+  const customerPhone = usePhoneValidation();
+
   return (
     <div className="flex h-screen">
       <SidebarCashier />
-
       <div className="flex flex-1 flex-col overflow-hidden">
         <Topbar />
 
@@ -118,6 +105,7 @@ export default function NewReservationPage() {
               selectedService={selectedService}
               setSelectedService={setSelectedService}
               formatPrice={formatPrice}
+              t={t}
             />
 
             <DateTimePicker
@@ -127,19 +115,20 @@ export default function NewReservationPage() {
               setSelectedDate={setSelectedDate}
               selectedTime={selectedTime}
               setSelectedTime={setSelectedTime}
+              t={t}
+              i18n={i18n}
             />
 
             <BookingSummary
               customerName={customerName}
-              setCustomerName={setCustomerName}
               customerPhone={customerPhone}
-              setCustomerPhone={setCustomerPhone}
               selectedDate={selectedDate}
               selectedTime={selectedTime}
               selectedStaff={selectedStaff}
               selectedService={selectedService}
               formatPrice={formatPrice}
               onConfirm={handleConfirm}
+              t={t}
             />
           </div>
         </main>
@@ -156,20 +145,24 @@ function StaffAndServiceSelector({
   selectedService,
   setSelectedService,
   formatPrice,
+  t,
 }: {
   selectedStaff: string;
   setSelectedStaff: (id: string) => void;
   selectedService: string | null;
   setSelectedService: (id: string | null) => void;
   formatPrice: (price: number) => string;
+  t: any;
 }) {
   return (
     <div className="rounded-xl bg-white p-5 shadow">
-      <h2 className="mb-5 text-xl font-bold">Select Staff & Service</h2>
+      <h2 className="mb-5 text-xl font-bold">
+        {t('reservation.staffServiceTitle')}
+      </h2>
 
       <div className="mb-6">
         <h3 className="mb-3 text-sm font-medium text-gray-600 uppercase">
-          Staff Member
+          {t('reservation.staffMember')}
         </h3>
         {staff.map(s => (
           <div
@@ -182,8 +175,12 @@ function StaffAndServiceSelector({
             }`}
           >
             <div>
-              <div className="font-medium">{s.name}</div>
-              <div className="text-xs text-gray-500">{s.role}</div>
+              <div className="font-medium">
+                {t(`reservation.staff.${s.name}`)}
+              </div>
+              <div className="text-xs text-gray-500">
+                {t(`reservation.staff.${s.role}`)}
+              </div>
             </div>
             {selectedStaff === s.id && (
               <span className="text-xl text-blue-600">✓</span>
@@ -193,7 +190,7 @@ function StaffAndServiceSelector({
       </div>
 
       <h3 className="mb-3 text-sm font-medium text-gray-600 uppercase">
-        Service
+        {t('reservation.service')}
       </h3>
       {services.map(service => (
         <div
@@ -206,8 +203,12 @@ function StaffAndServiceSelector({
           }`}
         >
           <div>
-            <div className="font-medium">{service.title}</div>
-            <div className="text-xs text-gray-500">{service.duration}</div>
+            <div className="font-medium">
+              {t(`reservation.services.${service.title}`)}
+            </div>
+            <div className="text-xs text-gray-500">
+              {t(`reservation.durations.${service.duration}`)}
+            </div>
           </div>
           <div className="font-semibold text-blue-600">
             {formatPrice(service.price)}
@@ -225,6 +226,8 @@ function DateTimePicker({
   setSelectedDate,
   selectedTime,
   setSelectedTime,
+  t,
+  i18n,
 }: {
   currentMonth: Date;
   setCurrentMonth: (date: Date) => void;
@@ -232,11 +235,21 @@ function DateTimePicker({
   setSelectedDate: (date: Date | null) => void;
   selectedTime: string | null;
   setSelectedTime: (time: string | null) => void;
+  t: any;
+  i18n: any;
 }) {
   const year = currentMonth.getFullYear();
   const month = currentMonth.getMonth();
-  const firstDay = new Date(year, month, 1).getDay();
+  const firstDayOriginal = new Date(year, month, 1).getDay();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  const isLT = i18n.language.startsWith('lt');
+  let weekdayKeys: string[] = isLT
+    ? ['mo', 'tu', 'we', 'th', 'fr', 'sa', 'su']
+    : ['su', 'mo', 'tu', 'we', 'th', 'fr', 'sa'];
+
+  let firstDay = firstDayOriginal;
+  if (isLT) firstDay = (firstDay + 6) % 7;
 
   const days: (number | null)[] = [];
   for (let i = 0; i < firstDay; i++) days.push(null);
@@ -244,7 +257,9 @@ function DateTimePicker({
 
   return (
     <div className="rounded-xl bg-white p-5 shadow">
-      <h3 className="mb-5 text-xl font-bold">Select Date & Time</h3>
+      <h3 className="mb-5 text-xl font-bold">
+        {t('reservation.dateTimeTitle')}
+      </h3>
 
       <div className="mb-6 rounded-lg border border-gray-200 p-4">
         <div className="mb-4 flex items-center justify-between">
@@ -255,7 +270,7 @@ function DateTimePicker({
             ←
           </button>
           <span className="font-semibold">
-            {monthNames[month]} {year}
+            {t(`reservation.months.${month}`)} {year}
           </span>
           <button
             onClick={() => setCurrentMonth(new Date(year, month + 1))}
@@ -266,15 +281,15 @@ function DateTimePicker({
         </div>
 
         <div className="grid grid-cols-7 text-center text-xs font-medium text-gray-600">
-          {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map(d => (
-            <div key={d}>{d}</div>
+          {weekdayKeys.map(key => (
+            <div key={key}>{t(`reservation.weekdays.${key}`)}</div>
           ))}
         </div>
 
         <div className="mt-2 mr-2 grid grid-cols-7 gap-1 text-sm">
-          {days.map((day, i) => (
+          {days.map((day, index) => (
             <button
-              key={i}
+              key={index}
               disabled={!day}
               onClick={() => day && setSelectedDate(new Date(year, month, day))}
               className={`h-10 w-10 rounded-lg transition ${
@@ -314,134 +329,113 @@ function DateTimePicker({
 
 function BookingSummary({
   customerName,
-  setCustomerName,
   customerPhone,
-  setCustomerPhone,
   selectedDate,
   selectedTime,
   selectedStaff,
   selectedService,
   formatPrice,
   onConfirm,
+  t,
 }: {
-  customerName: string;
-  setCustomerName: (name: string) => void;
-  customerPhone: string;
-  setCustomerPhone: (phone: string) => void;
+  customerName: ReturnType<typeof useNameValidation>;
+  customerPhone: ReturnType<typeof usePhoneValidation>;
   selectedDate: Date | null;
   selectedTime: string | null;
   selectedStaff: string;
   selectedService: string | null;
   formatPrice: (price: number) => string;
   onConfirm: () => void;
+  t: any;
 }) {
   const selectedServiceObj = services.find(s => s.id === selectedService);
 
-  const [nameError, setNameError] = useState(false);
-  const [phoneError, setPhoneError] = useState(false);
-
-  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const input = e.target.value;
-    const inputValid = input.match(/^[\p{Letter}\s'-]*$/u) != null;
-    const filteredInput = input
-      .replace(/[^\p{Letter}\s'-]*/gu, '')
-      .replace(/^\s+/g, '')
-      .replace(/\s+$/g, ' ');
-
-    setNameError(!inputValid);
-    setCustomerName(filteredInput);
-  };
-
-  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const input = e.target.value;
-    const filtered = input
-      .replace(/[^0-9+]/g, '')
-      .replace(/\+/g, (_match, offset) => (offset === 0 ? '+' : ''))
-      .slice(0, 16);
-
-    setPhoneError(input !== filtered);
-    setCustomerPhone(filtered);
-  };
-
-  const handleConfirmWithClear = () => {
-    setNameError(false);
-    setPhoneError(false);
-
-    onConfirm();
-  };
-
   return (
     <div className="rounded-xl bg-white p-5 shadow-lg">
-      <h3 className="mb-6 text-xl font-bold">Booking Summary</h3>
+      <h3 className="mb-6 text-xl font-bold">
+        {t('reservation.bookingSummary')}
+      </h3>
 
       <div className="mb-4">
         <input
           type="text"
-          placeholder="Customer name"
-          value={customerName}
-          onChange={handleNameChange}
-          className={`className="mb-4 w-full rounded-lg border px-4 py-3 focus:outline-none ${
-            nameError
-              ? 'border-red-500 focus:border-red-500'
+          placeholder={t('reservation.customerNamePlaceholder')}
+          value={customerName.value}
+          onChange={customerName.handleChange}
+          className={`mb-4 w-full rounded-lg border px-4 py-3 focus:outline-none ${
+            customerName.error
+              ? 'border-red-500'
               : 'border-gray-300 focus:border-blue-500'
           }`}
         />
-        {nameError && (
+        {customerName.error && (
           <p className="animate-fade-in mt-1 text-sm text-red-600">
-            Only letters, spaces, hyphens and apostrophes allowed
+            {t('reservation.nameError')}
           </p>
         )}
       </div>
       <div className="mb-6">
         <input
           type="tel"
-          placeholder="Phone number"
-          value={customerPhone}
-          onChange={handlePhoneChange}
-          className={`w-full rounded-lg border px-4 py-3 transition-all focus:outline-none ${
-            phoneError
-              ? 'border-red-500 focus:border-red-500'
+          placeholder={t('reservation.customerPhonePlaceholder')}
+          value={customerPhone.value}
+          onChange={customerPhone.handleChange}
+          className={`mb-4 w-full rounded-lg border px-4 py-3 focus:outline-none ${
+            customerPhone.error
+              ? 'border-red-500'
               : 'border-gray-300 focus:border-blue-500'
           }`}
         />
-        {phoneError && (
+        {customerPhone.error && (
           <p className="animate-fade-in mt-1 text-sm text-red-600">
-            Only numbers and optional "+" at the beginning
+            {t('reservation.phoneError')}
           </p>
         )}
       </div>
 
       <div className="mb-5 space-y-3 rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm">
         <SummaryRow
-          label="Date"
-          value={selectedDate?.toLocaleDateString() || '[Not selected]'}
-        />
-        <SummaryRow label="Time" value={selectedTime || '[Not selected]'} />
-        <SummaryRow
-          label="Staff"
-          value={staff.find(s => s.id === selectedStaff)?.name || 'Anyone'}
+          label={t('reservation.summary.date')}
+          value={
+            selectedDate?.toLocaleDateString() ||
+            t('reservation.summary.notSelected')
+          }
         />
         <SummaryRow
-          label="Service"
-          value={selectedServiceObj?.title || '[Not selected]'}
+          label={t('reservation.summary.time')}
+          value={selectedTime || t('reservation.summary.notSelected')}
+        />
+        <SummaryRow
+  label={t('reservation.summary.staff')}
+  value={t(
+    `reservation.staff.${staff.find(s => s.id === selectedStaff)?.name || 'Anyone'}`,
+  )}
+/>
+        <SummaryRow
+          label={t('reservation.summary.service')}
+          value={
+            selectedServiceObj
+              ? t(`reservation.services.${selectedServiceObj.title}`)
+              : t('reservation.summary.notSelected')
+          }
         />
         {selectedServiceObj && (
-          <div className="flex justify-between border-t pt-2 text-lg font-bold">
-            <span>Total:</span>
+          <div className="flex justify-between border-t pt-3 text-lg font-bold">
+            <span>{t('reservation.summary.total')}:</span>
             <span>{formatPrice(selectedServiceObj.price)}</span>
           </div>
         )}
       </div>
 
       <button
-        onClick={handleConfirmWithClear}
+        onClick={onConfirm}
         className="w-full rounded-lg bg-blue-600 py-4 font-semibold text-white transition hover:bg-blue-700"
       >
-        Confirm Reservation
+        {t('reservation.confirmButton')}
       </button>
 
       <p className="mt-3 text-center text-xs text-gray-500">
-        Confirmation will be sent via SMS
+        {t('reservation.smsNote')}
       </p>
     </div>
   );
