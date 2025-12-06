@@ -222,7 +222,7 @@ export function EditReservationPanel({
       {/* Price Summary */}
       <PriceSummarySection reservation={reservation} />
 
-      {/* Action Buttons */}
+      {/* Action Buttons - Just remove the wrapper div, keep everything else the same */}
       <ActionButtons onCancel={onCancel} onSave={handleSave} />
     </div>
   );

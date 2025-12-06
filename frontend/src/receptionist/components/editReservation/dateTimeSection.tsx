@@ -39,16 +39,13 @@ export function DateTimeSection({
     onDateTimeChange(newDate);
   };
 
-  // Calendar logic
   const year = currentMonth.getFullYear();
   const month = currentMonth.getMonth();
   const firstDayOfMonth = new Date(year, month, 1);
   const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-  // Monday as first day (default for Lithuania/Europe)
   const weekdayKeys: WeekdayKey[] = ['mo', 'tu', 'we', 'th', 'fr', 'sa', 'su'];
   
-  // Get weekday translations
   const weekdayTranslations: Record<WeekdayKey, string> = {
     'mo': t('reservation.weekdays.mo'),
     'tu': t('reservation.weekdays.tu'),
