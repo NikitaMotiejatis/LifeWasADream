@@ -64,6 +64,9 @@ type CartContextType = {
   ) => { amount: number; formatted: string } | null;
 
   generateKey: (product: Product, variations: Variation[]) => CartKey;
+
+  isPaymentStarted: boolean;
+  setIsPaymentStarted: (isPaymentStarted: boolean) => void;
 };
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -87,6 +90,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     'iced-latte': { type: 'percent', value: 50 },
   });
   const [cartDiscount, setCartDiscount] = useState<CartDiscount | null>(null);
+  const [isPaymentStarted, setIsPaymentStarted] = useState<boolean>(false);
 
   const addToCart = (
     product: Product,
@@ -222,6 +226,8 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         getFinalPrice,
         getDiscountFor,
         generateKey,
+        isPaymentStarted,
+        setIsPaymentStarted,
       }}
     >
       {children}
