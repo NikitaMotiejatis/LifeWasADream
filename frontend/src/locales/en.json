@@ -859,6 +859,33 @@
       "pcs_many": "{{count}} pcs",
       "pcs_one": "{{count}} pc",
       "pcs_other": "{{count}} pcs"
+    },
+    "form": {
+      "title": "New Transfer Request",
+      "subtitle": "Move inventory between branches",
+      "productLabel": "Product",
+      "quantityLabel": "Quantity",
+      "unitLabel": "Unit",
+      "fromBranchLabel": "From branch",
+      "toBranchLabel": "To branch",
+      "selectBranch": "Select branch",
+      "requestedByLabel": "Requested by",
+      "noteLabel": "Notes",
+      "notePlaceholder": "Optional details (delivery, urgency, etc.)",
+      "submitButton": "Submit request",
+      "submitting": "Submitting...",
+      "success": "Transfer request created",
+      "errors": {
+        "productRequired": "Select a product",
+        "quantityRequired": "Enter a quantity",
+        "quantityPositive": "Quantity must be greater than zero",
+        "unitRequired": "Select a unit",
+        "fromBranchRequired": "Select a source branch",
+        "toBranchRequired": "Select a destination branch",
+        "distinctBranches": "Destination must be different than source",
+        "requesterRequired": "Enter a requester name",
+        "generic": "Unable to save request. Please try again."
+      }
     }
   },
   "validation": {

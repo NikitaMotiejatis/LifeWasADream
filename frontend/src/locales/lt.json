@@ -905,6 +905,33 @@
       "pcs_few": "{{count}} vnt.",
       "pcs_many": "{{count}} vnt.",
       "pcs_one": "{{count}} vnt."
+    },
+    "form": {
+      "title": "Naujas perkėlimo prašymas",
+      "subtitle": "Perkelkite atsargas tarp filialų",
+      "productLabel": "Produktas",
+      "quantityLabel": "Kiekis",
+      "unitLabel": "Matas",
+      "fromBranchLabel": "Iš filialo",
+      "toBranchLabel": "Į filialą",
+      "selectBranch": "Pasirinkite filialą",
+      "requestedByLabel": "Pateikė",
+      "noteLabel": "Pastabos",
+      "notePlaceholder": "Papildoma informacija (pristatymas, skuba ir pan.)",
+      "submitButton": "Siųsti prašymą",
+      "submitting": "Siunčiama...",
+      "success": "Prašymas sukurtas",
+      "errors": {
+        "productRequired": "Pasirinkite produktą",
+        "quantityRequired": "Įveskite kiekį",
+        "quantityPositive": "Kiekis turi būti didesnis nei nulis",
+        "unitRequired": "Pasirinkite matą",
+        "fromBranchRequired": "Pasirinkite šaltinio filialą",
+        "toBranchRequired": "Pasirinkite gavėjo filialą",
+        "distinctBranches": "Gavėjo filialas turi skirtis nuo šaltinio",
+        "requesterRequired": "Įrašykite pateikėją",
+        "generic": "Nepavyko išsaugoti. Bandykite dar kartą."
+      }
     }
   },
   "validation": {
