@@ -82,7 +82,9 @@ function EditOrderContent() {
       <div className="flex h-screen items-center justify-center">
         <div className="text-center">
           <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent"></div>
-          <p className="mt-4 text-gray-500">{t('order.loading', 'loading')} #{orderId}...</p>
+          <p className="mt-4 text-gray-500">
+            {t('order.loading', 'loading')} #{orderId}...
+          </p>
         </div>
       </div>
     );
@@ -102,7 +104,9 @@ function EditOrderContent() {
               />
             </svg>
           </div>
-          <p className="mt-4 text-gray-500">{t('invoice.labels.order', 'order')} #{orderId} not found</p>
+          <p className="mt-4 text-gray-500">
+            {t('invoice.labels.order', 'order')} #{orderId} not found
+          </p>
           <button
             onClick={() => navigate('/orders')}
             className="mt-4 rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
@@ -142,7 +146,8 @@ function EditOrderContent() {
             </h1>
             <p className="text-sm text-gray-600">
               {t('editOrder.created', 'Created')}:{' '}
-              {orderData.createdAt.toLocaleDateString()}   •
+              {orderData.createdAt.toLocaleDateString()}
+              {' • '}
               {t(
                 `editOrder.status.${orderData.status}`,
                 orderData.status.charAt(0).toUpperCase() +

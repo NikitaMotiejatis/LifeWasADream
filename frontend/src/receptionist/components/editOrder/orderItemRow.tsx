@@ -52,7 +52,7 @@ export function OrderItemRow({
       className="rounded-lg border border-gray-200 p-4 transition-colors hover:bg-gray-50"
     >
       <div className="flex gap-4">
-        <div className="flex-shrink-0">
+        <div className="shrink-0">
           <div className="h-24 w-24 rounded-lg bg-gray-200 shadow-inner" />
         </div>
 

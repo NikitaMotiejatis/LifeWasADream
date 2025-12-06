@@ -4,7 +4,10 @@ interface CloseIconProps extends SVGProps<SVGSVGElement> {
   className?: string;
 }
 
-export const CloseIcon = ({ className = "h-6 w-6", ...props }: CloseIconProps) => (
+export const CloseIcon = ({
+  className = 'h-6 w-6',
+  ...props
+}: CloseIconProps) => (
   <svg
     className={className}
     fill="none"

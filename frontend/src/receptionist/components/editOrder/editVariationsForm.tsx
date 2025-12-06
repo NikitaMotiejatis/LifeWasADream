@@ -54,19 +54,16 @@ export function EditVariationsForm({
   return (
     <div className="space-y-4">
       {' '}
-      {/* Increased spacing */}
       {product.variations.some(v =>
         ['Small', 'Medium', 'Large', 'Regular'].includes(v.name),
       ) && (
         <div>
           <p className="mb-2 text-sm font-medium text-gray-700">
             {' '}
-            {/* Bigger text */}
             {t('variationModal.size', 'Size')}
           </p>
           <div className="flex flex-wrap gap-2">
             {' '}
-            {/* Bigger gap */}
             {product.variations
               .filter(v =>
                 ['Small', 'Medium', 'Large', 'Regular'].includes(v.name),
@@ -113,16 +110,13 @@ export function EditVariationsForm({
         <div>
           <p className="mb-2 text-sm font-medium text-gray-700">
             {' '}
-            {/* Bigger text */}
             {t('orderPanel.selectMilk', 'Select Milk')}
           </p>
 
           <div className="flex flex-wrap gap-2">
             {' '}
-            {/* Bigger gap */}
             {allMilkVariations.map(variation => {
               const isSelected = isVariationSelected(variation);
-
 
               return (
                 <button
@@ -162,7 +156,6 @@ export function EditVariationsForm({
           </div>
         </div>
       )}
-      {/* Action buttons - make them bigger too */}
       <div className="mt-4 flex gap-3">
         <button
           onClick={onCancel}

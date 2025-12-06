@@ -137,7 +137,7 @@ export default function OrderList() {
     if (type === 'edit') {
       navigate(`/edit-order/${order.id}`);
     } else {
-        setModalType(type);
+      setModalType(type);
       setSelectedOrder(order);
       setModalOpen(true);
     }
