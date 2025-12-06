@@ -4,7 +4,10 @@ interface ShoppingCartIconProps extends SVGProps<SVGSVGElement> {
   className?: string;
 }
 
-export const ShoppingCartIcon = ({ className = "h-8 w-8 text-gray-400", ...props }: ShoppingCartIconProps) => (
+export const ShoppingCartIcon = ({
+  className = 'h-8 w-8 text-gray-400',
+  ...props
+}: ShoppingCartIconProps) => (
   <svg
     className={className}
     fill="none"

@@ -4,7 +4,10 @@ interface EditIconProps extends SVGProps<SVGSVGElement> {
   className?: string;
 }
 
-export const EditIcon = ({ className = "h-5 w-5", ...props }: EditIconProps) => (
+export const EditIcon = ({
+  className = 'h-5 w-5',
+  ...props
+}: EditIconProps) => (
   <svg
     className={className}
     fill="none"

@@ -14,12 +14,17 @@ export function ProductGridView({ onProductClick }: ProductGridViewProps) {
   const { formatPrice } = useCart();
 
   const [search, setSearch] = useState('');
-  const [category, setCategory] = useState<'all' | 'hot drinks' | 'cold drinks' | 'pastries' | 'popular'>('all');
+  const [category, setCategory] = useState<
+    'all' | 'hot drinks' | 'cold drinks' | 'pastries' | 'popular'
+  >('all');
 
   const filteredProducts = realMenu.filter(p => {
-    const matchCategory = category === 'all' || p.categories?.includes(category);
+    const matchCategory =
+      category === 'all' || p.categories?.includes(category);
     const displayName = p.nameKey ? t(p.nameKey) : p.name;
-    const matchSearch = displayName.toLowerCase().includes(search.toLowerCase());
+    const matchSearch = displayName
+      .toLowerCase()
+      .includes(search.toLowerCase());
     return matchCategory && matchSearch;
   });
 
@@ -47,7 +52,9 @@ export function ProductGridView({ onProductClick }: ProductGridViewProps) {
         </div>
 
         <div className="flex flex-wrap gap-3">
-          {(['all', 'popular', 'hot drinks', 'cold drinks', 'pastries'] as const).map(cat => (
+          {(
+            ['all', 'popular', 'hot drinks', 'cold drinks', 'pastries'] as const
+          ).map(cat => (
             <button
               key={cat}
               onClick={() => setCategory(cat)}

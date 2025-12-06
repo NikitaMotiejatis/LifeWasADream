@@ -38,9 +38,9 @@ export function SplitBillSection({
   // Show split bill button when not active
   if (!splitBill) {
     return (
-      <button 
+      <button
         onClick={() => setSplitBill(true)}
-        className="w-full rounded-lg border border-gray-400 py-2 text-xs font-medium hover:bg-gray-50 mb-6"
+        className="mb-6 w-full rounded-lg border border-gray-400 py-2 text-xs font-medium hover:bg-gray-50"
       >
         {t('orderSummary.splitBill', 'Split Bill')}
       </button>
@@ -78,10 +78,15 @@ export function SplitBillSection({
 
         <div className="mb-2">
           <p className="text-sm text-gray-700">
-            {t('orderPanel.splitBetween', 'Split between')} <span className="font-bold">{splitCount}</span> {t('orderPanel.people', 'people')}
+            {t('orderPanel.splitBetween', 'Split between')}{' '}
+            <span className="font-bold">{splitCount}</span>{' '}
+            {t('orderPanel.people', 'people')}
           </p>
           <p className="text-sm text-gray-700">
-            {t('orderPanel.eachPays', 'Each person pays')}: <span className="font-bold text-green-700">${(total / splitCount).toFixed(2)}</span>
+            {t('orderPanel.eachPays', 'Each person pays')}:{' '}
+            <span className="font-bold text-green-700">
+              ${(total / splitCount).toFixed(2)}
+            </span>
           </p>
         </div>
       </div>
@@ -107,14 +112,16 @@ export function SplitBillSection({
         <label className="mb-2 block text-sm text-gray-600">
           {t('orderPanel.splitCount', 'Split between')}:
         </label>
-        <div className="flex items-center gap-3 mb-4">
+        <div className="mb-4 flex items-center gap-3">
           <button
             onClick={() => setTempSplitCount(Math.max(2, tempSplitCount - 1))}
             className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-300 hover:bg-gray-50"
           >
             −
           </button>
-          <span className="text-lg font-medium w-12 text-center">{tempSplitCount}</span>
+          <span className="w-12 text-center text-lg font-medium">
+            {tempSplitCount}
+          </span>
           <button
             onClick={() => setTempSplitCount(tempSplitCount + 1)}
             className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-300 hover:bg-gray-50"
@@ -123,8 +130,11 @@ export function SplitBillSection({
           </button>
         </div>
 
-        <p className="text-xs text-gray-500 mb-4">
-          {t('orderPanel.splitPerPerson', 'Each person pays')}: <span className="font-bold">${(total / tempSplitCount).toFixed(2)}</span>
+        <p className="mb-4 text-xs text-gray-500">
+          {t('orderPanel.splitPerPerson', 'Each person pays')}:{' '}
+          <span className="font-bold">
+            ${(total / tempSplitCount).toFixed(2)}
+          </span>
         </p>
       </div>
 

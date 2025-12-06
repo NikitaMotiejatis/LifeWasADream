@@ -6,10 +6,10 @@ import {
   type Product,
 } from '@/receptionist/contexts/cartContext';
 import VariationModal from '@/receptionist/components/variationModal';
-import { ProductGridView } from './productGridView';  
+import { ProductGridView } from './productGridView';
 import { OrderSummaryView } from './orderSummaryView';
-import { OrderItemRow } from './orderItemRow';  
-import type { EditOrderPanelProps, OrderItem, ExtendedProduct} from './types';
+import { OrderItemRow } from './orderItemRow';
+import type { EditOrderPanelProps, OrderItem, ExtendedProduct } from './types';
 import { createMockOrderItems } from './utils';
 import { ShoppingCartIcon } from '@/icons/shoppingCartItemIcon';
 import { PlusIcon } from '@/icons/plusIcon';
@@ -23,11 +23,14 @@ export function EditOrderPanel({
   const { t } = useTranslation();
   const { addToCart, clearCart, itemsList } = useCart();
 
-  const [items, setItems] = useState<OrderItem[]>(createMockOrderItems()); 
-  const [editingVariationsId, setEditingVariationsId] = useState<string | null>(null);
+  const [items, setItems] = useState<OrderItem[]>(createMockOrderItems());
+  const [editingVariationsId, setEditingVariationsId] = useState<string | null>(
+    null,
+  );
   const [tempVariations, setTempVariations] = useState<Variation[]>([]);
   const [showProductGrid, setShowProductGrid] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState<ExtendedProduct | null>(null);
+  const [selectedProduct, setSelectedProduct] =
+    useState<ExtendedProduct | null>(null);
 
   const total = items.reduce(
     (sum, item) => sum + item.finalPrice * item.quantity,
@@ -62,12 +65,12 @@ export function EditOrderPanel({
 
   const startEditingVariations = (id: string, current: Variation[]) => {
     setEditingVariationsId(id);
-    
+
     const variationsWithKeys = current.map(v => ({
       ...v,
-      nameKey: v.nameKey || `variationModal.variations.${v.name}`
+      nameKey: v.nameKey || `variationModal.variations.${v.name}`,
     }));
-    
+
     setTempVariations(variationsWithKeys);
   };
 
@@ -92,19 +95,19 @@ export function EditOrderPanel({
     }
   };
 
-const handleAddItemFromGrid = (product: ExtendedProduct) => {
-  console.log('Adding product:', {
-    name: product.name,
-    nameKey: product.nameKey,
-    hasNameKey: !!product.nameKey
-  });
-  
-  if (!product.variations || product.variations.length === 0) {
-    addToCart(product, []);
-    return;
-  }
-  setSelectedProduct(product);
-};
+  const handleAddItemFromGrid = (product: ExtendedProduct) => {
+    console.log('Adding product:', {
+      name: product.name,
+      nameKey: product.nameKey,
+      hasNameKey: !!product.nameKey,
+    });
+
+    if (!product.variations || product.variations.length === 0) {
+      addToCart(product, []);
+      return;
+    }
+    setSelectedProduct(product);
+  };
 
   const handleStartAddingItems = () => {
     clearCart();
@@ -143,9 +146,7 @@ const handleAddItemFromGrid = (product: ExtendedProduct) => {
           </div>
 
           <div className="w-1/3 max-w-md">
-            <OrderSummaryView
-              onBack={handleDoneAddingItems}
-            />
+            <OrderSummaryView onBack={handleDoneAddingItems} />
           </div>
         </div>
 
@@ -165,12 +166,11 @@ const handleAddItemFromGrid = (product: ExtendedProduct) => {
 
   return (
     <div className="flex-1 flex-col overflow-hidden rounded-2xl bg-white p-6 shadow-xl">
-
       <div className="mb-6 max-h-[50vh] overflow-y-auto">
         {items.length === 0 ? (
           <div className="py-10 text-center">
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
-<ShoppingCartIcon className="h-8 w-8 text-gray-400" />
+              <ShoppingCartIcon className="h-8 w-8 text-gray-400" />
             </div>
             <p className="mb-4 text-gray-400">
               {t('orderSummary.noItems', 'No items in order')}
@@ -206,16 +206,18 @@ const handleAddItemFromGrid = (product: ExtendedProduct) => {
       </div>
 
       {items.length > 0 && (
-  <div className="mb-6">
-    <button
-      onClick={handleStartAddingItems}
-      className="flex w-full items-center justify-center gap-2 rounded-lg border-2 border-blue-300 bg-blue-50 py-3 text-blue-600 transition-colors hover:bg-blue-100"
-    >
-      <PlusIcon className="h-6 w-6 text-blue-600" />
-      <span className="font-medium">{t('orderPanel.addItem', 'Add Item')}</span>
-    </button>
-  </div>
-)}
+        <div className="mb-6">
+          <button
+            onClick={handleStartAddingItems}
+            className="flex w-full items-center justify-center gap-2 rounded-lg border-2 border-blue-300 bg-blue-50 py-3 text-blue-600 transition-colors hover:bg-blue-100"
+          >
+            <PlusIcon className="h-6 w-6 text-blue-600" />
+            <span className="font-medium">
+              {t('orderPanel.addItem', 'Add Item')}
+            </span>
+          </button>
+        </div>
+      )}
 
       <div className="mb-6 border-t border-gray-300 pt-4">
         <div className="flex justify-between text-xl font-bold">
@@ -226,8 +228,6 @@ const handleAddItemFromGrid = (product: ExtendedProduct) => {
           {t('orderPanel.totalNote', 'Total amount for order')} {orderId}
         </div>
       </div>
-
-
 
       {/* Save/Cancel Buttons */}
       <div className="flex gap-3 border-t border-gray-300 pt-6">
