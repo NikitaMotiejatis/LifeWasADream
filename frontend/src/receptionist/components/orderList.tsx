@@ -27,7 +27,7 @@ export default function OrderList() {
   const [timeTo, setTimeTo] = useState('');
   const [filterStatus, setFilterStatus] = useState<
     'all' | 'open' | 'closed' | 'pending'
-  >('open');
+  >('all');
   const [modalOpen, setModalOpen] = useState(false);
   const [modalType, setModalType] = useState<
     'edit' | 'pay' | 'refund' | 'cancel'
