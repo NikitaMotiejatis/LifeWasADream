@@ -5,6 +5,7 @@ import OrderFilters from '@/receptionist/components/orderFilters';
 import OrderListItem from '@/receptionist/components/orderListItem';
 import OrderModal from '@/receptionist/components/orderModal';
 import Toast from '@/global/components/toast';
+import { useNavigate } from 'react-router-dom';
 
 type Order = {
   id: string;
@@ -16,6 +17,7 @@ type Order = {
 export default function OrderList() {
   const { t } = useTranslation();
   const { formatPrice } = useCurrency();
+  const navigate = useNavigate();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -132,9 +134,13 @@ export default function OrderList() {
     type: 'edit' | 'pay' | 'refund' | 'cancel',
     order: Order,
   ) => {
-    setModalType(type);
-    setSelectedOrder(order);
-    setModalOpen(true);
+    if (type === 'edit') {
+      navigate(`/edit-order/${order.id}`);
+    } else {
+      setModalType(type);
+      setSelectedOrder(order);
+      setModalOpen(true);
+    }
   };
 
   const closeModal = () => {

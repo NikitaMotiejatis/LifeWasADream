@@ -128,7 +128,8 @@
       "items_many": "{{count}} items",
       "items_one": "{{count}} item",
       "note": "Note:",
-      "order": "Order"
+      "order": "Order",
+      "notFound": "not found"
     },
     "status": {
       "approved": "Approved",
@@ -381,6 +382,15 @@
     "increaseQuantity": "Increase quantity",
     "noItems": "No items yet",
     "paymentMethod": "Payment method",
+    "people": "people",
+    "peopleCount": "People",
+    "splitEqually": "Split equally",
+    "splitByItems": "Each pays for own items",
+    "payer": "Person",
+    "selectMethod": "Select payment method",
+    "payWith": "Pay with {{method}}",
+    "allPaid": "All paid – thank you!",
+    "paid": "Paid",
     "paymentMethods": {
       "Card": "Card",
       "Cash": "Cash",
@@ -834,14 +844,69 @@
       "Large": "Large",
       "Medium": "Medium",
       "Oat Milk": "Oat Milk",
-      "Small": "Small"
+      "Small": "Small",
+      "regularMilk": "Regular Milk"
     }
   },
   "variations": {
+    "regularMilk": "Regular Milk",
     "almondMilk": "Almond Milk",
     "large": "Large",
     "medium": "Medium",
     "oatMilk": "Oat Milk",
     "small": "Small"
+  },
+  "orderPanel": {
+    "addItem": "Add item",
+    "cancel": "Cancel",
+    "done": "Done",
+    "change": "change",
+    "selectSize": "Select size:",
+    "selectMilk": "Select milk:",
+    "selectOptions": "Select options:",
+    "noSize": "No size selected",
+    "noMilk": "No milk selected",
+    "noOptions": "No options selected",
+    "extra": "extra",
+    "newItem": "New",
+    "originalItem": "Original",
+    "decreaseQuantity": "Decrease quantity",
+    "increaseQuantity": "Increase quantity",
+    "remove": "Remove",
+    "clearAll": "Clear All",
+    "viewTitle": "Current Order",
+    "originalItems": "Order Items",
+    "newItems": "New Items",
+    "newItemsAdded": "New Items Added",
+    "discounts": "Discounts",
+    "newTotal": "New Total",
+    "totalNote": "Changes will update order #",
+    "subtotal": "Subtotal",
+    "total": "Total",
+    "paymentMethod": "Payment Method",
+    "paymentMethods": {
+      "Cash": "Cash",
+      "Card": "Card",
+      "Gift card": "Gift Card"
+    },
+    "splitBill": "Split Bill",
+    "splitCount": "Split between:",
+    "completePayment": "Complete Payment",
+    "updateOrder": "Update Order"
+  },
+  "editOrder": {
+    "title": "Edit Order",
+    "subtitle": "Modify items, payment method, and billing",
+    "cancel": "Cancel",
+    "save": "Save Changes",
+    "saveChanges": "Save Changes",
+    "each": "each",
+    "created": "Created",
+    "active": "Active"
+  },
+  "status": {
+    "active": "Active",
+    "closed": "Closed",
+    "refund_pending": "Refund Pending"
   }
 }

@@ -27,7 +27,7 @@ export default function NewOrderPage() {
 
                   {/* Right: Order summary */}
                   <div className="w-1/3 max-w-md">
-                    <OrderSummary />
+                    <OrderSummary showPaymentSection={true} />
                   </div>
                 </div>
               </main>

@@ -1,13 +1,18 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Product, useCart } from '@/receptionist/contexts/cartContext';
-import { products } from '@/locales/products';
 import VariationModal from '@/receptionist/components/variationModal';
 import SearchIcon from '@/icons/searchIcon';
+import { realMenu } from './utils';
+import type { ExtendedProduct } from './types';
 
-export default function ProductGrid() {
+type ProductGridProps = {
+  onProductClick?: (product: ExtendedProduct) => void;
+};
+
+export default function ProductGrid({ onProductClick }: ProductGridProps) {
   const { t } = useTranslation();
-  const { addToCart, formatPrice } = useCart();
+  const { addToCart, formatPrice, isPaymentStarted } = useCart();
 
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [search, setSearch] = useState('');
@@ -23,7 +28,7 @@ export default function ProductGrid() {
     setSelectedProduct(product);
   };
 
-  const filteredProducts = products.filter(p => {
+  const filteredProducts = realMenu.filter(p => {
     const matchCategory =
       category === 'all' || p.categories?.includes(category);
     const displayName = p.nameKey ? t(p.nameKey) : p.name;
@@ -79,13 +84,26 @@ export default function ProductGrid() {
         {filteredProducts.map(product => (
           <button
             key={product.id}
-            onClick={() => handleProductClick(product)}
-            className="group relative flex flex-col items-center rounded-lg border border-gray-200 bg-white p-4 text-center shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md active:scale-95"
+            onClick={() =>
+              onProductClick
+                ? onProductClick(product)
+                : handleProductClick(product)
+            }
+            disabled={isPaymentStarted}
+            className={`group relative flex flex-col items-center rounded-lg border border-gray-200 bg-white p-4 text-center shadow-sm transition-all ${
+              isPaymentStarted
+                ? 'cursor-not-allowed opacity-65'
+                : 'cursor-pointer hover:-translate-y-0.5 hover:shadow-md active:scale-95'
+            }`}
+            title={product.nameKey ? t(product.nameKey) : product.name}
           >
             <div className="mb-3 aspect-square w-full max-w-24 rounded-lg bg-gray-200 shadow-inner" />
 
             <div className="w-full px-2">
-              <p className="line-clamp-2 text-center text-sm leading-snug font-medium">
+              <p
+                className="line-clamp-2 text-center text-sm leading-snug font-medium"
+                title={product.nameKey ? t(product.nameKey) : product.name}
+              >
                 {product.nameKey ? t(product.nameKey) : product.name}
               </p>
             </div>
