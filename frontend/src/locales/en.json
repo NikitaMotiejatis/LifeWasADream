@@ -294,6 +294,8 @@
       "pageTitle": "Refund approvals",
       "pageSubtitle": "Review and process refund requests",
       "noRefunds": "No pending refund requests",
+      "approved": "Patvirtinta grąžinimo užklausa {{id}}",
+      "rejected": "Atmesta grąžinimo užklausa {{id}}, priežastis: {{reason}}",
       "stats": {
         "pendingRequests": {
           "title": "Pending Requests",
@@ -473,7 +475,15 @@
     "lemonade": "Fresh Lemonade",
     "orangeJuice": "Orange Juice",
     "smoothieBerry": "Smoothie – Berry Blast",
-    "smoothieMango": "Smoothie – Mango Paradise"
+    "smoothieMango": "Smoothie – Mango Paradise",
+    "latteMedium": "Latte (Medium)",
+    "muffin": "Muffin",
+    "haircutStyle": "Haircut & Style",
+    "orangeJuice1L": "Orange Juice (1L)",
+    "coffeeBeans": "Coffee Beans (Arabica)",
+    "milkWhole": "Milk (Whole)",
+    "paperCups12oz": "Paper Cups (12oz)",
+    "croissants": "Croissants"
   },
   "reservation": {
     "weekdays": {
@@ -1006,5 +1016,21 @@
     "title": "Edit Reservation",
     "subtitle": "Modify reservation details",
     "saveChanges": "Save Changes"
+  },
+  "refundReasons": {
+    "wrongItem": "Incorrect item delivered (wrong size coffee).",
+    "reservationCancelled": "Reservation cancelled within 24 hours.",
+    "spoiledProduct": "Product spoiled upon opening."
+  },
+  "branches": {
+    "downtown": "Downtown Branch",
+    "eastside": "Eastside Branch",
+    "north": "North Branch"
+  },
+  "categories": {
+    "hotDrinks": "Hot Drinks",
+    "coldDrinks": "Cold Drinks",
+    "pastries": "Pastries",
+    "merchandise": "Merchandise"
   }
 }

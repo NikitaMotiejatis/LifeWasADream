@@ -239,7 +239,7 @@
         "items": {
           "coffeeBeans": "Kavos pupelės (1 kg)",
           "oatMilk": "Avižų pienas (1 l)",
-          "paperCups": "Popieriniai puodeliai (12 oz)"
+          "paperCups": "Popieriniai puodeliai (350 ml)"
         },
         "statuses": {
           "urgent": "Skubu",
@@ -272,6 +272,8 @@
       "pageTitle": "Grąžinimų tvirtinimai",
       "pageSubtitle": "Peržiūrėkite ir apdorokite prašymus",
       "noRefunds": "Nėra laukiančių grąžinimo prašymų",
+      "approved": "Patvirtinta grąžinimo užklausa {{id}}",
+      "rejected": "Atmesta grąžinimo užklausa {{id}}, priežastis: {{reason}}",
       "review": "Peržiūrėti",
       "stats": {
         "pendingRequests": {
@@ -479,7 +481,15 @@
     "lemonade": "Šviežias limonadas",
     "orangeJuice": "Apelsinų sultys",
     "smoothieBerry": "Kokteilis – Uogų sprogimas",
-    "smoothieMango": "Kokteilis – Mangų rojus"
+    "smoothieMango": "Kokteilis – Mangų rojus",
+    "latteMedium": "Latė (Vidutinė)",
+    "muffin": "Bandelė",
+    "haircutStyle": "Kirpimas ir Šukuosena",
+    "orangeJuice1L": "Apelsinų sultys (1L)",
+    "coffeeBeans": "Kavos pupelės",
+    "milkWhole": "Įprastas pienas",
+    "paperCups12oz": "Popieriniai puodeliai (350ml)",
+    "croissants": "Kruasanai"
   },
   "reservation": {
     "weekdays": {
@@ -1038,5 +1048,21 @@
     "title": "Redaguoti rezervaciją",
     "subtitle": "Keisti rezervacijos detales",
     "saveChanges": "Išsaugoti pakeitimus"
+  },
+  "refundReasons": {
+    "wrongItem": "Pateikta neteisinga prekė (neteisingas kavos dydis).",
+    "reservationCancelled": "Rezervacija atšaukta per 24 valandas.",
+    "spoiledProduct": "Produktas sugadintas atidarius."
+  },
+  "branches": {
+    "downtown": "Centrinis filialas",
+    "eastside": "Rytinis filialas",
+    "north": "Šiaurinis filialas"
+  },
+  "categories": {
+    "hotDrinks": "Karšti gėrimai",
+    "coldDrinks": "Šalti gėrimai",
+    "pastries": "Kepiniai",
+    "merchandise": "Prekės"
   }
 }

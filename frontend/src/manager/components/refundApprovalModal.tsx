@@ -3,6 +3,7 @@ import { RefundRequest } from '../mockData';
 import { useState } from 'react';
 import CheckmarkIcon from '../../icons/checkmarkIcon';
 import TrashcanIcon from '../../icons/trashcanIcon';
+import { useCurrency } from '@/global/contexts/currencyContext';
 
 interface RefundApprovalModalProps {
   request: RefundRequest;
@@ -20,6 +21,7 @@ export default function RefundApprovalModal({
   onReject,
 }: RefundApprovalModalProps) {
   const { t } = useTranslation();
+  const { formatPrice } = useCurrency();
   const [rejectionReason, setRejectionReason] = useState('');
   const [isRejecting, setIsRejecting] = useState(false);
 
@@ -55,45 +57,74 @@ export default function RefundApprovalModal({
     >
       <div className="absolute inset-0 bg-black/50" onClick={handleClose} />
 
-      <div className="bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all max-w-lg w-full relative">
+      <div className="relative w-full max-w-lg transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all">
         <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
           <div className="sm:flex sm:items-start">
-            <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
-              <h3 className="text-xl leading-6 font-semibold text-gray-900" id="modal-title">
+            <div className="mt-3 w-full text-center sm:mt-0 sm:ml-4 sm:text-left">
+              <h3
+                className="text-xl leading-6 font-semibold text-gray-900"
+                id="modal-title"
+              >
                 {t('manager.refunds.modal.title')} - {request.orderId}
               </h3>
               <p className="text-sm text-gray-500">
-                {t('manager.refunds.modal.subtitle')}
+                {t('manager.refunds.modal.subtitle', {
+                  orderId: request.orderId,
+                })}
               </p>
               <div className="mt-6 space-y-4">
                 {/* Customer Info */}
-                <div className="p-4 bg-gray-50 rounded-lg">
-                  <p className="text-xs font-medium text-gray-500 uppercase mb-1">{t('manager.refunds.modal.customerInfo')}</p>
-                  <p className="text-base font-medium text-gray-900">{request.customerName}</p>
-                  <p className="text-sm text-gray-500">{t('manager.refunds.modal.requestedBy')}: {request.requestedBy}</p>
+                <div className="rounded-lg bg-gray-50 p-4">
+                  <p className="mb-1 text-xs font-medium text-gray-500 uppercase">
+                    {t('manager.refunds.modal.customerInfo')}
+                  </p>
+                  <p className="text-base font-medium text-gray-900">
+                    {request.customerName}
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    {t('manager.refunds.modal.requestedBy')}:{' '}
+                    {request.requestedBy}
+                  </p>
                 </div>
 
                 {/* Refund Details */}
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="p-4 bg-gray-50 rounded-lg">
-                    <p className="text-xs font-medium text-gray-500 uppercase mb-1">{t('manager.refunds.modal.refundAmount')}</p>
-                    <p className="text-xl font-bold text-gray-900">${request.amount.toFixed(2)}</p>
-                    <p className="text-sm text-gray-500">Downtown Branch</p>
+                  <div className="rounded-lg bg-gray-50 p-4">
+                    <p className="mb-1 text-xs font-medium text-gray-500 uppercase">
+                      {t('manager.refunds.modal.refundAmount')}
+                    </p>
+                    <p className="text-xl font-bold text-gray-900">
+                      {formatPrice(request.amount)}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      {t('branches.downtown')}
+                    </p>
                   </div>
-                  <div className="p-4 bg-gray-50 rounded-lg">
-                    <p className="text-xs font-medium text-gray-500 uppercase mb-1">{t('manager.refunds.modal.reason')}</p>
-                    <p className="text-base font-medium text-red-600">{request.reason}</p>
+                  <div className="rounded-lg bg-gray-50 p-4">
+                    <p className="mb-1 text-xs font-medium text-gray-500 uppercase">
+                      {t('manager.refunds.modal.reason')}
+                    </p>
+                    <p className="text-base font-medium text-red-600">
+                      {t(request.reason)}
+                    </p>
                   </div>
                 </div>
 
                 {/* Order Items */}
-                <div className="p-4 bg-gray-50 rounded-lg">
-                  <p className="text-xs font-medium text-gray-500 uppercase mb-2">{t('manager.refunds.modal.orderItems')}</p>
+                <div className="rounded-lg bg-gray-50 p-4">
+                  <p className="mb-2 text-xs font-medium text-gray-500 uppercase">
+                    {t('manager.refunds.modal.orderItems')}
+                  </p>
                   <div className="space-y-1">
                     {request.orderItems.map((item, index) => (
-                      <div key={index} className="flex justify-between text-sm text-gray-700">
-                        <span>{item.quantity}x {item.name}</span>
-                        <span>${(item.quantity * item.price).toFixed(2)}</span>
+                      <div
+                        key={index}
+                        className="flex justify-between text-sm text-gray-700"
+                      >
+                        <span>
+                          {item.quantity}x {t(item.name)}
+                        </span>
+                        <span>{formatPrice(item.quantity * item.price)}</span>
                       </div>
                     ))}
                   </div>
@@ -102,19 +133,24 @@ export default function RefundApprovalModal({
                 {/* Rejection Reason Input */}
                 {isRejecting && (
                   <div className="mt-4">
-                    <label htmlFor="rejection-reason" className="block text-sm font-medium text-gray-700">
+                    <label
+                      htmlFor="rejection-reason"
+                      className="block text-sm font-medium text-gray-700"
+                    >
                       {t('manager.refunds.rejectionReason')}
                     </label>
                     <textarea
                       id="rejection-reason"
                       rows={3}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                      className="mt-1 block w-full rounded-md border-gray-300 p-1 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                       value={rejectionReason}
-                      onChange={(e) => setRejectionReason(e.target.value)}
+                      onChange={e => setRejectionReason(e.target.value)}
                       placeholder={t('manager.refunds.rejectionPlaceholder')}
                     />
                     {!rejectionReason.trim() && (
-                      <p className="mt-1 text-xs text-red-500">{t('manager.refunds.reasonRequired')}</p>
+                      <p className="mt-1 text-xs text-red-500">
+                        {t('manager.refunds.reasonRequired')}
+                      </p>
                     )}
                   </div>
                 )}
@@ -122,10 +158,10 @@ export default function RefundApprovalModal({
             </div>
           </div>
         </div>
-        <div className="bg-gray-50 px-4 py-3 sm:px-6 flex flex-col sm:flex-row sm:justify-end gap-3">
+        <div className="flex flex-col gap-3 bg-gray-50 px-4 py-3 sm:flex-row sm:justify-end sm:px-6">
           <button
             type="button"
-            className="w-full sm:w-auto inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 text-base font-medium text-gray-700 bg-white hover:bg-gray-100 transition-colors duration-150"
+            className="inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm transition-colors duration-150 hover:bg-gray-100 sm:w-auto"
             onClick={handleClose}
           >
             {t('common.cancel')}
@@ -133,7 +169,7 @@ export default function RefundApprovalModal({
 
           <button
             type="button"
-            className={`w-full sm:w-auto inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 text-base font-medium sm:text-sm transition-colors duration-150 ${isRejecting ? 'bg-red-600 text-white hover:bg-red-700' : 'bg-red-100 text-red-700 hover:bg-red-200'}`}
+            className={`inline-flex w-full justify-center rounded-md border border-transparent px-4 py-2 text-base font-medium shadow-sm transition-colors duration-150 sm:w-auto sm:text-sm ${isRejecting ? 'bg-red-600 text-white hover:bg-red-700' : 'bg-red-100 text-red-700 hover:bg-red-200'}`}
             onClick={() => {
               if (!isRejecting) {
                 setIsRejecting(true);
@@ -143,17 +179,19 @@ export default function RefundApprovalModal({
             }}
             disabled={isRejecting && !rejectionReason.trim()}
           >
-            <TrashcanIcon className="w-5 h-5 mr-2" />
-            {isRejecting ? t('manager.refunds.confirmReject') : t('manager.refunds.reject')}
+            <TrashcanIcon className="mr-2 h-5 w-5" />
+            {isRejecting
+              ? t('manager.refunds.confirmReject')
+              : t('manager.refunds.reject')}
           </button>
 
           {!isRejecting && (
             <button
               type="button"
-              className="w-full sm:w-auto inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 text-base font-medium text-white bg-green-600 hover:bg-green-700 transition-colors duration-150"
+              className="inline-flex w-full justify-center rounded-md border border-transparent bg-green-600 px-4 py-2 text-base font-medium text-white shadow-sm transition-colors duration-150 hover:bg-green-700 sm:w-auto"
               onClick={handleApprove}
             >
-              <CheckmarkIcon className="w-5 h-5 mr-2" />
+              <CheckmarkIcon className="mr-2 h-5 w-5" />
               {t('manager.refunds.approve')}
             </button>
           )}
