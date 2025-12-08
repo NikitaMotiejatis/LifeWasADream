@@ -11,11 +11,9 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 
-	"dreampos/internal/business"
 	"dreampos/internal/config"
-	"dreampos/internal/data"
 )
 
 type App struct {
@@ -23,25 +21,10 @@ type App struct {
 }
 
 func New(config config.Config) App {
-	mainRouter := gin.Default()
+	mainRouter := chi.NewRouter()
 
-	mainRouter.Use(gin.Recovery())
-
-	{
-		db, err := data.NewPostgresDb(config)
-		if err != nil {
-			panic(fmt.Errorf("Failed to connect to Postgres DB: %w", err))
-		}
-
-		businessController := business.BusinessController{
-			Service: business.ProductionBusinessService{
-				Db: db,
-			},
-		}
-		businessGroup := mainRouter.Group("/businesses")
-
-		businessController.Attach(businessGroup)
-	}
+	attachMiddlewares(mainRouter, config)
+	attachRoutes(mainRouter)
 
 	return App{
 		Server: &http.Server{
@@ -55,9 +38,11 @@ func (app *App) Start() {
 	go func() {
 		err := app.Server.ListenAndServe()
 		if err != nil && !errors.Is(err, http.ErrServerClosed) {
-			panic("Server failed: " + err.Error())
+			panic(fmt.Errorf("Server failed: %w", err))
 		}
 	}()
+
+	slog.Info("Server started")
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
@@ -70,7 +55,7 @@ func (app *App) Start() {
 
 	err := app.Server.Shutdown(ctx)
 	if err != nil {
-		panic("Server forced to shutdown: " + err.Error())
+		panic(fmt.Errorf("Server forced to shutdown: %w", err))
 	}
 
 	slog.Info("Server exiting")
