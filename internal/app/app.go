@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"os"
@@ -11,22 +12,27 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/jmoiron/sqlx"
 
 	"dreampos/internal/business"
+	"dreampos/internal/config"
+	"dreampos/internal/data"
 )
 
 type App struct {
-	Db  	*sqlx.DB
 	Server	*http.Server
 }
 
-func New(url string, db *sqlx.DB) App {
+func New(config config.Config) App {
 	mainRouter := gin.Default()
 
 	mainRouter.Use(gin.Recovery())
 
 	{
+		db, err := data.NewPostgresDb(config)
+		if err != nil {
+			panic(fmt.Errorf("Failed to connect to Postgres DB: %w", err))
+		}
+
 		businessController := business.BusinessController{
 			Service: business.ProductionBusinessService{
 				Db: db,
@@ -38,9 +44,8 @@ func New(url string, db *sqlx.DB) App {
 	}
 
 	return App{
-		Db:     db,
 		Server: &http.Server{
-			Addr:    url,
+			Addr:    config.Url,
 			Handler: mainRouter,
 		},
 	}
