@@ -2,6 +2,7 @@ package auth
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 )
@@ -15,14 +16,10 @@ type UserRepo interface {
 	GetUserDetails(username string) (UserDetails, error)
 }
 
-type AuthService interface {
-}
-
 type AuthController struct {
-	SessionTokenName	string
-	CsrfTokenName		string
-	UserRepo			UserRepo
-	Users 				map[string]UserDetails
+	SessionTokenDuration	time.Duration
+	CsrfTokenDuration 		time.Duration
+	AuthService				AuthService
 }
 
 func (c AuthController) Routes() http.Handler {
@@ -41,9 +38,16 @@ func (c AuthController) AuthenticateMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
-		_, err := r.Cookie(c.SessionTokenName)
+		sessionTokenCookie, err := r.Cookie(c.AuthService.SessionTokenName)
 		if err != nil {
-			http.Error(w, "page not found", http.StatusNotFound)
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+		csrfToken := r.Header.Get(c.AuthService.CsrfTokenName)
+
+		err = c.AuthService.validate(sessionTokenCookie.Value, csrfToken)
+		if err != nil {
+			w.WriteHeader(http.StatusNotFound)
 			return
 		}
 

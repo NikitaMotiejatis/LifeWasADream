@@ -23,8 +23,23 @@ type App struct {
 func New(config config.Config) App {
 	mainRouter := chi.NewRouter()
 
-	attachMiddlewares(mainRouter, config)
-	attachRoutes(mainRouter, config)
+	attachGlobalMiddlewares(mainRouter, config)
+
+	authController := setupAuthControllers(mainRouter, config)
+	setupApiRoutes(mainRouter, config, authController)
+
+	mainRouter.NotFound(func(w http.ResponseWriter, r *http.Request) {
+		if w == nil || r == nil {
+			return
+		}
+		http.Error(w, "page not found", http.StatusNotFound)
+	})
+	mainRouter.MethodNotAllowed(func(w http.ResponseWriter, r *http.Request) {
+		if w == nil || r == nil {
+			return
+		}
+		http.Error(w, "invalid method", http.StatusMethodNotAllowed)
+	})
 
 	return App{
 		Server: &http.Server{

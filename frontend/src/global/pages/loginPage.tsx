@@ -52,14 +52,24 @@ export default function LoginPage() {
         if (parts.length === 2) return parts.pop()?.split(';').shift();
       }
 
-      const _ = await fetch("http://localhost:8081/auth/validate", {
+      const r2 = await fetch("http://localhost:8081/auth/validate", {
         method: "PUT",
         headers: {
           "X-XSRF-TOKEN": getCookie("X-XSRF-TOKEN") ?? "",
         },
         credentials: 'include',
       });
-      response.redirected
+
+      const r3 = await fetch("http://localhost:8081/api/vhi", {
+        method: "GET",
+        headers: {
+          "X-XSRF-TOKEN": getCookie("X-XSRF-TOKEN") ?? "",
+        },
+        credentials: 'include',
+      });
+
+      console.log(await r3.text());
+
       //navigate(redirectPath);
     } catch (e) {
       console.error(e);

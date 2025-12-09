@@ -1,33 +1,16 @@
 package auth
 
 import (
-	"crypto/rand"
-	"encoding/base64"
 	"encoding/json"
-	"log/slog"
+	"errors"
 	"net/http"
 	"time"
-
-	"github.com/golang-jwt/jwt/v5"
-	"golang.org/x/crypto/bcrypt"
 )
-
-type JwtSessionToken struct {
-	Username		string	`json:"username"`
-	ExpiresUnix		int64	`json:"expires"`
-	CsrfToken		string	`json:"csrf-token"`
-	jwt.RegisteredClaims
-}
 
 
 func (c AuthController) login(w http.ResponseWriter, r *http.Request) {
 	if w == nil || r == nil {
 		return
-	}
-
-	type LoginInfo struct {
-		Username string `json:"username"`
-		Password string `json:"password"`
 	}
 
 	var user LoginInfo
@@ -36,66 +19,29 @@ func (c AuthController) login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userDetails, found := c.Users[user.Username]
-	if !found {
-		http.Error(w, "invalid login details", http.StatusUnauthorized)
+	sessionToken, csrfToken, err := c.AuthService.login(user, c.SessionTokenDuration)
+	if errors.Is(err, ErrTokenGenerationFailed) {
+		http.Error(w, "failed to generate token", http.StatusInternalServerError)
 		return
-	}
-
-	if err := bcrypt.CompareHashAndPassword([]byte(userDetails.PasswordHash), []byte(user.Password)); err != nil {
-		http.Error(w, "invalid login details", http.StatusUnauthorized)
+	} else if err != nil {
+		http.Error(w, "invalid login info", http.StatusBadRequest)
 		return
-	}
-
-	sessionTokenDuration := time.Hour * 24
-	csrfTokenDuration := time.Hour * 24
-
-	var csrfToken string
-	{
-		bytes := make([]byte, 64)
-		if _, err := rand.Read(bytes); err != nil {
-			slog.Error("failed to generate CSRF token: " + err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-
-		csrfToken = base64.URLEncoding.EncodeToString(bytes)
-	}
-
-	var sessionToken string
-	{
-		secretKey := []byte("secret"); // TODO: Read a better secret from config
-		claims := JwtSessionToken{
-			Username: user.Username, 
-			ExpiresUnix: time.Now().Add(sessionTokenDuration).Unix(), 
-			CsrfToken: csrfToken,
-		}
-		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-
-		signedToken, err := token.SignedString(secretKey)
-		if err != nil {
-			slog.Error("failed to generate session token: " + err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-
-		sessionToken = signedToken
 	}
 
 	http.SetCookie(w, &http.Cookie{
-		Name:       c.SessionTokenName,
+		Name:       c.AuthService.SessionTokenName,
 		Value:		sessionToken,
 		Path:		"/",
-		Expires:    time.Now().Add(sessionTokenDuration),
+		Expires:    time.Now().Add(c.SessionTokenDuration),
 		HttpOnly:   true,
 		SameSite:   http.SameSiteStrictMode,
 	})
 
 	http.SetCookie(w, &http.Cookie{
-		Name:       c.CsrfTokenName,
+		Name:       c.AuthService.CsrfTokenName,
 		Value:      csrfToken,
 		Path:		"/",
-		Expires:    time.Now().Add(csrfTokenDuration),
+		Expires:    time.Now().Add(c.CsrfTokenDuration),
 		HttpOnly:   false,
 		SameSite:   http.SameSiteStrictMode,
 	})
@@ -110,33 +56,17 @@ func (c AuthController) validate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	csrfToken := r.Header.Get("X-XSRF-TOKEN") // TODO: remove hard-coded header name
-
-	sessionTokenCookie, err := r.Cookie("SESSION-TOKEN")
+	sessionTokenCookie, err := r.Cookie(c.AuthService.SessionTokenName)
 	if err != nil {
 		http.Error(w, "not validated", http.StatusUnauthorized)
 		return
 	}
+	csrfToken := r.Header.Get(c.AuthService.CsrfTokenName)
 
-	{
-		token, err := jwt.ParseWithClaims(sessionTokenCookie.Value, &JwtSessionToken{}, func(t *jwt.Token) (any, error) {
-			return []byte("secret"), nil // TODO: secret
-		})
-		if err != nil || !token.Valid {
-			http.Error(w, "not validated", http.StatusUnauthorized)
-			return
-		}
-
-		claims, ok := token.Claims.(*JwtSessionToken)
-		if !ok {
-			http.Error(w, "not validated", http.StatusUnauthorized)
-			return
-		}
-
-		if time.Now().After(time.Unix(claims.ExpiresUnix, 0)) || claims.CsrfToken != csrfToken {
-			http.Error(w, "not validated", http.StatusUnauthorized)
-			return
-		}
+	err = c.AuthService.validate(sessionTokenCookie.Value, csrfToken)
+	if err != nil {
+		http.Error(w, "not validated", http.StatusUnauthorized)
+		return
 	}
 
 	w.WriteHeader(http.StatusOK)
@@ -149,7 +79,7 @@ func (c AuthController) logout(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.SetCookie(w, &http.Cookie{
-		Name:       c.SessionTokenName,
+		Name:       c.AuthService.SessionTokenName,
 		Value:      "",
 		Path: 		"/",
 		Expires:    time.Now().Add(-time.Hour),
@@ -158,7 +88,7 @@ func (c AuthController) logout(w http.ResponseWriter, r *http.Request) {
 	})
 
 	http.SetCookie(w, &http.Cookie{
-		Name:       c.CsrfTokenName,
+		Name:       c.AuthService.CsrfTokenName,
 		Value:      "",
 		Path: 		"/",
 		Expires:    time.Now().Add(-time.Hour),

@@ -9,7 +9,7 @@ import (
 	"github.com/go-chi/cors"
 )
 
-func attachMiddlewares(router *chi.Mux, config config.Config) {
+func attachGlobalMiddlewares(router *chi.Mux, config config.Config) {
 	router.Use(middleware.Heartbeat("/ping"))
 
 	router.Use(middleware.Recoverer)
