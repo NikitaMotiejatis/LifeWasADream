@@ -24,7 +24,7 @@ func New(config config.Config) App {
 	mainRouter := chi.NewRouter()
 
 	attachMiddlewares(mainRouter, config)
-	attachRoutes(mainRouter)
+	attachRoutes(mainRouter, config)
 
 	return App{
 		Server: &http.Server{

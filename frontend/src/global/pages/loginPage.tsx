@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import PersonIcon from '@/icons/personIcon';
 import LockIcon from '@/icons/lockIcon';
+import { useNavigate, useNavigation } from 'react-router-dom';
 
 export default function LoginPage() {
   const { t } = useTranslation();
@@ -9,6 +10,8 @@ export default function LoginPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [touched, setTouched] = useState({ username: false, password: false });
+
+  const navigate = useNavigate();
 
   const demoAccounts = [
     { role: 'Cashier / Receptionist', login: 'cashier1', pass: 'demo123' },
@@ -30,17 +33,37 @@ export default function LoginPage() {
     }, 250);
   };
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     setTouched({ username: true, password: true });
 
-    if (username.trim() === 'cashier1' && password.trim() === 'demo123')
-      window.location.href = '/newOrder';
-    else if (username.trim() === 'manager1' && password.trim() === 'demo123')
-      window.location.href = '/dashboard';
-    else if (username.trim() === 'clerk1' && password.trim() === 'demo123')
-      window.location.href = '/stockUpdates';
-    else if (username.trim() === 'supplier1' && password.trim() === 'demo123')
-      window.location.href = '/invoiceStatus';
+    try {
+      const response = await fetch("http://localhost:8081/auth/login", {
+        method: "POST",
+        body: JSON.stringify({username, password}),
+        credentials: 'include',
+      });
+
+      const redirectPath = await response.text();
+      console.log(redirectPath);
+
+      function getCookie(name: string) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop()?.split(';').shift();
+      }
+
+      const _ = await fetch("http://localhost:8081/auth/validate", {
+        method: "PUT",
+        headers: {
+          "X-XSRF-TOKEN": getCookie("X-XSRF-TOKEN") ?? "",
+        },
+        credentials: 'include',
+      });
+      response.redirected
+      //navigate(redirectPath);
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   const showUsernameError = touched.username && !username.trim();
