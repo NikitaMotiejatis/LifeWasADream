@@ -25,8 +25,8 @@ func New(config config.Config) App {
 
 	attachGlobalMiddlewares(mainRouter, config)
 
-	authController := setupAuthControllers(mainRouter, config)
-	setupApiRoutes(mainRouter, config, authController)
+	authController := setupAuth(mainRouter, config)
+	setupApiRoutes(mainRouter, config, authController.AuthenticateMiddleware)
 
 	mainRouter.NotFound(func(w http.ResponseWriter, r *http.Request) {
 		if w == nil || r == nil {

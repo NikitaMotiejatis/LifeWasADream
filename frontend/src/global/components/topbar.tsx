@@ -5,11 +5,14 @@ import BranchSelector from './branchSelector';
 import LanguageSwitcher from './languageSwitcher';
 import { useAuth } from '@/global/hooks/auth';
 import { useNavigate } from 'react-router-dom';
+import useSWR from 'swr';
 
 export default function Topbar() {
   const { t } = useTranslation();
-  const { logout } = useAuth();
+  const { userDetailsFetcher, logout } = useAuth();
   const navigate = useNavigate();
+
+  const { data: userData } = useSWR(`api/me`, userDetailsFetcher, { revalidateOnMount: true });
 
   const handleLogout = async () => {
     await logout();
@@ -34,8 +37,9 @@ export default function Topbar() {
       <div className="flex shrink-0 items-center gap-3 whitespace-nowrap">
         <div className="flex items-center gap-3">
           <span className="hidden text-sm font-medium text-gray-700 sm:block">
-            {t('topbar.userName')}
+            {userData?.username}
           </span>
+          {/* TODO: remove
           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-linear-to-br from-blue-500 to-purple-600 text-sm font-semibold text-white shadow-md ring-2 ring-white">
             {t('topbar.userName')
               ?.trim()
@@ -44,6 +48,7 @@ export default function Topbar() {
               .map(w => w[0]?.toUpperCase())
               .join('') || '?'}
           </div>
+          */}
         </div>
 
         <LanguageSwitcher />

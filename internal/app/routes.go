@@ -3,6 +3,7 @@ package app
 import (
 	"dreampos/internal/auth"
 	"dreampos/internal/config"
+	"encoding/json"
 	"time"
 
 	"net/http"
@@ -10,7 +11,7 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-func setupAuthControllers(router *chi.Mux, config config.Config) *auth.AuthController {
+func setupAuth(router *chi.Mux, config config.Config) *auth.AuthController {
 	c := &auth.AuthController{
 		SessionTokenDuration: 	time.Hour * 24,
 		CsrfTokenDuration: 		time.Hour * 24,
@@ -52,15 +53,26 @@ func setupAuthControllers(router *chi.Mux, config config.Config) *auth.AuthContr
 	return c
 }
 
-func setupApiRoutes(router *chi.Mux, config config.Config, ac *auth.AuthController) {
-	hi := func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("hello from server\n"))
-	}
-
+func setupApiRoutes(router *chi.Mux, _config config.Config, authMiddleware func(http.Handler)http.Handler) {
 	apiRouter := chi.NewRouter()
-	apiRouter.Get("/hi", hi)
-	apiRouter.With(ac.AuthenticateMiddleware).Get("/vhi", hi)
+
+	{
+		// TODO: if this becomes more complicated extract to controller
+		me := func(w http.ResponseWriter, r *http.Request) {
+			user, ok := r.Context().Value("user").(auth.User)
+			if !ok {
+				w.WriteHeader(http.StatusNotFound)
+				return
+			}
+
+			w.WriteHeader(http.StatusOK)
+			if err := json.NewEncoder(w).Encode(&user); err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+		}
+		apiRouter.With(authMiddleware).Get("/me", me)
+	}
 
 	router.Mount("/api", apiRouter)
 }
