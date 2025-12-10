@@ -19,7 +19,7 @@ func (c AuthController) login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	sessionToken, csrfToken, err := c.AuthService.login(user, c.SessionTokenDuration)
+	sessionToken, csrfToken, redirectPath, err := c.AuthService.login(user, c.SessionTokenDuration)
 	if errors.Is(err, ErrTokenGenerationFailed) {
 		http.Error(w, "failed to generate token", http.StatusInternalServerError)
 		return
@@ -48,7 +48,7 @@ func (c AuthController) login(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "text/plain")
-	w.Write([]byte("/orders"))
+	w.Write([]byte(redirectPath))
 }
 
 func (c AuthController) validate(w http.ResponseWriter, r *http.Request) {

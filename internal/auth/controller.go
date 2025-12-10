@@ -1,20 +1,12 @@
 package auth
 
 import (
+	"context"
 	"net/http"
 	"time"
 
 	"github.com/go-chi/chi/v5"
 )
-
-type UserDetails struct {
-	PasswordHash 	string
-	Roles			[]string
-}
-
-type UserRepo interface {
-	GetUserDetails(username string) (UserDetails, error)
-}
 
 type AuthController struct {
 	SessionTokenDuration	time.Duration
@@ -45,13 +37,26 @@ func (c AuthController) AuthenticateMiddleware(next http.Handler) http.Handler {
 		}
 		csrfToken := r.Header.Get(c.AuthService.CsrfTokenName)
 
-		err = c.AuthService.validate(sessionTokenCookie.Value, csrfToken)
+		sessionToken, err := c.AuthService.TokenService.parseSessionToken(sessionTokenCookie.Value)
 		if err != nil {
 			w.WriteHeader(http.StatusNotFound)
 			return
 		}
 
-		next.ServeHTTP(w, r)
+		err = c.AuthService.TokenService.verifySessionToken(sessionToken, csrfToken)
+		if err != nil {
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+
+		user, err := c.AuthService.getUserDetails(sessionToken)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		userContext := context.WithValue(r.Context(), "user", user)
+
+		next.ServeHTTP(w, r.WithContext(userContext))
 	})
 }
 

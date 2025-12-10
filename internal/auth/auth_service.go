@@ -3,6 +3,7 @@ package auth
 import (
 	"errors"
 	"log/slog"
+	"slices"
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
@@ -28,20 +29,30 @@ type LoginInfo struct {
 	Password string `json:"password"`
 }
 
-func (s AuthService) login(user LoginInfo, sessionTokenDuration time.Duration) (string, string, error) {
+type UserDetails struct {
+	PasswordHash 	string
+	Roles			[]string
+}
+
+type User struct {
+	Username	string 		`json:"username"`
+	Roles		[]string	`json:"roles"`
+}
+
+func (s AuthService) login(user LoginInfo, sessionTokenDuration time.Duration) (string, string, string, error) {
 	userDetails, found := s.Users[user.Username]
 	if !found {
-		return "", "", ErrUserNotFound
+		return "", "", "", ErrUserNotFound
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(userDetails.PasswordHash), []byte(user.Password)); err != nil {
-		return "", "", ErrWrongPassword
+		return "", "", "", ErrWrongPassword
 	}
 
 	csrfToken, err := s.TokenService.generateCsrfToken(64)
 	if err != nil {
 		slog.Error("failed to generate CSRF token: " + err.Error())
-		return "", "", ErrTokenGenerationFailed
+		return "", "", "", ErrTokenGenerationFailed
 	}
 
 	claims := JwtSessionToken{
@@ -52,18 +63,48 @@ func (s AuthService) login(user LoginInfo, sessionTokenDuration time.Duration) (
 	sessionToken, err := s.TokenService.generateSessionToken(claims)
 	if err != nil {
 		slog.Error("failed to generate session token: " + err.Error())
-		return "", "", ErrTokenGenerationFailed
+		return "", "", "", ErrTokenGenerationFailed
 	}
 
-	return sessionToken, csrfToken, nil
+	redirectPath := "/login"
+	if slices.Contains(userDetails.Roles, "Cashier") {
+		redirectPath = "/newOrder"
+	} else if slices.Contains(userDetails.Roles, "Manager") {
+		redirectPath = "/dashboard"
+	} else if slices.Contains(userDetails.Roles, "Clerk") {
+		redirectPath = "/stockUpdates"
+	} else if slices.Contains(userDetails.Roles, "Supplier") {
+		redirectPath = "/invoiceStatus"
+	}
+
+	return sessionToken, csrfToken, redirectPath, nil
 }
 
-func (s AuthService) validate(cookieValue string, csrfToken string) error {
-	_, err := s.TokenService.verifyAndParseSessionToken(cookieValue, csrfToken)
+func (s AuthService) validate(sessionCookieValue string, csrfToken string) error {
+	token, err := s.TokenService.parseSessionToken(sessionCookieValue)
+	if err != nil {
+		slog.Error("invalid token: " + err.Error())
+		return ErrTokenNotValid
+	}
+
+	err = s.TokenService.verifySessionToken(token, csrfToken)
 	if err != nil {
 		slog.Error("invalid credentials: " + err.Error())
 		return ErrTokenNotValid
 	}
 
 	return nil
+}
+
+func (s AuthService) getUserDetails(sessionToken *JwtSessionToken) (User, error) {
+	userDetails, found := s.Users[sessionToken.Username]
+	if !found {
+		return User{}, ErrUserNotFound
+	}
+
+	user := User{
+		Username: sessionToken.Username,
+		Roles: userDetails.Roles,
+	}
+	return user, nil
 }

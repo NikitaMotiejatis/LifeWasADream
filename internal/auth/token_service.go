@@ -48,7 +48,7 @@ func (s TokenService) generateCsrfToken(tokenLength uint16) (string, error) {
 	return base64.URLEncoding.EncodeToString(bytes), nil
 }
 
-func (s TokenService) verifyAndParseSessionToken(tokenString string, csrfToken string) (*JwtSessionToken, error) {
+func (s TokenService) parseSessionToken(tokenString string) (*JwtSessionToken, error) {
 	token, err := jwt.ParseWithClaims(tokenString, &JwtSessionToken{}, func(t *jwt.Token) (any, error) {
 		return s.JwtSecret, nil
 	})
@@ -64,13 +64,17 @@ func (s TokenService) verifyAndParseSessionToken(tokenString string, csrfToken s
 		return nil, ErrTokenWrongStructure
 	}
 
-	if expires := time.Unix(claims.ExpiresUnix, 0);  time.Now().After(expires) {
-		return nil, ErrTokenExpired
-	}
-
-	if claims.CsrfToken != csrfToken {
-		return nil, ErrTokenInvalidCsrf
-	}
-
 	return claims, nil
+}
+
+func (s TokenService) verifySessionToken(sessionToken *JwtSessionToken, csrfToken string) error {
+	if expires := time.Unix(sessionToken.ExpiresUnix, 0);  time.Now().After(expires) {
+		return ErrTokenExpired
+	}
+
+	if sessionToken.CsrfToken != csrfToken {
+		return ErrTokenInvalidCsrf
+	}
+
+	return nil
 }

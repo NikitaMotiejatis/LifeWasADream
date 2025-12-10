@@ -3,12 +3,17 @@ import LogoutIcon from '@/icons/logoutIcon';
 import SearchIcon from '@/icons/searchIcon';
 import BranchSelector from './branchSelector';
 import LanguageSwitcher from './languageSwitcher';
+import { useAuth } from '@/global/hooks/auth';
+import { useNavigate } from 'react-router-dom';
 
 export default function Topbar() {
   const { t } = useTranslation();
+  const { logout } = useAuth();
+  const navigate = useNavigate();
 
-  const handleLogout = () => {
-    window.location.href = '/login';
+  const handleLogout = async () => {
+    await logout();
+    navigate("/login");
   };
 
   return (
