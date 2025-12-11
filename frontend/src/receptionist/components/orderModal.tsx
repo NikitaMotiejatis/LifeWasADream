@@ -7,7 +7,7 @@ import {
 } from '@/utils/useInputValidation';
 
 type Order = {
-  id: string;
+  id: number;
   total: number;
 };
 

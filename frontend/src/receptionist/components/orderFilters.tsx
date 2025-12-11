@@ -37,7 +37,7 @@ export default function OrderFilters({
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap gap-2">
-        {(['all', 'open', 'closed', 'pending'] as const).map(status => (
+        {(['all', 'open', 'closed', 'refund_pending', 'refunded'] as const).map(status => (
           <button
             key={status}
             onClick={() => setFilterStatus(status)}
@@ -52,8 +52,10 @@ export default function OrderFilters({
               t('orders.filters.open', { count: counts.open })}
             {status === 'closed' &&
               t('orders.filters.closed', { count: counts.closed })}
-            {status === 'pending' &&
+            {status === 'refund_pending' &&
               t('orders.filters.pending', { count: counts.pending })}
+            {status === 'refunded' && // TODO: translation
+              t('Refunded', { count: counts.pending })}
           </button>
         ))}
       </div>

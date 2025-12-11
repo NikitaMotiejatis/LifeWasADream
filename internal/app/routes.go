@@ -58,6 +58,7 @@ func setupApiRoutes(router *chi.Mux, _config config.Config, authMiddleware func(
 
 	{
 		c := order.OrderController{
+			OrderRepo: 	 data.NewMockDataSource(),
 			ProductRepo: data.NewMockDataSource(),
 		}
 

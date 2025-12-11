@@ -9,15 +9,44 @@ import (
 )
 
 type OrderController struct {
+	OrderRepo	OrderRepo
 	ProductRepo	ProductRepo
 }
 
 func (c OrderController) Routes() http.Handler {
 	router := chi.NewRouter()
 
+	router.Get("/", c.orders)
 	router.Get("/products", c.getProducts)
 
 	return router
+}
+
+func (c OrderController) orders(w http.ResponseWriter, r *http.Request) {
+	if w == nil || r == nil {
+		return
+	}
+
+	orderStatus := r.URL.Query().Get("orderStatus")
+
+	filter := OrderFilter{}
+
+	if orderStatus != "" && orderStatus != "all" {
+		filter.OrderStatus = &orderStatus
+	}
+
+	orders, err := c.OrderRepo.GetOrders(filter)
+	if err != nil {
+		http.Error(w, "failed to send orders", http.StatusInternalServerError)
+		return
+	}
+
+	if err = json.NewEncoder(w).Encode(orders); err != nil {
+		http.Error(w, "failed to send orders", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
 }
 
 func (c OrderController) getProducts(w http.ResponseWriter, r *http.Request) {
@@ -50,19 +79,4 @@ func (c OrderController) getProducts(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
-}
-
-type Variation struct {
-	Name          string  `json:"name"`
-	NameKey       string  `json:"nameKey"`
-	PriceModifier float64 `json:"priceModifier"`
-}
-
-type Product struct {
-	ID         string      `json:"id"`
-	Name       string      `json:"name"`
-	NameKey    string      `json:"nameKey"`
-	BasePrice  float64     `json:"basePrice"`
-	Categories []string    `json:"categories"`
-	Variations []Variation `json:"variations"`
 }
