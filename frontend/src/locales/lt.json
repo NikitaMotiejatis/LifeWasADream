@@ -734,9 +734,9 @@
       "inventory": "Atsargų apžvalga",
       "vatSettings": "PVM nustatymai"
     },
-      "settings": {
+    "settings": {
       "group": "Nustatymai",
-      "vatSettings": "PVM nustatymai" 
+      "vatSettings": "PVM nustatymai"
     },
     "subtitle": "Vientisa sistema"
   },
@@ -1003,7 +1003,7 @@
     "subtitle": "Keisti rezervacijos detales",
     "saveChanges": "Išsaugoti pakeitimus"
   },
-"vat": {
+  "vat": {
     "title": "PVM tarifai",
     "subtitle": "Tvarkykite PVM tarifus. Nustatykite pagrindinį, kuris bus taikomas visiems produktams.",
     "currentDefault": "Dabartinis PVM visiems produktams:",

@@ -480,7 +480,7 @@
     "smoothieMango": "Smoothie – Mango Paradise"
   },
   "reservation": {
-        "weekdays": {
+    "weekdays": {
       "mo": "Mo",
       "tu": "Tu",
       "we": "We",
@@ -571,7 +571,6 @@
       "missingInfo": "Missing customer information.\nPlease enter customer name and phone number.",
       "success": "Reservation confirmed!\nConfirmation code: {{code}}\nSMS sent to {{phone}}"
     },
-
 
     "serviceDetails": "Service Details",
 
@@ -683,7 +682,7 @@
       "deliveries": "Deliveries",
       "group": "Supplier Portal",
       "invoices": "Invoice Status",
-      "invoiceStatus":"Invoice Status"
+      "invoiceStatus": "Invoice Status"
     },
     "manager": {
       "group": "Manager Portal",
@@ -693,7 +692,7 @@
       "inventory": "Inventory Overview",
       "vatSettings": "VAT Settings"
     },
-        "settings": {
+    "settings": {
       "group": "Settings",
       "vatSettings": "VAT Settings"
     }
