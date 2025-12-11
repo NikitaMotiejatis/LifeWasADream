@@ -678,7 +678,8 @@
     "supplier": {
       "deliveries": "Deliveries",
       "group": "Supplier Portal",
-      "invoices": "Invoice Status"
+      "invoices": "Invoice Status",
+      "invoiceStatus":"Invoice Status"
     },
     "manager": {
       "group": "Manager Portal",
