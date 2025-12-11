@@ -1,5 +1,7 @@
 package business
 
+// TODO: remove or migrate to Chi
+
 import (
 	"errors"
 	"net/http"
