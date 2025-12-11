@@ -1,18 +1,18 @@
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Product, useCart } from '@/receptionist/contexts/cartContext';
 import VariationModal from '@/receptionist/components/variationModal';
 import SearchIcon from '@/icons/searchIcon';
-import { realMenu } from './utils';
-import type { ExtendedProduct } from './types';
+import { useAuth } from '@/global/hooks/auth';
+import useSWR from 'swr';
 
 type ProductGridProps = {
-  onProductClick?: (product: ExtendedProduct) => void;
+  onProductClick?: (product: Product) => void;
 };
 
 export default function ProductGrid({ onProductClick }: ProductGridProps) {
   const { t } = useTranslation();
-  const { addToCart, formatPrice, isPaymentStarted } = useCart();
+  const { addToCart } = useCart();
 
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [search, setSearch] = useState('');
@@ -27,16 +27,6 @@ export default function ProductGrid({ onProductClick }: ProductGridProps) {
     }
     setSelectedProduct(product);
   };
-
-  const filteredProducts = realMenu.filter(p => {
-    const matchCategory =
-      category === 'all' || p.categories?.includes(category);
-    const displayName = p.nameKey ? t(p.nameKey) : p.name;
-    const matchSearch = displayName
-      .toLowerCase()
-      .includes(search.toLowerCase());
-    return matchCategory && matchSearch;
-  });
 
   return (
     <div>
@@ -80,45 +70,16 @@ export default function ProductGrid({ onProductClick }: ProductGridProps) {
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-4">
-        {filteredProducts.map(product => (
-          <button
-            key={product.id}
-            onClick={() =>
-              onProductClick
-                ? onProductClick(product)
-                : handleProductClick(product)
-            }
-            disabled={isPaymentStarted}
-            className={`group relative flex flex-col items-center rounded-lg border border-gray-200 bg-white p-4 text-center shadow-sm transition-all ${
-              isPaymentStarted
-                ? 'cursor-not-allowed opacity-65'
-                : 'cursor-pointer hover:-translate-y-0.5 hover:shadow-md active:scale-95'
-            }`}
-            title={product.nameKey ? t(product.nameKey) : product.name}
-          >
-            <div className="mb-3 aspect-square w-full max-w-24 rounded-lg bg-gray-200 shadow-inner" />
-
-            <div className="w-full px-2">
-              <p
-                className="line-clamp-2 text-center text-sm leading-snug font-medium"
-                title={product.nameKey ? t(product.nameKey) : product.name}
-              >
-                {product.nameKey ? t(product.nameKey) : product.name}
-              </p>
-            </div>
-            <p className="mt-1 text-gray-600">
-              {t('menu.fromPrice', { price: formatPrice(product.basePrice) })}
-            </p>
-
-            {product.variations && product.variations.length > 0 && (
-              <p className="mt-2 flex items-center gap-1 text-xs font-medium text-blue-600">
-                {t('menu.customizable')}
-              </p>
-            )}
-          </button>
-        ))}
-      </div>
+    <div className="grid grid-cols-3 gap-4">
+      <Suspense fallback={<div>Loading...</div>}>
+        <Items 
+          includes={search}
+          category={category}
+          onProductClick={onProductClick}
+          handleProductClick={handleProductClick}>
+        </Items>
+      </Suspense>
+    </div>
 
       {selectedProduct && selectedProduct.variations && (
         <VariationModal
@@ -131,5 +92,69 @@ export default function ProductGrid({ onProductClick }: ProductGridProps) {
         />
       )}
     </div>
+  );
+}
+
+type ItemProps = {
+  includes: string;
+  category: string;
+  onProductClick?: (product: Product) => void;
+  handleProductClick: (product: Product) => void;
+};
+
+function Items({ includes, category, onProductClick, handleProductClick } : ItemProps) {
+  const { t } = useTranslation();
+  const { formatPrice, isPaymentStarted} = useCart();
+  const { authFetch } = useAuth();
+
+  const { data: filteredProducts } = useSWR(
+    `order/products?category=${category}`,
+    (url: string) => authFetch<Product[]>(url, "GET"),
+    { 
+      suspense: true,
+      revalidateOnMount: true,
+    }
+  );
+
+  return (
+    <>
+      {filteredProducts && filteredProducts.map(product => (
+        <button
+          key={product.id}
+          onClick={() =>
+            onProductClick
+              ? onProductClick(product)
+              : handleProductClick(product)
+          }
+          disabled={isPaymentStarted}
+          className={`group relative flex flex-col items-center rounded-lg border border-gray-200 bg-white p-4 text-center shadow-sm transition-all ${
+            isPaymentStarted
+              ? 'cursor-not-allowed opacity-65'
+              : 'cursor-pointer hover:-translate-y-0.5 hover:shadow-md active:scale-95'
+          }`}
+          title={product.nameKey ? t(product.nameKey) : product.name}
+        >
+          <div className="mb-3 aspect-square w-full max-w-24 rounded-lg bg-gray-200 shadow-inner" />
+
+          <div className="w-full px-2">
+            <p
+              className="line-clamp-2 text-center text-sm leading-snug font-medium"
+              title={product.nameKey ? t(product.nameKey) : product.name}
+            >
+              {product.nameKey ? t(product.nameKey) : product.name}
+            </p>
+          </div>
+          <p className="mt-1 text-gray-600">
+            {t('menu.fromPrice', { price: formatPrice(product.basePrice) })}
+          </p>
+
+          {product.variations && product.variations.length > 0 && (
+            <p className="mt-2 flex items-center gap-1 text-xs font-medium text-blue-600">
+              {t('menu.customizable')}
+            </p>
+          )}
+        </button>
+      ))}
+    </>
   );
 }

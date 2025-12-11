@@ -6,6 +6,8 @@ import { CartProvider, useCart } from '@/receptionist/contexts/cartContext';
 import { CurrencyProvider } from '@/global/contexts/currencyContext';
 import { EditOrderPanel } from '@/receptionist/components/editOrderPanel';
 import { useTranslation } from 'react-i18next';
+import ProductGrid from '../components/productGrid';
+import OrderSummary from '../components/orderSummary';
 
 type Order = {
   id: string;
@@ -183,7 +185,23 @@ export default function EditOrderPage() {
         <Topbar />
         <CurrencyProvider>
           <CartProvider>
-            <EditOrderContent />
+          {false // TODO: cleanup
+              ? <EditOrderContent />
+              : (
+                  <main className="flex-1 overflow-y-auto">
+                <div className="flex gap-6 p-6">
+                  {/* Left: Products */}
+                  <div className="flex-1">
+                    <ProductGrid />
+                  </div>
+
+                  {/* Right: Order summary */}
+                  <div className="w-1/3 max-w-md">
+                    <OrderSummary showPaymentSection={true} />
+                  </div>
+                </div>
+              </main>
+              )}
           </CartProvider>
         </CurrencyProvider>
       </div>

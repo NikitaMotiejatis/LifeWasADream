@@ -15,11 +15,11 @@ type AuthService struct {
 	SessionTokenName	string
 	CsrfTokenName		string
 
-	Users 				map[string]UserDetails
+	UserRepo			UserRepo
+	//Users 				map[string]UserDetails
 }
 
 var (
-	ErrUserNotFound 			= errors.New("unknown username")
 	ErrWrongPassword			= errors.New("wrong password")
 	ErrTokenGenerationFailed 	= errors.New("token generation failed")
 )
@@ -40,8 +40,8 @@ type User struct {
 }
 
 func (s AuthService) login(user LoginInfo, sessionTokenDuration time.Duration) (string, string, string, error) {
-	userDetails, found := s.Users[user.Username]
-	if !found {
+	userDetails, err := s.UserRepo.GetUserDetails(user.Username)
+	if err != nil {
 		return "", "", "", ErrUserNotFound
 	}
 
@@ -97,8 +97,8 @@ func (s AuthService) validate(sessionCookieValue string, csrfToken string) error
 }
 
 func (s AuthService) getUserDetails(sessionToken *JwtSessionToken) (User, error) {
-	userDetails, found := s.Users[sessionToken.Username]
-	if !found {
+	userDetails, err := s.UserRepo.GetUserDetails(sessionToken.Username)
+	if err != nil {
 		return User{}, ErrUserNotFound
 	}
 

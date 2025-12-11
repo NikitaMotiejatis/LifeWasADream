@@ -1,9 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import {
-  CartItem,
-  generateKey,
-  useCart,
-} from '@/receptionist/contexts/cartContext';
+import { CartItem, generateKey, useCart, } from '@/receptionist/contexts/cartContext';
 import TrashcanIcon from '@/icons/trashcanIcon';
 import { useNavigate } from 'react-router-dom';
 import { SplitBillSection } from './splitBillSection';
@@ -12,11 +8,13 @@ import { useState } from 'react';
 type OrderSummaryProps = {
   onBack?: () => void;
   showPaymentSection?: boolean;
+  initItemsList: CartItem[];
 };
 
 export default function OrderSummary({
   onBack,
   showPaymentSection = false,
+  initItemsList = [],
 }: OrderSummaryProps) {
   const { t } = useTranslation();
   const {
