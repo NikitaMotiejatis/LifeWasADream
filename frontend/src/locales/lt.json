@@ -727,7 +727,8 @@
       "dashboard": "Suvestinė",
       "refunds": "Grąžinimų tvirtinimai",
       "reports": "Ataskaitos ir analizė",
-      "inventory": "Atsargų apžvalga"
+      "inventory": "Atsargų apžvalga",
+      "vatSettings": "PVM nustatymai"
     },
     "subtitle": "Vientisa sistema"
   },
@@ -993,5 +994,25 @@
     "title": "Redaguoti rezervaciją",
     "subtitle": "Keisti rezervacijos detales",
     "saveChanges": "Išsaugoti pakeitimus"
+  },
+    "vatSettings": {
+    "title": "PVM nustatymai",
+    "currentRates": "Dabartiniai PVM tarifai",
+    "addRate": "Pridėti naują tarifą",
+    "editRate": "Redaguoti tarifą",
+    "rateName": "Tarifo pavadinimas",
+    "percentage": "Procentas",
+    "standardRate": "Bendras tarifas",
+    "reducedRate": "Sumažintas tarifas",
+    "zeroRate": "Nulinis tarifas",
+    "effectiveDate": "Galioja nuo",
+    "save": "Išsaugoti",
+    "cancel": "Atšaukti",
+    "delete": "Ištrinti",
+    "confirmDelete": "Ar tikrai norite ištrinti šį PVM tarifą?",
+    "noRates": "Nėra nustatytų PVM tarifų",
+    "addFirstRate": "Pridėkite pirmąjį PVM tarifą",
+    "error": "Klaida įrašant PVM nustatymus",
+    "success": "PVM nustatymai sėkmingai išsaugoti"
   }
 }

@@ -20,6 +20,7 @@ import ReportsAnalyticsPage from '@/manager/pages/reportsAnalyticsPage';
 import InventoryOverviewPage from '@/manager/pages/inventoryOverviewPage';
 import EditOrderPage from '@/receptionist/pages/editOrderPage';
 import EditReservationPage from '@/receptionist/pages/editReservationPage';
+import VatSettingsPage from '@/manager/pages/vatSettingsPage'; 
 
 const router = createBrowserRouter(
   [
@@ -42,6 +43,7 @@ const router = createBrowserRouter(
     { path: '/edit-order/:orderId', element: <EditOrderPage /> },
     { path: '/edit-reservation/:reservationId',  element: <EditReservationPage />,
     },
+    { path: '/vat-settings', element: <VatSettingsPage /> },
   ],
   {
     future: {

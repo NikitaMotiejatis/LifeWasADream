@@ -686,7 +686,8 @@
       "dashboard": "Dashboard",
       "refunds": "Refund Approvals",
       "reports": "Reports & Analytics",
-      "inventory": "Inventory Overview"
+      "inventory": "Inventory Overview",
+      "vatSettings": "VAT Settings"
     }
   },
   "stockAlerts": {
@@ -950,5 +951,25 @@
     "title": "Edit Reservation",
     "subtitle": "Modify reservation details",
     "saveChanges": "Save Changes"
+  },
+    "vatSettings": {
+    "title": "VAT Settings",
+    "currentRates": "Current VAT Rates",
+    "addRate": "Add New Rate",
+    "editRate": "Edit Rate",
+    "rateName": "Rate Name",
+    "percentage": "Percentage",
+    "standardRate": "Standard Rate",
+    "reducedRate": "Reduced Rate",
+    "zeroRate": "Zero Rate",
+    "effectiveDate": "Effective Date",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "confirmDelete": "Are you sure you want to delete this VAT rate?",
+    "noRates": "No VAT rates configured",
+    "addFirstRate": "Add your first VAT rate",
+    "error": "Error saving VAT settings",
+    "success": "VAT settings saved successfully"
   }
 }
