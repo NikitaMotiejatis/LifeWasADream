@@ -60,7 +60,11 @@
     "clear": "Clear",
     "review": "Review",
     "back": "Back",
-    "status": "Status"
+    "status": "Status",
+    "update": "Update",
+    "add": "Add",
+    "edit": "Edit",
+    "delete": "Delete"
   },
   "deliveries": {
     "buttons": {
@@ -688,6 +692,10 @@
       "reports": "Reports & Analytics",
       "inventory": "Inventory Overview",
       "vatSettings": "VAT Settings"
+    },
+        "settings": {
+      "group": "Settings",
+      "vatSettings": "VAT Settings"
     }
   },
   "stockAlerts": {
@@ -952,24 +960,44 @@
     "subtitle": "Modify reservation details",
     "saveChanges": "Save Changes"
   },
-    "vatSettings": {
-    "title": "VAT Settings",
-    "currentRates": "Current VAT Rates",
-    "addRate": "Add New Rate",
-    "editRate": "Edit Rate",
-    "rateName": "Rate Name",
-    "percentage": "Percentage",
-    "standardRate": "Standard Rate",
-    "reducedRate": "Reduced Rate",
-    "zeroRate": "Zero Rate",
-    "effectiveDate": "Effective Date",
-    "save": "Save",
-    "cancel": "Cancel",
-    "delete": "Delete",
-    "confirmDelete": "Are you sure you want to delete this VAT rate?",
+  "vat": {
+    "title": "VAT Rates",
+    "subtitle": "Manage VAT rates. Set one as default to apply to all products.",
+    "currentDefault": "Current VAT for all products:",
+    "appliesToAll": "Applies to all products for new orders",
+    "editRate": "Edit VAT Rate",
+    "addRate": "Add New VAT Rate",
+    "percentageLabel": "VAT Percentage",
+    "percentagePlaceholder": "e.g., 21.00",
+    "editHelp": "Update the VAT percentage value",
+    "addHelp": "Enter a value between 0 and 100 (no duplicates)",
+    "availableRates": "Available VAT Rates",
+    "addNewRate": "Add New Rate",
+    "confirmChange": {
+      "title": "Change Default VAT Rate",
+      "message": "This will change the VAT rate for ALL PRODUCTS to {{rate}}. Existing orders will keep their original VAT rates.",
+      "confirm": "Yes, Change All Products"
+    },
+    "activeLabel": "ACTIVE FOR ALL PRODUCTS",
+    "appliedToAll": "Applied to all products",
+    "availableForSelection": "Available for selection",
+    "setAsDefault": "Set as Default",
+    "defaultExplanation": "This VAT rate applies to all products automatically",
     "noRates": "No VAT rates configured",
-    "addFirstRate": "Add your first VAT rate",
-    "error": "Error saving VAT settings",
-    "success": "VAT settings saved successfully"
+    "defaultToZero": "All products will use 0% VAT until you add VAT rates",
+    "addFirstRate": "Add Your First VAT Rate",
+    "rates": {
+      "21percent": "21% VAT",
+      "9percent": "9% VAT",
+      "0percent": "0% VAT"
+    },
+    "rateName": "{{rate}}% VAT",
+    "validation": {
+      "required": "VAT percentage is required",
+      "nan": "Must be a valid number",
+      "negative": "Cannot be negative",
+      "exceeds": "Cannot exceed 100%",
+      "duplicate": "A {{rate}}% VAT rate already exists"
+    }
   }
 }

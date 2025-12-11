@@ -58,7 +58,11 @@
   "common": {
     "cancel": "Atšaukti",
     "clear": "Išvalyti",
-    "review": "Peržiūrėti"
+    "review": "Peržiūrėti",
+    "update": "Atnaujinti",
+    "add": "Pridėti",
+    "edit": "Redaguoti",
+    "delete": "Ištrinti"
   },
   "deliveries": {
     "buttons": {
@@ -730,6 +734,10 @@
       "inventory": "Atsargų apžvalga",
       "vatSettings": "PVM nustatymai"
     },
+      "settings": {
+      "group": "Nustatymai",
+      "vatSettings": "PVM nustatymai" 
+    },
     "subtitle": "Vientisa sistema"
   },
   "stockAlerts": {
@@ -995,24 +1003,44 @@
     "subtitle": "Keisti rezervacijos detales",
     "saveChanges": "Išsaugoti pakeitimus"
   },
-    "vatSettings": {
-    "title": "PVM nustatymai",
-    "currentRates": "Dabartiniai PVM tarifai",
-    "addRate": "Pridėti naują tarifą",
-    "editRate": "Redaguoti tarifą",
-    "rateName": "Tarifo pavadinimas",
-    "percentage": "Procentas",
-    "standardRate": "Bendras tarifas",
-    "reducedRate": "Sumažintas tarifas",
-    "zeroRate": "Nulinis tarifas",
-    "effectiveDate": "Galioja nuo",
-    "save": "Išsaugoti",
-    "cancel": "Atšaukti",
-    "delete": "Ištrinti",
-    "confirmDelete": "Ar tikrai norite ištrinti šį PVM tarifą?",
-    "noRates": "Nėra nustatytų PVM tarifų",
-    "addFirstRate": "Pridėkite pirmąjį PVM tarifą",
-    "error": "Klaida įrašant PVM nustatymus",
-    "success": "PVM nustatymai sėkmingai išsaugoti"
+"vat": {
+    "title": "PVM tarifai",
+    "subtitle": "Tvarkykite PVM tarifus. Nustatykite pagrindinį, kuris bus taikomas visiems produktams.",
+    "currentDefault": "Dabartinis PVM visiems produktams:",
+    "appliesToAll": "Taikomas visiems produktams naujiems užsakymams",
+    "editRate": "Redaguoti PVM tarifą",
+    "addRate": "Pridėti naują PVM tarifą",
+    "percentageLabel": "PVM procentai",
+    "percentagePlaceholder": "pvz., 21.00",
+    "editHelp": "Atnaujinkite PVM procentų reikšmę",
+    "addHelp": "Įveskite reikšmę nuo 0 iki 100 (be dublikatų)",
+    "availableRates": "Galimi PVM tarifai",
+    "addNewRate": "Pridėti naują tarifą",
+    "confirmChange": {
+      "title": "Pakeisti pagrindinį PVM tarifą",
+      "message": "Tai pakeis PVM tarifą VISIEMS PRODUKTAMS į {{rate}}. Esami užsakymai išlaikys originalius PVM tarifus.",
+      "confirm": "Taip, pakeisti visus produktus"
+    },
+    "activeLabel": "AKTYVUS VISIEMS PRODUKTAMS",
+    "appliedToAll": "Taikomas visiems produktams",
+    "availableForSelection": "Galimas pasirinkimui",
+    "setAsDefault": "Nustatyti pagrindiniu",
+    "defaultExplanation": "Šis PVM tarifas automatiškai taikomas visiems produktams",
+    "noRates": "Nėra sukonfigūruotų PVM tarifų",
+    "defaultToZero": "Visi produktai naudos 0% PVM kol pridėsite PVM tarifus",
+    "addFirstRate": "Pridėkite savo pirmąjį PVM tarifą",
+    "rates": {
+      "21percent": "21% PVM",
+      "9percent": "9% PVM",
+      "0percent": "0% PVM"
+    },
+    "rateName": "{{rate}}% PVM",
+    "validation": {
+      "required": "PVM procentai yra privalomi",
+      "nan": "Turi būti tinkamas skaičius",
+      "negative": "Negali būti neigiamas",
+      "exceeds": "Negali viršyti 100%",
+      "duplicate": "{{rate}}% PVM tarifas jau egzistuoja"
+    }
   }
 }

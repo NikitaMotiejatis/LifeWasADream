@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import ManagerLayout from '../components/managerLayout';
 import { Plus, Edit2, Trash2, Save, X, Percent, Package, AlertTriangle } from 'lucide-react';
 
@@ -10,11 +11,13 @@ interface VatRate {
 }
 
 const VatSettingsPage: React.FC = () => {
+  const { t } = useTranslation();
+  
   // State for all VAT rates in the system
   const [vatRates, setVatRates] = useState<VatRate[]>([
-    { id: 1, name: '21% VAT', rate: 21, isDefault: true },
-    { id: 2, name: '9% VAT', rate: 9, isDefault: false },
-    { id: 3, name: '0% VAT', rate: 0, isDefault: false },
+    { id: 1, name: t('vat.rates.21percent'), rate: 21, isDefault: true },
+    { id: 2, name: t('vat.rates.9percent'), rate: 9, isDefault: false },
+    { id: 3, name: t('vat.rates.0percent'), rate: 0, isDefault: false },
   ]);
   
   // State for managing form interactions
@@ -29,28 +32,28 @@ const VatSettingsPage: React.FC = () => {
   // Validate the rate input
   const validateRate = (value: string, isEditing: boolean = false): string | null => {
     if (!value.trim()) {
-      return 'VAT percentage is required';
+      return t('vat.validation.required');
     }
     
     const rateValue = parseFloat(value);
     
     if (isNaN(rateValue)) {
-      return 'Must be a valid number';
+      return t('vat.validation.nan');
     }
     
     if (rateValue < 0) {
-      return 'Cannot be negative';
+      return t('vat.validation.negative');
     }
     
     if (rateValue > 100) {
-      return 'Cannot exceed 100%';
+      return t('vat.validation.exceeds');
     }
     
     // Check for duplicate rates (only when adding new, not when editing the same rate)
     if (!isEditing) {
       const existingRate = vatRates.find(rate => rate.rate === rateValue);
       if (existingRate) {
-        return `A ${rateValue}% VAT rate already exists`;
+        return t('vat.validation.duplicate', { rate: rateValue });
       }
     }
     
@@ -72,7 +75,7 @@ const VatSettingsPage: React.FC = () => {
   // Get the currently active default VAT rate
   const getDefaultVatRate = () => {
     if (vatRates.length === 0) {
-      return { id: 0, name: '0% VAT', rate: 0, isDefault: true };
+      return { id: 0, name: t('vat.rates.0percent'), rate: 0, isDefault: true };
     }
     return vatRates.find(rate => rate.isDefault) || vatRates[0];
   };
@@ -113,7 +116,7 @@ const VatSettingsPage: React.FC = () => {
       );
       
       if (duplicateRate) {
-        setValidationError(`A ${rateValue}% VAT rate already exists`);
+        setValidationError(t('vat.validation.duplicate', { rate: rateValue }));
         return;
       }
       
@@ -121,7 +124,7 @@ const VatSettingsPage: React.FC = () => {
         rate.id === editingId 
           ? { 
               ...rate, 
-              name: `${rateValue}% VAT`,
+              name: t('vat.rateName', { rate: rateValue }),
               rate: rateValue
             }
           : rate
@@ -130,7 +133,7 @@ const VatSettingsPage: React.FC = () => {
       // Add new rate 
       const newVatRate: VatRate = {
         id: vatRates.length > 0 ? Math.max(...vatRates.map(r => r.id)) + 1 : 1,
-        name: `${rateValue}% VAT`,
+        name: t('vat.rateName', { rate: rateValue }),
         rate: rateValue,
         isDefault: vatRates.length === 0 
       };
@@ -184,9 +187,11 @@ const VatSettingsPage: React.FC = () => {
       <div className="p-6">
         {/* Page Header */}
         <div className="mb-8">
-          <h1 className="text-2xl font-semibold text-gray-900">VAT Rates</h1>
+          <h1 className="text-2xl font-semibold text-gray-900">
+            {t('vat.title')}
+          </h1>
           <p className="text-sm text-gray-500 mt-1">
-            Manage VAT rates. Set one as default to apply to all products.
+            {t('vat.subtitle')}
           </p>
         </div>
 
@@ -197,12 +202,14 @@ const VatSettingsPage: React.FC = () => {
               <div className="flex items-center gap-3">
                 <Percent className="w-5 h-5 text-blue-600" />
                 <div>
-                  <p className="text-sm font-medium text-blue-900">Current VAT for all products:</p>
+                  <p className="text-sm font-medium text-blue-900">
+                    {t('vat.currentDefault')}
+                  </p>
                   <p className="text-2xl font-bold text-blue-800">{defaultVatRate.name}</p>
                 </div>
               </div>
               <div className="text-sm text-blue-700">
-                Applies to all products for new orders
+                {t('vat.appliesToAll')}
               </div>
             </div>
           </div>
@@ -212,13 +219,16 @@ const VatSettingsPage: React.FC = () => {
         {(isAdding || editingId) && (
           <div className="bg-white rounded-lg border p-4 mb-6">
             <h3 className="text-md font-medium text-gray-900 mb-3">
-              {editingId ? 'Edit VAT Rate' : 'Add New VAT Rate'}
+              {editingId 
+                ? t('vat.editRate')
+                : t('vat.addRate')
+              }
             </h3>
             
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  VAT Percentage
+                  {t('vat.percentageLabel')}
                 </label>
                 <div className="flex items-center gap-2">
                   <input
@@ -239,7 +249,7 @@ const VatSettingsPage: React.FC = () => {
                         ? 'border-red-300 focus:ring-red-500' 
                         : 'border-gray-300 focus:ring-blue-500'
                     }`}
-                    placeholder="e.g., 21.00"
+                    placeholder={t('vat.percentagePlaceholder')}
                     autoFocus
                   />
                   <span className="text-gray-600">%</span>
@@ -257,8 +267,8 @@ const VatSettingsPage: React.FC = () => {
                 {!validationError && (
                   <p className="mt-1 text-sm text-gray-500">
                     {editingId 
-                      ? 'Update the VAT percentage value'
-                      : 'Enter a value between 0 and 100 (no duplicates)'
+                      ? t('vat.editHelp')
+                      : t('vat.addHelp')
                     }
                   </p>
                 )}
@@ -269,7 +279,7 @@ const VatSettingsPage: React.FC = () => {
                   onClick={handleCancel}
                   className="flex-1 px-3 py-2 border border-gray-300 rounded text-gray-700 hover:bg-gray-50 text-sm"
                 >
-                  Cancel
+                  {t('common.cancel')}
                 </button>
                 <button
                   onClick={handleSave}
@@ -280,7 +290,10 @@ const VatSettingsPage: React.FC = () => {
                       : 'bg-blue-600 text-white hover:bg-blue-700'
                   }`}
                 >
-                  {editingId ? 'Update' : 'Add'}
+                  {editingId 
+                    ? t('common.update')
+                    : t('common.add')
+                  }
                 </button>
               </div>
             </div>
@@ -290,7 +303,7 @@ const VatSettingsPage: React.FC = () => {
         {/* Action Bar */}
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-medium text-gray-900">
-            Available VAT Rates
+            {t('vat.availableRates')}
           </h2>
           {!isAdding && !editingId && !confirmChange && (
             <button
@@ -298,7 +311,7 @@ const VatSettingsPage: React.FC = () => {
               className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
             >
               <Plus className="w-4 h-4" />
-              Add New Rate
+              {t('vat.addNewRate')}
             </button>
           )}
         </div>
@@ -310,26 +323,25 @@ const VatSettingsPage: React.FC = () => {
               <AlertTriangle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
               <div className="flex-1">
                 <h3 className="text-md font-medium text-yellow-800 mb-2">
-                  Change Default VAT Rate
+                  {t('vat.confirmChange.title')}
                 </h3>
                 <p className="text-sm text-yellow-700 mb-4">
-                  This will change the VAT rate for <strong>ALL PRODUCTS</strong> to {
-                    vatRates.find(r => r.id === confirmChange)?.name
-                  }. 
-                  Existing orders will keep their original VAT rates.
+                  {t('vat.confirmChange.message', { 
+                    rate: vatRates.find(r => r.id === confirmChange)?.name 
+                  })}
                 </p>
                 <div className="flex gap-2">
                   <button
                     onClick={cancelSetAsDefault}
                     className="px-4 py-2 border border-gray-300 rounded text-gray-700 hover:bg-gray-50"
                   >
-                    Cancel
+                    {t('common.cancel')}
                   </button>
                   <button
                     onClick={confirmSetAsDefault}
                     className="px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700"
                   >
-                    Yes, Change All Products
+                    {t('vat.confirmChange.confirm')}
                   </button>
                 </div>
               </div>
@@ -364,14 +376,14 @@ const VatSettingsPage: React.FC = () => {
                         </h3>
                         {rate.isDefault && (
                           <span className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
-                            ACTIVE FOR ALL PRODUCTS
+                            {t('vat.activeLabel')}
                           </span>
                         )}
                       </div>
                       <p className="text-sm text-gray-500">
                         {rate.isDefault 
-                          ? 'Applied to all products' 
-                          : 'Available for selection'
+                          ? t('vat.appliedToAll')
+                          : t('vat.availableForSelection')
                         }
                       </p>
                     </div>
@@ -383,7 +395,7 @@ const VatSettingsPage: React.FC = () => {
                         onClick={() => setAsDefault(rate.id)}
                         className="px-3 py-1.5 text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200"
                       >
-                        Set as Default
+                        {t('vat.setAsDefault')}
                       </button>
                     )}
                     
@@ -392,12 +404,14 @@ const VatSettingsPage: React.FC = () => {
                         <button
                           onClick={() => handleEdit(rate)}
                           className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg"
+                          title={t('common.edit')}
                         >
                           <Edit2 className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => handleDelete(rate.id)}
                           className="p-2 text-red-600 hover:bg-red-50 rounded-lg"
+                          title={t('common.delete')}
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -410,7 +424,9 @@ const VatSettingsPage: React.FC = () => {
                   <div className="mt-3 pt-3 border-t border-blue-200">
                     <div className="flex items-center gap-2 text-sm text-blue-700">
                       <Package className="w-4 h-4" />
-                      <span>This VAT rate applies to all products automatically</span>
+                      <span>
+                        {t('vat.defaultExplanation')}
+                      </span>
                     </div>
                   </div>
                 )}
@@ -421,15 +437,17 @@ const VatSettingsPage: React.FC = () => {
           /* Empty State */
           <div className="text-center py-12">
             <Percent className="w-12 h-12 mx-auto text-gray-300 mb-3" />
-            <p className="text-gray-500 mb-2">No VAT rates configured</p>
+            <p className="text-gray-500 mb-2">
+              {t('vat.noRates')}
+            </p>
             <p className="text-sm text-gray-400 mb-4">
-              All products will use 0% VAT until you add VAT rates
+              {t('vat.defaultToZero')}
             </p>
             <button
               onClick={handleAddNew}
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
             >
-              Add Your First VAT Rate
+              {t('vat.addFirstRate')}
             </button>
           </div>
         )}
