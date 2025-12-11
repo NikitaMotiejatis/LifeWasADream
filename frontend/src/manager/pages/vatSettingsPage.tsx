@@ -2,13 +2,6 @@ import React, { useState } from 'react';
 import ManagerLayout from '../components/managerLayout';
 import { Plus, Edit2, Trash2, Save, X, Percent, Package, AlertTriangle } from 'lucide-react';
 
-/**
- * Represents a VAT (Value Added Tax) rate in the system
- * @property id - Unique identifier for the VAT rate
- * @property name - Display name (e.g., "21% VAT")
- * @property rate - Percentage value (e.g., 21 for 21%)
- * @property isDefault - Whether this rate applies to all products
- */
 interface VatRate {
   id: number;
   name: string;
@@ -28,9 +21,53 @@ const VatSettingsPage: React.FC = () => {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [isAdding, setIsAdding] = useState(false);
   const [newRate, setNewRate] = useState<string>('');
+  const [validationError, setValidationError] = useState<string | null>(null);
   
   // State for confirmation dialog when changing default VAT
   const [confirmChange, setConfirmChange] = useState<number | null>(null);
+
+  // Validate the rate input
+  const validateRate = (value: string, isEditing: boolean = false): string | null => {
+    if (!value.trim()) {
+      return 'VAT percentage is required';
+    }
+    
+    const rateValue = parseFloat(value);
+    
+    if (isNaN(rateValue)) {
+      return 'Must be a valid number';
+    }
+    
+    if (rateValue < 0) {
+      return 'Cannot be negative';
+    }
+    
+    if (rateValue > 100) {
+      return 'Cannot exceed 100%';
+    }
+    
+    // Check for duplicate rates (only when adding new, not when editing the same rate)
+    if (!isEditing) {
+      const existingRate = vatRates.find(rate => rate.rate === rateValue);
+      if (existingRate) {
+        return `A ${rateValue}% VAT rate already exists`;
+      }
+    }
+    
+    return null; // No error
+  };
+
+  // Handle input change with validation
+  const handleRateChange = (value: string) => {
+    setNewRate(value);
+    
+    // Clear error if input is being corrected
+    if (validationError) {
+      const isEditing = editingId !== null;
+      const error = validateRate(value, isEditing);
+      setValidationError(error);
+    }
+  };
 
   // Get the currently active default VAT rate
   const getDefaultVatRate = () => {
@@ -48,6 +85,7 @@ const VatSettingsPage: React.FC = () => {
     setIsAdding(true);
     setEditingId(null);
     setNewRate('');
+    setValidationError(null);
   };
 
   // Start editing an existing VAT rate
@@ -55,23 +93,30 @@ const VatSettingsPage: React.FC = () => {
     setEditingId(rate.id);
     setNewRate(rate.rate.toString());
     setIsAdding(false);
+    setValidationError(null);
   };
 
-  /**
-   * Save a new or edited VAT rate
-   * Validates input and updates state accordingly
-   */
   const handleSave = () => {
-    if (!newRate.trim()) return;
-
-    const rateValue = parseFloat(newRate);
-    if (isNaN(rateValue) || rateValue < 0 || rateValue > 100) {
-      alert('VAT rate must be a number between 0 and 100');
+    const isEditing = editingId !== null;
+    const error = validateRate(newRate, isEditing);
+    if (error) {
+      setValidationError(error);
       return;
     }
 
+    const rateValue = parseFloat(newRate);
+
     if (editingId) {
-      // Update existing rate
+      // Check if editing would create a duplicate with another rate
+      const duplicateRate = vatRates.find(rate => 
+        rate.rate === rateValue && rate.id !== editingId
+      );
+      
+      if (duplicateRate) {
+        setValidationError(`A ${rateValue}% VAT rate already exists`);
+        return;
+      }
+      
       setVatRates(prev => prev.map(rate => 
         rate.id === editingId 
           ? { 
@@ -82,12 +127,12 @@ const VatSettingsPage: React.FC = () => {
           : rate
       ));
     } else {
-      // Add new rate (new rates are never default by default)
+      // Add new rate 
       const newVatRate: VatRate = {
         id: vatRates.length > 0 ? Math.max(...vatRates.map(r => r.id)) + 1 : 1,
         name: `${rateValue}% VAT`,
         rate: rateValue,
-        isDefault: vatRates.length === 0 // First rate becomes default
+        isDefault: vatRates.length === 0 
       };
       setVatRates(prev => [...prev, newVatRate]);
     }
@@ -97,49 +142,39 @@ const VatSettingsPage: React.FC = () => {
 
   // Delete a VAT rate with confirmation
   const handleDelete = (id: number) => {
-    if (window.confirm('Delete this VAT rate?')) {
       const updatedRates = vatRates.filter(rate => rate.id !== id);
-      
-      // If we're deleting the default rate, make the first remaining rate the default
       const deletedRate = vatRates.find(rate => rate.id === id);
       if (deletedRate?.isDefault && updatedRates.length > 0) {
         updatedRates[0].isDefault = true;
       }
       
       setVatRates(updatedRates);
-    }
   };
 
-  // Cancel any form editing or adding
   const handleCancel = () => {
     setEditingId(null);
     setIsAdding(false);
     setNewRate('');
+    setValidationError(null);
   };
 
-  // Initiate process to set a VAT rate as default
   const setAsDefault = (id: number) => {
     const vatRate = vatRates.find(r => r.id === id);
     if (!vatRate) return;
     setConfirmChange(id);
   };
 
-  // Confirm setting a new default VAT rate
   const confirmSetAsDefault = () => {
     if (!confirmChange) return;
 
-    // Update all rates: only the selected one becomes default
     setVatRates(prev => prev.map(rate => ({
       ...rate,
       isDefault: rate.id === confirmChange
     })));
 
-    alert(`VAT rate changed to ${vatRates.find(r => r.id === confirmChange)?.name}. This will apply to ALL products for new orders.`);
-    
     setConfirmChange(null);
   };
 
-  // Cancel the default VAT rate change
   const cancelSetAsDefault = () => {
     setConfirmChange(null);
   };
@@ -189,16 +224,44 @@ const VatSettingsPage: React.FC = () => {
                   <input
                     type="number"
                     value={newRate}
-                    onChange={(e) => setNewRate(e.target.value)}
+                    onChange={(e) => handleRateChange(e.target.value)}
+                    onBlur={() => {
+                      // Validate on blur as well
+                      const isEditing = editingId !== null;
+                      const error = validateRate(newRate, isEditing);
+                      setValidationError(error);
+                    }}
                     min="0"
                     max="100"
                     step="0.1"
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className={`flex-1 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
+                      validationError 
+                        ? 'border-red-300 focus:ring-red-500' 
+                        : 'border-gray-300 focus:ring-blue-500'
+                    }`}
                     placeholder="e.g., 21.00"
                     autoFocus
                   />
                   <span className="text-gray-600">%</span>
                 </div>
+                
+                {/* Validation Error Message */}
+                {validationError && (
+                  <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
+                    <AlertTriangle className="w-3 h-3" />
+                    {validationError}
+                  </p>
+                )}
+                
+                {/* Help text when no error */}
+                {!validationError && (
+                  <p className="mt-1 text-sm text-gray-500">
+                    {editingId 
+                      ? 'Update the VAT percentage value'
+                      : 'Enter a value between 0 and 100 (no duplicates)'
+                    }
+                  </p>
+                )}
               </div>
               
               <div className="flex gap-2">
@@ -210,7 +273,12 @@ const VatSettingsPage: React.FC = () => {
                 </button>
                 <button
                   onClick={handleSave}
-                  className="flex-1 px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
+                  disabled={!!validationError || !newRate.trim()}
+                  className={`flex-1 px-3 py-2 rounded text-sm ${
+                    validationError || !newRate.trim()
+                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                      : 'bg-blue-600 text-white hover:bg-blue-700'
+                  }`}
                 >
                   {editingId ? 'Update' : 'Add'}
                 </button>
