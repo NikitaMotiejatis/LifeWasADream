@@ -423,12 +423,13 @@
       "refund": "Grąžinti pinigus"
     },
     "filters": {
-      "all": "Visi ({{count}})",
-      "closed": "Uždaryti ({{count}})",
-      "from": "Nuo",
-      "open": "Atviri ({{count}})",
-      "pending": "Laukia grąžinimo ({{count}})",
+      "all": "Visi",
+      "closed": "Uždaryti",
+      "open": "Atviri",
+      "refund_pending": "Laukia grąžinimo",
+      "refunded": "Grąžinta",
       "searchPlaceholder": "Ieškoti pagal užsakymo nr....",
+      "from": "Nuo",
       "to": "Iki"
     },
     "loading": "Kraunamas užsakymų sąrašas...",

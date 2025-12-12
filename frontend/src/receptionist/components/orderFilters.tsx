@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import SearchIcon from '@/icons/searchIcon';
+import { Counts } from './orderList';
 
 type Props = {
   filterStatus: string;
@@ -14,7 +15,7 @@ type Props = {
   setDateTo: (v: string) => void;
   timeTo: string;
   setTimeTo: (v: string) => void;
-  counts: { all: number; open: number; closed: number; pending: number };
+  counts?: Counts;
 };
 
 export default function OrderFilters({
@@ -34,6 +35,8 @@ export default function OrderFilters({
 }: Props) {
   const { t } = useTranslation();
 
+  const countString = (count?: number) => (count || count == 0) ? ` (${count})` : "";
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap gap-2">
@@ -47,15 +50,11 @@ export default function OrderFilters({
                 : 'border border-gray-400 hover:bg-gray-100'
             }`}
           >
-            {status === 'all' && t('orders.filters.all', { count: counts.all })}
-            {status === 'open' &&
-              t('orders.filters.open', { count: counts.open })}
-            {status === 'closed' &&
-              t('orders.filters.closed', { count: counts.closed })}
-            {status === 'refund_pending' &&
-              t('orders.filters.pending', { count: counts.pending })}
-            {status === 'refunded' && // TODO: translation
-              t('Refunded', { count: counts.pending })}
+            {status === 'all'             && (t('orders.filters.all')             + countString(counts?.all))}
+            {status === 'open'            && (t('orders.filters.open')            + countString(counts?.open))}
+            {status === 'closed'          && (t('orders.filters.closed')          + countString(counts?.closed))}
+            {status === 'refund_pending'  && (t('orders.filters.refund_pending')  + countString(counts?.refund_pending))}
+            {status === 'refunded'        && (t('orders.filters.refunded')        + countString(counts?.refunded))}
           </button>
         ))}
       </div>

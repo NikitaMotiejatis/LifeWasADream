@@ -2,6 +2,7 @@ package order
 
 type OrderRepo interface {
 	GetOrders(filter OrderFilter) ([]Order, error)
+	GetOrderCounts() (OrderCounts, error)
 }
 
 // Options for filtering orders.

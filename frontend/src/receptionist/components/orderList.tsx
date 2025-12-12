@@ -18,6 +18,14 @@ type Order = {
   status: OrderStatus;
 };
 
+export type Counts = {
+  all: number;
+  open: number;
+  closed: number;
+  refund_pending: number;
+  refunded: number;
+};
+
 export default function OrderList() {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -37,6 +45,15 @@ export default function OrderList() {
     message: string;
     type: 'success' | 'error';
   } | null>(null);
+
+  const { authFetch } = useAuth();
+  const { data: counts } = useSWR(
+    `order/counts`,
+    (url) => authFetch<Counts>(url, "GET"),
+    {
+      revalidateOnMount: true,
+    }
+  );
 
   const openModal = (
     type: 'edit' | 'pay' | 'refund' | 'cancel',
@@ -59,13 +76,6 @@ export default function OrderList() {
   const updateOrderStatus = (id: number, status: Order['status']) => {
     setOrders(prev => prev.map(o => (o.id === id ? { ...o, status } : o)));
     closeModal();
-  };
-
-  const counts = {
-    all: orders.length,
-    open: orders.filter(o => o.status === 'open').length,
-    closed: orders.filter(o => o.status === 'closed').length,
-    pending: orders.filter(o => o.status === 'refund_pending').length,
   };
 
   const showToast = (

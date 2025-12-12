@@ -417,12 +417,13 @@
       "refund": "Refund"
     },
     "filters": {
-      "all": "All ({{count}})",
-      "closed": "Closed ({{count}})",
-      "from": "From",
-      "open": "Open ({{count}})",
-      "pending": "Refund Pending ({{count}})",
+      "all": "All",
+      "open": "Open",
+      "closed": "Closed",
+      "refund_pending": "Refund Pending",
+      "refunded": "Refunded",
       "searchPlaceholder": "Search by order #...",
+      "from": "From",
       "to": "To"
     },
     "loading": "Loading orders...",

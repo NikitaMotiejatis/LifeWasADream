@@ -23,3 +23,11 @@ type Product struct {
 	Categories []string    `json:"categories"`
 	Variations []Variation `json:"variations"`
 }
+
+type OrderCounts struct {
+	All				uint64 `json:"all"`
+	Open			uint64 `json:"open"`
+	Closed			uint64 `json:"closed"`
+	RefundPending	uint64 `json:"refund_pending"`
+	Refunded		uint64 `json:"refunded"`
+}

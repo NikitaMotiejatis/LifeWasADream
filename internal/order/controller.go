@@ -17,6 +17,7 @@ func (c OrderController) Routes() http.Handler {
 	router := chi.NewRouter()
 
 	router.Get("/", c.orders)
+	router.Get("/counts", c.counts)
 	router.Get("/products", c.getProducts)
 
 	return router
@@ -43,6 +44,25 @@ func (c OrderController) orders(w http.ResponseWriter, r *http.Request) {
 
 	if err = json.NewEncoder(w).Encode(orders); err != nil {
 		http.Error(w, "failed to send orders", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
+func (c OrderController) counts(w http.ResponseWriter, r *http.Request) {
+	if w == nil || r == nil {
+		return
+	}
+
+	counts, err := c.OrderRepo.GetOrderCounts()
+	if err != nil {
+		http.Error(w, "failed to count orders", http.StatusInternalServerError)
+		return
+	}
+
+	if err = json.NewEncoder(w).Encode(counts); err != nil {
+		http.Error(w, "failed to count orders", http.StatusInternalServerError)
 		return
 	}
 

@@ -24,6 +24,7 @@ export default function Topbar() {
       <div className="flex min-w-0 flex-1 items-center gap-3">
         <BranchSelector />
 
+        {/* TODO: remove
         <div className="relative max-w-xl flex-1">
           <input
             type="text"
@@ -32,6 +33,7 @@ export default function Topbar() {
           />
           <SearchIcon className="pointer-events-none absolute top-1/2 right-2.5 h-5 w-5 -translate-y-1/2 text-gray-400" />
         </div>
+        */}
       </div>
 
       <div className="flex shrink-0 items-center gap-3 whitespace-nowrap">

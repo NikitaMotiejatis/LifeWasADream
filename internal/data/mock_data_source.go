@@ -52,6 +52,21 @@ func (s MockDataSource) GetOrders(filter order.OrderFilter) ([]order.Order, erro
 	return orders, nil
 }
 
+func (s MockDataSource) GetOrderCounts() (order.OrderCounts, error) {
+	counts := order.OrderCounts{}
+	for _, o := range s.Orders {
+		counts.All += 1
+		switch o.Status {
+		case "open": 			counts.Open += 1
+		case "closed": 			counts.Closed += 1
+		case "refund_pending": 	counts.RefundPending += 1
+		case "refunded": 		counts.Refunded += 1
+		}
+	}
+
+	return counts, nil
+}
+
 // -------------------------------------------------------------------------------------------------
 // order.ProductRepo implimentation ----------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------
