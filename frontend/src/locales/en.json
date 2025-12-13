@@ -404,6 +404,8 @@
     },
     "removeItem": "Remove item",
     "saveOrder": "Save Order",
+    "saveSuccess": "Order saved successfully",
+    "saveError": "Failed to save order",
     "splitBill": "Split Bill",
     "subtotal": "Subtotal",
     "title": "Current Order",
@@ -1003,6 +1005,7 @@
 
   "payment": {
     "payWithStripe": "Pay with Stripe",
+    "processing": "Processing order...",
     "redirecting": "Redirecting to payment...",
     "error": "Payment failed. Please try again.",
     "verifying": "Verifying payment...",
