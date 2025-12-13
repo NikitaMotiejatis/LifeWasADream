@@ -8,13 +8,11 @@ import { useState } from 'react';
 type OrderSummaryProps = {
   onBack?: () => void;
   showPaymentSection?: boolean;
-  initItemsList: CartItem[];
 };
 
 export default function OrderSummary({
   onBack,
   showPaymentSection = false,
-  initItemsList = [],
 }: OrderSummaryProps) {
   const { t } = useTranslation();
   const {
@@ -26,6 +24,7 @@ export default function OrderSummary({
     total,
     generateKey,
   } = useCart();
+
   const hasItems = itemsList.length > 0;
 
   const navigate = useNavigate();
@@ -44,8 +43,9 @@ export default function OrderSummary({
   };
 
   function handleSave(): void {
+    console.log(itemsList);
     // TODO: do something real
-    navigate('/orders');
+    //navigate('/orders');
   }
 
   return (

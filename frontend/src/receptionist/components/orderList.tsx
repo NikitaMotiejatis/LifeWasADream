@@ -18,6 +18,13 @@ type Order = {
   status: OrderStatus;
 };
 
+export type OrderFilter = {
+  orderStatus: 'all' | OrderStatus;
+  searchTerm?: string;
+  from?: string;
+  to?: string;
+};
+
 export type Counts = {
   all: number;
   open: number;
@@ -26,16 +33,28 @@ export type Counts = {
   refunded: number;
 };
 
+const toQueryString = (filter: OrderFilter) => {
+  // TODO: timezones
+  const queryArgs = [
+    `orderStatus=${filter.orderStatus}`,
+    filter.searchTerm  ? `includes=${filter.searchTerm}`  : '',
+    filter.from        ? `from=${filter.from}`            : '',
+    filter.to          ? `to=${filter.to}`                : '',
+  ].filter(a => a.length > 0);
+
+  return queryArgs.length > 0 ? `?${queryArgs.join('&')}` : '';
+};
+
 export default function OrderList() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const [orderFilter, setOrderFilter] = useState<OrderFilter>({
+    orderStatus: 'all',
+    searchTerm: undefined,
+    from: undefined,
+    to: undefined,
+  });
   const [orders, setOrders] = useState<Order[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [dateFrom, setDateFrom] = useState('');
-  const [timeFrom, setTimeFrom] = useState('');
-  const [dateTo, setDateTo] = useState('');
-  const [timeTo, setTimeTo] = useState('');
-  const [filterStatus, setFilterStatus] = useState<OrderStatus>('open');
   const [modalOpen, setModalOpen] = useState(false);
   const [modalType, setModalType] = useState<
     'edit' | 'pay' | 'refund' | 'cancel'
@@ -48,7 +67,7 @@ export default function OrderList() {
 
   const { authFetch } = useAuth();
   const { data: counts } = useSWR(
-    `order/counts`,
+    `order/counts${toQueryString(orderFilter)}`,
     (url) => authFetch<Counts>(url, "GET"),
     {
       revalidateOnMount: true,
@@ -73,7 +92,7 @@ export default function OrderList() {
     setSelectedOrder(null);
   };
 
-  const updateOrderStatus = (id: number, status: Order['status']) => {
+  const updateOrderStatus = (id: number, status: OrderStatus) => {
     setOrders(prev => prev.map(o => (o.id === id ? { ...o, status } : o)));
     closeModal();
   };
@@ -95,18 +114,8 @@ export default function OrderList() {
           </h2>
 
           <OrderFilters
-            filterStatus={filterStatus}
-            setFilterStatus={setFilterStatus}
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
-            dateFrom={dateFrom}
-            setDateFrom={setDateFrom}
-            timeFrom={timeFrom}
-            setTimeFrom={setTimeFrom}
-            dateTo={dateTo}
-            setDateTo={setDateTo}
-            timeTo={timeTo}
-            setTimeTo={setTimeTo}
+            orderFilter={orderFilter}
+            setOrderFilter={setOrderFilter}
             counts={counts}
           />
         </div>
@@ -114,7 +123,7 @@ export default function OrderList() {
         <div className="mt-6 space-y-3">
           <Suspense fallback={<div>Loading...</div>}>
             <Orders 
-              orderStatus={filterStatus.replace(/ /g, '_')}
+              orderFilter={orderFilter}
               openModal={openModal} />
           </Suspense>
         </div>
@@ -151,18 +160,18 @@ export default function OrderList() {
 }
 
 type OrdersProps = {
-  orderStatus: string;
+  orderFilter: OrderFilter;
   openModal: (type: 'edit' | 'pay' | 'refund' | 'cancel', order: Order) => void;
 };
 
-function Orders({ orderStatus: filterStatus, openModal }: OrdersProps) {
+function Orders({ orderFilter, openModal }: OrdersProps) {
   const { t } = useTranslation();
   const { formatPrice } = useCurrency();
   const { authFetch } = useAuth();
 
   const { data: orders, error } = useSWR(
-    `order/?orderStatus=${filterStatus}`,
-    (url) => authFetch<Order[]>(url, "GET"),
+    `order${toQueryString(orderFilter)}`,
+    (url: string) => authFetch<Order[]>(url, "GET"),
     {
       suspense: true,
       revalidateOnMount: true,
@@ -170,8 +179,11 @@ function Orders({ orderStatus: filterStatus, openModal }: OrdersProps) {
   );
 
   if (error) {
+    // TODO: translations
     return (
-      <div>Something went wrong</div>
+        <p className="py-12 text-center text-gray-400">
+          Something went wrong.
+        </p>
     );
   }
 

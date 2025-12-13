@@ -3,7 +3,7 @@ package order
 import "time"
 
 type Order struct {
-	Id			int			`json:"id"`
+	Id			uint64		`json:"id"`
 	Total 		float64		`json:"total"`
 	CreatedAt	time.Time	`json:"createdAt"`
 	Status		string		`json:"status"`
@@ -25,9 +25,15 @@ type Product struct {
 }
 
 type OrderCounts struct {
-	All				uint64 `json:"all"`
-	Open			uint64 `json:"open"`
-	Closed			uint64 `json:"closed"`
-	RefundPending	uint64 `json:"refund_pending"`
-	Refunded		uint64 `json:"refunded"`
+	All				uint64	`json:"all"`
+	Open			uint64	`json:"open"`
+	Closed			uint64	`json:"closed"`
+	RefundPending	uint64	`json:"refund_pending"`
+	Refunded		uint64	`json:"refunded"`
+}
+
+type Item struct {
+	Product				Product		`json:"product"`
+	SelectedVariations	[]Variation	`json:"selectedVariations"`
+	Quantity			uint16		`json:"quantity"`
 }

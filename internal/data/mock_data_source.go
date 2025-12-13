@@ -46,15 +46,29 @@ func (s MockDataSource) GetOrders(filter order.OrderFilter) ([]order.Order, erro
 		if filter.OrderStatus != nil && o.Status != *filter.OrderStatus {
 			continue
 		}
+		if filter.From != nil && o.CreatedAt.Before(*filter.From) {
+			continue
+		}
+		if filter.To != nil && o.CreatedAt.After(*filter.To) {
+			continue
+		}
+		
 		orders = append(orders, o)
 	}
 
 	return orders, nil
 }
 
-func (s MockDataSource) GetOrderCounts() (order.OrderCounts, error) {
+func (s MockDataSource) GetOrderCounts(filter order.OrderFilter) (order.OrderCounts, error) {
 	counts := order.OrderCounts{}
 	for _, o := range s.Orders {
+		if filter.From != nil && o.CreatedAt.Before(*filter.From) {
+			continue
+		}
+		if filter.To != nil && o.CreatedAt.After(*filter.To) {
+			continue
+		}
+
 		counts.All += 1
 		switch o.Status {
 		case "open": 			counts.Open += 1
@@ -65,6 +79,32 @@ func (s MockDataSource) GetOrderCounts() (order.OrderCounts, error) {
 	}
 
 	return counts, nil
+}
+
+func (s MockDataSource) GetOrderItems(orderId int32) ([]order.Item, error) {
+	return []order.Item{
+		{
+			Product: s.Products[0],
+			SelectedVariations: []order.Variation{},
+			Quantity: 5,
+		},
+		{
+			Product: s.Products[0],
+			SelectedVariations: []order.Variation{
+				{
+					Name:          "Large",
+					NameKey:       "large",
+					PriceModifier: 2,
+				},
+			},
+			Quantity: 1,
+		},
+		{
+			Product: s.Products[1],
+			SelectedVariations: []order.Variation{},
+			Quantity: 3,
+		},
+	}, nil
 }
 
 // -------------------------------------------------------------------------------------------------

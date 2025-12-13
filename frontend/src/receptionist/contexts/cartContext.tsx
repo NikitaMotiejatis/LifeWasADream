@@ -83,9 +83,14 @@ export const generateKey = (
   return `${product.id}___${variationKey || 'default'}`;
 };
 
-export const CartProvider = ({ children }: { children: ReactNode }) => {
+export const CartProvider = ({ initItems = [], children }: { initItems?: CartItem[], children: ReactNode }) => {
   const { currency, setCurrency, formatPrice } = useCurrency();
-  const [items, setItems] = useState<Record<CartKey, CartItem>>({});
+  const [items, setItems] = useState<Record<CartKey, CartItem>>(initItems.reduce((acc, item) => {
+    return { 
+      ...acc,
+      [generateKey(item.product, item.selectedVariations)]: item,
+    };
+  }, {} as Record<CartKey, CartItem>));
   const [promotions, setPromotions] = useState<Promotions>({
     'iced-latte': { type: 'percent', value: 50 },
   });
