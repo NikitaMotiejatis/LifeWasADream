@@ -1,13 +1,10 @@
 import { useTranslation } from 'react-i18next';
-import {
-  CartItem,
-  generateKey,
-  useCart,
-} from '@/receptionist/contexts/cartContext';
+import { CartItem, generateKey, useCart, } from '@/receptionist/contexts/cartContext';
 import TrashcanIcon from '@/icons/trashcanIcon';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { SplitBillSection } from './splitBillSection';
 import { useState } from 'react';
+import { useAuth } from '@/global/hooks/auth';
 
 type OrderSummaryProps = {
   onBack?: () => void;
@@ -19,6 +16,9 @@ export default function OrderSummary({
   showPaymentSection = false,
 }: OrderSummaryProps) {
   const { t } = useTranslation();
+  const params = useParams();
+  const { authFetch } = useAuth();
+
   const {
     itemsList,
     formatPrice,
@@ -28,6 +28,7 @@ export default function OrderSummary({
     total,
     generateKey,
   } = useCart();
+
   const hasItems = itemsList.length > 0;
 
   const navigate = useNavigate();
@@ -45,8 +46,23 @@ export default function OrderSummary({
     setTimeout(() => setToast(null), 5800);
   };
 
-  function handleSave(): void {
-    // TODO: do something real
+  const handleSave = async () => {
+    const order = ({ items: itemsList } as { items: CartItem[] });
+
+    // TODO: fix throws.
+    // Will throw because backend doesn't return anything.
+    try {
+      const orderId = params.orderId;
+      if (orderId) {
+        const _ = await authFetch<string>(`order/${orderId}`, "PATCH", JSON.stringify(order));
+      } else {
+        const _ = await authFetch<string>(`order/`, "POST", JSON.stringify(order));
+      }
+
+    } catch (e) {
+      console.error(e);
+    }
+
     navigate('/orders');
   }
 

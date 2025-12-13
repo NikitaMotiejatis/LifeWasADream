@@ -37,7 +37,19 @@ export const useAuth = () => {
         credentials: 'include',
       });
     } catch {}
-  }
+  };
+
+  const authFetch = <T>(apiPath: string, method: string, bodyJson?: string) =>
+    fetch(`${BACKEND_URL}/api/${apiPath}`, {
+      method: method,
+      headers: {
+        [CSRF_TOKEN_NAME]: getCookie(CSRF_TOKEN_NAME) ?? "",
+      },
+      body: (bodyJson && bodyJson),
+      credentials: 'include',
+    })
+    .then(response => response.json())
+    .then(data => data as T);
 
   const userDetailsFetcher = (url: string) =>
     fetch(`${BACKEND_URL}/${url}`, {
@@ -53,6 +65,7 @@ export const useAuth = () => {
   return {
     login,
     logout,
+    authFetch,
     userDetailsFetcher,
   };
 }

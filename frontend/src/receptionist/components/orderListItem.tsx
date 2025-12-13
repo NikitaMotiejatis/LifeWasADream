@@ -1,11 +1,13 @@
 import { useTranslation } from 'react-i18next';
 import { formatDateTime } from '@/utils/formatDateTime';
 
+type OrderStatus = 'open' | 'closed' | 'refund_pending' | 'refunded';
+
 type Order = {
-  id: string;
+  id: number;
   total: number;
   createdAt: Date;
-  status: 'active' | 'closed' | 'refund_pending';
+  status: OrderStatus;
 };
 
 type Props = {
@@ -36,7 +38,7 @@ export default function OrderListItem({ order, formatPrice, onAction }: Props) {
         </div>
 
         <div className="flex items-center gap-2">
-          {order.status === 'active' ? (
+          {order.status === 'open' ? (
             <>
               <button
                 onClick={() => onAction('edit', order)}

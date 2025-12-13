@@ -8,7 +8,11 @@ import (
 	"dreampos/internal/config"
 )
 
-func NewPostgresDb(config config.Config) (*sqlx.DB, error) {
+type PostgresDb struct {
+	Db *sqlx.DB
+}
+
+func MustCreatePostgresDb(config config.Config) PostgresDb {
 	dbDataSource := fmt.Sprintf(
 		"host=%s port=%s dbname=%s user=%s password=%s sslmode=disable",
 		config.DbHostname,
@@ -17,5 +21,7 @@ func NewPostgresDb(config config.Config) (*sqlx.DB, error) {
 		config.DbUser,
 		config.DbPass)
 
-	return sqlx.Connect("postgres", dbDataSource)
+	return PostgresDb{
+		Db: sqlx.MustConnect("postgres", dbDataSource),
+	}
 }
