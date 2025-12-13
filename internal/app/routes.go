@@ -3,7 +3,9 @@ package app
 import (
 	"dreampos/internal/auth"
 	"dreampos/internal/config"
+	"dreampos/internal/payment"
 	"encoding/json"
+	"fmt"
 	"time"
 
 	"net/http"
@@ -13,8 +15,8 @@ import (
 
 func setupAuth(router *chi.Mux, config config.Config) *auth.AuthController {
 	c := &auth.AuthController{
-		SessionTokenDuration: 	time.Hour * 24,
-		CsrfTokenDuration: 		time.Hour * 24,
+		SessionTokenDuration: time.Hour * 24,
+		CsrfTokenDuration:    time.Hour * 24,
 
 		AuthService: auth.AuthService{
 			TokenService: auth.TokenService{
@@ -53,7 +55,7 @@ func setupAuth(router *chi.Mux, config config.Config) *auth.AuthController {
 	return c
 }
 
-func setupApiRoutes(router *chi.Mux, _config config.Config, authMiddleware func(http.Handler)http.Handler) {
+func setupApiRoutes(router *chi.Mux, _config config.Config, authMiddleware func(http.Handler) http.Handler) {
 	apiRouter := chi.NewRouter()
 
 	{
@@ -75,4 +77,21 @@ func setupApiRoutes(router *chi.Mux, _config config.Config, authMiddleware func(
 	}
 
 	router.Mount("/api", apiRouter)
+}
+
+func setupPaymentRoutes(router *chi.Mux, config config.Config, authMiddleware func(http.Handler) http.Handler) {
+	// Setup payment controller with Stripe configuration
+	paymentService := &payment.PaymentService{
+		StripeSecretKey: config.StripeSecretKey,
+		StripePublicKey: config.StripePublicKey,
+		SuccessURL:      fmt.Sprintf("http://%s/payment/success", config.Url),
+		CancelURL:       fmt.Sprintf("http://%s/payment/cancel", config.Url),
+	}
+
+	paymentController := &payment.PaymentController{
+		Service: paymentService,
+	}
+
+	// Mount payment routes with authentication
+	router.Mount("/api/payment", paymentController.Routes())
 }

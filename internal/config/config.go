@@ -7,19 +7,24 @@ import (
 )
 
 type Config struct {
-	Url    			string
-	VitePort		uint16 // TODO: maybe rename to smth like FrontendPort
+	Url      string
+	VitePort uint16 // TODO: maybe rename to smth like FrontendPort
 
-	JwtSecret		string
+	JwtSecret string
 
-	XSRFHeaderKey	string
-	XSRFCookieName	string
+	XSRFHeaderKey  string
+	XSRFCookieName string
 
-	DbHostname		string
-	DbPort			string
-	DbName			string
-	DbUser			string
-	DbPass			string
+	DbHostname string
+	DbPort     string
+	DbName     string
+	DbUser     string
+	DbPass     string
+
+	// Stripe configuration
+	StripeSecretKey     string
+	StripePublicKey     string
+	StripeWebhookSecret string
 }
 
 func LoadConfig() (*Config, error) {
@@ -29,17 +34,21 @@ func LoadConfig() (*Config, error) {
 	}
 
 	config := &Config{
-		Url: 			os.Getenv("URL"),
-		VitePort: 		uint16(vitePort),
+		Url:      os.Getenv("URL"),
+		VitePort: uint16(vitePort),
 
-		XSRFHeaderKey: 	os.Getenv("XSRF_HEADER_KEY"),
-		XSRFCookieName:	os.Getenv("XSRF_COOKIE_NAME"),
+		XSRFHeaderKey:  os.Getenv("XSRF_HEADER_KEY"),
+		XSRFCookieName: os.Getenv("XSRF_COOKIE_NAME"),
 
-		DbHostname: 	os.Getenv("DB_HOSTNAME"),
-		DbPort:	 		os.Getenv("DB_PORT"),
-		DbName:	 		os.Getenv("DB_NAME"),
-		DbUser:	 		os.Getenv("DB_USER"),
-		DbPass:	 		os.Getenv("DB_PASS"),
+		DbHostname: os.Getenv("DB_HOSTNAME"),
+		DbPort:     os.Getenv("DB_PORT"),
+		DbName:     os.Getenv("DB_NAME"),
+		DbUser:     os.Getenv("DB_USER"),
+		DbPass:     os.Getenv("DB_PASS"),
+
+		StripeSecretKey:     os.Getenv("STRIPE_SECRET_KEY"),
+		StripePublicKey:     os.Getenv("STRIPE_PUBLIC_KEY"),
+		StripeWebhookSecret: os.Getenv("STRIPE_WEBHOOK_SECRET"),
 	}
 
 	return config, nil

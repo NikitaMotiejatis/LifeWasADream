@@ -20,6 +20,8 @@ import ReportsAnalyticsPage from '@/manager/pages/reportsAnalyticsPage';
 import InventoryOverviewPage from '@/manager/pages/inventoryOverviewPage';
 import EditOrderPage from '@/receptionist/pages/editOrderPage';
 import EditReservationPage from '@/receptionist/pages/editReservationPage';
+import PaymentSuccessPage from '@/receptionist/pages/paymentSuccessPage';
+import PaymentCancelPage from '@/receptionist/pages/paymentCancelPage';
 
 const router = createBrowserRouter(
   [
@@ -42,6 +44,8 @@ const router = createBrowserRouter(
     { path: '/edit-order/:orderId', element: <EditOrderPage /> },
     { path: '/edit-reservation/:reservationId',  element: <EditReservationPage />,
     },
+    { path: '/payment/success', element: <PaymentSuccessPage /> },
+    { path: '/payment/cancel', element: <PaymentCancelPage /> },
   ],
   {
     future: {

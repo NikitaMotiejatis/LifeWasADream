@@ -8,6 +8,8 @@ import TrashcanIcon from '@/icons/trashcanIcon';
 import { useNavigate } from 'react-router-dom';
 import { SplitBillSection } from './splitBillSection';
 import { useState } from 'react';
+import Toast from '@/global/components/toast';
+import { createStripeCheckout, redirectToStripeCheckout } from '@/utils/paymentService';
 
 type OrderSummaryProps = {
   onBack?: () => void;
@@ -32,7 +34,7 @@ export default function OrderSummary({
 
   const navigate = useNavigate();
 
-  const [, setToast] = useState<{
+  const [toast, setToast] = useState<{
     message: string;
     type: 'success' | 'error';
   } | null>(null);
@@ -46,12 +48,37 @@ export default function OrderSummary({
   };
 
   function handleSave(): void {
-    // TODO: do something real
-    navigate('/orders');
+    showToast(t('orderSummary.orderSaved', 'Order saved'));
+    clearCart();
+    setTimeout(() => navigate('/orders'), 600);
   }
+
+  const handleStripePayment = async () => {
+    try {
+      // TODO: Replace with actual order ID when order system is implemented
+      const mockOrderId = Math.floor(Math.random() * 10000);
+      
+      showToast(t('payment.redirecting', 'Redirecting to payment...'));
+      
+      const response = await createStripeCheckout(mockOrderId, total, 'eur');
+      
+      // Clear cart before redirecting
+      clearCart();
+      
+      // Redirect to Stripe checkout
+      redirectToStripeCheckout(response.session_url);
+    } catch (error) {
+      showToast(
+        t('payment.error', 'Payment failed. Please try again.'),
+        'error'
+      );
+      console.error('Stripe payment error:', error);
+    }
+  };
 
   return (
     <div className="max-h-full flex-1 flex-col overflow-hidden rounded-2xl bg-white p-4 shadow-xl xl:p-5">
+      <Toast toast={toast} />
       <div className="mb-4 flex items-center justify-between">
         <h3 className="text-lg font-bold xl:text-xl">
           {t('orderSummary.title')}
@@ -126,10 +153,11 @@ export default function OrderSummary({
                 formatPrice={formatPrice}
                 onCompletePayment={payments => {
                   console.log('All paid:', payments);
+                  showToast(t('orderSummary.allPaid'));
                   clearCart();
-                  navigate('/orders');
-                  showToast(t('orderSummary.allPaid')); //TODO: currently doesn't work
+                  setTimeout(() => navigate('/orders'), 600);
                 }}
+                onStripePayment={handleStripePayment}
               />
             </>
           ) : onBack ? (

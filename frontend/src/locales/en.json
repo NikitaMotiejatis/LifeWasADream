@@ -949,5 +949,22 @@
     "title": "Edit Reservation",
     "subtitle": "Modify reservation details",
     "saveChanges": "Save Changes"
+  },
+
+  "payment": {
+    "payWithStripe": "Pay with Stripe",
+    "redirecting": "Redirecting to payment...",
+    "error": "Payment failed. Please try again.",
+    "verifying": "Verifying payment...",
+    "verificationFailed": "Verification Failed",
+    "backToOrders": "Back to Orders",
+    "success": "Payment Successful!",
+    "successMessage": "Your payment has been processed successfully.",
+    "orderId": "Order ID",
+    "viewOrders": "View Orders",
+    "newOrder": "Create New Order",
+    "cancelled": "Payment Cancelled",
+    "cancelledMessage": "Your payment was cancelled. No charges were made.",
+    "tryAgain": "Try Again"
   }
 }
