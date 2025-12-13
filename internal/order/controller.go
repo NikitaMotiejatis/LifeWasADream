@@ -2,6 +2,7 @@ package order
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -18,7 +19,9 @@ func (c OrderController) Routes() http.Handler {
 	router := chi.NewRouter()
 
 	router.Get("/", c.orders)
+	router.Post("/", c.createOrder)
 	router.Get("/{orderId:^[0-9]{1,10}$}", c.getOrder)
+	router.Patch("/{orderId:^[0-9]{1,10}$}", c.updateOrder)
 	router.Get("/counts", c.counts)
 	router.Get("/products", c.getProducts)
 
@@ -76,6 +79,29 @@ func (c OrderController) orders(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
+func (c OrderController) createOrder(w http.ResponseWriter, r *http.Request) {
+	if w == nil || r == nil {
+		return
+	}
+
+	_, err := strconv.ParseInt(r.PathValue("orderId"), 10, 32)
+	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	var order Order
+	if err := json.NewDecoder(r.Body).Decode(&order); err != nil {
+		http.Error(w, "invalid order", http.StatusBadRequest)
+		return
+	}
+
+	// TODO: actually do smth
+
+	w.WriteHeader(http.StatusCreated)
+	w.Write([]byte("order created"))
+}
+
 func (c OrderController) getOrder(w http.ResponseWriter, r *http.Request) {
 	if w == nil || r == nil {
 		return
@@ -99,6 +125,32 @@ func (c OrderController) getOrder(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
+}
+
+func (c OrderController) updateOrder(w http.ResponseWriter, r *http.Request) {
+	if w == nil || r == nil {
+		return
+	}
+
+	_, err := strconv.ParseInt(r.PathValue("orderId"), 10, 32)
+	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	var order Order
+	if err := json.NewDecoder(r.Body).Decode(&order); err != nil {
+		http.Error(w, "invalid order", http.StatusBadRequest)
+		return
+	}
+
+	fmt.Println(order)
+
+	// TODO: actually do smth
+
+	// TODO: improve
+	w.WriteHeader(http.StatusNoContent)
+	w.Write([]byte("order updated"))
 }
 
 func (c OrderController) counts(w http.ResponseWriter, r *http.Request) {
@@ -150,8 +202,6 @@ func (c OrderController) getProducts(w http.ResponseWriter, r *http.Request) {
 	if w == nil || r == nil {
 		return
 	}
-
-	time.Sleep(time.Second / 2.0) // TODO: remove
 
 	category := r.URL.Query().Get("category")
 	includes := r.URL.Query().Get("includes")

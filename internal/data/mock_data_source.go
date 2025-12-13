@@ -11,7 +11,7 @@ import (
 
 type MockDataSource struct {
 	Users		map[string]auth.UserDetails
-	Orders		[]order.Order
+	Orders		[]order.OrderSummary
 	Products	[]order.Product
 }
 
@@ -40,8 +40,8 @@ func (s MockDataSource) GetUserDetails(username string) (auth.UserDetails, error
 // order.OrderRepo implimentation ----------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------
 
-func (s MockDataSource) GetOrders(filter order.OrderFilter) ([]order.Order, error) {
-	orders := make([]order.Order, 0, len(mockOrders))
+func (s MockDataSource) GetOrders(filter order.OrderFilter) ([]order.OrderSummary, error) {
+	orders := make([]order.OrderSummary, 0, len(mockOrders))
 	for _, o := range mockOrders {
 		if filter.OrderStatus != nil && o.Status != *filter.OrderStatus {
 			continue
@@ -166,7 +166,7 @@ func mustParseTime(dateStr string) time.Time {
 	return t
 }
 
-var mockOrders = []order.Order{
+var mockOrders = []order.OrderSummary{
 	{
 		Id:        1821, // Direct integer literal
 		Total:     87.4,

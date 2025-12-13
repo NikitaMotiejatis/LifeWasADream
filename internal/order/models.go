@@ -3,7 +3,11 @@ package order
 import "time"
 
 type Order struct {
-	Id			uint64		`json:"id"`
+	Items		[]Item `json:"items"`
+}
+
+type OrderSummary struct {
+	Id			uint32		`json:"id"`
 	Total 		float64		`json:"total"`
 	CreatedAt	time.Time	`json:"createdAt"`
 	Status		string		`json:"status"`

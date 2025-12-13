@@ -3,7 +3,7 @@ package order
 import "time"
 
 type OrderRepo interface {
-	GetOrders(filter OrderFilter) ([]Order, error)
+	GetOrders(filter OrderFilter) ([]OrderSummary, error)
 	GetOrderCounts(filter OrderFilter) (OrderCounts, error)
 	GetOrderItems(orderId int32) ([]Item, error)
 }
