@@ -3,6 +3,8 @@ package app
 import (
 	"dreampos/internal/auth"
 	"dreampos/internal/config"
+	"dreampos/internal/data"
+	"dreampos/internal/order"
 	"dreampos/internal/payment"
 	"encoding/json"
 	"fmt"
@@ -25,28 +27,8 @@ func setupAuth(router *chi.Mux, config config.Config) *auth.AuthController {
 			// TODO: not hardcoded
 			SessionTokenName: "SESSION-TOKEN",
 			CsrfTokenName:    "X-XSRF-TOKEN",
-			Users: map[string]auth.UserDetails{
-				// username: cashier1, password: demo123
-				"cashier1": {
-					PasswordHash: "$2a$12$tcQXe081NZkwYnuGGPzLuu5aawmu6OeIAVdiDsfa7432jbQr0OTku",
-					Roles:        []string{"Cashier", "Receptionist"},
-				},
-				// username: manager1, password: demo123
-				"manager1": {
-					PasswordHash: "$2a$12$FxiIjuFUjCP8WslpRtebEulIB8tXLjBnIprv5vrSm.kWoKGxybO4S",
-					Roles:        []string{"Manager"},
-				},
-				// username: clerk1, password: demo123
-				"clerk1": {
-					PasswordHash: "$2a$12$Syv1Tld4YjaKgtZEvun8duLEHCql/P46msMnHSbsZ2gigp4s6MCh.",
-					Roles:        []string{"Clerk"},
-				},
-				// username: supplier1, password: demo123
-				"supplier1": {
-					PasswordHash: "$2a$12$S5JrjWT2gilyFCoVBgi4A.uPpjcoU0R1DTiZaO/twzkOFNh748PGu",
-					Roles:        []string{"Supplier"},
-				},
-			},
+
+			UserRepo: data.NewMockDataSource(),
 		},
 	}
 
@@ -74,6 +56,15 @@ func setupApiRoutes(router *chi.Mux, _config config.Config, authMiddleware func(
 			}
 		}
 		apiRouter.With(authMiddleware).Get("/me", me)
+	}
+
+	{
+		c := order.OrderController{
+			OrderRepo:   data.NewMockDataSource(),
+			ProductRepo: data.NewMockDataSource(),
+		}
+
+		apiRouter.Mount("/order", c.Routes())
 	}
 
 	router.Mount("/api", apiRouter)
