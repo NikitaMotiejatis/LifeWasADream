@@ -16,6 +16,7 @@ export default function ProductGrid({ onProductClick }: ProductGridProps) {
 
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [search, setSearch] = useState('');
+  // TODO: load from backend
   const [category, setCategory] = useState<
     'all' | 'hot drinks' | 'cold drinks' | 'pastries' | 'popular'
   >('all');
@@ -71,7 +72,7 @@ export default function ProductGrid({ onProductClick }: ProductGridProps) {
       </div>
 
     <div className="grid grid-cols-3 gap-4">
-      <Suspense fallback={<div>Loading...</div>}>
+      <Suspense fallback={<div className="p-10 text-center text-gray-500">Loading...</div>}>
         <Items 
           includes={search}
           category={category}
@@ -115,6 +116,10 @@ function Items({ includes, category, onProductClick, handleProductClick } : Item
       revalidateOnMount: true,
     }
   );
+
+  if (!filteredProducts) {
+      return <div className="text-center text-gray-500">No items found.</div>;
+  }
 
   return (
     <>

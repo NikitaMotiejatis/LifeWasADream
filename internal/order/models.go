@@ -14,18 +14,16 @@ type OrderSummary struct {
 }
 
 type Variation struct {
-	Name          string  `json:"name"`
-	NameKey       string  `json:"nameKey"`
-	PriceModifier float64 `json:"priceModifier"`
+	Name          string	`json:"name"`
+	PriceModifier uint64	`json:"priceModifier"`
 }
 
 type Product struct {
-	Id         string      `json:"id"`
-	Name       string      `json:"name"`
-	NameKey    string      `json:"nameKey"`
-	BasePrice  float64     `json:"basePrice"`
-	Categories []string    `json:"categories"`
-	Variations []Variation `json:"variations"`
+	Id         int32		`json:"id"         db:"id"`
+	Name       string		`json:"name"       db:"name"`
+	BasePrice  int64     	`json:"basePrice"  db:"price_per_unit"`
+	Categories []string		`json:"categories"`
+	Variations []Variation	`json:"variations"`
 }
 
 type OrderCounts struct {

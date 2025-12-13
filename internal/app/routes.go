@@ -38,7 +38,7 @@ func setupAuth(router *chi.Mux, config config.Config) *auth.AuthController {
 	return c
 }
 
-func setupApiRoutes(router *chi.Mux, _config config.Config, authMiddleware func(http.Handler) http.Handler) {
+func setupApiRoutes(router *chi.Mux, config config.Config, authMiddleware func(http.Handler)http.Handler) {
 	apiRouter := chi.NewRouter()
 
 	{
@@ -61,8 +61,8 @@ func setupApiRoutes(router *chi.Mux, _config config.Config, authMiddleware func(
 
 	{
 		c := order.OrderController{
-			OrderRepo:   data.NewMockDataSource(),
-			ProductRepo: data.NewMockDataSource(),
+			OrderRepo: 	 data.NewMockDataSource(),
+			ProductRepo: data.MustCreatePostgresDb(config),
 		}
 
 		apiRouter.With(authMiddleware).Mount("/order", c.Routes())

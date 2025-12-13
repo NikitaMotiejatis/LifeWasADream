@@ -145,6 +145,38 @@ INSERT INTO item_variation (id, item_id, name, price_difference) VALUES
 (7, 11, 'Small', 0),
 (8, 11, 'Large', 150);
 
+-- Category
+INSERT INTO category (id, name) VALUES
+(1, 'hot drinks'),
+(2, 'cold drinks'),
+(3, 'pastries'),
+(4, 'accessories'),
+(5, 'peripherals'),
+(6, 'burgers'),
+(7, 'sides'),
+(8, 'beverages');
+
+INSERT INTO item_category (item_id, category_id) VALUES
+-- Morning Roast Items
+(1, 1), -- House Blend Coffee -> Hot Drinks
+(2, 1), -- Espresso Shot -> Hot Drinks
+(3, 3), -- Blueberry Muffin -> Pastries
+(4, 3), -- Bagel with Cream Cheese -> Pastries
+(5, 2), -- Iced Latte -> Cold Drinks
+
+-- Tech Gadgets Items
+(6, 4), -- USB-C Cable -> Accessories
+(7, 5), -- Wireless Mouse -> Peripherals
+(8, 5), -- Mechanical Keyboard -> Peripherals
+(9, 4), -- HDMI Adapter -> Accessories
+
+-- Burger Joint Items
+(10, 6), -- Cheeseburger -> Burgers
+(11, 7), -- Fries -> Sides
+(12, 8), -- Soda -> Beverages
+(13, 6), -- Double Burger -> Burgers
+(14, 7); -- Onion Rings -> Sides
+
 -- ================================================================================================
 -- 6. SERVICES (For Appointment-Based Businesses)
 -- ================================================================================================

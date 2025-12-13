@@ -226,7 +226,7 @@ CREATE TABLE service_employee (
 -- ------------------------------------------------------------------------------------------------
 
 DROP TYPE IF EXISTS order_status CASCADE;
-CREATE TYPE order_status AS ENUM('OPEN', 'CLOSED', 'REFUNDED');
+CREATE TYPE order_status AS ENUM('OPEN', 'CLOSED', 'REFUND_PENDING', 'REFUNDED');
 
 DROP TABLE IF EXISTS order_data CASCADE;
 CREATE TABLE order_data (
@@ -268,6 +268,9 @@ CREATE TABLE item (
     CONSTRAINT non_negative_vat_price           CHECK (vat >= 0)
 );
 
+DROP INDEX IF EXISTS item_index CASCADE;
+CREATE INDEX item_index ON item(name);
+
 
 DROP TABLE IF EXISTS item_variation CASCADE;
 CREATE TABLE item_variation (
@@ -276,6 +279,21 @@ CREATE TABLE item_variation (
     name                VARCHAR(64) NOT NULL,
     price_difference    DECIMAL(15) NOT NULL DEFAULT 0
 );
+
+DROP TABLE IF EXISTS category CASCADE;
+CREATE TABLE category (
+    id      INTEGER PRIMARY KEY,
+    name    VARCHAR(64) NOT NULL UNIQUE
+);
+
+DROP TABLE IF EXISTS item_category CASCADE;
+CREATE TABLE item_category (
+    item_id     INTEGER NOT NULL REFERENCES item(id),
+    category_id INTEGER NOT NULL REFERENCES category(id),
+
+    PRIMARY KEY (item_id, category_id)
+);
+
 
 DROP TABLE IF EXISTS order_item CASCADE;
 CREATE TABLE order_item (
