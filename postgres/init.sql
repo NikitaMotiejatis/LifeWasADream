@@ -64,6 +64,13 @@ CREATE TABLE role_permission (
     PRIMARY KEY (role_id, permission_id)
 );
 
+DROP TABLE IF EXISTS employee_role CASCADE;
+CREATE TABLE employee_role (
+    employee_id INTEGER NOT NULL REFERENCES employee(id),
+    role_id     INTEGER NOT NULL REFERENCES role(id),
+
+    PRIMARY KEY (employee_id, role_id)
+);
 
 
 DROP TABLE IF EXISTS currency_info CASCADE;
@@ -118,6 +125,7 @@ CREATE TRIGGER business_valid_created_at
 DROP TABLE IF EXISTS employee CASCADE;
 CREATE TABLE employee (
     id              INTEGER PRIMARY KEY,
+    username        VARCHAR(16)     NOT NULL UNIQUE,
     first_name      VARCHAR(64)     NOT NULL,
     last_name       VARCHAR(64)     NOT NULL,
     password_hash   CHAR(60)        NOT NULL,

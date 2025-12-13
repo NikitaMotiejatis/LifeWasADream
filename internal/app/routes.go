@@ -29,7 +29,7 @@ func setupAuth(router *chi.Mux, config config.Config) *auth.AuthController {
 			SessionTokenName: "SESSION-TOKEN",
 			CsrfTokenName:    "X-XSRF-TOKEN",
 
-			UserRepo: data.NewMockDataSource(),
+			UserRepo: 			data.MustCreatePostgresDb(config),
 		},
 	}
 
@@ -65,7 +65,7 @@ func setupApiRoutes(router *chi.Mux, _config config.Config, authMiddleware func(
 			ProductRepo: data.NewMockDataSource(),
 		}
 
-		apiRouter.Mount("/order", c.Routes())
+		apiRouter.With(authMiddleware).Mount("/order", c.Routes())
 	}
 
 	{
