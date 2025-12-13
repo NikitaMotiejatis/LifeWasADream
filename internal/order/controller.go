@@ -11,8 +11,8 @@ import (
 )
 
 type OrderController struct {
-	OrderRepo	OrderRepo
-	ProductRepo	ProductRepo
+	OrderRepo   OrderRepo
+	ProductRepo ProductRepo
 }
 
 func (c OrderController) Routes() http.Handler {
@@ -93,9 +93,9 @@ func (c OrderController) createOrder(w http.ResponseWriter, r *http.Request) {
 	// TODO: actually save order to database and get real ID
 	// For now, generate a temporary ID
 	orderId := time.Now().Unix() // Temporary solution until DB implementation
-	
+
 	response := map[string]interface{}{
-		"id": orderId,
+		"id":      orderId,
 		"message": "order created",
 	}
 
