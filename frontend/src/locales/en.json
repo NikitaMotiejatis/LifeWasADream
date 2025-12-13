@@ -60,7 +60,11 @@
     "clear": "Clear",
     "review": "Review",
     "back": "Back",
-    "status": "Status"
+    "status": "Status",
+    "update": "Update",
+    "add": "Add",
+    "edit": "Edit",
+    "delete": "Delete"
   },
   "deliveries": {
     "buttons": {
@@ -476,7 +480,7 @@
     "smoothieMango": "Smoothie – Mango Paradise"
   },
   "reservation": {
-        "weekdays": {
+    "weekdays": {
       "mo": "Mo",
       "tu": "Tu",
       "we": "We",
@@ -567,7 +571,6 @@
       "missingInfo": "Missing customer information.\nPlease enter customer name and phone number.",
       "success": "Reservation confirmed!\nConfirmation code: {{code}}\nSMS sent to {{phone}}"
     },
-
 
     "serviceDetails": "Service Details",
 
@@ -678,14 +681,20 @@
     "supplier": {
       "deliveries": "Deliveries",
       "group": "Supplier Portal",
-      "invoices": "Invoice Status"
+      "invoices": "Invoice Status",
+      "invoiceStatus": "Invoice Status"
     },
     "manager": {
       "group": "Manager Portal",
       "dashboard": "Dashboard",
       "refunds": "Refund Approvals",
       "reports": "Reports & Analytics",
-      "inventory": "Inventory Overview"
+      "inventory": "Inventory Overview",
+      "vatSettings": "VAT Settings"
+    },
+    "settings": {
+      "group": "Settings",
+      "vatSettings": "VAT Settings"
     }
   },
   "stockAlerts": {
@@ -949,5 +958,45 @@
     "title": "Edit Reservation",
     "subtitle": "Modify reservation details",
     "saveChanges": "Save Changes"
+  },
+  "vat": {
+    "title": "VAT Rates",
+    "subtitle": "Manage VAT rates. Set one as default to apply to all products.",
+    "currentDefault": "Current VAT for all products:",
+    "appliesToAll": "Applies to all products for new orders",
+    "editRate": "Edit VAT Rate",
+    "addRate": "Add New VAT Rate",
+    "percentageLabel": "VAT Percentage",
+    "percentagePlaceholder": "e.g., 21.00",
+    "editHelp": "Update the VAT percentage value",
+    "addHelp": "Enter a value between 0 and 100 (no duplicates)",
+    "availableRates": "Available VAT Rates",
+    "addNewRate": "Add New Rate",
+    "confirmChange": {
+      "title": "Change Default VAT Rate",
+      "message": "This will change the VAT rate for ALL PRODUCTS to {{rate}}. Existing orders will keep their original VAT rates.",
+      "confirm": "Yes, Change All Products"
+    },
+    "activeLabel": "ACTIVE FOR ALL PRODUCTS",
+    "appliedToAll": "Applied to all products",
+    "availableForSelection": "Available for selection",
+    "setAsDefault": "Set as Default",
+    "defaultExplanation": "This VAT rate applies to all products automatically",
+    "noRates": "No VAT rates configured",
+    "defaultToZero": "All products will use 0% VAT until you add VAT rates",
+    "addFirstRate": "Add Your First VAT Rate",
+    "rates": {
+      "21percent": "21% VAT",
+      "9percent": "9% VAT",
+      "0percent": "0% VAT"
+    },
+    "rateName": "{{rate}}% VAT",
+    "validation": {
+      "required": "VAT percentage is required",
+      "nan": "Must be a valid number",
+      "negative": "Cannot be negative",
+      "exceeds": "Cannot exceed 100%",
+      "duplicate": "A {{rate}}% VAT rate already exists"
+    }
   }
 }
