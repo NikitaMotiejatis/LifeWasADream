@@ -25,6 +25,10 @@ func (c *PaymentController) Routes() chi.Router {
 
 // createStripeCheckoutSession creates a new Stripe checkout session
 func (c *PaymentController) createStripeCheckoutSession(w http.ResponseWriter, r *http.Request) {
+	if w == nil || r == nil {
+		return
+	}
+
 	var req StripeCheckoutRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "invalid request body", http.StatusBadRequest)
@@ -44,10 +48,18 @@ func (c *PaymentController) createStripeCheckoutSession(w http.ResponseWriter, r
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(response)
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		http.Error(w, "failed to encode response", http.StatusInternalServerError)
+		return
+	}
 }
 
 // verifyStripePayment verifies a Stripe payment session
 func (c *PaymentController) verifyStripePayment(w http.ResponseWriter, r *http.Request) {
+	if w == nil || r == nil {
+		return
+	}
+
 	sessionID := chi.URLParam(r, "sessionId")
 	if sessionID == "" {
 		http.Error(w, "session ID required", http.StatusBadRequest)
@@ -63,10 +75,18 @@ func (c *PaymentController) verifyStripePayment(w http.ResponseWriter, r *http.R
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(payment)
+	if err := json.NewEncoder(w).Encode(payment); err != nil {
+		http.Error(w, "failed to encode response", http.StatusInternalServerError)
+		return
+	}
 }
 
 // handleStripeWebhook handles Stripe webhook events
 func (c *PaymentController) handleStripeWebhook(w http.ResponseWriter, r *http.Request) {
+	if w == nil || r == nil {
+		return
+	}
+	
 	const MaxBodyBytes = int64(65536)
 	r.Body = http.MaxBytesReader(w, r.Body, MaxBodyBytes)
 
