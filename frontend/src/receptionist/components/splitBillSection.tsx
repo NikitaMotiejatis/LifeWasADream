@@ -121,21 +121,16 @@ export const SplitBillSection: React.FC<SplitBillSectionProps> = ({
 
         <button
           onClick={() => {
-            navigate('/orders');
+            if (paymentMethod === 'Card' && onStripePayment) {
+              onStripePayment();
+            } else {
+              navigate('/orders');
+            }
           }}
           className="w-full rounded-xl bg-blue-600 py-4 text-lg font-bold text-white shadow-md transition hover:bg-blue-700"
         >
           {t('orderSummary.completePayment')}
         </button>
-
-        {onStripePayment && (
-          <button
-            onClick={onStripePayment}
-            className="mt-3 w-full rounded-xl border-2 border-blue-600 bg-white py-4 text-lg font-bold text-blue-600 shadow-md transition hover:bg-blue-50"
-          >
-            {t('payment.payWithStripe', 'Pay with Stripe')}
-          </button>
-        )}
       </>
     );
   }

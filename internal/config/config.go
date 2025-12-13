@@ -7,8 +7,9 @@ import (
 )
 
 type Config struct {
-	Url      string
-	VitePort uint16 // TODO: maybe rename to smth like FrontendPort
+	Url         string
+	FrontendUrl string // URL for frontend (used for Stripe redirects)
+	VitePort    uint16 // TODO: maybe rename to smth like FrontendPort
 
 	JwtSecret string
 
@@ -34,8 +35,9 @@ func LoadConfig() (*Config, error) {
 	}
 
 	config := &Config{
-		Url:      os.Getenv("URL"),
-		VitePort: uint16(vitePort),
+		Url:         os.Getenv("URL"),
+		FrontendUrl: os.Getenv("FRONTEND_URL"),
+		VitePort:    uint16(vitePort),
 
 		XSRFHeaderKey:  os.Getenv("XSRF_HEADER_KEY"),
 		XSRFCookieName: os.Getenv("XSRF_COOKIE_NAME"),

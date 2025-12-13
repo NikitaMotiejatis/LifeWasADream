@@ -84,8 +84,8 @@ func setupPaymentRoutes(router *chi.Mux, config config.Config, authMiddleware fu
 	paymentService := &payment.PaymentService{
 		StripeSecretKey: config.StripeSecretKey,
 		StripePublicKey: config.StripePublicKey,
-		SuccessURL:      fmt.Sprintf("http://%s/payment/success", config.Url),
-		CancelURL:       fmt.Sprintf("http://%s/payment/cancel", config.Url),
+		SuccessURL:      fmt.Sprintf("http://%s/payment/success", config.FrontendUrl), // When I save it automatically makes the spaces, after ':' !?
+		CancelURL:       fmt.Sprintf("http://%s/payment/cancel", config.FrontendUrl),
 	}
 
 	paymentController := &payment.PaymentController{
