@@ -1,20 +1,19 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  Reservation,
-  servicesMap,
-} from '@/receptionist/components/reservationList';
 import { useCurrency } from '@/global/contexts/currencyContext';
 import {
   useNameValidation,
   usePhoneValidation,
 } from '@/utils/useInputValidation';
 import { formatDateTime } from '@/utils/formatDateTime';
+import { Reservation } from './reservationList';
+import { Service } from './editReservation/types';
 
 type Props = {
   open: boolean;
   type: 'complete' | 'cancel' | 'noshow' | 'refund' | 'cancel_refund' | 'edit';
   reservation: Reservation | null;
+  service?: Service;
   onClose: () => void;
   onConfirm: (refundData?: {
     name: string;
@@ -28,21 +27,22 @@ export default function ReservationModal({
   open,
   type,
   reservation,
+  service,
   onClose,
   onConfirm,
 }: Props) {
   const { t } = useTranslation();
   const { formatPrice } = useCurrency();
 
-  const name = useNameValidation(reservation?.customerName ?? '');
-  const phone = usePhoneValidation(reservation?.customerPhone ?? '');
+  const name = useNameValidation(reservation?.CustomerName ?? '');
+  const phone = usePhoneValidation(reservation?.CustomerPhone ?? '');
   const [email, setEmail] = useState('');
   const [reason, setReason] = useState('');
 
   useEffect(() => {
     if (open && reservation) {
-      name.reset(reservation.customerName || '');
-      phone.reset(reservation.customerPhone || '');
+      name.reset(reservation.CustomerName || '');
+      phone.reset(reservation.CustomerPhone || '');
       setEmail('');
       setReason('');
     }
@@ -56,7 +56,7 @@ export default function ReservationModal({
 
   if (!open || !reservation) return null;
 
-  const servicePrice = servicesMap[reservation.serviceId]?.price || 0;
+  const servicePrice = service?.price ?? 0;
 
   const isRefundInvalid =
     type === 'refund' && (!name.isValid || !phone.isValid || !reason.trim());
@@ -83,14 +83,14 @@ export default function ReservationModal({
 
       <div className="relative w-full max-w-md rounded-2xl bg-white p-7 shadow-2xl">
         <h3 className="mb-5 text-xl font-bold text-gray-900">
-          {t(`reservations.modal.title.${type}`)} #{reservation.id}
+          {t(`reservations.modal.title.${type}`)} #{reservation.Id}
         </h3>
 
         <div className="flex justify-evenly text-sm text-gray-700">
-          <p className="font-medium">{reservation.customerName}</p>
-          <p className="text-gray-600">{reservation.customerPhone}</p>
+          <p className="font-medium">{reservation.CustomerName}</p>
+          <p className="text-gray-600">{reservation.CustomerPhone}</p>
           <p className="text-gray-600">
-            {formatDateTime(reservation.datetime)}
+            {formatDateTime(reservation.Datetime)}
           </p>
         </div>
 

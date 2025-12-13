@@ -550,8 +550,6 @@
     },
     "smsNote": "Confirmation will be sent via SMS",
     "staff": {
-      "James Chen": "James Chen",
-      "Sarah Johnson": "Sarah Johnson",
       "Anyone": "Anyone",
       "Colorist": "Colorist",
       "Nail Technician": "Nail Technician",
@@ -635,6 +633,7 @@
       "totalAmount": "Total Amount"
     },
     "noReservations": "No reservations found",
+    "notFound": "Not found",
     "services": {
       "1": "Haircut & Style",
       "2": "Hair Color",
@@ -642,9 +641,7 @@
       "4": "Pedicure"
     },
     "staff": {
-      "anyone": "Any Staff",
-      "james": "James Chen",
-      "sarah": "Sarah Johnson"
+      "anyone": "Any Staff"
     },
     "status": {
       "refundInProgress": "Refund in progress"

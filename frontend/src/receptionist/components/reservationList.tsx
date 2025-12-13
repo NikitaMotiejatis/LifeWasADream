@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useCurrency } from '@/global/contexts/currencyContext';
 import ReservationFilters from '@/receptionist/components/reservationFilters';
@@ -6,30 +6,55 @@ import ReservationListItem from '@/receptionist/components/reservationListItem';
 import ReservationModal from '@/receptionist/components/reservationModal';
 import { EditReservationPanel } from '@/receptionist/components/editReservation/editReservationPanel';
 import Toast from '@/global/components/toast';
-import { 
-  servicesMap, 
-  serviceIdMapping, 
-  staffIdMapping,
-  mapReservationForEdit 
-} from '@/utils/reservationMappings';
+import { useAuth } from '@/global/hooks/auth';
+import { mapReservationForEdit } from '@/utils/reservationMappings';
+import useSWR from 'swr';
 
-export type Reservation = {
-  id: string;
-  customerName: string;
-  customerPhone: string;
-  staffId: string;
-  serviceId: string;
-  datetime: Date;
-  status: 'pending' | 'completed' | 'cancelled' | 'no_show' | 'refund_pending';
+type Service = {
+  Id: string;
+  NameKey: string;
+  Price: number;
 };
 
-export { servicesMap }; 
+type Staff = {
+  Id: string;
+  Name: string;
+  Role: string;
+  Services: Service[];
+};
+
+export type Reservation = {
+  Id: string;
+  CustomerName: string;
+  CustomerPhone: string;
+  StaffId: string;
+  ServiceId: string;
+  Datetime: string;
+  Status: 'pending' | 'completed' | 'cancelled' | 'no_show' | 'refund_pending';
+};
+
+export type Counts = {
+  all: number;
+  pending: number;
+  completed: number;
+  cancelled: number;
+  no_show: number;
+  refund_pending: number;
+};
+
+const defaultCounts: Counts = {
+  all: 0,
+  pending: 0,
+  completed: 0,
+  cancelled: 0,
+  no_show: 0,
+  refund_pending: 0,
+};
 
 export default function ReservationList() {
   const { t } = useTranslation();
   const { formatPrice } = useCurrency();
-  const [reservations, setReservations] = useState<Reservation[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { authFetch } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [dateFrom, setDateFrom] = useState('');
   const [timeFrom, setTimeFrom] = useState('');
@@ -56,116 +81,33 @@ export default function ReservationList() {
     type: 'success' | 'error';
   } | null>(null);
 
-  useEffect(() => {
-    const load = async () => {
-      await new Promise(r => setTimeout(r, 300));
-      const mock: Reservation[] = [
-        {
-          id: 'RES-301',
-          customerName: 'Emma Wilson',
-          customerPhone: '+1234567890',
-          staffId: 'james',
-          serviceId: '1',
-          datetime: new Date('2026-11-28T10:00:00'),
-          status: 'completed',
-        },
-        {
-          id: 'RES-302',
-          customerName: 'Liam Chen',
-          customerPhone: '+1987654321',
-          staffId: 'anyone',
-          serviceId: '3',
-          datetime: new Date('2025-11-30T14:30:00'),
-          status: 'pending',
-        },
-        {
-          id: 'RES-303',
-          customerName: 'Sophia Kim',
-          customerPhone: '+1555123456',
-          staffId: 'sarah',
-          serviceId: '4',
-          datetime: new Date('2025-12-20T11:00:00'),
-          status: 'pending',
-        },
-        {
-          id: 'RES-304',
-          customerName: 'Noah Park',
-          customerPhone: '+1443123456',
-          staffId: 'james',
-          serviceId: '2',
-          datetime: new Date('2025-12-18T16:00:00'),
-          status: 'cancelled',
-        },
-        {
-          id: 'RES-305',
-          customerName: 'Ava Brown',
-          customerPhone: '+1333444555',
-          staffId: 'anyone',
-          serviceId: '1',
-          datetime: new Date('2025-11-20T09:30:00'),
-          status: 'no_show',
-        },
-      ];
-      setReservations(mock);
-      setLoading(false);
-    };
-    load();
-  }, []);
+  const {
+    data: reservations,
+    error: reservationsError,
+    isLoading,
+  } = useSWR(
+    `reservation?status=${statusFilter}&from=${dateFrom}&to=${dateTo}`,
+    (url: string) => authFetch<Reservation[]>(url, 'GET'),
+    { revalidateOnMount: true },
+  );
 
-  const sortedAndFiltered = useMemo(() => {
-    const from =
-      dateFrom && timeFrom
-        ? new Date(`${dateFrom}T${timeFrom}`)
-        : dateFrom
-          ? new Date(`${dateFrom}T00:00`)
-          : null;
-    const to =
-      dateTo && timeTo
-        ? new Date(`${dateTo}T${timeTo}`)
-        : dateTo
-          ? new Date(`${dateTo}T23:59:59`)
-          : null;
+  const { data: counts } = useSWR(
+    `reservation/counts?from=${dateFrom}&to=${dateTo}`,
+    (url: string) => authFetch<Counts>(url, 'GET'),
+    { revalidateOnMount: true },
+  );
 
-    return reservations
-      .filter(r => {
-        if (statusFilter !== 'all' && r.status !== statusFilter) return false;
+  const { data: services } = useSWR(
+    `reservation/services`,
+    (url: string) => authFetch<Service[]>(url, 'GET'),
+    { revalidateOnMount: true },
+  );
 
-        if (searchTerm) {
-          const q = searchTerm.toLowerCase();
-          const searchable =
-            `${r.id} ${r.customerName} ${r.customerPhone} ${t(`reservations.services.${r.serviceId}`)} ${t(`reservations.staff.${r.staffId}`)}`.toLowerCase();
-          if (!searchable.includes(q)) return false;
-        }
-
-        const time = r.datetime.getTime();
-        if (from && time < from.getTime()) return false;
-        if (to && time > to.getTime()) return false;
-
-        return true;
-      })
-      .sort((a, b) => {
-        const order: Record<Reservation['status'], number> = {
-          pending: 0,
-          refund_pending: 1,
-          completed: 2,
-          cancelled: 3,
-          no_show: 4,
-        };
-        return (
-          order[a.status] - order[b.status] ||
-          parseInt(b.id.slice(4)) - parseInt(a.id.slice(4))
-        );
-      });
-  }, [
-    reservations,
-    searchTerm,
-    statusFilter,
-    dateFrom,
-    timeFrom,
-    dateTo,
-    timeTo,
-    t,
-  ]);
+  const { data: staff } = useSWR(
+    `reservation/staff`,
+    (url: string) => authFetch<Staff[]>(url, 'GET'),
+    { revalidateOnMount: true },
+  );
 
   const openModal = (type: typeof modalType, res: Reservation) => {
     setModalType(type);
@@ -176,72 +118,28 @@ export default function ReservationList() {
   const handleEditClick = (reservation: Reservation) => {
     const formattedReservation = mapReservationForEdit(reservation);
 
-    setReservationIdToEdit(reservation.id);
+    setReservationIdToEdit(reservation.Id);
     setSelectedReservation(formattedReservation as any);
     setEditModalOpen(true);
   };
 
-  const updateStatus = (id: string, newStatus: Reservation['status']) => {
-    setReservations(prev =>
-      prev.map(r => (r.id === id ? { ...r, status: newStatus } : r)),
-    );
-    setModalOpen(false);
-  };
-
-  const handleSaveEdit = (reservationData: any) => {
+  const handleSaveEdit = async (reservationData: any) => {
     try {
-      if (!reservationData) {
-        throw new Error('No reservation data received');
-      }
-
-      const originalReservation = reservations.find(
-        r => r.id === reservationData.id,
-      );
-
-      if (!originalReservation) {
-        throw new Error(`Reservation with ID ${reservationData.id} not found`);
-      }
-
-      const datetime = reservationData.datetime;
-
-      const serviceId =
-        serviceIdMapping[reservationData.service] ||
-        originalReservation.serviceId;
-      const staffId =
-        staffIdMapping[reservationData.staff] || originalReservation.staffId;
-
-      const updatedReservation: Reservation = {
-        id: reservationData.id,
-        customerName:
-          reservationData.customerName || originalReservation.customerName,
-        customerPhone:
-          reservationData.customerPhone || originalReservation.customerPhone,
-        staffId: staffId,
-        serviceId: serviceId,
-        datetime: datetime,
-        status: originalReservation.status,
-      };
-
-      setReservations(prev =>
-        prev.map(r =>
-          r.id === updatedReservation.id ? updatedReservation : r,
-        ),
+      if (!reservationData) throw new Error('No reservation data received');
+      await authFetch(
+        `reservation/${reservationData.id}`,
+        'PUT',
+        reservationData,
       );
       setEditModalOpen(false);
-      setToast({
-        message: t('reservations.toast.updated'),
-        type: 'success',
-      });
-    } catch (error: any) {
-      console.error('Error saving reservation:', error);
-      setToast({
-        message: `Error: ${error.message}`,
-        type: 'error',
-      });
+      setToast({ message: t('reservations.toast.updated'), type: 'success' });
+    } catch (err: any) {
+      console.error(err);
+      setToast({ message: `Error: ${err.message}`, type: 'error' });
     }
-
     setTimeout(() => setToast(null), 5000);
   };
+
   const handleCancelEdit = () => {
     setEditModalOpen(false);
     setReservationIdToEdit(null);
@@ -252,23 +150,12 @@ export default function ReservationList() {
     setTimeout(() => setToast(null), 5000);
   };
 
-  if (loading) {
+  if (isLoading)
     return (
       <div className="p-10 text-center text-gray-500">
         {t('reservations.loading')}
       </div>
     );
-  }
-
-  const counts = {
-    all: reservations.length,
-    pending: reservations.filter(r => r.status === 'pending').length,
-    completed: reservations.filter(r => r.status === 'completed').length,
-    cancelled: reservations.filter(r => r.status === 'cancelled').length,
-    no_show: reservations.filter(r => r.status === 'no_show').length,
-    refund_pending: reservations.filter(r => r.status === 'refund_pending')
-      .length,
-  };
 
   return (
     <div className="space-y-6">
@@ -289,25 +176,33 @@ export default function ReservationList() {
           setTimeTo={setTimeTo}
           statusFilter={statusFilter}
           setStatusFilter={setStatusFilter}
-          counts={counts}
+          counts={counts || defaultCounts}
         />
       </div>
 
       <div className="mt-6 space-y-3">
-        {sortedAndFiltered.length === 0 ? (
-          <p className="py-12 text-center text-gray-400">
-            {t('reservations.noReservations')}
-          </p>
-        ) : (
-          sortedAndFiltered.map(res => (
+        {isLoading ? (
+          <div>{t('reservations.loading')}</div>
+        ) : reservationsError ? (
+          <div className="p-10 text-center text-gray-500">
+            {t('reservations.loading')}
+          </div>
+        ) : (reservations || []).length > 0 ? (
+          reservations?.map(res => (
             <ReservationListItem
-              key={res.id}
+              key={res.Id}
               reservation={res}
+              services={services}
+              staff={staff}
               formatPrice={formatPrice}
               onAction={openModal}
               onEdit={handleEditClick}
             />
           ))
+        ) : (
+          <p className="py-12 text-center text-gray-400">
+            {t('reservations.noReservations')}
+          </p>
         )}
       </div>
 
@@ -318,30 +213,14 @@ export default function ReservationList() {
         onClose={() => setModalOpen(false)}
         onConfirm={() => {
           if (!selectedReservation) return;
-
           const actions: Record<typeof modalType, () => void> = {
-            complete: () => {
-              updateStatus(selectedReservation.id, 'completed');
-              showToast('reservations.toast.completed');
-            },
-            cancel: () => {
-              updateStatus(selectedReservation.id, 'cancelled');
-              showToast('reservations.toast.cancelled');
-            },
-            noshow: () => {
-              updateStatus(selectedReservation.id, 'no_show');
-              showToast('reservations.toast.noShow');
-            },
-            refund: () => {
-              updateStatus(selectedReservation.id, 'refund_pending');
-              showToast('reservations.toast.refundRequested');
-            },
-            cancel_refund: () => {
-              updateStatus(selectedReservation.id, 'completed');
-              showToast('reservations.toast.refundCancelled');
-            },
+            complete: () => showToast('reservations.toast.completed'),
+            cancel: () => showToast('reservations.toast.cancelled'),
+            noshow: () => showToast('reservations.toast.noShow'),
+            refund: () => showToast('reservations.toast.refundRequested'),
+            cancel_refund: () =>
+              showToast('reservations.toast.refundCancelled'),
           };
-
           actions[modalType]();
         }}
       />
@@ -354,7 +233,6 @@ export default function ReservationList() {
           />
 
           <div className="relative max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-2xl bg-white p-7 shadow-2xl">
-
             <EditReservationPanel
               mode="edit"
               reservationId={reservationIdToEdit}
@@ -368,4 +246,4 @@ export default function ReservationList() {
       <Toast toast={toast} />
     </div>
   );
-} 
+}

@@ -550,10 +550,8 @@
 
     "staffMember": "Darbuotojas",
     "staff": {
-      "James Chen": "Jonas Petraitis",
-      "Sarah Johnson": "Ona Jonaitienė",
       "Anyone": "Bet kas",
-      "Colorist": "Spalvininkas",
+      "Colorist": "Dažytojas",
       "Nail Technician": "Nagų meistrė",
       "Any available staff": "Bet kuris darbuotojas"
     },
@@ -603,9 +601,7 @@
     "Any available staff": "Bet kuris laisvas darbuotojas",
     "Colorist": "Dažytojas",
     "Nail Technician": "Nagų meistrė",
-    "Anyone": "Bet kas",
-    "James Chen": "Jonas Petraitis",
-    "Sarah Johnsonh": "Ona Jonaitienė"
+    "Anyone": "Bet kas"
   },
   "staffMember": "Darbuotojas",
   "staffServiceTitle": "Pasirinkite darbuotoją ir paslaugą",
@@ -679,6 +675,7 @@
       "totalAmount": "Bendra suma"
     },
     "noReservations": "Rezervacijų nerasta",
+    "notFound": "Nerasta",
     "services": {
       "1": "Plaukų kirpimas ir stilizavimas",
       "2": "Plaukų dažymas",
@@ -686,9 +683,7 @@
       "4": "Pedikiūras"
     },
     "staff": {
-      "anyone": "Bet kuris darbuotojas",
-      "james": "Jonas Petraitis",
-      "sarah": "Ona Jonaitienė"
+      "anyone": "Bet kuris darbuotojas"
     },
     "status": {
       "refundInProgress": "Grąžinimas vykdomas"
