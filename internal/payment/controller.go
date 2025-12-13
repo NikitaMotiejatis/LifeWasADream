@@ -2,7 +2,9 @@ package payment
 
 import (
 	"encoding/json"
+	"errors"
 	"io"
+	"log/slog"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -37,19 +39,22 @@ func (c *PaymentController) createStripeCheckoutSession(w http.ResponseWriter, r
 
 	response, err := c.Service.CreateStripeCheckoutSession(req)
 	if err != nil {
-		if err == ErrInvalidAmount || err == ErrInvalidCurrency {
+		// Expose only safe erros to client
+		if errors.Is(err, ErrInvalidAmount) || errors.Is(err, ErrInvalidCurrency) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
+		slog.Error("Failed to create checkout session",
+			"order_id", req.OrderID,
+			"error", err)
 		http.Error(w, "failed to create checkout session", http.StatusInternalServerError)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(response)
 	if err := json.NewEncoder(w).Encode(response); err != nil {
-		http.Error(w, "failed to encode response", http.StatusInternalServerError)
+		slog.Error("Failed to encode checkout response", "error", err)
 		return
 	}
 }
@@ -68,15 +73,28 @@ func (c *PaymentController) verifyStripePayment(w http.ResponseWriter, r *http.R
 
 	payment, err := c.Service.VerifyStripePayment(sessionID)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		// Expose only safe erros to client
+		if errors.Is(err, ErrPaymentNotFound) {
+			slog.Warn("Payment session not found", "session_id", sessionID)
+			http.Error(w, "payment session not found", http.StatusNotFound)
+			return
+		}
+		if errors.Is(err, ErrPaymentNotCompleted) {
+			slog.Warn("Payment not completed", "session_id", sessionID)
+			http.Error(w, "payment not completed", http.StatusBadRequest)
+			return
+		}
+		slog.Error("Failed to verify payment",
+			"session_id", sessionID,
+			"error", err)
+		http.Error(w, "failed to verify payment", http.StatusInternalServerError)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(payment)
 	if err := json.NewEncoder(w).Encode(payment); err != nil {
-		http.Error(w, "failed to encode response", http.StatusInternalServerError)
+		slog.Error("Failed to encode payment verification response", "error", err)
 		return
 	}
 }
@@ -86,7 +104,7 @@ func (c *PaymentController) handleStripeWebhook(w http.ResponseWriter, r *http.R
 	if w == nil || r == nil {
 		return
 	}
-	
+
 	const MaxBodyBytes = int64(65536)
 	r.Body = http.MaxBytesReader(w, r.Body, MaxBodyBytes)
 
@@ -104,7 +122,9 @@ func (c *PaymentController) handleStripeWebhook(w http.ResponseWriter, r *http.R
 
 	err = c.Service.HandleStripeWebhook(payload, signature)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		// Expose only safe erros to client
+		slog.Error("Webhook processing failed", "error", err)
+		http.Error(w, "webhook processing failed", http.StatusBadRequest)
 		return
 	}
 

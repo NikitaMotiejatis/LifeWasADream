@@ -10,10 +10,11 @@ import (
 )
 
 var (
-	ErrInternal        = errors.New("internal error")
-	ErrPaymentNotFound = errors.New("payment not found")
-	ErrInvalidAmount   = errors.New("invalid amount")
-	ErrInvalidCurrency = errors.New("invalid currency")
+	ErrInternal            = errors.New("internal error")
+	ErrPaymentNotFound     = errors.New("payment not found")
+	ErrPaymentNotCompleted = errors.New("payment not completed")
+	ErrInvalidAmount       = errors.New("invalid amount")
+	ErrInvalidCurrency     = errors.New("invalid currency")
 )
 
 type PaymentService struct {
@@ -66,7 +67,7 @@ func (s *PaymentService) CreateStripeCheckoutSession(req StripeCheckoutRequest) 
 
 	sess, err := session.New(params)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create Stripe session: %w", err)
+		return nil, fmt.Errorf("%w: checkout session creation failed", ErrInternal)
 	}
 
 	// TODO: Store payment record in database when orders are implemented
@@ -93,11 +94,11 @@ func (s *PaymentService) VerifyStripePayment(sessionID string) (*Payment, error)
 
 	sess, err := session.Get(sessionID, nil)
 	if err != nil {
-		return nil, fmt.Errorf("failed to retrieve session: %w", err)
+		return nil, ErrPaymentNotFound
 	}
 
 	if sess.PaymentStatus != stripe.CheckoutSessionPaymentStatusPaid {
-		return nil, errors.New("payment not completed")
+		return nil, ErrPaymentNotCompleted
 	}
 
 	// TODO: Update payment status in database when orders are implemented
