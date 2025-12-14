@@ -1,15 +1,15 @@
 import { useTranslation } from 'react-i18next';
-import { RefundRequest } from '../mockData';
+import { Refund } from '@/utils/refundService';
 import { useState } from 'react';
 import CheckmarkIcon from '../../icons/checkmarkIcon';
 import TrashcanIcon from '../../icons/trashcanIcon';
 
 interface RefundApprovalModalProps {
-  request: RefundRequest;
+  request: Refund;
   isOpen: boolean;
   onClose: () => void;
-  onApprove: (id: string) => void;
-  onReject: (id: string, reason: string) => void;
+  onApprove: () => void;
+  onReject: (reason: string) => void;
 }
 
 export default function RefundApprovalModal({
@@ -36,13 +36,13 @@ export default function RefundApprovalModal({
   if (!isOpen) return null;
 
   const handleApprove = () => {
-    onApprove(request.id);
+    onApprove();
     handleClose();
   };
 
   const handleConfirmReject = () => {
     if (!rejectionReason.trim()) return;
-    onReject(request.id, rejectionReason.trim());
+    onReject(rejectionReason.trim());
     handleClose();
   };
 
@@ -66,37 +66,20 @@ export default function RefundApprovalModal({
                 {t('manager.refunds.modal.subtitle')}
               </p>
               <div className="mt-6 space-y-4">
-                {/* Customer Info */}
-                <div className="p-4 bg-gray-50 rounded-lg">
-                  <p className="text-xs font-medium text-gray-500 uppercase mb-1">{t('manager.refunds.modal.customerInfo')}</p>
-                  <p className="text-base font-medium text-gray-900">{request.customerName}</p>
-                  <p className="text-sm text-gray-500">{t('manager.refunds.modal.requestedBy')}: {request.requestedBy}</p>
-                </div>
-
                 {/* Refund Details */}
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4">
                   <div className="p-4 bg-gray-50 rounded-lg">
                     <p className="text-xs font-medium text-gray-500 uppercase mb-1">{t('manager.refunds.modal.refundAmount')}</p>
-                    <p className="text-xl font-bold text-gray-900">${request.amount.toFixed(2)}</p>
-                    <p className="text-sm text-gray-500">Downtown Branch</p>
-                  </div>
-                  <div className="p-4 bg-gray-50 rounded-lg">
-                    <p className="text-xs font-medium text-gray-500 uppercase mb-1">{t('manager.refunds.modal.reason')}</p>
-                    <p className="text-base font-medium text-red-600">{request.reason}</p>
+                    <p className="text-3xl font-bold text-gray-900">${request.amount.toFixed(2)}</p>
+                    <p className="text-sm text-gray-500 mt-2">Refund ID: {request.id} | Order ID: {request.orderId}</p>
                   </div>
                 </div>
 
-                {/* Order Items */}
+                {/* Reason */}
                 <div className="p-4 bg-gray-50 rounded-lg">
-                  <p className="text-xs font-medium text-gray-500 uppercase mb-2">{t('manager.refunds.modal.orderItems')}</p>
-                  <div className="space-y-1">
-                    {request.orderItems.map((item, index) => (
-                      <div key={index} className="flex justify-between text-sm text-gray-700">
-                        <span>{item.quantity}x {item.name}</span>
-                        <span>${(item.quantity * item.price).toFixed(2)}</span>
-                      </div>
-                    ))}
-                  </div>
+                  <p className="text-xs font-medium text-gray-500 uppercase mb-1">{t('manager.refunds.modal.reason')}</p>
+                  <p className="text-base font-medium text-red-600">{request.reason}</p>
+                  <p className="text-sm text-gray-500 mt-2">Requested At: {new Date(request.requestedAt).toLocaleString()}</p>
                 </div>
 
                 {/* Rejection Reason Input */}
