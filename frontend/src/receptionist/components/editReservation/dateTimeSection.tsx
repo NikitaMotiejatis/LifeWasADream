@@ -4,7 +4,7 @@ import i18n from '@/i18n';
 import DropdownSelector from '@/global/components/dropdownSelector';
 
 interface DateTimeSectionProps {
-  datetime: Date; 
+  datetime: Date;
   onDateTimeChange: (newDateTime: Date) => void;
   availableTimes: string[];
 }
@@ -34,7 +34,7 @@ export function DateTimeSection({
       datetime.getMonth(),
       datetime.getDate(),
       hours,
-      minutes
+      minutes,
     );
     onDateTimeChange(newDate);
   };
@@ -45,26 +45,25 @@ export function DateTimeSection({
   const daysInMonth = new Date(year, month + 1, 0).getDate();
 
   const weekdayKeys: WeekdayKey[] = ['mo', 'tu', 'we', 'th', 'fr', 'sa', 'su'];
-  
+
   const weekdayTranslations: Record<WeekdayKey, string> = {
-    'mo': t('reservation.weekdays.mo'),
-    'tu': t('reservation.weekdays.tu'),
-    'we': t('reservation.weekdays.we'),
-    'th': t('reservation.weekdays.th'),
-    'fr': t('reservation.weekdays.fr'),
-    'sa': t('reservation.weekdays.sa'),
-    'su': t('reservation.weekdays.su')
+    mo: t('reservation.weekdays.mo'),
+    tu: t('reservation.weekdays.tu'),
+    we: t('reservation.weekdays.we'),
+    th: t('reservation.weekdays.th'),
+    fr: t('reservation.weekdays.fr'),
+    sa: t('reservation.weekdays.sa'),
+    su: t('reservation.weekdays.su'),
   };
 
- 
   const firstDayOffset = (firstDayOfMonth.getDay() + 6) % 7;
 
   const days: (number | null)[] = [];
-  
+
   for (let i = 0; i < firstDayOffset; i++) {
     days.push(null);
   }
-  
+
   for (let d = 1; d <= daysInMonth; d++) {
     days.push(d);
   }
@@ -83,10 +82,10 @@ export function DateTimeSection({
   return (
     <div className="rounded-lg border border-gray-200 p-4">
       <h3 className="mb-3 text-lg font-semibold">
-        {t('reservation.dateTime')}
+        {t('reservations.dateTime')}
       </h3>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         <div className="rounded-lg border border-gray-200 p-4">
           <div className="mb-4 flex items-center justify-between">
             <button
@@ -96,7 +95,7 @@ export function DateTimeSection({
             >
               ←
             </button>
-            <span className="font-semibold text-sm md:text-base">
+            <span className="text-sm font-semibold md:text-base">
               {t(`reservation.months.${month}`)} {year}
             </span>
             <button
@@ -118,33 +117,37 @@ export function DateTimeSection({
 
           <div className="mt-2 grid grid-cols-7 gap-1 text-sm">
             {days.map((day, index) => {
-              const isSelected = day !== null && 
+              const isSelected =
+                day !== null &&
                 datetime.getDate() === day &&
                 datetime.getMonth() === month &&
                 datetime.getFullYear() === year;
-              
-              const isToday = day !== null && 
-                new Date().getDate() === day && 
-                new Date().getMonth() === month && 
+
+              const isToday =
+                day !== null &&
+                new Date().getDate() === day &&
+                new Date().getMonth() === month &&
                 new Date().getFullYear() === year;
-              
-              const isPast = day !== null && 
-                new Date(year, month, day) < new Date(new Date().setHours(0, 0, 0, 0));
+
+              const isPast =
+                day !== null &&
+                new Date(year, month, day) <
+                  new Date(new Date().setHours(0, 0, 0, 0));
 
               return (
                 <button
                   key={index}
                   disabled={!day || isPast}
                   onClick={() => day && handleDateClick(day)}
-                  className={`h-8 w-8 text-xs rounded-lg transition ${
+                  className={`h-8 w-8 rounded-lg text-xs transition ${
                     day
                       ? isSelected
                         ? 'bg-blue-600 text-white'
                         : isToday
-                        ? 'border border-blue-300 hover:bg-blue-50'
-                        : 'hover:bg-gray-100'
+                          ? 'border border-blue-300 hover:bg-blue-50'
+                          : 'hover:bg-gray-100'
                       : ''
-                  } ${isPast ? 'text-gray-400 cursor-not-allowed' : ''}`}
+                  } ${isPast ? 'cursor-not-allowed text-gray-400' : ''}`}
                 >
                   {day || ''}
                 </button>
@@ -176,7 +179,7 @@ export function DateTimeSection({
                     weekday: 'short',
                     year: 'numeric',
                     month: 'short',
-                    day: 'numeric'
+                    day: 'numeric',
                   })}
                 </span>
               </div>

@@ -601,6 +601,8 @@
       "to": "To"
     },
     "loading": "Loading reservations...",
+    "min": "min",
+    "dateTime": "Date & Time",
     "modal": {
       "confirm": {
         "cancel": "Confirm Cancellation",

@@ -7,7 +7,6 @@ import ReservationModal from '@/receptionist/components/reservationModal';
 import { EditReservationPanel } from '@/receptionist/components/editReservation/editReservationPanel';
 import Toast from '@/global/components/toast';
 import { useAuth } from '@/global/hooks/auth';
-import { mapReservationForEdit } from '@/utils/reservationMappings';
 import useSWR from 'swr';
 
 type Service = {
@@ -116,10 +115,8 @@ export default function ReservationList() {
   };
 
   const handleEditClick = (reservation: Reservation) => {
-    const formattedReservation = mapReservationForEdit(reservation);
-
     setReservationIdToEdit(reservation.Id);
-    setSelectedReservation(formattedReservation as any);
+    setSelectedReservation(reservation as any);
     setEditModalOpen(true);
   };
 
@@ -236,6 +233,8 @@ export default function ReservationList() {
             <EditReservationPanel
               mode="edit"
               reservationId={reservationIdToEdit}
+              services={services}
+              staffMembers={staff}
               initialReservation={selectedReservation as any}
               onSave={handleSaveEdit}
               onCancel={handleCancelEdit}

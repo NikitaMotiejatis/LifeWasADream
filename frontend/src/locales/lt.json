@@ -643,6 +643,8 @@
       "to": "Iki"
     },
     "loading": "Kraunamos rezervacijos...",
+    "min": "min",
+    "dateTime": "Data ir laikas",
     "modal": {
       "confirm": {
         "cancel": "Patvirtinti atšaukimą",

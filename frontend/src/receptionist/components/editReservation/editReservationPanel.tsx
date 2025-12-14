@@ -13,27 +13,41 @@ import { StaffSection } from './staffSection';
 import { DateTimeSection } from './dateTimeSection';
 import { PriceSummarySection } from './priceSummarySection';
 import { ActionButtons } from './actionButtons';
-import { formatPhone } from '@/utils/useInputValidation'; 
-import {
-  getDefaultServices,
-  getDefaultStaff,
-  DEFAULT_AVAILABLE_TIMES,
-} from '@/utils/reservationMappings';
+import { formatPhone } from '@/utils/useInputValidation';
+
+export const DEFAULT_AVAILABLE_TIMES = [
+  '08:00',
+  '08:30',
+  '09:00',
+  '09:30',
+  '10:00',
+  '10:30',
+  '11:00',
+  '11:30',
+  '12:00',
+  '12:30',
+  '13:00',
+  '13:30',
+  '14:00',
+  '14:30',
+  '15:00',
+  '15:30',
+  '16:00',
+  '16:30',
+  '17:00',
+  '17:30',
+  '18:00',
+];
 
 export function EditReservationPanel({
   reservationId,
-  services = [],
-  staffMembers = [],
+  services,
+  staffMembers,
   initialReservation,
   onSave,
   onCancel,
 }: EditReservationPanelProps) {
   const { t } = useTranslation();
-
-  const displayServices =
-    services.length > 0 ? services : getDefaultServices(t);
-  const displayStaff =
-    staffMembers.length > 0 ? staffMembers : getDefaultStaff(t);
 
   const [reservation, setReservation] = useState<Reservation>(() => {
     if (initialReservation) {
@@ -74,7 +88,7 @@ export function EditReservationPanel({
   const validatePhoneNumber = (phone: string): boolean => {
     if (!phone) return false;
     const formattedPhone = formatPhone(phone);
-    return formattedPhone === phone; 
+    return formattedPhone === phone;
   };
 
   const validateForm = (): boolean => {
@@ -109,9 +123,7 @@ export function EditReservationPanel({
       const updated = { ...prev, ...updates };
 
       if (updates.service !== undefined) {
-        const selectedService = displayServices.find(
-          s => s.id === updates.service,
-        );
+        const selectedService = services?.find(s => s.id === updates.service);
         if (selectedService) {
           updated.duration = selectedService.duration;
           updated.price = selectedService.price;
@@ -157,7 +169,9 @@ export function EditReservationPanel({
             }`}
           >
             <span className="text-sm font-medium capitalize">
-              {t(`reservation.status.${reservation.status}`)}
+              {reservation.status
+                ? t(`reservation.status.${reservation.status}`)
+                : t(`reservations.notFound`)}
             </span>
           </div>
         </div>
@@ -188,7 +202,7 @@ export function EditReservationPanel({
 
       {/* Service Selection */}
       <ServiceSection
-        services={displayServices}
+        services={services ?? []}
         reservation={reservation}
         handleChange={(field, value) => {
           if (field === 'service') {
@@ -199,7 +213,7 @@ export function EditReservationPanel({
 
       {/* Staff Selection */}
       <StaffSection
-        staffMembers={displayStaff}
+        staffMembers={staffMembers ?? []}
         reservation={reservation}
         handleChange={(field, value) => {
           if (field === 'staff') {
@@ -212,7 +226,7 @@ export function EditReservationPanel({
       <DateTimeSection
         datetime={reservation.datetime}
         onDateTimeChange={handleDateTimeChange}
-        availableTimes={DEFAULT_AVAILABLE_TIMES} 
+        availableTimes={DEFAULT_AVAILABLE_TIMES}
       />
 
       {/* Price Summary */}
