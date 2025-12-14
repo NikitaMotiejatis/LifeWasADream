@@ -175,9 +175,7 @@ function StaffAndServiceSelector({
             }`}
           >
             <div>
-              <div className="font-medium">
-                {t(`reservation.staff.${s.name}`)}
-              </div>
+              <div className="font-medium">{s.name}</div>
               <div className="text-xs text-gray-500">
                 {t(`reservation.staff.${s.role}`)}
               </div>
@@ -406,11 +404,11 @@ function BookingSummary({
           value={selectedTime || t('reservation.summary.notSelected')}
         />
         <SummaryRow
-  label={t('reservation.summary.staff')}
-  value={t(
-    `reservation.staff.${staff.find(s => s.id === selectedStaff)?.name || 'Anyone'}`,
-  )}
-/>
+          label={t('reservation.summary.staff')}
+          value={t(
+            `reservation.staff.${staff.find(s => s.id === selectedStaff)?.name || 'anyone'}`,
+          )}
+        />
         <SummaryRow
           label={t('reservation.summary.service')}
           value={

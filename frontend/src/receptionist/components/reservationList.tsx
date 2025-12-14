@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useCurrency } from '@/global/contexts/currencyContext';
 import ReservationFilters from '@/receptionist/components/reservationFilters';
@@ -10,26 +10,26 @@ import { useAuth } from '@/global/hooks/auth';
 import useSWR from 'swr';
 
 type Service = {
-  Id: string;
-  NameKey: string;
-  Price: number;
+  id: string;
+  nameKey: string;
+  price: number;
 };
 
 type Staff = {
-  Id: string;
-  Name: string;
-  Role: string;
-  Services: Service[];
+  id: string;
+  name: string;
+  role: string;
+  rervices: Service[];
 };
 
 export type Reservation = {
-  Id: string;
-  CustomerName: string;
-  CustomerPhone: string;
-  StaffId: string;
-  ServiceId: string;
-  Datetime: string;
-  Status: 'pending' | 'completed' | 'cancelled' | 'no_show' | 'refund_pending';
+  id: string;
+  customerName: string;
+  customerPhone: string;
+  staffId: string;
+  serviceId: string;
+  datetime: string;
+  status: 'pending' | 'completed' | 'cancelled' | 'no_show' | 'refund_pending';
 };
 
 export type Counts = {
@@ -49,6 +49,36 @@ const defaultCounts: Counts = {
   no_show: 0,
   refund_pending: 0,
 };
+
+function buildISOString(
+  date: string,
+  time: string,
+  isEnd = false,
+): string | undefined {
+  if (!date) return undefined;
+
+  const localDate = new Date(
+    `${date}T${time || (isEnd ? '23:59:59' : '00:00:00')}`,
+  );
+
+  if (!time) {
+    if (!isEnd) {
+      localDate.setHours(0, 0, 0, 0);
+    } else {
+      localDate.setHours(23, 59, 59, 999);
+    }
+  }
+
+  return localDate.toISOString();
+}
+
+function buildQuery(status: string, from?: string, to?: string) {
+  const params = new URLSearchParams();
+  if (status !== 'all') params.set('status', status);
+  if (from) params.set('from', from);
+  if (to) params.set('to', to);
+  return params.toString();
+}
 
 export default function ReservationList() {
   const { t } = useTranslation();
@@ -80,30 +110,49 @@ export default function ReservationList() {
     type: 'success' | 'error';
   } | null>(null);
 
+  const fromISO = useMemo(
+    () => (dateFrom ? buildISOString(dateFrom, timeFrom) : undefined),
+    [dateFrom, timeFrom],
+  );
+
+  const toISO = useMemo(
+    () => (dateTo ? buildISOString(dateTo, timeTo, true) : undefined),
+    [dateTo, timeTo],
+  );
+
+  const query = useMemo(
+    () => buildQuery(statusFilter, fromISO, toISO),
+    [statusFilter, fromISO, toISO],
+  );
+
   const {
     data: reservations,
     error: reservationsError,
     isLoading,
   } = useSWR(
-    `reservation?status=${statusFilter}&from=${dateFrom}&to=${dateTo}`,
+    `reservation?${query}`,
     (url: string) => authFetch<Reservation[]>(url, 'GET'),
-    { revalidateOnMount: true },
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: true,
+      dedupingInterval: 2000,
+    },
   );
 
   const { data: counts } = useSWR(
-    `reservation/counts?from=${dateFrom}&to=${dateTo}`,
+    `reservation/counts?${query}`,
     (url: string) => authFetch<Counts>(url, 'GET'),
-    { revalidateOnMount: true },
+    { dedupingInterval: 2000 },
   );
 
   const { data: services } = useSWR(
-    `reservation/services`,
+    'reservation/services',
     (url: string) => authFetch<Service[]>(url, 'GET'),
     { revalidateOnMount: true },
   );
 
   const { data: staff } = useSWR(
-    `reservation/staff`,
+    'reservation/staff',
     (url: string) => authFetch<Staff[]>(url, 'GET'),
     { revalidateOnMount: true },
   );
@@ -115,7 +164,7 @@ export default function ReservationList() {
   };
 
   const handleEditClick = (reservation: Reservation) => {
-    setReservationIdToEdit(reservation.Id);
+    setReservationIdToEdit(reservation.id);
     setSelectedReservation(reservation as any);
     setEditModalOpen(true);
   };
@@ -187,7 +236,7 @@ export default function ReservationList() {
         ) : (reservations || []).length > 0 ? (
           reservations?.map(res => (
             <ReservationListItem
-              key={res.Id}
+              key={res.id}
               reservation={res}
               services={services as any}
               staff={staff as any}

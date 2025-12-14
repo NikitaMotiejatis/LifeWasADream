@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import i18n from '@/i18n';
 import SearchIcon from '@/icons/searchIcon';
 
 type Props = {
@@ -40,6 +41,38 @@ export default function ReservationFilters({
   counts,
 }: Props) {
   const { t } = useTranslation();
+  const lang = i18n.language;
+
+  const formatDisplayTime = (time24: string): string => {
+    if (!time24) return '';
+    if (lang === 'en') {
+      let hour = parseInt(time24.split(':')[0]);
+      const minute = time24.split(':')[1];
+      const ampm = hour >= 12 ? 'PM' : 'AM';
+      hour = hour % 12 || 12;
+      return `${hour.toString().padStart(2, '0')}:${minute} ${ampm}`;
+    }
+
+    return time24;
+  };
+
+  const parseDisplayTime = (displayValue: string): string => {
+    if (!displayValue) return '';
+
+    if (lang === 'en') {
+      const match = displayValue.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+      if (match) {
+        let hour = parseInt(match[1], 10);
+        const minute = match[2];
+        const ampm = match[3].toUpperCase();
+        if (ampm === 'PM' && hour < 12) hour += 12;
+        if (ampm === 'AM' && hour === 12) hour = 0;
+        return `${hour.toString().padStart(2, '0')}:${minute}`;
+      }
+    }
+
+    return displayValue;
+  };
 
   return (
     <div className="space-y-5">
@@ -101,8 +134,8 @@ export default function ReservationFilters({
           />
           <input
             type="time"
-            value={timeFrom}
-            onChange={e => setTimeFrom(e.target.value)}
+            value={formatDisplayTime(timeFrom)}
+            onChange={e => setTimeFrom(parseDisplayTime(e.target.value))}
             className="rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none"
           />
         </div>
@@ -119,8 +152,8 @@ export default function ReservationFilters({
           />
           <input
             type="time"
-            value={timeTo}
-            onChange={e => setTimeTo(e.target.value)}
+            value={formatDisplayTime(timeTo)}
+            onChange={e => setTimeTo(parseDisplayTime(e.target.value))}
             className="rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none"
           />
         </div>

@@ -34,15 +34,15 @@ export default function ReservationModal({
   const { t } = useTranslation();
   const { formatPrice } = useCurrency();
 
-  const name = useNameValidation(reservation?.CustomerName ?? '');
-  const phone = usePhoneValidation(reservation?.CustomerPhone ?? '');
+  const name = useNameValidation(reservation?.customerName ?? '');
+  const phone = usePhoneValidation(reservation?.customerPhone ?? '');
   const [email, setEmail] = useState('');
   const [reason, setReason] = useState('');
 
   useEffect(() => {
     if (open && reservation) {
-      name.reset(reservation.CustomerName || '');
-      phone.reset(reservation.CustomerPhone || '');
+      name.reset(reservation.customerName || '');
+      phone.reset(reservation.customerPhone || '');
       setEmail('');
       setReason('');
     }
@@ -83,14 +83,14 @@ export default function ReservationModal({
 
       <div className="relative w-full max-w-md rounded-2xl bg-white p-7 shadow-2xl">
         <h3 className="mb-5 text-xl font-bold text-gray-900">
-          {t(`reservations.modal.title.${type}`)} #{reservation.Id}
+          {t(`reservations.modal.title.${type}`)} #{reservation.id}
         </h3>
 
         <div className="flex justify-evenly text-sm text-gray-700">
-          <p className="font-medium">{reservation.CustomerName}</p>
-          <p className="text-gray-600">{reservation.CustomerPhone}</p>
+          <p className="font-medium">{reservation.customerName}</p>
+          <p className="text-gray-600">{reservation.customerPhone}</p>
           <p className="text-gray-600">
-            {formatDateTime(reservation.Datetime)}
+            {formatDateTime(reservation.datetime)}
           </p>
         </div>
 

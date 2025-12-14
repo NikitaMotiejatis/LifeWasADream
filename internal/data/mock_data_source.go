@@ -250,6 +250,14 @@ func mustParseTime(dateStr string) time.Time {
 	return t
 }
 
+func mustParseTimeUTC(s string) time.Time {
+    t, err := time.Parse(time.RFC3339, s+"Z")
+    if err != nil {
+        panic(err)
+    }
+    return t.UTC()
+}
+
 var mockOrders = []order.OrderSummary{
 	{
 		Id:        1821, // Direct integer literal
@@ -441,7 +449,7 @@ var mockReservations = []reservation.Reservation{
 		CustomerPhone: "+1234567890",
 		StaffId:        "2",
 		ServiceId:      "1",
-		Datetime:     mustParseTime("2026-11-28T10:00:00"),
+		Datetime:     mustParseTimeUTC("2025-11-28T10:00:00"),
 		Status:       "completed",
 	},
 	{
@@ -450,7 +458,7 @@ var mockReservations = []reservation.Reservation{
 		CustomerPhone: "+1987654321",
 		StaffId:        "1",
 		ServiceId:      "3",
-		Datetime:     mustParseTime("2025-11-30T14:30:00"),
+		Datetime:     mustParseTimeUTC("2025-11-30T14:30:00"),
 		Status:       "pending",
 	},
 	{
@@ -459,7 +467,7 @@ var mockReservations = []reservation.Reservation{
 		CustomerPhone: "+1555123456",
 		StaffId:        "3",
 		ServiceId:      "4",
-		Datetime:     mustParseTime("2025-12-20T11:00:00"),
+		Datetime:     mustParseTimeUTC("2025-12-20T11:00:00"),
 		Status:       "pending",
 	},
 	{
@@ -468,7 +476,7 @@ var mockReservations = []reservation.Reservation{
 		CustomerPhone: "+1443123456",
 		StaffId:        "2",
 		ServiceId:      "2",
-		Datetime:     mustParseTime("2025-12-18T16:00:00"),
+		Datetime:     mustParseTimeUTC("2025-12-18T16:00:00"),
 		Status:       "cancelled",
 	},
 	{
@@ -477,7 +485,7 @@ var mockReservations = []reservation.Reservation{
 		CustomerPhone: "+1333444555",
 		StaffId:        "1",
 		ServiceId:      "1",
-		Datetime:     mustParseTime("2025-11-20T09:30:00"),
+		Datetime:     mustParseTimeUTC("2025-11-20T09:30:00"),
 		Status:       "no_show",
 	},
 }

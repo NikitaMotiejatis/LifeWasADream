@@ -21,10 +21,10 @@ func (c *ReservationController) Routes() http.Handler {
 
 	router.Get("/", c.listReservations)
 	router.Post("/", c.createReservation)
-	router.Get("/{id}", c.getReservation)
 	router.Get("/counts", c.counts)
 	router.Get("/services", c.listServices)
 	router.Get("/staff", c.listStaff)
+	router.Get("/{id}", c.getReservation)
 
 	return router
 }
@@ -42,23 +42,24 @@ func (c *ReservationController) listReservations(w http.ResponseWriter, r *http.
 
 	fromStr := r.URL.Query().Get("from")
 	if fromStr != "" {
-		from, err := time.Parse(time.DateOnly, fromStr)
-		if err != nil {
-			http.Error(w, "invalid param 'from'", http.StatusBadRequest)
-			return
-		}
-		filter.From = &from
-	}
+    	from, err := time.Parse(time.RFC3339, fromStr)
+    	if err != nil {
+        	http.Error(w, "invalid param 'from'", http.StatusBadRequest)
+        	return
+    	}
+	from = from.UTC()
+    filter.From = &from
+}
 
 	toStr := r.URL.Query().Get("to")
 	if toStr != "" {
-		to, err := time.Parse(time.DateOnly, toStr)
-		if err != nil {
-			http.Error(w, "invalid param 'to'", http.StatusBadRequest)
-			return
-		}
-		to = to.Add(24*time.Hour - time.Nanosecond)
-		filter.To = &to
+    	to, err := time.Parse(time.RFC3339, toStr)
+    	if err != nil {
+        	http.Error(w, "invalid param 'to'", http.StatusBadRequest)
+        	return
+    	}
+		to = to.UTC()
+    	filter.To = &to
 	}
 
 	reservations, err := c.ReservationRepo.GetReservations(filter)
@@ -128,23 +129,24 @@ func (c *ReservationController) counts(w http.ResponseWriter, r *http.Request) {
 
 	fromStr := r.URL.Query().Get("from")
 	if fromStr != "" {
-		from, err := time.Parse(time.DateOnly, fromStr)
-		if err != nil {
-			http.Error(w, "invalid param 'from'", http.StatusBadRequest)
-			return
-		}
-		filter.From = &from
+    	from, err := time.Parse(time.RFC3339, fromStr)
+    	if err != nil {
+        	http.Error(w, "invalid param 'from'", http.StatusBadRequest)
+        	return
+    	}
+		from = from.UTC()
+    	filter.From = &from
 	}
 
 	toStr := r.URL.Query().Get("to")
 	if toStr != "" {
-		to, err := time.Parse(time.DateOnly, toStr)
-		if err != nil {
-			http.Error(w, "invalid param 'to'", http.StatusBadRequest)
-			return
-		}
-		to = to.Add(24*time.Hour - time.Nanosecond)
-		filter.To = &to
+    	to, err := time.Parse(time.RFC3339, toStr)
+    	if err != nil {
+        	http.Error(w, "invalid param 'to'", http.StatusBadRequest)
+        	return
+    	}
+		to = to.UTC()
+    	filter.To = &to
 	}
 
 	counts, err := c.ReservationRepo.GetReservationCounts(filter)
