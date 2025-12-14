@@ -37,9 +37,9 @@ const toQueryString = (filter: OrderFilter) => {
   // TODO: timezones
   const queryArgs = [
     `orderStatus=${filter.orderStatus}`,
-    filter.searchTerm  ? `includes=${filter.searchTerm}`  : '',
-    filter.from        ? `from=${filter.from}`            : '',
-    filter.to          ? `to=${filter.to}`                : '',
+    filter.searchTerm ? `includes=${filter.searchTerm}` : '',
+    filter.from ? `from=${filter.from}` : '',
+    filter.to ? `to=${filter.to}` : '',
   ].filter(a => a.length > 0);
 
   return queryArgs.length > 0 ? `?${queryArgs.join('&')}` : '';
@@ -68,10 +68,10 @@ export default function OrderList() {
   const { authFetch } = useAuth();
   const { data: counts } = useSWR(
     `order/counts${toQueryString(orderFilter)}`,
-    (url) => authFetch<Counts>(url, "GET"),
+    url => authFetch<Counts>(url, 'GET'),
     {
       revalidateOnMount: true,
-    }
+    },
   );
 
   const openModal = (
@@ -122,9 +122,7 @@ export default function OrderList() {
 
         <div className="mt-6 space-y-3">
           <Suspense fallback={<div>Loading...</div>}>
-            <Orders 
-              orderFilter={orderFilter}
-              openModal={openModal} />
+            <Orders orderFilter={orderFilter} openModal={openModal} />
           </Suspense>
         </div>
       </div>
@@ -171,42 +169,37 @@ function Orders({ orderFilter, openModal }: OrdersProps) {
 
   const { data: orders, error } = useSWR(
     `order${toQueryString(orderFilter)}`,
-    (url: string) => authFetch<Order[]>(url, "GET"),
+    (url: string) => authFetch<Order[]>(url, 'GET'),
     {
       suspense: true,
       revalidateOnMount: true,
-    }
+    },
   );
 
   if (error) {
-    // TODO: translations
     return (
-        <p className="py-12 text-center text-gray-400">
-          Something went wrong.
-        </p>
+      <p className="py-12 text-center text-gray-400">
+        {t('somethingWentWrong')}
+      </p>
     );
   }
 
   if (orders.length < 1) {
     return (
-        <p className="py-12 text-center text-gray-400">
-          {t('orders.noOrders')}
-        </p>
+      <p className="py-12 text-center text-gray-400">{t('orders.noOrders')}</p>
     );
   }
 
   return (
     <>
-      {
-        orders?.map(order => (
-          <OrderListItem
-            key={order.id}
-            order={order}
-            formatPrice={formatPrice}
-            onAction={openModal}
-          />
-        ))
-      }
+      {orders?.map(order => (
+        <OrderListItem
+          key={order.id}
+          order={order}
+          formatPrice={formatPrice}
+          onAction={openModal}
+        />
+      ))}
     </>
   );
 }

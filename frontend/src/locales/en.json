@@ -519,9 +519,9 @@
     "dateTimeTitle": "Select Date & Time",
     "bookingSummary": "Reservation Summary",
     "durations": {
-      "120 min": "120 min",
-      "45 min": "45 min",
-      "60 min": "60 min"
+      "120": "120 min",
+      "45": "45 min",
+      "60": "60 min"
     },
     "months": {
       "0": "January",
@@ -553,6 +553,7 @@
     "smsNote": "Confirmation will be sent via SMS",
     "staff": {
       "Anyone": "Anyone",
+      "Any": "Any",
       "Colorist": "Colorist",
       "Nail Technician": "Nail Technician",
       "Any available staff": "Any available staff"
@@ -1001,7 +1002,7 @@
       "duplicate": "A {{rate}}% VAT rate already exists"
     }
   },
-
+  "somethingWentWrong": "Something went wrong.",
   "payment": {
     "payWithStripe": "Pay with Stripe",
     "processing": "Processing order...",

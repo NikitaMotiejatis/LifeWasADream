@@ -518,10 +518,10 @@ var mockReservations = []reservation.Reservation{
 }
 
 var mockServices = []reservation.Service{
-    {Id: "1", NameKey: "haircut", Price: 65, Duration: 60},
-    {Id: "2", NameKey: "color", Price: 120, Duration: 120},
-    {Id: "3", NameKey: "manicure", Price: 35, Duration: 45},
-    {Id: "4", NameKey: "pedicure", Price: 50, Duration: 60},
+    {Id: "1", NameKey: "Haircut & Style", Price: 65, Duration: 60},
+    {Id: "2", NameKey: "Hair Color", Price: 120, Duration: 120},
+    {Id: "3", NameKey: "Manicure", Price: 35, Duration: 45},
+    {Id: "4", NameKey: "Pedicure", Price: 50, Duration: 60},
 }
 
 var mockStaff = []reservation.Staff{
