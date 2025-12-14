@@ -5,7 +5,9 @@ import (
 	"dreampos/internal/config"
 	"dreampos/internal/data"
 	"dreampos/internal/order"
+	"dreampos/internal/payment"
 	"encoding/json"
+	"fmt"
 	"time"
 
 	"net/http"
@@ -15,18 +17,18 @@ import (
 
 func setupAuth(router *chi.Mux, config config.Config) *auth.AuthController {
 	c := &auth.AuthController{
-		SessionTokenDuration: 	time.Hour * 24,
-		CsrfTokenDuration: 		time.Hour * 24,
+		SessionTokenDuration: time.Hour * 24,
+		CsrfTokenDuration:    time.Hour * 24,
 
 		AuthService: auth.AuthService{
 			TokenService: auth.TokenService{
 				JwtSecret: []byte(config.JwtSecret),
 			},
 			// TODO: not hardcoded
-			SessionTokenName: 	"SESSION-TOKEN",
-			CsrfTokenName:    	"X-XSRF-TOKEN",
+			SessionTokenName: "SESSION-TOKEN",
+			CsrfTokenName:    "X-XSRF-TOKEN",
 
-			UserRepo: 			data.NewMockDataSource(),
+			UserRepo: data.NewMockDataSource(),
 		},
 	}
 
@@ -35,7 +37,7 @@ func setupAuth(router *chi.Mux, config config.Config) *auth.AuthController {
 	return c
 }
 
-func setupApiRoutes(router *chi.Mux, _config config.Config, authMiddleware func(http.Handler)http.Handler) {
+func setupApiRoutes(router *chi.Mux, _config config.Config, authMiddleware func(http.Handler) http.Handler) {
 	apiRouter := chi.NewRouter()
 
 	{
@@ -58,7 +60,7 @@ func setupApiRoutes(router *chi.Mux, _config config.Config, authMiddleware func(
 
 	{
 		c := order.OrderController{
-			OrderRepo: 	 data.NewMockDataSource(),
+			OrderRepo:   data.NewMockDataSource(),
 			ProductRepo: data.NewMockDataSource(),
 		}
 
@@ -66,4 +68,21 @@ func setupApiRoutes(router *chi.Mux, _config config.Config, authMiddleware func(
 	}
 
 	router.Mount("/api", apiRouter)
+}
+
+func setupPaymentRoutes(router *chi.Mux, config config.Config, authMiddleware func(http.Handler) http.Handler) {
+	// Setup payment controller with Stripe configuration
+	paymentService := &payment.PaymentService{
+		StripeSecretKey: config.StripeSecretKey,
+		StripePublicKey: config.StripePublicKey,
+		SuccessURL:      fmt.Sprintf("http://%s/payment/success", config.FrontendUrl), // When I save it automatically makes the spaces, after ':' !?
+		CancelURL:       fmt.Sprintf("http://%s/payment/cancel", config.FrontendUrl),
+	}
+
+	paymentController := &payment.PaymentController{
+		Service: paymentService,
+	}
+
+	// Mount payment routes with authentication
+	router.Mount("/api/payment", paymentController.Routes())
 }
