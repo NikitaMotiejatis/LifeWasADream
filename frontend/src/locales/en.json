@@ -1002,7 +1002,7 @@
       "duplicate": "A {{rate}}% VAT rate already exists"
     }
   },
-
+  "somethingWentWrong": "Something went wrong.",
   "payment": {
     "payWithStripe": "Pay with Stripe",
     "processing": "Processing order...",

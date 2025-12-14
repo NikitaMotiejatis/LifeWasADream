@@ -1041,5 +1041,6 @@
       "exceeds": "Negali viršyti 100%",
       "duplicate": "{{rate}}% PVM tarifas jau egzistuoja"
     }
-  }
+  },
+  "somethingWentWrong": "Kažkas nutiko ne taip."
 }

@@ -305,7 +305,9 @@ function Reservations({
 
   if (error) {
     return (
-      <p className="py-12 text-center text-gray-400">Something went wrong.</p>
+      <p className="py-12 text-center text-gray-400">
+        {t('somethingWentWrong')}
+      </p>
     );
   }
 
