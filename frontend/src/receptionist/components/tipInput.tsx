@@ -31,14 +31,15 @@ export const TipInput: React.FC<TipInputProps> = ({
   const defaultMessages = {
     addTip: t('common.addTip'),
     enterTip: t('common.enterTipAmount'),
-    tip: t('common.tip'),
-    tipDisabled: t('common.tipDisabled'),
+    tip: t('common.tip')
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let val = e.target.value;
+
+    const isValidDecimal = /^$|^\d*\.?\d{0,2}$/.test(val);
     
-    if (val === '' || /^\.?\d*\.?\d{0,2}$/.test(val)) {
+    if (isValidDecimal) {
       if ((val.match(/\./g) || []).length <= 1) {
         setInputValue(val);
       }
@@ -46,14 +47,21 @@ export const TipInput: React.FC<TipInputProps> = ({
   };
 
   const handleSubmit = () => {
-    let amount = parseFloat(inputValue) || 0;
-    
-    if (inputValue.startsWith('.') && inputValue.length > 1) {
-      amount = parseFloat('0' + inputValue);
+    if (inputValue === '' || inputValue === '.') {
+      onChange(0);
+    } else {
+      const amount = parseFloat(inputValue) || 0;
+      
+      if (inputValue.startsWith('.')) {
+        const correctedValue = '0' + inputValue;
+        onChange(parseFloat(correctedValue) || 0);
+      } else {
+        onChange(amount);
+      }
     }
     
-    onChange(amount);
     setShowInput(false);
+    setInputValue('');
   };
 
   const handleCancel = () => {
@@ -66,28 +74,6 @@ export const TipInput: React.FC<TipInputProps> = ({
     setInputValue('');
     setShowInput(false);
   };
-
-  if (disabled) {
-    return (
-      <div className={`rounded-lg border border-gray-300 bg-gray-100 p-3 ${className}`}>
-        <p className="text-sm font-medium text-gray-600 text-center">
-          {disabledMessage || defaultMessages.tipDisabled}
-        </p>
-      </div>
-    );
-  }
-
-  if (!showInput && value === 0) {
-    return (
-      <button
-        onClick={() => setShowInput(true)}
-        className={`w-full rounded-lg border border-gray-400 bg-white py-3 text-sm font-medium hover:bg-gray-50 ${className}`}
-        disabled={disabled}
-      >
-        {addTipText || defaultMessages.addTip}
-      </button>
-    );
-  }
 
   if (showInput) {
     return (
@@ -121,7 +107,7 @@ export const TipInput: React.FC<TipInputProps> = ({
           <button
             onClick={handleSubmit}
             className="flex-1 rounded-lg bg-blue-600 py-2 text-xs font-medium text-white hover:bg-blue-700"
-            disabled={!inputValue || disabled}
+            disabled={disabled}
           >
             {t('common.add')}
           </button>
@@ -130,21 +116,42 @@ export const TipInput: React.FC<TipInputProps> = ({
     );
   }
 
-  return (
-    <div className={`flex items-center justify-between rounded-lg border border-gray-300 bg-gray-50 p-3 ${className}`}>
-      <div>
-        <p className="text-sm font-medium text-gray-700">{defaultMessages.tip}</p>
-        <p className="text-lg font-bold text-green-600">
-          +{formatAmount(value)}{showCurrency && '€'}
-        </p>
+  if (value > 0) {
+    return (
+      <div className={`flex items-center justify-between rounded-lg border border-gray-300 bg-gray-50 p-3 ${className}`}>
+        <div>
+          <p className="text-sm font-medium text-gray-700">{defaultMessages.tip}</p>
+          <p className="text-lg font-bold text-green-600">
+            +{formatAmount(value)}{showCurrency && '€'}
+          </p>
+        </div>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setShowInput(true)}
+            className="text-sm font-medium text-blue-600 hover:text-blue-800"
+            disabled={disabled}
+          >
+            {t('common.edit')}
+          </button>
+          <button
+            onClick={handleRemove}
+            className="text-sm font-medium text-red-600 hover:text-red-800"
+            disabled={disabled}
+          >
+            {t('common.remove')}
+          </button>
+        </div>
       </div>
-      <button
-        onClick={handleRemove}
-        className="text-sm font-medium text-red-600 hover:text-red-800"
-        disabled={disabled}
-      >
-        {t('common.remove')}
-      </button>
-    </div>
+    );
+  }
+
+  return (
+    <button
+      onClick={() => setShowInput(true)}
+      className={`w-full rounded-lg border border-gray-400 bg-white py-3 text-sm font-medium hover:bg-gray-50 ${className}`}
+      disabled={disabled}
+    >
+      {addTipText || defaultMessages.addTip}
+    </button>
   );
 };

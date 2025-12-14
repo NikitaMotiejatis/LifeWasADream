@@ -388,6 +388,7 @@
     "title": "Meniu"
   },
   "orderSummary": {
+    "payWithCard":"Mokėti kortele",
     "tipAfterSplit": "Arbatpinigiai pridedami dalijant sąskaitą",
     "addIndividualTip": "Pridėti arbatpinigių",
     "individualTipForPayer": "Arbatpinigiai {{payer}}-ajam asmeniui",

@@ -92,6 +92,7 @@ export default function NewReservationPage() {
       showToast(t('reservation.toast.incomplete'), 'error');
       return;
     }
+
     const selectedServiceObj = services?.find(s => s.id === selectedService);
     const totalAmount = (selectedServiceObj?.price || 0) + tipAmount;
 
@@ -400,10 +401,10 @@ function BookingSummary({
   selectedService,
   formatPrice,
   onConfirm,
-  staff,
-  services,
   onTipAdded,
   tipAmount,
+  staff,
+  services,
   t,
   isSubmitting = false,
 }: {
@@ -415,10 +416,10 @@ function BookingSummary({
   selectedService: string | null;
   formatPrice: (price: number) => string;
   onConfirm: () => void;
-  staff: Staff[];
-  services: Service[];
   onTipAdded: (amount: number) => void;
   tipAmount: number;
+  staff: Staff[];
+  services: Service[];
   t: any;
   isSubmitting?: boolean;
 }) {
@@ -490,7 +491,7 @@ function BookingSummary({
           value={
             selectedStaff == 'anyone'
               ? t(`reservations.staff.anyone`)
-              : staff.find(s => s.id === selectedStaff)?.name
+              : staff.find(s => s.id === selectedStaff)?.name || t('reservation.summary.notSelected')
           }
         />
         <SummaryRow
@@ -501,7 +502,7 @@ function BookingSummary({
               : t('reservation.summary.notSelected')
           }
         />
-
+        
         {/* Price breakdown with tip */}
         {selectedServiceObj && (
           <>
@@ -511,24 +512,20 @@ function BookingSummary({
                 disabled={!selectedServiceObj}
               />
             </div>
-
+            
             <div className="space-y-2 border-t pt-3">
               <div className="flex justify-between">
-                <span className="text-gray-600">
-                  {t('reservation.summary.service')}:
-                </span>
+                <span className="text-gray-600">{t('reservation.summary.service')}:</span>
                 <span className="font-medium">{formatPrice(servicePrice)}</span>
               </div>
-
+              
               {tipAmount > 0 && (
-                <div className="flex justify-between">
+                <div className="flex justify-between text-green-600">
                   <span className="text-gray-600">{t('reservation.tip')}:</span>
-                  <span className="font-medium text-green-600">
-                    +{formatPrice(tipAmount)}
-                  </span>
+                  <span className="font-medium">+{formatPrice(tipAmount)}</span>
                 </div>
               )}
-
+              
               <div className="flex justify-between border-t pt-2 text-lg font-bold">
                 <span>{t('reservation.summary.total')}:</span>
                 <span>{formatPrice(totalAmount)}</span>
