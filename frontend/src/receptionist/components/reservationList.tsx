@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useState, Suspense, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useCurrency } from '@/global/contexts/currencyContext';
 import ReservationFilters from '@/receptionist/components/reservationFilters';
@@ -19,7 +19,7 @@ type Staff = {
   id: string;
   name: string;
   role: string;
-  rervices: Service[];
+  services: Service[];
 };
 
 export type Reservation = {
@@ -56,19 +56,14 @@ function buildISOString(
   isEnd = false,
 ): string | undefined {
   if (!date) return undefined;
-
   const localDate = new Date(
     `${date}T${time || (isEnd ? '23:59:59' : '00:00:00')}`,
   );
-
   if (!time) {
-    if (!isEnd) {
-      localDate.setHours(0, 0, 0, 0);
-    } else {
-      localDate.setHours(23, 59, 59, 999);
-    }
+    isEnd
+      ? localDate.setHours(23, 59, 59, 999)
+      : localDate.setHours(0, 0, 0, 0);
   }
-
   return localDate.toISOString();
 }
 
@@ -86,18 +81,60 @@ function buildQuery(
   return params.toString();
 }
 
+type ReservationFiltersState = {
+  searchTerm: string;
+  dateFrom: string;
+  timeFrom: string;
+  dateTo: string;
+  timeTo: string;
+  statusFilter: string;
+};
+
 export default function ReservationList() {
   const { t } = useTranslation();
   const { formatPrice } = useCurrency();
   const { authFetch } = useAuth();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [dateFrom, setDateFrom] = useState('');
-  const [timeFrom, setTimeFrom] = useState('');
-  const [dateTo, setDateTo] = useState('');
-  const [timeTo, setTimeTo] = useState('');
-  const [statusFilter, setStatusFilter] = useState<
-    'all' | 'pending' | 'completed' | 'cancelled' | 'no_show' | 'refund_pending'
-  >('all');
+
+  const [filters, setFilters] = useState<ReservationFiltersState>({
+    searchTerm: '',
+    dateFrom: '',
+    timeFrom: '',
+    dateTo: '',
+    timeTo: '',
+    statusFilter: 'all',
+  });
+
+  const fromISO = useMemo(
+    () =>
+      filters.dateFrom
+        ? buildISOString(filters.dateFrom, filters.timeFrom)
+        : undefined,
+    [filters.dateFrom, filters.timeFrom],
+  );
+
+  const toISO = useMemo(
+    () =>
+      filters.dateTo
+        ? buildISOString(filters.dateTo, filters.timeTo, true)
+        : undefined,
+    [filters.dateTo, filters.timeTo],
+  );
+
+  const query = useMemo(
+    () => buildQuery(filters.statusFilter, fromISO, toISO, filters.searchTerm),
+    [filters.statusFilter, fromISO, toISO, filters.searchTerm],
+  );
+
+  const { data: staff } = useSWR(
+    'reservation/staff',
+    url => authFetch<Staff[]>(url, 'GET'),
+    { revalidateOnMount: true },
+  );
+  const { data: services } = useSWR(
+    'reservation/services',
+    url => authFetch<Service[]>(url, 'GET'),
+    { revalidateOnMount: true },
+  );
 
   const [modalOpen, setModalOpen] = useState(false);
   const [modalType, setModalType] = useState<
@@ -115,53 +152,6 @@ export default function ReservationList() {
     message: string;
     type: 'success' | 'error';
   } | null>(null);
-
-  const fromISO = useMemo(
-    () => (dateFrom ? buildISOString(dateFrom, timeFrom) : undefined),
-    [dateFrom, timeFrom],
-  );
-
-  const toISO = useMemo(
-    () => (dateTo ? buildISOString(dateTo, timeTo, true) : undefined),
-    [dateTo, timeTo],
-  );
-
-  const query = useMemo(
-    () => buildQuery(statusFilter, fromISO, toISO, searchTerm),
-    [statusFilter, fromISO, toISO, searchTerm],
-  );
-
-  const {
-    data: reservations,
-    error: reservationsError,
-    isLoading,
-  } = useSWR(
-    `reservation?${query}`,
-    (url: string) => authFetch<Reservation[]>(url, 'GET'),
-    {
-      revalidateOnFocus: false,
-      revalidateOnReconnect: true,
-      dedupingInterval: 2000,
-    },
-  );
-
-  const { data: counts } = useSWR(
-    `reservation/counts?${query}`,
-    (url: string) => authFetch<Counts>(url, 'GET'),
-    { dedupingInterval: 2000 },
-  );
-
-  const { data: services } = useSWR(
-    'reservation/services',
-    (url: string) => authFetch<Service[]>(url, 'GET'),
-    { revalidateOnMount: true },
-  );
-
-  const { data: staff } = useSWR(
-    'reservation/staff',
-    (url: string) => authFetch<Staff[]>(url, 'GET'),
-    { revalidateOnMount: true },
-  );
 
   const openModal = (type: typeof modalType, res: Reservation) => {
     setModalType(type);
@@ -192,22 +182,10 @@ export default function ReservationList() {
     setTimeout(() => setToast(null), 5000);
   };
 
-  const handleCancelEdit = () => {
-    setEditModalOpen(false);
-    setReservationIdToEdit(null);
-  };
-
   const showToast = (key: string) => {
     setToast({ message: t(key), type: 'success' });
     setTimeout(() => setToast(null), 5000);
   };
-
-  if (isLoading)
-    return (
-      <div className="p-10 text-center text-gray-500">
-        {t('reservations.loading')}
-      </div>
-    );
 
   return (
     <div className="space-y-6">
@@ -216,46 +194,41 @@ export default function ReservationList() {
           {t('reservations.title')}
         </h2>
         <ReservationFilters
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          dateFrom={dateFrom}
-          setDateFrom={setDateFrom}
-          timeFrom={timeFrom}
-          setTimeFrom={setTimeFrom}
-          dateTo={dateTo}
-          setDateTo={setDateTo}
-          timeTo={timeTo}
-          setTimeTo={setTimeTo}
-          statusFilter={statusFilter}
-          setStatusFilter={setStatusFilter}
-          counts={counts || defaultCounts}
+          searchTerm={filters.searchTerm}
+          setSearchTerm={v => setFilters(prev => ({ ...prev, searchTerm: v }))}
+          dateFrom={filters.dateFrom}
+          setDateFrom={v => setFilters(prev => ({ ...prev, dateFrom: v }))}
+          timeFrom={filters.timeFrom}
+          setTimeFrom={v => setFilters(prev => ({ ...prev, timeFrom: v }))}
+          dateTo={filters.dateTo}
+          setDateTo={v => setFilters(prev => ({ ...prev, dateTo: v }))}
+          timeTo={filters.timeTo}
+          setTimeTo={v => setFilters(prev => ({ ...prev, timeTo: v }))}
+          statusFilter={filters.statusFilter}
+          setStatusFilter={v =>
+            setFilters(prev => ({ ...prev, statusFilter: v }))
+          }
+          counts={defaultCounts} // counts will be fetched in SWR below
         />
       </div>
 
       <div className="mt-6 space-y-3">
-        {isLoading ? (
-          <div>{t('reservations.loading')}</div>
-        ) : reservationsError ? (
-          <div className="p-10 text-center text-gray-500">
-            {t('reservations.loading')}
-          </div>
-        ) : (reservations || []).length > 0 ? (
-          reservations?.map(res => (
-            <ReservationListItem
-              key={res.id}
-              reservation={res}
-              services={services as any}
-              staff={staff as any}
-              formatPrice={formatPrice}
-              onAction={openModal}
-              onEdit={handleEditClick}
-            />
-          ))
-        ) : (
-          <p className="py-12 text-center text-gray-400">
-            {t('reservations.noReservations')}
-          </p>
-        )}
+        <Suspense
+          fallback={
+            <div className="p-10 text-center text-gray-500">
+              {t('reservations.loading')}
+            </div>
+          }
+        >
+          <Reservations
+            ordersQuery={query}
+            openModal={openModal}
+            formatPrice={formatPrice}
+            onEdit={handleEditClick}
+            staff={staff || []}
+            services={services || []}
+          />
+        </Suspense>
       </div>
 
       <ReservationModal
@@ -281,9 +254,8 @@ export default function ReservationList() {
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div
             className="absolute inset-0 bg-black/50"
-            onClick={handleCancelEdit}
+            onClick={() => setEditModalOpen(false)}
           />
-
           <div className="relative max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-2xl bg-white p-7 shadow-2xl">
             <EditReservationPanel
               mode="edit"
@@ -292,12 +264,76 @@ export default function ReservationList() {
               staffMembers={staff as any}
               initialReservation={selectedReservation as any}
               onSave={handleSaveEdit}
-              onCancel={handleCancelEdit}
+              onCancel={() => setEditModalOpen(false)}
             />
           </div>
         </div>
       )}
       <Toast toast={toast} />
     </div>
+  );
+}
+
+type ReservationsProps = {
+  ordersQuery: string;
+  openModal: (
+    type: 'complete' | 'cancel' | 'noshow' | 'refund' | 'cancel_refund',
+    res: Reservation,
+  ) => void;
+  formatPrice: (amount: number) => string;
+  onEdit: (res: Reservation) => void;
+  staff: Staff[];
+  services: Service[];
+};
+
+function Reservations({
+  ordersQuery,
+  openModal,
+  formatPrice,
+  onEdit,
+  staff,
+  services,
+}: ReservationsProps) {
+  const { t } = useTranslation();
+  const { authFetch } = useAuth();
+
+  const { data: reservations, error } = useSWR(
+    `reservation?${ordersQuery}`,
+    (url: string) => authFetch<Reservation[]>(url, 'GET'),
+    { suspense: true, revalidateOnMount: true },
+  );
+
+  if (error) {
+    return (
+      <p className="py-12 text-center text-gray-400">Something went wrong.</p>
+    );
+  }
+
+  if (!reservations || reservations.length === 0) {
+    return (
+      <p className="py-12 text-center text-gray-400">
+        {t('reservations.noReservations')}
+      </p>
+    );
+  }
+
+  return (
+    <>
+      {reservations.map(res => {
+        const resStaff = staff.find(s => s.id === res.staffId);
+        const resService = services.find(s => s.id === res.serviceId);
+        return (
+          <ReservationListItem
+            key={res.id}
+            reservation={res}
+            staff={resStaff ? [resStaff] : []}
+            services={resService ? [resService] : []}
+            formatPrice={formatPrice}
+            onAction={openModal}
+            onEdit={onEdit}
+          />
+        );
+      })}
+    </>
   );
 }
