@@ -69,14 +69,12 @@ export const SplitBillSection: React.FC<SplitBillSectionProps> = ({
     Array(50).fill(false),
   );
 
-  // Individual tip input visibility
   const [showTipInputs, setShowTipInputs] = useState<boolean[]>(
-    Array(50).fill(false)
+    Array(9999).fill(false)
   );
   
-  // Store the string values for tip inputs separately
   const [tipInputValues, setTipInputValues] = useState<string[]>(
-    Array(50).fill('')
+    Array(9999).fill('')
   );
 
   const anyPaid = paidStatus.some(Boolean);
@@ -100,7 +98,6 @@ export const SplitBillSection: React.FC<SplitBillSectionProps> = ({
     return base + mod;
   };
 
-  // Calculate base amounts WITHOUT tips
   const baseAmounts = Array.from({ length: numPeople }, () => 0);
 
   if (splitMode === 'byItems') {
@@ -115,7 +112,6 @@ export const SplitBillSection: React.FC<SplitBillSectionProps> = ({
     baseAmounts.fill(equal);
   }
 
-  // Add individual tips to base amounts - SAFE ACCESS
   const payerTotals = baseAmounts.map((base, index) => {
     const tip = individualTips[index] || 0;
     return base + tip;
@@ -128,7 +124,6 @@ export const SplitBillSection: React.FC<SplitBillSectionProps> = ({
   const allPaid = activePayers.every(p => paidStatus[p.index - 1]);
 
   const handleTipInputToggle = (index: number) => {
-    // FIX: Only disable if THIS payer is paid
     if (paidStatus[index] || index < 0 || index >= 50) return;
     
     setShowTipInputs(prev => {
@@ -137,7 +132,6 @@ export const SplitBillSection: React.FC<SplitBillSectionProps> = ({
       return newShowInputs;
     });
     
-    // Reset input value when opening
     if (!showTipInputs[index]) {
       setTipInputValues(prev => {
         const newValues = [...prev];
@@ -148,22 +142,17 @@ export const SplitBillSection: React.FC<SplitBillSectionProps> = ({
   };
 
   const handleTipInputChange = (index: number, value: string) => {
-    // FIX: Only disable if THIS payer is paid
     if (paidStatus[index] || index < 0 || index >= 50) return;
     
-    // Allow: empty string, numbers, decimal point
-    // Specifically allow "0." at the beginning and decimal numbers
+
     if (value === '' || /^(\d+)?(\.\d{0,2})?$/.test(value)) {
-      // Don't allow multiple decimal points
       if ((value.match(/\./g) || []).length <= 1) {
-        // Update the string value
         setTipInputValues(prev => {
           const newValues = [...prev];
           newValues[index] = value;
           return newValues;
         });
         
-        // Convert to number if valid
         if (value === '' || value === '.' || value === '0.') {
           setIndividualTip(index, 0);
         } else {
@@ -192,28 +181,20 @@ export const SplitBillSection: React.FC<SplitBillSectionProps> = ({
 
   const handleSplitEnable = () => {
     setIsSplitEnabled(true);
-    // Clear any previous individual tips when enabling split
     clearIndividualTips();
-    // Reset paid status
-    setPaidStatus(Array(50).fill(false));
-    // Reset show tip inputs
-    setShowTipInputs(Array(50).fill(false));
-    // Reset tip input values
-    setTipInputValues(Array(50).fill(''));
+    setPaidStatus(Array(9999).fill(false));
+    setShowTipInputs(Array(9999).fill(false));
+    setTipInputValues(Array(9999).fill(''));
   };
 
   const handleSplitDisable = () => {
-    // FIX: Only allow disabling split if NO ONE has paid yet
     if (!anyPaid) {
       setIsSplitEnabled(false);
-      // Clear individual tips when disabling split
       clearIndividualTips();
     }
   };
 
-  // Handle payment method change for individual payers
   const handlePaymentMethodChange = (payerIndex: number, method: PaymentMethod) => {
-    // FIX: Only disable if THIS payer is paid
     if (paidStatus[payerIndex] || payerIndex < 0 || payerIndex >= 50) return;
     
     const newMethods = [...paymentMethods];
@@ -221,7 +202,6 @@ export const SplitBillSection: React.FC<SplitBillSectionProps> = ({
     setPaymentMethods(newMethods);
   };
 
-  // Handle payer payment
   const handlePayerPayment = (payerIndex: number) => {
     if (payerIndex < 0 || payerIndex >= 50) return;
     
@@ -229,7 +209,6 @@ export const SplitBillSection: React.FC<SplitBillSectionProps> = ({
     newPaid[payerIndex] = true;
     setPaidStatus(newPaid);
 
-    // Check if all active payers have paid
     const allActivePaid = activePayers.every(p => newPaid[p.index - 1]);
     if (allActivePaid && onCompletePayment) {
       onCompletePayment(
@@ -458,7 +437,6 @@ export const SplitBillSection: React.FC<SplitBillSectionProps> = ({
                     </span>
                   </div>
                   
-                  {/* Breakdown */}
                   <div className="text-sm text-gray-600 mb-3">
                     <div className="flex justify-between">
                       <span>{t('orderSummary.baseAmount')}:</span>

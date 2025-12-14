@@ -116,8 +116,8 @@ export const CartProvider = ({ initItems = [], children }: { initItems?: CartIte
   // Tip state for regular payments
   const [tipAmount, setTipAmount] = useState<number>(0);
   
-  // Individual tips for split payments (max 50 people)
-  const [individualTips, setIndividualTips] = useState<number[]>(Array(50).fill(0));
+  // Individual tips for split payments
+  const [individualTips, setIndividualTips] = useState<number[]>(Array(9999).fill(0));
 
   const addToCart = (
     product: Product,
@@ -180,7 +180,7 @@ export const CartProvider = ({ initItems = [], children }: { initItems?: CartIte
     return clampToCents(product.basePrice + extra);
   };
 
-  // Individual tip functions - FIXED with bounds checking
+  // Individual tip functions
   const setIndividualTip = (index: number, amount: number) => {
     if (index < 0 || index >= 50) return;
     

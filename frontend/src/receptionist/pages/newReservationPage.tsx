@@ -14,6 +14,7 @@ import {
 import useSWR from 'swr';
 import { useAuth } from '@/global/hooks/auth';
 import type { Cents } from '@/receptionist/contexts/cartContext';
+import { ReservationTipSection } from '@/receptionist/components/reservationTipSection';
 
 type Service = {
   id: string;
@@ -49,6 +50,7 @@ export default function NewReservationPage() {
   const [selectedService, setSelectedService] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
+  const [tipAmount, setTipAmount] = useState<number>(0);
   const [toast, setToast] = useState<{
     message: string;
     type: 'success' | 'error';
@@ -77,6 +79,10 @@ export default function NewReservationPage() {
   const customerName = useNameValidation();
   const customerPhone = usePhoneValidation();
 
+  const handleTipAdded = (amount: number) => {
+    setTipAmount(amount);
+  };
+
   const handleConfirm = async () => {
     if (!customerName.value.trim() || !customerPhone.value.trim()) {
       showToast(t('reservation.toast.missingInfo'), 'error');
@@ -86,6 +92,8 @@ export default function NewReservationPage() {
       showToast(t('reservation.toast.incomplete'), 'error');
       return;
     }
+    const selectedServiceObj = services?.find(s => s.id === selectedService);
+    const totalAmount = (selectedServiceObj?.price || 0) + tipAmount;
 
     const [hours, minutes] = selectedTime.split(':').map(Number);
     const dt = new Date(selectedDate);
@@ -125,6 +133,7 @@ export default function NewReservationPage() {
       setSelectedService(null);
       setSelectedDate(null);
       setSelectedTime(null);
+      setTipAmount(0);
     } catch (error) {
       console.error('Failed to create reservation:', error);
       showToast(t('reservation.toast.error'), 'error');
@@ -393,6 +402,8 @@ function BookingSummary({
   onConfirm,
   staff,
   services,
+  onTipAdded,
+  tipAmount,
   t,
   isSubmitting = false,
 }: {
@@ -406,10 +417,18 @@ function BookingSummary({
   onConfirm: () => void;
   staff: Staff[];
   services: Service[];
+  onTipAdded: (amount: number) => void;
+  tipAmount: number;
   t: any;
   isSubmitting?: boolean;
 }) {
   const selectedServiceObj = services.find(s => s.id === selectedService);
+  const servicePrice = selectedServiceObj?.price || 0;
+  const totalAmount = servicePrice + tipAmount;
+
+  const handleConfirmWithTip = () => {
+    onConfirm();
+  };
 
   return (
     <div className="rounded-xl bg-white p-5 shadow-lg">
@@ -482,18 +501,47 @@ function BookingSummary({
               : t('reservation.summary.notSelected')
           }
         />
+
+        {/* Price breakdown with tip */}
         {selectedServiceObj && (
-          <div className="flex justify-between border-t pt-3 text-lg font-bold">
-            <span>{t('reservation.summary.total')}:</span>
-            <span>{formatPrice(selectedServiceObj.price)}</span>
-          </div>
+          <>
+            <div className="pt-3">
+              <ReservationTipSection
+                onTipAdded={onTipAdded}
+                disabled={!selectedServiceObj}
+              />
+            </div>
+
+            <div className="space-y-2 border-t pt-3">
+              <div className="flex justify-between">
+                <span className="text-gray-600">
+                  {t('reservation.summary.service')}:
+                </span>
+                <span className="font-medium">{formatPrice(servicePrice)}</span>
+              </div>
+
+              {tipAmount > 0 && (
+                <div className="flex justify-between">
+                  <span className="text-gray-600">{t('reservation.tip')}:</span>
+                  <span className="font-medium text-green-600">
+                    +{formatPrice(tipAmount)}
+                  </span>
+                </div>
+              )}
+
+              <div className="flex justify-between border-t pt-2 text-lg font-bold">
+                <span>{t('reservation.summary.total')}:</span>
+                <span>{formatPrice(totalAmount)}</span>
+              </div>
+            </div>
+          </>
         )}
       </div>
 
       <button
-        onClick={onConfirm}
+        onClick={handleConfirmWithTip}
         disabled={isSubmitting}
-        className="w-full rounded-lg bg-blue-600 py-4 font-semibold text-white transition hover:bg-blue-700 disabled:opacity-60"
+        className="w-full rounded-lg bg-blue-600 py-4 font-semibold text-white transition hover:bg-blue-700"
       >
         {isSubmitting
           ? t('payment.processing')

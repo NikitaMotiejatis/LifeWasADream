@@ -517,6 +517,10 @@
     "Onion Rings": "Svogūnų žiedai"
   },
   "reservation": {
+    "addTip": "Pridėti arbatpinigių",
+    "tip": "Arbatpinigiai",
+    "enterTipAmount": "Įveskite arbatpinigių sumą",
+    "tipDisabled": "Pasirinkite paslaugą, kad pridėtumėte arbatpinigių",
     "weekdays": {
       "mo": "Pr",
       "tu": "An",

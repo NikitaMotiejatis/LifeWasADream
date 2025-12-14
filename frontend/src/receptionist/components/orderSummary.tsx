@@ -16,7 +16,7 @@ import {
 import { useAuth } from '@/global/hooks/auth';
 import { mutate } from 'swr';
 import i18n from '@/i18n';
-import { TipSection } from './tipSection';
+import { TipSection } from './orderTipSection';
 
 type OrderSummaryProps = {
   onBack?: () => void;
@@ -226,11 +226,10 @@ export default function OrderSummary({
 
           {showPaymentSection ? (
             <>
-              {/* Show tip section only when NOT in split mode */}
               {!isSplitEnabled && <TipSection />}
               
               <SplitBillSection
-                total={totalWithoutTip} // Pass WITHOUT tip for split
+                total={totalWithoutTip}
                 items={itemsList}
                 formatPrice={formatPrice}
                 onSplitEnabledChange={setIsSplitEnabled}

@@ -517,6 +517,10 @@
     "Onion Rings": "Onion Rings"
   },
   "reservation": {
+    "addTip": "Add Tip",
+    "tip": "Tip",
+    "enterTipAmount": "Enter tip amount",
+    "tipDisabled": "Select a service first to add tip",
     "weekdays": {
       "mo": "Mo",
       "tu": "Tu",

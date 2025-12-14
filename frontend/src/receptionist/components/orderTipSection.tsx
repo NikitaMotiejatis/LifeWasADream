@@ -18,11 +18,8 @@ export const TipSection: React.FC<TipSectionProps> = ({ disabled = false }) => {
 
   const handleTipInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let value = e.target.value;
-    
-    // Allow: empty string, numbers, and decimal point
-    // Also allow starting with decimal point (like .50)
+
     if (value === '' || /^\.?\d*\.?\d{0,2}$/.test(value)) {
-      // Don't allow multiple decimal points
       if ((value.match(/\./g) || []).length <= 1) {
         setTipInputValue(value);
       }
@@ -32,7 +29,6 @@ export const TipSection: React.FC<TipSectionProps> = ({ disabled = false }) => {
   const handleTipSubmit = () => {
     let amount = parseFloat(tipInputValue) || 0;
     
-    // Handle input like ".50" (0.50)
     if (tipInputValue.startsWith('.') && tipInputValue.length > 1) {
       amount = parseFloat('0' + tipInputValue);
     }
@@ -115,7 +111,6 @@ export const TipSection: React.FC<TipSectionProps> = ({ disabled = false }) => {
     );
   }
 
-  // Show tip amount with remove option
   return (
     <div className="mt-4 rounded-lg border border-gray-300 bg-gray-50 p-4">
       <div className="flex items-center justify-between">
