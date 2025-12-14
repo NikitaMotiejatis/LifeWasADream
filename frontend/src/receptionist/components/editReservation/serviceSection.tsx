@@ -7,8 +7,6 @@ type ServiceSectionProps = {
   handleChange: (field: keyof Reservation, value: any) => void;
 };
 
-
-
 export function ServiceSection({
   services,
   reservation,
@@ -23,23 +21,21 @@ export function ServiceSection({
         <h3 className="mb-3 text-sm font-medium text-gray-600 uppercase">
           {t('reservation.service')}
         </h3>
-        <div className="text-center py-8">
-          <div className="mx-auto h-10 w-10 text-gray-400 mb-3">
-          </div>
+        <div className="py-8 text-center">
+          <div className="mx-auto mb-3 h-10 w-10 text-gray-400"></div>
           <p className="text-gray-500">No services available</p>
         </div>
       </div>
     );
   }
 
-
- return (
+  return (
     <div className="rounded-xl bg-white p-5 shadow">
       <h3 className="mb-3 text-sm font-medium text-gray-600 uppercase">
         {t('reservation.service')}
       </h3>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         {services.map(service => (
           <div
             key={service.id}
@@ -50,13 +46,13 @@ export function ServiceSection({
                 : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
             }`}
           >
-            <div className="flex justify-between items-start mb-2">
+            <div className="mb-2 flex items-start justify-between">
               <div>
                 <h3 className="font-semibold text-gray-900">
-                  {t(`reservation.services.${service.id}`, service.name)}
+                  {t(`reservations.services.${service.id}`)}
                 </h3>
-                <p className="text-sm text-gray-500 mt-1">
-                  {service.duration} {t('reservation.durations.min')}
+                <p className="mt-1 text-sm text-gray-500">
+                  {service.duration} {t('reservations.min')}
                 </p>
               </div>
               <span className="font-bold text-blue-600">

@@ -1,20 +1,19 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  Reservation,
-  servicesMap,
-} from '@/receptionist/components/reservationList';
 import { useCurrency } from '@/global/contexts/currencyContext';
 import {
   useNameValidation,
   usePhoneValidation,
 } from '@/utils/useInputValidation';
 import { formatDateTime } from '@/utils/formatDateTime';
+import { Reservation } from './reservationList';
+import { Service } from './editReservation/types';
 
 type Props = {
   open: boolean;
   type: 'complete' | 'cancel' | 'noshow' | 'refund' | 'cancel_refund' | 'edit';
   reservation: Reservation | null;
+  service?: Service;
   onClose: () => void;
   onConfirm: (refundData?: {
     name: string;
@@ -28,6 +27,7 @@ export default function ReservationModal({
   open,
   type,
   reservation,
+  service,
   onClose,
   onConfirm,
 }: Props) {
@@ -56,7 +56,7 @@ export default function ReservationModal({
 
   if (!open || !reservation) return null;
 
-  const servicePrice = servicesMap[reservation.serviceId]?.price || 0;
+  const servicePrice = service?.price ?? 0;
 
   const isRefundInvalid =
     type === 'refund' && (!name.isValid || !phone.isValid || !reason.trim());

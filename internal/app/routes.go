@@ -5,6 +5,7 @@ import (
 	"dreampos/internal/config"
 	"dreampos/internal/data"
 	"dreampos/internal/order"
+	"dreampos/internal/reservation"
 	"dreampos/internal/payment"
 	"encoding/json"
 	"fmt"
@@ -65,6 +66,16 @@ func setupApiRoutes(router *chi.Mux, _config config.Config, authMiddleware func(
 		}
 
 		apiRouter.Mount("/order", c.Routes())
+	}
+
+	{
+		r := reservation.ReservationController{
+			ReservationRepo: 	data.NewMockDataSource(),
+			ServiceRepo: 		data.NewMockDataSource(),
+			StaffRepo: 			data.NewMockDataSource(),
+		}
+
+		apiRouter.Mount("/reservation", r.Routes())
 	}
 
 	router.Mount("/api", apiRouter)

@@ -1,6 +1,9 @@
 import i18n from '@/i18n';
 
-export const formatDateTime = (date: Date | string | number): string => {
+export const formatDateTime = (
+  date: Date | string | number | null | undefined,
+): string => {
+  if (!date) return '–';
   const d = new Date(date);
   const lang = i18n.resolvedLanguage || i18n.language || 'en';
 

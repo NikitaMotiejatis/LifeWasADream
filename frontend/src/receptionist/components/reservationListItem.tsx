@@ -1,10 +1,23 @@
 import { useTranslation } from 'react-i18next';
 import { formatDateTime } from '@/utils/formatDateTime';
 import type { Reservation } from '@/receptionist/components/reservationList';
-import { servicesMap } from './reservationList';
 
+type Service = {
+  id: string;
+  nameKey: string;
+  price: number;
+};
+
+type Staff = {
+  id: string;
+  name: string;
+  role: string;
+  services: Service[];
+};
 type Props = {
   reservation: Reservation;
+  services?: Service[];
+  staff?: Staff[];
   formatPrice: (n: number) => string;
   onAction: (
     type: 'complete' | 'cancel' | 'noshow' | 'refund' | 'cancel_refund',
@@ -15,14 +28,21 @@ type Props = {
 
 export default function ReservationListItem({
   reservation,
+  services,
+  staff,
   formatPrice,
   onAction,
   onEdit,
 }: Props) {
   const { t } = useTranslation();
-  const service = servicesMap[reservation.serviceId];
-  const serviceTitle = t(`reservations.services.${reservation.serviceId}`);
-  const staffName = t(`reservations.staff.${reservation.staffId}`);
+
+  const service = services?.find(s => s.id === reservation.serviceId);
+  const serviceTitle = service?.id
+    ? t(`reservations.services.${service?.id}`)
+    : t('reservations.notFound');
+  const servicePrice = service?.price ?? 0;
+  const worker = staff?.find(s => s.id === reservation.staffId);
+  const staffName = worker?.name ?? t('reservations.notFound');
 
   return (
     <div className="group rounded-lg bg-white p-5 shadow-sm transition-all hover:shadow-lg hover:ring-2 hover:ring-blue-500/20">
@@ -51,12 +71,16 @@ export default function ReservationListItem({
             <span>{serviceTitle}</span>
             <span className="hidden sm:inline">•</span>
             <span className="sm:hidden">|</span>
-            <span>{staffName}</span>
+            <span>
+              {staffName === 'Anyone'
+                ? t('reservations.staff.anyone')
+                : staffName}
+            </span>
           </div>
         </div>
 
         <div className="text-right">
-          <div className="text-xl font-bold">{formatPrice(service.price)}</div>
+          <div className="text-xl font-bold">{formatPrice(servicePrice)}</div>
         </div>
 
         <div className="flex gap-2">
