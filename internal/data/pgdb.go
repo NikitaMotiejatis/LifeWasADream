@@ -138,6 +138,54 @@ func (pdb PostgresDb) GetOrderCounts(filter order.OrderFilter) (order.OrderCount
 	//return counts, nil
 }
 
+func (pdb PostgresDb) ModifyOrder(orderId int32, order order.Order) error {
+	transaction, err := pdb.Db.Begin()
+	if err != nil {
+		slog.Error(err.Error())
+		return ErrInternal
+	}
+
+	_, err = pdb.Db.Exec("DELETE FROM order_item WHERE order_id = $1", orderId)
+	if err != nil {
+		slog.Error(err.Error())
+		_ = transaction.Rollback()
+		return ErrInternal
+	}
+
+	for _, item := range order.Items {
+		const insertItemStatement = `
+		INSERT INTO order_item (order_id, item_id, quantity)
+			VALUES ($1, $2, $3)
+			RETURNING id
+		`
+
+		orderItemId := 0
+		err := pdb.Db.QueryRowx(insertItemStatement, orderId, item.Product.Id, item.Quantity).Scan(&orderItemId)
+		if err != nil {
+			slog.Error(err.Error())
+			_ = transaction.Rollback()
+			return ErrInternal
+		}
+
+		for _, variation := range item.SelectedVariations {
+			const insertVariationStatement = `
+			INSERT INTO order_item_variation (order_item_id, variation_id)
+				VALUES ($1, $2)
+			`
+			_, err := pdb.Db.Exec(insertVariationStatement, orderItemId, variation.Id)
+			if err != nil {
+				slog.Error(err.Error())
+				_ = transaction.Rollback()
+				return ErrInternal
+			}
+		}
+	}
+
+	_ = transaction.Commit()
+
+	return nil
+}
+
 func (pdb PostgresDb) GetOrderItems(orderId int32) ([]order.Item, error) {
 	const query = `
 	SELECT id, item_id, quantity
@@ -177,16 +225,18 @@ func (pdb PostgresDb) GetOrderItems(orderId int32) ([]order.Item, error) {
 		}
 
 		const selectedVariationQuery =`
-		SELECT item_variation.name, price_difference
+		SELECT item_variation.id, item_variation.name, price_difference
 		FROM order_item
 		JOIN order_item_variation
 			ON order_item.id = order_item_variation.order_item_id
 		JOIN item_variation
 			ON order_item_variation.variation_id = item_variation.id
-		WHERE order_item.item_id = $1;
+		WHERE 
+			order_item.order_id = $1
+			AND order_item.item_id = $2;
 		`
 
-		err = pdb.Db.Select(&items[i].SelectedVariations, selectedVariationQuery, itemsDetails[i].ItemId)
+		err = pdb.Db.Select(&items[i].SelectedVariations, selectedVariationQuery, orderId, itemsDetails[i].ItemId)
 		if err != nil {
 			slog.Error(err.Error())
 			return []order.Item{}, ErrInternal
@@ -206,10 +256,6 @@ func (pdb PostgresDb) GetProducts(filter order.ProductFilter) ([]order.Product, 
 	}
 
 	var filteredProducts []order.Product
-
-	// TODO: (potentialy) In the future it may be a good idea
-	// to optimize this query by rewriting it, adding materialized table to DB, etc.
-	// Right now, it does not cause any performace issues (or is even close to doing that).
 	{
 		const query = `
 		SELECT item.id, item.name, price_per_unit
@@ -250,7 +296,7 @@ func (pdb PostgresDb) GetProducts(filter order.ProductFilter) ([]order.Product, 
 	}
 	{
 		const query = `
-		SELECT name
+		SELECT id, name, price_difference
 		FROM item_variation
 		WHERE item_id = $1
 		`

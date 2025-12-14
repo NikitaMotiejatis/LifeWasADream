@@ -19,7 +19,7 @@ export default function OrderSummary({
 }: OrderSummaryProps) {
   const { t } = useTranslation();
   const params = useParams();
-  const { authFetch } = useAuth();
+  const { authFetch, authFetchJson } = useAuth();
 
   const {
     itemsList,
@@ -54,9 +54,9 @@ export default function OrderSummary({
     try {
       const orderId = params.orderId;
       if (orderId) {
-        await authFetch<string>(`order/${orderId}`, "PATCH", JSON.stringify(order));
+        await authFetch(`order/${orderId}`, "PATCH", JSON.stringify(order));
       } else {
-        await authFetch<{ id: number; message: string }>(`order/`, "POST", JSON.stringify(order));
+        await authFetch(`order/`, "POST", JSON.stringify(order));
       }
       
       showToast(t('orderSummary.saveSuccess', 'Order saved successfully'));
@@ -83,11 +83,11 @@ export default function OrderSummary({
       const existingOrderId = params.orderId;
       if (existingOrderId) {
         // Update existing order
-        await authFetch<string>(`order/${existingOrderId}`, "PATCH", JSON.stringify(order));
+        await authFetchJson<string>(`order/${existingOrderId}`, "PATCH", JSON.stringify(order));
         orderId = parseInt(existingOrderId);
       } else {
         // Create new order and get the order ID
-        const response = await authFetch<{ id: number; message: string }>(`order/`, "POST", JSON.stringify(order));
+        const response = await authFetchJson<{ id: number; message: string }>(`order/`, "POST", JSON.stringify(order));
         orderId = response.id;
       }
       

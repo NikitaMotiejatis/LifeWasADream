@@ -2,7 +2,6 @@ package order
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -137,7 +136,7 @@ func (c OrderController) updateOrder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err := strconv.ParseInt(r.PathValue("orderId"), 10, 32)
+	orderId, err := strconv.ParseInt(r.PathValue("orderId"), 10, 32)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 		return
@@ -149,13 +148,9 @@ func (c OrderController) updateOrder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Println(order)
+	c.OrderRepo.ModifyOrder(int32(orderId), order)
 
-	// TODO: actually do smth
-
-	// TODO: improve
 	w.WriteHeader(http.StatusNoContent)
-	w.Write([]byte("order updated"))
 }
 
 func (c OrderController) counts(w http.ResponseWriter, r *http.Request) {

@@ -106,11 +106,11 @@ type ItemProps = {
 function Items({ includes, category, onProductClick, handleProductClick } : ItemProps) {
   const { t } = useTranslation();
   const { formatPrice, isPaymentStarted} = useCart();
-  const { authFetch } = useAuth();
+  const { authFetchJson } = useAuth();
 
   const { data: filteredProducts } = useSWR(
     `order/products?category=${category}`,
-    (url: string) => authFetch<Product[]>(url, "GET"),
+    (url: string) => authFetchJson<Product[]>(url, "GET"),
     { 
       suspense: true,
       revalidateOnMount: true,

@@ -2,6 +2,7 @@ import { createContext, useContext, useMemo, useState, ReactNode } from 'react';
 import { Currency, useCurrency } from '@/global/contexts/currencyContext';
 
 export type Variation = {
+  id: number;
   name: string;
   nameKey?: string;
   priceModifier: number;

@@ -223,27 +223,27 @@ INSERT INTO order_data (id, employee_id, created_at, status, currency, discount,
 (10, 10, NOW() - INTERVAL '1 hour', 'CLOSED', 'AUD', 100, 0, 0);
 
 -- Order Items
-INSERT INTO order_item (id, order_id, item_id, quantity, discount) VALUES 
+INSERT INTO order_item (order_id, item_id, quantity, discount) VALUES 
 -- Order 1 (Coffee)
-(1, 1, 1, 1, 0), (2, 1, 3, 1, 0),
+(1, 1, 1, 0), (1, 3, 1, 0),
 -- Order 2 (Coffee)
-(3, 2, 2, 2, 0),
+(2, 2, 2, 0),
 -- Order 3 (Iced Latte + Bagel)
-(4, 3, 5, 1, 0), (5, 3, 4, 1, 0),
+(3, 5, 1, 0), (3, 4, 1, 0),
 -- Order 4 (Tech)
-(6, 4, 6, 1, 0), (7, 4, 7, 1, 0),
+(4, 6, 1, 0), (4, 7, 1, 0),
 -- Order 5 (Tech - Refunded)
-(8, 5, 8, 1, 0),
+(5, 8, 1, 0),
 -- Order 6 (Tech)
-(9, 6, 9, 2, 0),
+(6, 9, 2, 0),
 -- Order 7 (Burger)
-(10, 7, 10, 1, 0), (11, 7, 11, 1, 0), (12, 7, 12, 1, 0),
+( 7, 10, 1, 0), (7, 11, 1, 0), (7, 12, 1, 0),
 -- Order 8 (Burger)
-(13, 8, 10, 2, 0),
+(8, 10, 2, 0),
 -- Order 9 (Burger)
-(14, 9, 13, 1, 0), (15, 9, 14, 1, 0),
+(9, 13, 1, 0), (9, 14, 1, 0),
 -- Order 10 (Burger)
-(16, 10, 11, 2, 0);
+(10, 11, 2, 0);
 
 -- Order Item Variations (Strict item_id matching)
 INSERT INTO order_item_variation (order_item_id, variation_id) VALUES 

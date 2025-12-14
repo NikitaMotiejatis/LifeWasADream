@@ -230,7 +230,7 @@ CREATE TYPE order_status AS ENUM('OPEN', 'CLOSED', 'REFUND_PENDING', 'REFUNDED')
 
 DROP TABLE IF EXISTS order_data CASCADE;
 CREATE TABLE order_data (
-    id              INTEGER PRIMARY KEY,
+    id              SERIAL PRIMARY KEY,
     employee_id     INTEGER         NOT NULL REFERENCES employee(id),
     created_at      TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
     status          order_status    NOT NULL DEFAULT 'OPEN',
@@ -297,7 +297,7 @@ CREATE TABLE item_category (
 
 DROP TABLE IF EXISTS order_item CASCADE;
 CREATE TABLE order_item (
-    id          INTEGER PRIMARY KEY,
+    id          SERIAL PRIMARY KEY,
     order_id    INTEGER     NOT NULL REFERENCES order_data(id),
     item_id     INTEGER     NOT NULL REFERENCES item(id),
     quantity    INTEGER     NOT NULL DEFAULT 1,
@@ -309,7 +309,7 @@ CREATE TABLE order_item (
 
 DROP TABLE IF EXISTS order_item_variation CASCADE;
 CREATE TABLE order_item_variation (
-    order_item_id   INTEGER NOT NULL REFERENCES order_item(id),
+    order_item_id   INTEGER NOT NULL REFERENCES order_item(id) ON DELETE CASCADE,
     variation_id    INTEGER NOT NULL REFERENCES item_variation(id),
 
     PRIMARY KEY(order_item_id, variation_id)
@@ -464,22 +464,37 @@ AS
         status,
         variation_id,
         variation_name,
-        price_difference,
-          (price_per_unit + COALESCE(price_difference, 0) - unit_discount)                                  AS net,
-         ((price_per_unit + COALESCE(price_difference, 0) - unit_discount) * (0.01 * (100 + vat)))              AS gross,
-        (((price_per_unit + COALESCE(price_difference, 0) - unit_discount) * (0.01 * (100 + vat))) * quantity)  AS total 
+        price_difference
     FROM item_info 
     LEFT JOIN variation_info 
         ON item_info.order_item_id = variation_info.order_item_id
 ;
 
+CREATE OR REPLACE VIEW order_item_total
+AS
+     SELECT
+        order_item_id,
+        order_id,
+        vat,
+        quantity,
+         SUM(price_per_unit + COALESCE(price_difference, 0) - unit_discount)                            ::DECIMAL(15) AS gross,
+        (SUM(price_per_unit + COALESCE(price_difference, 0) - unit_discount) / (0.01 * (100 + vat)))    ::DECIMAL(15) AS net,
+        (SUM(price_per_unit + COALESCE(price_difference, 0) - unit_discount) * quantity)                ::DECIMAL(15) AS total
+    FROM order_item_detail
+    GROUP BY 
+        order_item_id,
+        order_id,
+        vat,
+        quantity
+;
+
 CREATE OR REPLACE VIEW order_detail
 AS
-    WITH order_item_total AS (
-        SELECT 
+    WITH item_total_sum AS (
+        SELECT
             order_id,
-            SUM(total) AS total
-        FROM order_item_detail
+            SUM(total) AS sum_of_totals
+        FROM order_item_total
         GROUP BY order_id
     )
     SELECT 
@@ -491,10 +506,10 @@ AS
         discount,
         tip,
         service_charge,
-        GREATEST(COALESCE(order_item_total.total, 0) + tip + service_charge - discount, 0) AS total
+        GREATEST(COALESCE(sum_of_totals, 0) + tip + service_charge - discount, 0) AS total
     FROM order_data
-    LEFT JOIN order_item_total
-        ON order_data.id = order_item_total.order_id
+    LEFT JOIN item_total_sum
+        ON order_data.id = item_total_sum.order_id
 ;
 
 -- -------------------------------------------------------------------------------------------------

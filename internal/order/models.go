@@ -14,8 +14,9 @@ type OrderSummary struct {
 }
 
 type Variation struct {
-	Name          string	`json:"name"          db:"name"`
-	PriceModifier uint64	`json:"priceModifier" db:"price_difference"`
+	Id				int32	`json:"id"            db:"id"`
+	Name          	string	`json:"name"          db:"name"`
+	PriceModifier 	uint64	`json:"priceModifier" db:"price_difference"`
 }
 
 type Product struct {
