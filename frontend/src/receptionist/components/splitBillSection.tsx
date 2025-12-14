@@ -25,7 +25,8 @@ type SplitBillSectionProps = {
   onCompletePayment?: (
     payments: { amount: number; method: PaymentMethod; tip: number }[],
   ) => void;
-  onStripePayment?: () => void;
+  onStripePayment?: (payerIndex?: number, amount?: number) => void;
+  isProcessing?: boolean;
 };
 
 export const SplitBillSection: React.FC<SplitBillSectionProps> = ({
@@ -35,6 +36,7 @@ export const SplitBillSection: React.FC<SplitBillSectionProps> = ({
   onSplitEnabledChange,
   onCompletePayment,
   onStripePayment,
+  isProcessing = false,
 }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -152,6 +154,12 @@ export const SplitBillSection: React.FC<SplitBillSectionProps> = ({
     setIndividualTip(payerIndex, amount);
   };
 
+  const handlePayWithCard = (payerIndex: number, amount: number) => {
+    if (onStripePayment) {
+      onStripePayment(payerIndex, amount);
+    }
+  };
+
   const handlePayerPayment = (payerIndex: number) => {
     if (payerIndex < 0 || payerIndex >= MAX_PAYERS) return;
     
@@ -177,6 +185,7 @@ export const SplitBillSection: React.FC<SplitBillSectionProps> = ({
         <button
           onClick={handleSplitEnable}
           className="mt-4 w-full rounded-lg border border-gray-400 bg-white py-3 text-sm font-medium hover:bg-gray-50"
+          disabled={isProcessing}
         >
           {t('orderSummary.splitBill')}
         </button>
@@ -195,6 +204,7 @@ export const SplitBillSection: React.FC<SplitBillSectionProps> = ({
                     ? 'bg-blue-600 text-white hover:bg-blue-700'
                     : 'border border-gray-400 hover:bg-gray-100'
                 }`}
+                disabled={isProcessing}
               >
                 {t(`orderSummary.paymentMethods.${method}`)}
               </button>
@@ -205,12 +215,13 @@ export const SplitBillSection: React.FC<SplitBillSectionProps> = ({
         <button
           onClick={() => {
             if (paymentMethod === 'Card' && onStripePayment) {
-              onStripePayment();
+              onStripePayment(); // No payerIndex for non-split payments
             } else {
               navigate('/orders');
             }
           }}
           className="w-full rounded-xl bg-blue-600 py-4 text-lg font-bold text-white shadow-md transition hover:bg-blue-700"
+          disabled={isProcessing}
         >
           {t('orderSummary.completePayment')}
         </button>
@@ -233,7 +244,7 @@ export const SplitBillSection: React.FC<SplitBillSectionProps> = ({
                 ? 'cursor-not-allowed text-red-400 opacity-60'
                 : 'text-red-600 hover:text-red-800 active:text-red-900'
             } `}
-            disabled={anyPaid}
+            disabled={anyPaid || isProcessing}
           >
             {t('common.cancel')}
           </button>
@@ -248,7 +259,7 @@ export const SplitBillSection: React.FC<SplitBillSectionProps> = ({
           >
             <button
               onClick={() => setNumPeople(Math.max(2, numPeople - 1))}
-              disabled={anyPaid}
+              disabled={anyPaid || isProcessing}
               className="h-8 w-8 rounded-full border border-gray-400 text-lg font-bold hover:bg-gray-100 disabled:cursor-not-allowed"
             >
               −
@@ -258,7 +269,7 @@ export const SplitBillSection: React.FC<SplitBillSectionProps> = ({
             </span>
             <button
               onClick={() => setNumPeople(Math.min(MAX_PAYERS, numPeople + 1))}
-              disabled={anyPaid}
+              disabled={anyPaid || isProcessing}
               className="h-8 w-8 rounded-full bg-blue-600 text-lg font-bold text-white hover:bg-blue-700 disabled:opacity-70"
             >
               +
@@ -273,8 +284,8 @@ export const SplitBillSection: React.FC<SplitBillSectionProps> = ({
             <input
               type="radio"
               checked={splitMode === 'equal'}
-              onChange={() => !anyPaid && setSplitMode('equal')}
-              disabled={anyPaid}
+              onChange={() => !anyPaid && !isProcessing && setSplitMode('equal')}
+              disabled={anyPaid || isProcessing}
               className="text-blue-600"
             />
             <span>{t('orderSummary.splitEqually')}</span>
@@ -285,8 +296,8 @@ export const SplitBillSection: React.FC<SplitBillSectionProps> = ({
             <input
               type="radio"
               checked={splitMode === 'byItems'}
-              onChange={() => !anyPaid && setSplitMode('byItems')}
-              disabled={anyPaid}
+              onChange={() => !anyPaid && !isProcessing && setSplitMode('byItems')}
+              disabled={anyPaid || isProcessing}
               className="text-blue-600"
             />
             <span>{t('orderSummary.splitByItems')}</span>
@@ -329,7 +340,7 @@ export const SplitBillSection: React.FC<SplitBillSectionProps> = ({
                       }))}
                       selected={String(assignments[idx] || 1)}
                       onChange={val => {
-                        if (!anyPaid) {
+                        if (!anyPaid && !isProcessing) {
                           const newAssign = [...assignments];
                           newAssign[idx] = Number(val);
                           setAssignments(newAssign);
@@ -389,7 +400,7 @@ export const SplitBillSection: React.FC<SplitBillSectionProps> = ({
                     <TipInput
                       value={tipAmount}
                       onChange={(amount) => handleIndividualTipChange(payerIndex, amount)}
-                      disabled={paid}
+                      disabled={paid || isProcessing}
                       addTipText={t('orderSummary.addIndividualTip')}
                       enterTipLabel={t('orderSummary.individualTipForPayer', { payer: index })}
                       showCurrency={false}
@@ -411,7 +422,7 @@ export const SplitBillSection: React.FC<SplitBillSectionProps> = ({
                               ? 'bg-blue-600 text-white'
                               : 'border border-gray-300 hover:bg-gray-50'
                           }`}
-                          disabled={paid}
+                          disabled={paid || isProcessing}
                         >
                           {t(`orderSummary.paymentMethods.${m}`)}
                         </button>
@@ -419,13 +430,22 @@ export const SplitBillSection: React.FC<SplitBillSectionProps> = ({
                     </div>
 
                     <button
-                      onClick={() => handlePayerPayment(payerIndex)}
+                      onClick={() => {
+                        if (method === 'Card') {
+                          handlePayWithCard(payerIndex, totalAmount);
+                        } else {
+                          handlePayerPayment(payerIndex);
+                        }
+                      }}
                       className="w-full rounded-xl bg-blue-600 py-5 text-xl font-bold text-white shadow-md transition hover:bg-blue-700"
-                      disabled={paid}
+                      disabled={paid || isProcessing || (method === 'Card' && isProcessing)}
                     >
-                      {t('orderSummary.payWith', {
-                        method: t(`orderSummary.paymentMethods.${method}`),
-                      })}
+                      {method === 'Card' 
+                        ? t('orderSummary.payWithCard')
+                        : t('orderSummary.payWith', {
+                            method: t(`orderSummary.paymentMethods.${method}`),
+                          })
+                      }
                     </button>
                   </>
                 )}
