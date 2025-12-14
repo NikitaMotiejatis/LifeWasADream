@@ -529,7 +529,7 @@ func (pdb PostgresDb) GetReservationItems(reservationId int32) ([]reservation.Se
 	}, nil
 }
 
-func (pdb PostgresDb) CreateReservation(res reservation.ReservationCreate) (int32, error) {
+func (pdb PostgresDb) CreateReservation(res reservation.Reservation) (int32, error) {
 	serviceId, err := strconv.ParseInt(res.ServiceId, 10, 32)
 	if err != nil {
 		return 0, ErrInternal

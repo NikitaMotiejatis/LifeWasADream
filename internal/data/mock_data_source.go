@@ -243,7 +243,7 @@ func (s *MockDataSource) GetReservationItems(reservationID int32) ([]reservation
 	return services, nil
 }
 
-func (s *MockDataSource) CreateReservation(res reservation.ReservationCreate) (int32, error) {
+func (s *MockDataSource) CreateReservation(res reservation.Reservation) (int32, error) {
 	newId := int32(len(s.Reservations) + 1)
 	s.Reservations = append(s.Reservations, reservation.Reservation{
 		Id:            fmt.Sprintf("%d", newId),

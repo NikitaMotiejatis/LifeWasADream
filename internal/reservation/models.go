@@ -23,16 +23,6 @@ type Reservation struct {
 	Status        string    `json:"status"`
 }
 
-// Payload for creating a reservation.
-type ReservationCreate struct {
-	CustomerName  string    `json:"customerName"`
-	CustomerPhone string    `json:"customerPhone"`
-	StaffId       string    `json:"staffId"`
-	ServiceId     string    `json:"serviceId"`
-	Datetime      time.Time `json:"datetime"`
-	Status        string    `json:"status"`
-}
-
 // Payload for updating a reservation; nil fields are ignored.
 type ReservationUpdate struct {
 	CustomerName  *string    `json:"customerName"`

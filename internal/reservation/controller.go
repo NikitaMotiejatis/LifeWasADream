@@ -3,8 +3,8 @@ package reservation
 import (
 	"encoding/json"
 	"net/http"
-	"strconv"
 	"regexp"
+	"strconv"
 	"time"
 
 	"github.com/go-chi/chi/v5"
@@ -102,7 +102,7 @@ func (c *ReservationController) createReservation(w http.ResponseWriter, r *http
 		_ = json.NewEncoder(w).Encode(map[string]string{"error": msg})
 	}
 
-	var reservation ReservationCreate
+	var reservation Reservation
 	if err := json.NewDecoder(r.Body).Decode(&reservation); err != nil {
 		writeJSONError("invalid reservation payload", http.StatusBadRequest)
 		return
