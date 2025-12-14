@@ -42,8 +42,8 @@ func New(config config.Config) App {
 		CancelURL:       fmt.Sprintf("http://%s/payment/cancel", config.FrontendUrl),
 	}
 
-	setupApiRoutes(mainRouter, authController.AuthenticateMiddleware, refundService)
-	setupPaymentRoutes(mainRouter, paymentService)
+	setupApiRoutes(mainRouter, config, authController.AuthenticateMiddleware, refundService)
+	setupPaymentRoutes(mainRouter, config, authController.AuthenticateMiddleware, paymentService)
 
 	mainRouter.NotFound(func(w http.ResponseWriter, r *http.Request) {
 		if w == nil || r == nil {

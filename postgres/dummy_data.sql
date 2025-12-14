@@ -95,7 +95,8 @@ INSERT INTO employee (id, username, first_name, last_name, password_hash, email,
 (8, 'zenmaster', 'Zen', 'Master', '$2a$14$ajq8Q7fbtFRQvXpdCq7Jcuy.Rx1h/L4J60Otx.gyNLbAYctGMJ9tK', 'zen@serenity.com', '+15554002', NOW() - INTERVAL '180 days', 4),
 -- Burger Joint
 (9, 'flipperpatty', 'Patty', 'Flipper', '$2a$14$ajq8Q7fbtFRQvXpdCq7Jcuy.Rx1h/L4J60Otx.gyNLbAYctGMJ9tK', 'patty@burgerjoint.com', '+15555001', NOW() - INTERVAL '140 days', 5),
-(10, 'cashier1', 'Bun', 'Toaster', '$2a$12$k8sRjlINxLzAiakxjM1x6OdLT4oZRd23YQCSd/zvha4nXUHMCMDOy', 'bun@burgerjoint.com', '+15555002', NOW() - INTERVAL '130 days', 5);
+(10, 'cashier1', 'Bun', 'Toaster', '$2a$12$k8sRjlINxLzAiakxjM1x6OdLT4oZRd23YQCSd/zvha4nXUHMCMDOy', 'bun@burgerjoint.com', '+15555002', NOW() - INTERVAL '130 days', 5),
+(11, 'manager1', 'mr', 'manager', '$2a$12$k8sRjlINxLzAiakxjM1x6OdLT4oZRd23YQCSd/zvha4nXUHMCMDOy', 'bu@burgerjoint.com', '+15555003', NOW() - INTERVAL '230 days', 5);
 
 INSERT INTO work_shift (id, day_of_the_week, start_time, end_time) VALUES 
 (1, 'MONDAY', '08:00', '16:00'),
@@ -109,7 +110,9 @@ INSERT INTO employee_shift (user_id, work_shift_id) VALUES
 
 -- Employee Roles (must be after employees are inserted)
 INSERT INTO employee_role (employee_id, role_id) VALUES
-(10, 3);
+(10, 3),
+(11, 2)
+;
 
 -- ================================================================================================
 -- 5. ITEMS & INVENTORY (For Order-Based Businesses)
