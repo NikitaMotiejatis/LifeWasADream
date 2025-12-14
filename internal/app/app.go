@@ -17,7 +17,7 @@ import (
 )
 
 type App struct {
-	Server	*http.Server
+	Server *http.Server
 }
 
 func New(config config.Config) App {
@@ -27,6 +27,7 @@ func New(config config.Config) App {
 
 	authController := setupAuth(mainRouter, config)
 	setupApiRoutes(mainRouter, config, authController.AuthenticateMiddleware)
+	setupPaymentRoutes(mainRouter, config, authController.AuthenticateMiddleware)
 
 	mainRouter.NotFound(func(w http.ResponseWriter, r *http.Request) {
 		if w == nil || r == nil {
@@ -65,7 +66,7 @@ func (app *App) Start() {
 	<-quit
 	slog.Info("Shutting down server...")
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5 * time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	err := app.Server.Shutdown(ctx)

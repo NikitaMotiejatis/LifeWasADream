@@ -404,6 +404,8 @@
     },
     "removeItem": "Remove item",
     "saveOrder": "Save Order",
+    "saveSuccess": "Order saved successfully",
+    "saveError": "Failed to save order",
     "splitBill": "Split Bill",
     "subtotal": "Subtotal",
     "title": "Current Order",
@@ -998,5 +1000,23 @@
       "exceeds": "Cannot exceed 100%",
       "duplicate": "A {{rate}}% VAT rate already exists"
     }
+  },
+
+  "payment": {
+    "payWithStripe": "Pay with Stripe",
+    "processing": "Processing order...",
+    "redirecting": "Redirecting to payment...",
+    "error": "Payment failed. Please try again.",
+    "verifying": "Verifying payment...",
+    "verificationFailed": "Verification Failed",
+    "backToOrders": "Back to Orders",
+    "success": "Payment Successful!",
+    "successMessage": "Your payment has been processed successfully.",
+    "orderId": "Order ID",
+    "viewOrders": "View Orders",
+    "newOrder": "Create New Order",
+    "cancelled": "Payment Cancelled",
+    "cancelledMessage": "Your payment was cancelled. No charges were made.",
+    "tryAgain": "Try Again"
   }
 }

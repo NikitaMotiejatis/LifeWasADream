@@ -4,6 +4,8 @@ import TrashcanIcon from '@/icons/trashcanIcon';
 import { useNavigate, useParams } from 'react-router-dom';
 import { SplitBillSection } from './splitBillSection';
 import { useState } from 'react';
+import Toast from '@/global/components/toast';
+import { createStripeCheckout, redirectToStripeCheckout } from '@/utils/paymentService';
 import { useAuth } from '@/global/hooks/auth';
 
 type OrderSummaryProps = {
@@ -33,7 +35,7 @@ export default function OrderSummary({
 
   const navigate = useNavigate();
 
-  const [, setToast] = useState<{
+  const [toast, setToast] = useState<{
     message: string;
     type: 'success' | 'error';
   } | null>(null);
@@ -47,27 +49,69 @@ export default function OrderSummary({
   };
 
   const handleSave = async () => {
-    const order = ({ items: itemsList } as { items: CartItem[] });
+    const order = { items: itemsList } as { items: CartItem[] };
 
-    // TODO: fix throws.
-    // Will throw because backend doesn't return anything.
     try {
       const orderId = params.orderId;
       if (orderId) {
-        const _ = await authFetch<string>(`order/${orderId}`, "PATCH", JSON.stringify(order));
+        await authFetch<string>(`order/${orderId}`, "PATCH", JSON.stringify(order));
       } else {
-        const _ = await authFetch<string>(`order/`, "POST", JSON.stringify(order));
+        await authFetch<{ id: number; message: string }>(`order/`, "POST", JSON.stringify(order));
       }
-
+      
+      showToast(t('orderSummary.saveSuccess', 'Order saved successfully'));
     } catch (e) {
       console.error(e);
+      showToast(
+        t('orderSummary.saveError', 'Failed to save order'),
+        'error'
+      );
+      return;
     }
 
     navigate('/orders');
   }
 
+  const handleStripePayment = async () => {
+    try {
+      showToast(t('payment.processing', 'Processing order...'));
+      
+      // Create or update the order first
+      const order = { items: itemsList } as { items: CartItem[] };
+      let orderId: number;
+      
+      const existingOrderId = params.orderId;
+      if (existingOrderId) {
+        // Update existing order
+        await authFetch<string>(`order/${existingOrderId}`, "PATCH", JSON.stringify(order));
+        orderId = parseInt(existingOrderId);
+      } else {
+        // Create new order and get the order ID
+        const response = await authFetch<{ id: number; message: string }>(`order/`, "POST", JSON.stringify(order));
+        orderId = response.id;
+      }
+      
+      showToast(t('payment.redirecting', 'Redirecting to payment...'));
+      
+      const checkoutResponse = await createStripeCheckout(orderId, total, 'eur');
+      
+      // Clear cart before redirecting
+      clearCart();
+      
+      // Redirect to Stripe checkout
+      redirectToStripeCheckout(checkoutResponse.session_url);
+    } catch (error) {
+      showToast(
+        t('payment.error', 'Payment failed. Please try again.'),
+        'error'
+      );
+      console.error('Stripe payment error:', error);
+    }
+  };
+
   return (
     <div className="max-h-full flex-1 flex-col overflow-hidden rounded-2xl bg-white p-4 shadow-xl xl:p-5">
+      <Toast toast={toast} />
       <div className="mb-4 flex items-center justify-between">
         <h3 className="text-lg font-bold xl:text-xl">
           {t('orderSummary.title')}
@@ -142,10 +186,11 @@ export default function OrderSummary({
                 formatPrice={formatPrice}
                 onCompletePayment={payments => {
                   console.log('All paid:', payments);
+                  showToast(t('orderSummary.allPaid'));
                   clearCart();
-                  navigate('/orders');
-                  showToast(t('orderSummary.allPaid')); //TODO: currently doesn't work
+                  setTimeout(() => navigate('/orders'), 600);
                 }}
+                onStripePayment={handleStripePayment}
               />
             </>
           ) : onBack ? (

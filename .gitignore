@@ -17,6 +17,11 @@ coverage.*
 *.coverprofile
 profile.cov
 
+# Log files
+logs/
+*.log
+dreampos.log
+
 # Dependency directories (remove the comment below to include it)
 # vendor/
 build/

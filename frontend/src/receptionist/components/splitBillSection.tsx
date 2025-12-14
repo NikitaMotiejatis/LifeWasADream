@@ -13,6 +13,7 @@ type SplitBillSectionProps = {
   onCompletePayment?: (
     payments: { amount: number; method: PaymentMethod }[],
   ) => void;
+  onStripePayment?: () => void;
 };
 
 export const SplitBillSection: React.FC<SplitBillSectionProps> = ({
@@ -20,6 +21,7 @@ export const SplitBillSection: React.FC<SplitBillSectionProps> = ({
   items,
   formatPrice,
   onCompletePayment,
+  onStripePayment,
 }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -119,7 +121,11 @@ export const SplitBillSection: React.FC<SplitBillSectionProps> = ({
 
         <button
           onClick={() => {
-            navigate('/orders');
+            if (paymentMethod === 'Card' && onStripePayment) {
+              onStripePayment();
+            } else {
+              navigate('/orders');
+            }
           }}
           className="w-full rounded-xl bg-blue-600 py-4 text-lg font-bold text-white shadow-md transition hover:bg-blue-700"
         >

@@ -11,8 +11,8 @@ import (
 )
 
 type OrderController struct {
-	OrderRepo	OrderRepo
-	ProductRepo	ProductRepo
+	OrderRepo   OrderRepo
+	ProductRepo ProductRepo
 }
 
 func (c OrderController) Routes() http.Handler {
@@ -84,22 +84,27 @@ func (c OrderController) createOrder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err := strconv.ParseInt(r.PathValue("orderId"), 10, 32)
-	if err != nil {
-		w.WriteHeader(http.StatusNotFound)
-		return
-	}
-
 	var order Order
 	if err := json.NewDecoder(r.Body).Decode(&order); err != nil {
 		http.Error(w, "invalid order", http.StatusBadRequest)
 		return
 	}
 
-	// TODO: actually do smth
+	// TODO: actually save order to database and get real ID
+	// For now, generate a temporary ID
+	orderId := time.Now().Unix() // Temporary solution until DB implementation
 
+	response := map[string]interface{}{
+		"id":      orderId,
+		"message": "order created",
+	}
+
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	w.Write([]byte("order created"))
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		http.Error(w, "failed to encode response", http.StatusInternalServerError)
+		return
+	}
 }
 
 func (c OrderController) getOrder(w http.ResponseWriter, r *http.Request) {

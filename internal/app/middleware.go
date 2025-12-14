@@ -3,6 +3,9 @@ package app
 import (
 	"dreampos/internal/config"
 	"fmt"
+	"log/slog"
+	"net/http"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -14,7 +17,7 @@ func attachGlobalMiddlewares(router *chi.Mux, config config.Config) {
 
 	router.Use(middleware.Recoverer)
 	router.Use(middleware.CleanPath)
-	router.Use(middleware.Logger)
+	router.Use(requestLogger)
 
 	corsOptions := cors.Options{
 		AllowedOrigins:   []string{"http://localhost:" + fmt.Sprint(config.VitePort)},
@@ -25,4 +28,24 @@ func attachGlobalMiddlewares(router *chi.Mux, config config.Config) {
 		MaxAge:           60 * 5, // Seconds
 	}
 	router.Use(cors.Handler(corsOptions))
+}
+
+// requestLogger logs HTTP requests to the configured log file
+func requestLogger(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		start := time.Now()
+		wrapper := middleware.NewWrapResponseWriter(w, r.ProtoMajor)
+
+		next.ServeHTTP(wrapper, r)
+
+		duration := time.Since(start)
+		slog.Info("HTTP request",
+			"method", r.Method,
+			"uri", r.RequestURI,
+			"status", wrapper.Status(),
+			"bytes", wrapper.BytesWritten(),
+			"duration", duration,
+			"remote", r.RemoteAddr,
+		)
+	})
 }
