@@ -425,36 +425,77 @@ CREATE TRIGGER appointment_bill_valid_created_at
 -- -------------------------------------------------------------------------------------------------
 -- -------------------------------------------------------------------------------------------------
 
-CREATE OR REPLACE VIEW order_item_total
+CREATE OR REPLACE VIEW order_item_detail
 AS
+    WITH item_info AS 
+    (
+        SELECT
+            order_item.id AS order_item_id,
+            order_id,
+            item.id AS item_id,
+            item.name AS item_name,
+            price_per_unit,
+            quantity,
+            discount AS unit_discount,
+            vat,
+            status 
+        FROM item 
+        JOIN order_item 
+            ON item.id = order_item.item_id 
+    ), variation_info AS (
+        SELECT
+            order_item_id,
+            variation_id,
+            name AS variation_name,
+            price_difference 
+        FROM order_item_variation 
+        JOIN item_variation 
+            ON order_item_variation.variation_id = item_variation.id 
+    )
     SELECT
-        order_item.id,
+        item_info.order_item_id,
         order_id,
+        item_id,
+        item_name,
         price_per_unit,
         quantity,
-        discount,
+        unit_discount,
         vat,
-        (price_per_unit * quantity * (100.0 + vat) / (100::DECIMAL(15)) - discount) AS total
-    FROM order_item
-    JOIN item 
-        ON item_id=item_id;
-    
-CREATE OR REPLACE VIEW order_total
+        status,
+        variation_id,
+        variation_name,
+        price_difference,
+          (price_per_unit + COALESCE(price_difference, 0) - unit_discount)                                  AS net,
+         ((price_per_unit + COALESCE(price_difference, 0) - unit_discount) * (0.01 * (100 + vat)))              AS gross,
+        (((price_per_unit + COALESCE(price_difference, 0) - unit_discount) * (0.01 * (100 + vat))) * quantity)  AS total 
+    FROM item_info 
+    LEFT JOIN variation_info 
+        ON item_info.order_item_id = variation_info.order_item_id
+;
+
+CREATE OR REPLACE VIEW order_detail
 AS
+    WITH order_item_total AS (
+        SELECT 
+            order_id,
+            SUM(total) AS total
+        FROM order_item_detail
+        GROUP BY order_id
+    )
     SELECT 
         id,
+        employee_id,
+        created_at,
+        status,
+        currency,
         discount,
         tip,
         service_charge,
-        total AS item_total,
-        (total + tip + service_charge - discount) AS total
-    FROM (
-        SELECT order_id, SUM(total) AS total
-        FROM order_item_total 
-        GROUP BY order_id)
-    JOIN order_data
-        ON id = order_id;
-
+        GREATEST(COALESCE(order_item_total.total, 0) + tip + service_charge - discount, 0) AS total
+    FROM order_data
+    LEFT JOIN order_item_total
+        ON order_data.id = order_item_total.order_id
+;
 
 -- -------------------------------------------------------------------------------------------------
 -- -------------------------------------------------------------------------------------------------

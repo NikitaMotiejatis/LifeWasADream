@@ -82,6 +82,102 @@ func (pdb PostgresDb) GetUserDetails(username string) (auth.UserDetails, error) 
 }
 
 // -------------------------------------------------------------------------------------------------
+// order.OrderRepo implimentation ----------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
+
+func (pdb PostgresDb) GetOrders(filter order.OrderFilter) ([]order.OrderSummary, error) {
+	filterStrings := []string{ "TRUE" }
+	if filter.OrderStatus != nil {
+		filterStrings = append(
+			filterStrings,
+			fmt.Sprintf("status = '%s'", strings.ToUpper(*filter.OrderStatus)),
+		)
+	}
+	if filter.From != nil {
+		filterStrings = append(
+			filterStrings,
+			fmt.Sprintf("'%s' <= created_at", (*filter.From).Format("2006-01-02 15:04:05")),
+		)
+	}
+	if filter.To != nil {
+		filterStrings = append(
+			filterStrings,
+			fmt.Sprintf("created_at <= '%s'", (*filter.To).Format("2006-01-02 15:04:05")),
+		)
+	}
+
+	query := fmt.Sprintf(`
+	SELECT id, total, created_at, status
+	FROM order_detail
+	WHERE %s
+	ORDER BY id DESC
+	`, strings.Join(filterStrings, " AND "))
+
+
+	orders := []order.OrderSummary{}
+	err := pdb.Db.Select(&orders, query)
+	if err != nil {
+		slog.Error(err.Error())
+		return []order.OrderSummary{}, ErrInternal
+	}
+
+	for i := range orders {
+		orders[i].Status = strings.ToLower(orders[i].Status)
+	}
+
+	return orders, nil
+}
+
+func (pdb PostgresDb) GetOrderCounts(filter order.OrderFilter) (order.OrderCounts, error) {
+	return order.OrderCounts{}, nil
+	//counts := order.OrderCounts{}
+	//for _, o := range s.Orders {
+	//	if filter.From != nil && o.CreatedAt.Before(*filter.From) {
+	//		continue
+	//	}
+	//	if filter.To != nil && o.CreatedAt.After(*filter.To) {
+	//		continue
+	//	}
+
+	//	counts.All += 1
+	//	switch o.Status {
+	//	case "open": 			counts.Open += 1
+	//	case "closed": 			counts.Closed += 1
+	//	case "refund_pending": 	counts.RefundPending += 1
+	//	case "refunded": 		counts.Refunded += 1
+	//	}
+	//}
+
+	//return counts, nil
+}
+
+func (pdb PostgresDb) GetOrderItems(orderId int32) ([]order.Item, error) {
+	panic("not implemented")
+	//return []order.Item{
+	//	{
+	//		Product: s.Products[0],
+	//		SelectedVariations: []order.Variation{},
+	//		Quantity: 5,
+	//	},
+	//	{
+	//		Product: s.Products[0],
+	//		SelectedVariations: []order.Variation{
+	//			{
+	//				Name:          "Large",
+	//				PriceModifier: 200,
+	//			},
+	//		},
+	//		Quantity: 1,
+	//	},
+	//	{
+	//		Product: s.Products[1],
+	//		SelectedVariations: []order.Variation{},
+	//		Quantity: 3,
+	//	},
+	//}, nil
+}
+
+// -------------------------------------------------------------------------------------------------
 // order.ProductRepo implimentation ----------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------
 
@@ -109,7 +205,7 @@ func (pdb PostgresDb) GetProducts(filter order.ProductFilter) ([]order.Product, 
 			%s
 		ORDER BY
 			item.name ASC
-		`, strings.Join(queryFilterConditions, " AND ") + "\n")
+		`, strings.Join(queryFilterConditions, " AND "))
 
 
 		err := pdb.Db.Select(&filteredProducts, query)

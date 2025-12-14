@@ -7,10 +7,10 @@ type Order struct {
 }
 
 type OrderSummary struct {
-	Id			uint32		`json:"id"`
-	Total 		float64		`json:"total"`
-	CreatedAt	time.Time	`json:"createdAt"`
-	Status		string		`json:"status"`
+	Id			int32		`json:"id"        db:"id"`
+	Total 		float64		`json:"total"     db:"total"`
+	CreatedAt	time.Time	`json:"createdAt" db:"created_at"`
+	Status		string		`json:"status"    db:"status"`
 }
 
 type Variation struct {

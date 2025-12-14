@@ -61,7 +61,7 @@ func setupApiRoutes(router *chi.Mux, config config.Config, authMiddleware func(h
 
 	{
 		c := order.OrderController{
-			OrderRepo: 	 data.NewMockDataSource(),
+			OrderRepo: 	 data.MustCreatePostgresDb(config),
 			ProductRepo: data.MustCreatePostgresDb(config),
 		}
 
