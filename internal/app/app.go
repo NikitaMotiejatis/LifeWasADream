@@ -14,6 +14,8 @@ import (
 	"github.com/go-chi/chi/v5"
 
 	"dreampos/internal/config"
+	"dreampos/internal/payment"
+	"dreampos/internal/refund"
 )
 
 type App struct {
@@ -26,8 +28,22 @@ func New(config config.Config) App {
 	attachGlobalMiddlewares(mainRouter, config)
 
 	authController := setupAuth(mainRouter, config)
-	setupApiRoutes(mainRouter, config, authController.AuthenticateMiddleware)
-	setupPaymentRoutes(mainRouter, config, authController.AuthenticateMiddleware)
+
+	// Create refund service for processing Stripe refunds
+	refundService := &refund.StripeService{
+		StripeSecretKey: config.StripeSecretKey,
+	}
+
+	// Create payment service for checkout sessions
+	paymentService := &payment.PaymentService{
+		StripeSecretKey: config.StripeSecretKey,
+		StripePublicKey: config.StripePublicKey,
+		SuccessURL:      fmt.Sprintf("http://%s/payment/success", config.FrontendUrl),
+		CancelURL:       fmt.Sprintf("http://%s/payment/cancel", config.FrontendUrl),
+	}
+
+	setupApiRoutes(mainRouter, authController.AuthenticateMiddleware, refundService)
+	setupPaymentRoutes(mainRouter, paymentService)
 
 	mainRouter.NotFound(func(w http.ResponseWriter, r *http.Request) {
 		if w == nil || r == nil {
