@@ -56,16 +56,16 @@ export default function NewReservationPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentMonth, setCurrentMonth] = useState(new Date());
 
-  const { authFetch } = useAuth();
+  const { authFetch, authFetchJson } = useAuth();
 
   const { data: staff } = useSWR(
     'reservation/staff',
-    url => authFetch<Staff[]>(url, 'GET'),
+    url => authFetchJson<Staff[]>(url, 'GET'),
     { revalidateOnMount: true },
   );
   const { data: services } = useSWR(
     'reservation/services',
-    url => authFetch<Service[]>(url, 'GET'),
+    url => authFetchJson<Service[]>(url, 'GET'),
     { revalidateOnMount: true },
   );
 
@@ -102,7 +102,7 @@ export default function NewReservationPage() {
 
     try {
       setIsSubmitting(true);
-      await authFetch('reservation', 'POST', payload);
+      await authFetch('reservation', 'POST', JSON.stringify(payload));
       showToast(
         t('reservation.toast.success', {
           code: dt.getTime(),
