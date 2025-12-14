@@ -28,10 +28,10 @@ export default function EditOrderPage() {
 
 function OrderPanel() {
   const params = useParams();
-  const { authFetch } = useAuth();
+  const { authFetchJson } = useAuth();
   const { data: items } = useSWR(
     `order/${params.orderId}`,
-    (url) => authFetch<CartItem[]>(url, "GET"),
+    (url) => authFetchJson<CartItem[]>(url, "GET"),
     {
       suspense: true,
       revalidateOnMount: true,

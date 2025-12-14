@@ -64,6 +64,13 @@ CREATE TABLE role_permission (
     PRIMARY KEY (role_id, permission_id)
 );
 
+DROP TABLE IF EXISTS employee_role CASCADE;
+CREATE TABLE employee_role (
+    employee_id INTEGER NOT NULL REFERENCES employee(id),
+    role_id     INTEGER NOT NULL REFERENCES role(id),
+
+    PRIMARY KEY (employee_id, role_id)
+);
 
 
 DROP TABLE IF EXISTS currency_info CASCADE;
@@ -118,13 +125,14 @@ CREATE TRIGGER business_valid_created_at
 DROP TABLE IF EXISTS employee CASCADE;
 CREATE TABLE employee (
     id              INTEGER PRIMARY KEY,
+    username        VARCHAR(16)     NOT NULL UNIQUE,
     first_name      VARCHAR(64)     NOT NULL,
     last_name       VARCHAR(64)     NOT NULL,
     password_hash   CHAR(60)        NOT NULL,
     email           VARCHAR(512)    NOT NULL UNIQUE,
     phone           VARCHAR(16)     NOT NULL UNIQUE,
     created_at      TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    business_id     INTEGER         NOT NULL REFERENCES business(id),
+    location_id     INTEGER         NOT NULL REFERENCES location(id),
 
     CONSTRAINT valid_password_hash  CHECK (password_hash ~ '^\$2(a|b|x|y)\$[0-9]{2}\$[a-zA-Z0-9./]{53}$'),
     CONSTRAINT valid_email          CHECK (email ~ '^[^\.][a-zA-Z0-9\-\.+]{0,62}[^\.]+@([^\-][a-zA-Z0-9\-]{0,61}[^\-]\.)+[^\-][a-zA-Z0-9\-]{0,61}[^\-]$'),
@@ -218,11 +226,11 @@ CREATE TABLE service_employee (
 -- ------------------------------------------------------------------------------------------------
 
 DROP TYPE IF EXISTS order_status CASCADE;
-CREATE TYPE order_status AS ENUM('OPEN', 'CLOSED', 'REFUNDED');
+CREATE TYPE order_status AS ENUM('OPEN', 'CLOSED', 'REFUND_PENDING', 'REFUNDED');
 
 DROP TABLE IF EXISTS order_data CASCADE;
 CREATE TABLE order_data (
-    id              INTEGER PRIMARY KEY,
+    id              SERIAL PRIMARY KEY,
     employee_id     INTEGER         NOT NULL REFERENCES employee(id),
     created_at      TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
     status          order_status    NOT NULL DEFAULT 'OPEN',
@@ -260,6 +268,9 @@ CREATE TABLE item (
     CONSTRAINT non_negative_vat_price           CHECK (vat >= 0)
 );
 
+DROP INDEX IF EXISTS item_index CASCADE;
+CREATE INDEX item_index ON item(name);
+
 
 DROP TABLE IF EXISTS item_variation CASCADE;
 CREATE TABLE item_variation (
@@ -269,9 +280,24 @@ CREATE TABLE item_variation (
     price_difference    DECIMAL(15) NOT NULL DEFAULT 0
 );
 
+DROP TABLE IF EXISTS category CASCADE;
+CREATE TABLE category (
+    id      INTEGER PRIMARY KEY,
+    name    VARCHAR(64) NOT NULL UNIQUE
+);
+
+DROP TABLE IF EXISTS item_category CASCADE;
+CREATE TABLE item_category (
+    item_id     INTEGER NOT NULL REFERENCES item(id),
+    category_id INTEGER NOT NULL REFERENCES category(id),
+
+    PRIMARY KEY (item_id, category_id)
+);
+
+
 DROP TABLE IF EXISTS order_item CASCADE;
 CREATE TABLE order_item (
-    id          INTEGER PRIMARY KEY,
+    id          SERIAL PRIMARY KEY,
     order_id    INTEGER     NOT NULL REFERENCES order_data(id),
     item_id     INTEGER     NOT NULL REFERENCES item(id),
     quantity    INTEGER     NOT NULL DEFAULT 1,
@@ -283,7 +309,7 @@ CREATE TABLE order_item (
 
 DROP TABLE IF EXISTS order_item_variation CASCADE;
 CREATE TABLE order_item_variation (
-    order_item_id   INTEGER NOT NULL REFERENCES order_item(id),
+    order_item_id   INTEGER NOT NULL REFERENCES order_item(id) ON DELETE CASCADE,
     variation_id    INTEGER NOT NULL REFERENCES item_variation(id),
 
     PRIMARY KEY(order_item_id, variation_id)
@@ -399,36 +425,93 @@ CREATE TRIGGER appointment_bill_valid_created_at
 -- -------------------------------------------------------------------------------------------------
 -- -------------------------------------------------------------------------------------------------
 
-CREATE OR REPLACE VIEW order_item_total
+CREATE OR REPLACE VIEW order_item_detail
 AS
+    WITH item_info AS 
+    (
+        SELECT
+            order_item.id AS order_item_id,
+            order_id,
+            item.id AS item_id,
+            item.name AS item_name,
+            price_per_unit,
+            quantity,
+            discount AS unit_discount,
+            vat,
+            status 
+        FROM item 
+        JOIN order_item 
+            ON item.id = order_item.item_id 
+    ), variation_info AS (
+        SELECT
+            order_item_id,
+            variation_id,
+            name AS variation_name,
+            price_difference 
+        FROM order_item_variation 
+        JOIN item_variation 
+            ON order_item_variation.variation_id = item_variation.id 
+    )
     SELECT
-        order_item.id,
+        item_info.order_item_id,
         order_id,
+        item_id,
+        item_name,
         price_per_unit,
         quantity,
-        discount,
+        unit_discount,
         vat,
-        (price_per_unit * quantity * (100.0 + vat) / (100::DECIMAL(15)) - discount) AS total
-    FROM order_item
-    JOIN item 
-        ON item_id=item_id;
-    
-CREATE OR REPLACE VIEW order_total
+        status,
+        variation_id,
+        variation_name,
+        price_difference
+    FROM item_info 
+    LEFT JOIN variation_info 
+        ON item_info.order_item_id = variation_info.order_item_id
+;
+
+CREATE OR REPLACE VIEW order_item_total
 AS
+     SELECT
+        order_item_id,
+        order_id,
+        vat,
+        quantity,
+         SUM(price_per_unit + COALESCE(price_difference, 0) - unit_discount)                            ::DECIMAL(15) AS gross,
+        (SUM(price_per_unit + COALESCE(price_difference, 0) - unit_discount) / (0.01 * (100 + vat)))    ::DECIMAL(15) AS net,
+        (SUM(price_per_unit + COALESCE(price_difference, 0) - unit_discount) * quantity)                ::DECIMAL(15) AS total
+    FROM order_item_detail
+    GROUP BY 
+        order_item_id,
+        order_id,
+        vat,
+        quantity
+;
+
+CREATE OR REPLACE VIEW order_detail
+AS
+    WITH item_total_sum AS (
+        SELECT
+            order_id,
+            SUM(total) AS sum_of_totals
+        FROM order_item_total
+        GROUP BY order_id
+    )
     SELECT 
         id,
+        employee_id,
+        created_at,
+        status,
+        currency,
         discount,
         tip,
         service_charge,
-        total AS item_total,
-        (total + tip + service_charge - discount) AS total
-    FROM (
-        SELECT order_id, SUM(total) AS total
-        FROM order_item_total 
-        GROUP BY order_id)
-    JOIN order_data
-        ON id = order_id;
-
+        GREATEST(COALESCE(sum_of_totals, 0) + service_charge - discount, 0)         AS total,
+        GREATEST(COALESCE(sum_of_totals, 0) + service_charge - discount, 0) + tip   AS total_with_tip
+    FROM order_data
+    LEFT JOIN item_total_sum
+        ON order_data.id = item_total_sum.order_id
+;
 
 -- -------------------------------------------------------------------------------------------------
 -- -------------------------------------------------------------------------------------------------

@@ -2,7 +2,6 @@ package order
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -20,8 +19,9 @@ func (c OrderController) Routes() http.Handler {
 
 	router.Get("/", c.orders)
 	router.Post("/", c.createOrder)
-	router.Get("/{orderId:^[0-9]{1,10}$}", c.getOrder)
+	router.Post("/{orderId:^[0-9]{1,10}$}", c.createOrder)
 	router.Patch("/{orderId:^[0-9]{1,10}$}", c.updateOrder)
+	router.Get("/{orderId:^[0-9]{1,10}$}", c.getOrder)
 	router.Get("/counts", c.counts)
 	router.Get("/products", c.getProducts)
 
@@ -90,18 +90,14 @@ func (c OrderController) createOrder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODO: actually save order to database and get real ID
-	// For now, generate a temporary ID
-	orderId := time.Now().Unix() // Temporary solution until DB implementation
-
-	response := map[string]interface{}{
-		"id":      orderId,
-		"message": "order created",
+	orderId, err := c.OrderRepo.CreateOrder(order)
+	if err != nil {
+		http.Error(w, "failed to create order", http.StatusBadRequest)
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	if err := json.NewEncoder(w).Encode(response); err != nil {
+	if err := json.NewEncoder(w).Encode(orderId); err != nil {
 		http.Error(w, "failed to encode response", http.StatusInternalServerError)
 		return
 	}
@@ -112,13 +108,13 @@ func (c OrderController) getOrder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	orderId, err := strconv.ParseInt(r.PathValue("orderId"), 10, 32)
+	orderId, err := strconv.ParseInt(r.PathValue("orderId"), 10, 64)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
 
-	items, err := c.OrderRepo.GetOrderItems(int32(orderId))
+	items, err := c.OrderRepo.GetOrderItems(orderId)
 	if err != nil {
 		http.Error(w, "something went wrong", http.StatusInternalServerError)
 		return
@@ -137,7 +133,7 @@ func (c OrderController) updateOrder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err := strconv.ParseInt(r.PathValue("orderId"), 10, 32)
+	orderId, err := strconv.ParseInt(r.PathValue("orderId"), 10, 64)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 		return
@@ -149,13 +145,9 @@ func (c OrderController) updateOrder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Println(order)
+	c.OrderRepo.ModifyOrder(orderId, order)
 
-	// TODO: actually do smth
-
-	// TODO: improve
 	w.WriteHeader(http.StatusNoContent)
-	w.Write([]byte("order updated"))
 }
 
 func (c OrderController) counts(w http.ResponseWriter, r *http.Request) {

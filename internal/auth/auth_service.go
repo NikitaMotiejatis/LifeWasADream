@@ -67,13 +67,15 @@ func (s AuthService) login(user LoginInfo, sessionTokenDuration time.Duration) (
 	}
 
 	redirectPath := "/login"
-	if slices.Contains(userDetails.Roles, "Cashier") {
+	if slices.Contains(userDetails.Roles, "CASHIER") {
 		redirectPath = "/newOrder"
-	} else if slices.Contains(userDetails.Roles, "Manager") {
+	} else if slices.Contains(userDetails.Roles, "RECEPTIONIST") {
+		redirectPath = "/newReservation"
+	} else if slices.Contains(userDetails.Roles, "MANAGER") {
 		redirectPath = "/dashboard"
-	} else if slices.Contains(userDetails.Roles, "Clerk") {
+	} else if slices.Contains(userDetails.Roles, "CLERK") {
 		redirectPath = "/stockUpdates"
-	} else if slices.Contains(userDetails.Roles, "Supplier") {
+	} else if slices.Contains(userDetails.Roles, "SUPPLIER") {
 		redirectPath = "/invoiceStatus"
 	}
 

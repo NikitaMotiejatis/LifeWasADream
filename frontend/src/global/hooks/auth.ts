@@ -39,7 +39,7 @@ export const useAuth = () => {
     } catch {}
   };
 
-  const authFetch = <T>(apiPath: string, method: string, bodyJson?: string) =>
+  const authFetch = (apiPath: string, method: string, bodyJson?: string) =>
     fetch(`${BACKEND_URL}/api/${apiPath}`, {
       method: method,
       headers: {
@@ -47,9 +47,13 @@ export const useAuth = () => {
       },
       body: (bodyJson && bodyJson),
       credentials: 'include',
-    })
+    });
+
+  const authFetchJson = <T>(apiPath: string, method: string, bodyJson?: string) =>
+    authFetch(apiPath, method, bodyJson)
     .then(response => response.json())
     .then(data => data as T);
+
 
   const userDetailsFetcher = (url: string) =>
     fetch(`${BACKEND_URL}/${url}`, {
@@ -66,6 +70,7 @@ export const useAuth = () => {
     login,
     logout,
     authFetch,
+    authFetchJson,
     userDetailsFetcher,
   };
 }

@@ -7,25 +7,24 @@ type Order struct {
 }
 
 type OrderSummary struct {
-	Id			uint32		`json:"id"`
-	Total 		float64		`json:"total"`
-	CreatedAt	time.Time	`json:"createdAt"`
-	Status		string		`json:"status"`
+	Id			int64		`json:"id"        db:"id"`
+	Total 		float64		`json:"total"     db:"total"`
+	CreatedAt	time.Time	`json:"createdAt" db:"created_at"`
+	Status		string		`json:"status"    db:"status"`
 }
 
 type Variation struct {
-	Name          string  `json:"name"`
-	NameKey       string  `json:"nameKey"`
-	PriceModifier float64 `json:"priceModifier"`
+	Id				int64	`json:"id"            db:"id"`
+	Name          	string	`json:"name"          db:"name"`
+	PriceModifier 	uint64	`json:"priceModifier" db:"price_difference"`
 }
 
 type Product struct {
-	Id         string      `json:"id"`
-	Name       string      `json:"name"`
-	NameKey    string      `json:"nameKey"`
-	BasePrice  float64     `json:"basePrice"`
-	Categories []string    `json:"categories"`
-	Variations []Variation `json:"variations"`
+	Id         int64		`json:"id"         db:"id"`
+	Name       string		`json:"name"       db:"name"`
+	BasePrice  int64     	`json:"basePrice"  db:"price_per_unit"`
+	Categories []string		`json:"categories"`
+	Variations []Variation	`json:"variations"`
 }
 
 type OrderCounts struct {
@@ -37,6 +36,7 @@ type OrderCounts struct {
 }
 
 type Item struct {
+	Id					int64		`json:"id"`
 	Product				Product		`json:"product"`
 	SelectedVariations	[]Variation	`json:"selectedVariations"`
 	Quantity			uint16		`json:"quantity"`

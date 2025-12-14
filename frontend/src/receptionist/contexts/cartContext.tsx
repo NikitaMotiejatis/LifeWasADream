@@ -2,6 +2,7 @@ import { createContext, useContext, useMemo, useState, ReactNode } from 'react';
 import { Currency, useCurrency } from '@/global/contexts/currencyContext';
 
 export type Variation = {
+  id: number;
   name: string;
   nameKey?: string;
   priceModifier: number;
@@ -17,6 +18,7 @@ export type Product = {
 };
 
 export type CartItem = {
+  id: number;
   product: Product;
   selectedVariations: Variation[];
   quantity: number;
@@ -106,7 +108,7 @@ export const CartProvider = ({ initItems = [], children }: { initItems?: CartIte
       ...prev,
       [key]: prev[key]
         ? { ...prev[key], quantity: prev[key].quantity + 1 }
-        : { product, selectedVariations, quantity: 1 },
+        : { id: 0, product, selectedVariations, quantity: 1 },
     }));
   };
 

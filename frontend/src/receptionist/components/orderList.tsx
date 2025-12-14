@@ -65,10 +65,10 @@ export default function OrderList() {
     type: 'success' | 'error';
   } | null>(null);
 
-  const { authFetch } = useAuth();
+  const { authFetchJson } = useAuth();
   const { data: counts } = useSWR(
     `order/counts${toQueryString(orderFilter)}`,
-    url => authFetch<Counts>(url, 'GET'),
+    (url) => authFetchJson<Counts>(url, "GET"),
     {
       revalidateOnMount: true,
     },
@@ -165,11 +165,11 @@ type OrdersProps = {
 function Orders({ orderFilter, openModal }: OrdersProps) {
   const { t } = useTranslation();
   const { formatPrice } = useCurrency();
-  const { authFetch } = useAuth();
+  const { authFetchJson } = useAuth();
 
   const { data: orders, error } = useSWR(
     `order${toQueryString(orderFilter)}`,
-    (url: string) => authFetch<Order[]>(url, 'GET'),
+    (url: string) => authFetchJson<Order[]>(url, "GET"),
     {
       suspense: true,
       revalidateOnMount: true,

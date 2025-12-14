@@ -6,7 +6,7 @@ BEGIN TRANSACTION;
 
 -- Roles
 INSERT INTO role (id, name) VALUES 
-(1, 'OWNER'), (2, 'MANAGER'), (3, 'BARISTA'), (4, 'STYLIST'), (5, 'RECEPTIONIST');
+(1, 'OWNER'), (2, 'MANAGER'), (3, 'CASHIER'), (4, 'STYLIST'), (5, 'RECEPTIONIST');
 
 -- Permissions
 INSERT INTO permissions (id, name) VALUES 
@@ -19,6 +19,10 @@ INSERT INTO role_permission (role_id, permission_id) VALUES
 (3, 3), (3, 4),                         -- Barista
 (4, 3), (4, 5),                         -- Stylist
 (5, 3), (5, 5);                         -- Receptionist
+
+-- Employee Roles
+INSERT INTO employee_role (employee_id, role_id) VALUES
+(10, 3);
 
 -- Currencies
 INSERT INTO currency_info (code, name, symbol) VALUES 
@@ -80,22 +84,22 @@ INSERT INTO location_open (location_id, day_of_the_week, open_at, closes_at) VAL
 -- 4. EMPLOYEES & SHIFTS
 -- ================================================================================================
 
-INSERT INTO employee (id, first_name, last_name, password_hash, email, phone, created_at, business_id) VALUES 
+INSERT INTO employee (id, username, first_name, last_name, password_hash, email, phone, created_at, location_id) VALUES 
 -- Morning Roast
-(1, 'James', 'Bean', '$2a$14$ajq8Q7fbtFRQvXpdCq7Jcuy.Rx1h/L4J60Otx.gyNLbAYctGMJ9tK', 'james@morningroast.com', '+15551001', NOW() - INTERVAL '360 days', 1),
-(2, 'Sarah', 'Latte', '$2a$14$ajq8Q7fbtFRQvXpdCq7Jcuy.Rx1h/L4J60Otx.gyNLbAYctGMJ9tK', 'sarah@morningroast.com', '+15551002', NOW() - INTERVAL '350 days', 1),
+(1, 'jbean', 'James', 'Bean', '$2a$14$ajq8Q7fbtFRQvXpdCq7Jcuy.Rx1h/L4J60Otx.gyNLbAYctGMJ9tK', 'james@morningroast.com', '+15551001', NOW() - INTERVAL '360 days', 1),
+(2, 'slatte', 'Sarah', 'Latte', '$2a$14$ajq8Q7fbtFRQvXpdCq7Jcuy.Rx1h/L4J60Otx.gyNLbAYctGMJ9tK', 'sarah@morningroast.com', '+15551002', NOW() - INTERVAL '350 days', 1),
 -- Urban Cuts
-(3, 'Harry', 'Clipper', '$2a$14$ajq8Q7fbtFRQvXpdCq7Jcuy.Rx1h/L4J60Otx.gyNLbAYctGMJ9tK', 'harry@urbancuts.com', '+15552001', NOW() - INTERVAL '290 days', 2),
-(4, 'Sally', 'Style', '$2a$14$ajq8Q7fbtFRQvXpdCq7Jcuy.Rx1h/L4J60Otx.gyNLbAYctGMJ9tK', 'sally@urbancuts.com', '+15552002', NOW() - INTERVAL '280 days', 2),
+(3, 'hclipper', 'Harry', 'Clipper', '$2a$14$ajq8Q7fbtFRQvXpdCq7Jcuy.Rx1h/L4J60Otx.gyNLbAYctGMJ9tK', 'harry@urbancuts.com', '+15552001', NOW() - INTERVAL '290 days', 2),
+(4, 'sallystyle', 'Sally', 'Style', '$2a$14$ajq8Q7fbtFRQvXpdCq7Jcuy.Rx1h/L4J60Otx.gyNLbAYctGMJ9tK', 'sally@urbancuts.com', '+15552002', NOW() - INTERVAL '280 days', 2),
 -- Tech Gadgets
-(5, 'Gary', 'Geek', '$2a$14$ajq8Q7fbtFRQvXpdCq7Jcuy.Rx1h/L4J60Otx.gyNLbAYctGMJ9tK', 'gary@techgadgets.com', '+15553001', NOW() - INTERVAL '240 days', 3),
-(6, 'Lisa', 'Tech', '$2a$14$ajq8Q7fbtFRQvXpdCq7Jcuy.Rx1h/L4J60Otx.gyNLbAYctGMJ9tK', 'lisa@techgadgets.com', '+15553002', NOW() - INTERVAL '230 days', 3),
+(5, 'ggeek', 'Gary', 'Geek', '$2a$14$ajq8Q7fbtFRQvXpdCq7Jcuy.Rx1h/L4J60Otx.gyNLbAYctGMJ9tK', 'gary@techgadgets.com', '+15553001', NOW() - INTERVAL '240 days', 3),
+(6, 'lt06', 'Lisa', 'Tech', '$2a$14$ajq8Q7fbtFRQvXpdCq7Jcuy.Rx1h/L4J60Otx.gyNLbAYctGMJ9tK', 'lisa@techgadgets.com', '+15553002', NOW() - INTERVAL '230 days', 3),
 -- Serenity Spa
-(7, 'Mindy', 'Massage', '$2a$14$ajq8Q7fbtFRQvXpdCq7Jcuy.Rx1h/L4J60Otx.gyNLbAYctGMJ9tK', 'mindy@serenity.com', '+15554001', NOW() - INTERVAL '190 days', 4),
-(8, 'Zen', 'Master', '$2a$14$ajq8Q7fbtFRQvXpdCq7Jcuy.Rx1h/L4J60Otx.gyNLbAYctGMJ9tK', 'zen@serenity.com', '+15554002', NOW() - INTERVAL '180 days', 4),
+(7, 'mindym', 'Mindy', 'Massage', '$2a$14$ajq8Q7fbtFRQvXpdCq7Jcuy.Rx1h/L4J60Otx.gyNLbAYctGMJ9tK', 'mindy@serenity.com', '+15554001', NOW() - INTERVAL '190 days', 4),
+(8, 'zenmaster', 'Zen', 'Master', '$2a$14$ajq8Q7fbtFRQvXpdCq7Jcuy.Rx1h/L4J60Otx.gyNLbAYctGMJ9tK', 'zen@serenity.com', '+15554002', NOW() - INTERVAL '180 days', 4),
 -- Burger Joint
-(9, 'Patty', 'Flipper', '$2a$14$ajq8Q7fbtFRQvXpdCq7Jcuy.Rx1h/L4J60Otx.gyNLbAYctGMJ9tK', 'patty@burgerjoint.com', '+15555001', NOW() - INTERVAL '140 days', 5),
-(10, 'Bun', 'Toaster', '$2a$14$ajq8Q7fbtFRQvXpdCq7Jcuy.Rx1h/L4J60Otx.gyNLbAYctGMJ9tK', 'bun@burgerjoint.com', '+15555002', NOW() - INTERVAL '130 days', 5);
+(9, 'flipperpatty', 'Patty', 'Flipper', '$2a$14$ajq8Q7fbtFRQvXpdCq7Jcuy.Rx1h/L4J60Otx.gyNLbAYctGMJ9tK', 'patty@burgerjoint.com', '+15555001', NOW() - INTERVAL '140 days', 5),
+(10, 'cashier1', 'Bun', 'Toaster', '$2a$12$k8sRjlINxLzAiakxjM1x6OdLT4oZRd23YQCSd/zvha4nXUHMCMDOy', 'bun@burgerjoint.com', '+15555002', NOW() - INTERVAL '130 days', 5);
 
 INSERT INTO work_shift (id, day_of_the_week, start_time, end_time) VALUES 
 (1, 'MONDAY', '08:00', '16:00'),
@@ -141,6 +145,38 @@ INSERT INTO item_variation (id, item_id, name, price_difference) VALUES
 (7, 11, 'Small', 0),
 (8, 11, 'Large', 150);
 
+-- Category
+INSERT INTO category (id, name) VALUES
+(1, 'hot drinks'),
+(2, 'cold drinks'),
+(3, 'pastries'),
+(4, 'accessories'),
+(5, 'peripherals'),
+(6, 'burgers'),
+(7, 'sides'),
+(8, 'beverages');
+
+INSERT INTO item_category (item_id, category_id) VALUES
+-- Morning Roast Items
+(1, 1), -- House Blend Coffee -> Hot Drinks
+(2, 1), -- Espresso Shot -> Hot Drinks
+(3, 3), -- Blueberry Muffin -> Pastries
+(4, 3), -- Bagel with Cream Cheese -> Pastries
+(5, 2), -- Iced Latte -> Cold Drinks
+
+-- Tech Gadgets Items
+(6, 4), -- USB-C Cable -> Accessories
+(7, 5), -- Wireless Mouse -> Peripherals
+(8, 5), -- Mechanical Keyboard -> Peripherals
+(9, 4), -- HDMI Adapter -> Accessories
+
+-- Burger Joint Items
+(10, 6), -- Cheeseburger -> Burgers
+(11, 7), -- Fries -> Sides
+(12, 8), -- Soda -> Beverages
+(13, 6), -- Double Burger -> Burgers
+(14, 7); -- Onion Rings -> Sides
+
 -- ================================================================================================
 -- 6. SERVICES (For Appointment-Based Businesses)
 -- ================================================================================================
@@ -174,45 +210,46 @@ INSERT INTO service_employee (service_location_id, employee_id) VALUES
 -- ================================================================================================
 
 -- 10 Orders across the 3 order-based businesses
-INSERT INTO order_data (id, employee_id, created_at, status, currency, discount, tip, service_charge) VALUES 
-(1, 1, NOW() - INTERVAL '5 days', 'CLOSED', 'USD', 0, 100, 0),
-(2, 1, NOW() - INTERVAL '4 days', 'CLOSED', 'USD', 0, 0, 0),
-(3, 2, NOW() - INTERVAL '3 days', 'OPEN', 'USD', 50, 200, 0),
-(4, 5, NOW() - INTERVAL '2 days', 'CLOSED', 'EUR', 0, 0, 0),
-(5, 5, NOW() - INTERVAL '2 days', 'REFUNDED', 'EUR', 0, 0, 0),
-(6, 6, NOW() - INTERVAL '1 day', 'OPEN', 'EUR', 0, 500, 0),
-(7, 9, NOW() - INTERVAL '12 hours', 'CLOSED', 'AUD', 0, 50, 0),
-(8, 9, NOW() - INTERVAL '10 hours', 'CLOSED', 'AUD', 0, 0, 0),
-(9, 10, NOW() - INTERVAL '2 hours', 'OPEN', 'AUD', 0, 100, 0),
-(10, 10, NOW() - INTERVAL '1 hour', 'CLOSED', 'AUD', 100, 0, 0);
+INSERT INTO order_data (employee_id, created_at, status, currency, discount, tip, service_charge) VALUES 
+(1, NOW() - INTERVAL '5 days', 'CLOSED', 'USD', 0, 100, 0),
+(1, NOW() - INTERVAL '4 days', 'CLOSED', 'USD', 0, 0, 0),
+(2, NOW() - INTERVAL '3 days', 'OPEN', 'USD', 50, 200, 0),
+(5, NOW() - INTERVAL '2 days', 'CLOSED', 'EUR', 0, 0, 0),
+(5, NOW() - INTERVAL '2 days', 'REFUNDED', 'EUR', 0, 0, 0),
+(6, NOW() - INTERVAL '1 day', 'OPEN', 'EUR', 0, 500, 0),
+(9, NOW() - INTERVAL '12 hours', 'CLOSED', 'AUD', 0, 50, 0),
+(9, NOW() - INTERVAL '10 hours', 'CLOSED', 'AUD', 0, 0, 0),
+(10, NOW() - INTERVAL '2 hours', 'OPEN', 'AUD', 0, 100, 0),
+(10, NOW() - INTERVAL '1 hour', 'CLOSED', 'AUD', 100, 0, 0);
 
 -- Order Items
-INSERT INTO order_item (id, order_id, item_id, quantity, discount) VALUES 
+INSERT INTO order_item (order_id, item_id, quantity, discount) VALUES 
 -- Order 1 (Coffee)
-(1, 1, 1, 1, 0), (2, 1, 3, 1, 0),
+(1, 1, 1, 0), (1, 3, 1, 0),
 -- Order 2 (Coffee)
-(3, 2, 2, 2, 0),
+(2, 2, 2, 0),
 -- Order 3 (Iced Latte + Bagel)
-(4, 3, 5, 1, 0), (5, 3, 4, 1, 0),
+(3, 5, 1, 0), (3, 4, 1, 0),
 -- Order 4 (Tech)
-(6, 4, 6, 1, 0), (7, 4, 7, 1, 0),
+(4, 6, 1, 0), (4, 7, 1, 0),
 -- Order 5 (Tech - Refunded)
-(8, 5, 8, 1, 0),
+(5, 8, 1, 0),
 -- Order 6 (Tech)
-(9, 6, 9, 2, 0),
+(6, 9, 2, 0),
 -- Order 7 (Burger)
-(10, 7, 10, 1, 0), (11, 7, 11, 1, 0), (12, 7, 12, 1, 0),
+( 7, 10, 1, 0), (7, 11, 1, 0), (7, 12, 1, 0),
 -- Order 8 (Burger)
-(13, 8, 10, 2, 0),
+(8, 10, 2, 0),
 -- Order 9 (Burger)
-(14, 9, 13, 1, 0), (15, 9, 14, 1, 0),
+(9, 13, 1, 0), (9, 14, 1, 0),
 -- Order 10 (Burger)
-(16, 10, 11, 2, 0);
+(10, 11, 2, 0);
 
 -- Order Item Variations (Strict item_id matching)
 INSERT INTO order_item_variation (order_item_id, variation_id) VALUES 
 (1, 2), -- OrderItem 1 (Item 1) -> Variation 2 (Item 1 Large)
 (4, 3), -- OrderItem 4 (Item 5) -> Variation 3 (Item 5 Oat Milk)
+(10, 5), -- OrderItem 10 (Item 10) -> Variation 6 (Item 10 Extra Cheese)
 (10, 6), -- OrderItem 10 (Item 10) -> Variation 6 (Item 10 Extra Cheese)
 (11, 7), -- OrderItem 11 (Item 11) -> Variation 7 (Item 11 Small)
 (16, 8); -- OrderItem 16 (Item 11) -> Variation 8 (Item 11 Large)

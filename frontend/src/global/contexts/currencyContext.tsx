@@ -92,7 +92,7 @@ export const CurrencyProvider = ({ children }: { children: ReactNode }) => {
 
   const formatPrice = (price: number): string => {
     const symbol = currencySymbols[currency];
-    const amount = price.toFixed(2);
+    const amount = (0.01 * price).toFixed(2);
 
     if (currency === 'EUR' && i18n.language.startsWith('lt')) {
       return `${amount.replace('.', ',')} ${symbol}`;
