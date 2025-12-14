@@ -389,8 +389,6 @@
   },
   "orderSummary": {
     "tipAfterSplit": "Arbatpinigiai pridedami dalijant sąskaitą",
-    "splitInfo": "Kiekvienas asmenis gali pridėti savo arbatpinigių",
-    "individualTipsInfo": "Arbatpinigiai pridedami prie kiekvieno asmens sumos",
     "addIndividualTip": "Pridėti arbatpinigių",
     "individualTipForPayer": "Arbatpinigiai {{payer}}-ajam asmeniui",
     "tipAdded": "Pridėti arbatpinigiai",

@@ -239,16 +239,6 @@ export const SplitBillSection: React.FC<SplitBillSectionProps> = ({
           </button>
         </div>
 
-        {/* Info message */}
-        <div className="mb-4 rounded-lg bg-blue-50 p-3 border border-blue-200">
-          <p className="text-sm font-medium text-blue-800">
-            {t('orderSummary.splitInfo')}
-          </p>
-          <p className="text-xs text-blue-600 mt-1">
-            {t('orderSummary.individualTipsInfo')}
-          </p>
-        </div>
-
         <div className="mb-4 flex items-center gap-3">
           <span className="text-sm font-medium text-gray-700">
             {t('orderSummary.peopleCount')}:
