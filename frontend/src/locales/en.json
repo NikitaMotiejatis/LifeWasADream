@@ -66,7 +66,6 @@
     "edit": "Edit",
     "delete": "Delete",
     "remove": "Remove"
-
   },
   "deliveries": {
     "buttons": {
@@ -383,7 +382,11 @@
     "title": "Menu"
   },
   "orderSummary": {
+    "payWithCard": "Pay with Card",
+    "individualTipForPayer": "individual tip for payer",
+    "addIndividualTip": "Add tip",
     "enterTipAmount": "Enter tip amount",
+    "baseAmount": "Base amount",
     "noTipOnSplit": "Tip cannot be added when splitting the bill",
     "tipIncludedInSplit": "Tip is included in the split",
     "tipAmountIncluded": "Tip amount of {amount} is included in each person's share",
