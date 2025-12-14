@@ -20,10 +20,6 @@ INSERT INTO role_permission (role_id, permission_id) VALUES
 (4, 3), (4, 5),                         -- Stylist
 (5, 3), (5, 5);                         -- Receptionist
 
--- Employee Roles
-INSERT INTO employee_role (employee_id, role_id) VALUES
-(10, 3);
-
 -- Currencies
 INSERT INTO currency_info (code, name, symbol) VALUES 
 ('USD', 'US Dollar', '$'), 
@@ -110,6 +106,10 @@ INSERT INTO work_shift (id, day_of_the_week, start_time, end_time) VALUES
 
 INSERT INTO employee_shift (user_id, work_shift_id) VALUES 
 (1, 1), (2, 2), (3, 3), (4, 3), (5, 4), (6, 4), (7, 5), (8, 5), (9, 1), (10, 2);
+
+-- Employee Roles (must be after employees are inserted)
+INSERT INTO employee_role (employee_id, role_id) VALUES
+(10, 3);
 
 -- ================================================================================================
 -- 5. ITEMS & INVENTORY (For Order-Based Businesses)

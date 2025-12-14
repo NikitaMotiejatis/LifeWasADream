@@ -64,14 +64,6 @@ CREATE TABLE role_permission (
     PRIMARY KEY (role_id, permission_id)
 );
 
-DROP TABLE IF EXISTS employee_role CASCADE;
-CREATE TABLE employee_role (
-    employee_id INTEGER NOT NULL REFERENCES employee(id),
-    role_id     INTEGER NOT NULL REFERENCES role(id),
-
-    PRIMARY KEY (employee_id, role_id)
-);
-
 
 DROP TABLE IF EXISTS currency_info CASCADE;
 CREATE TABLE currency_info (
@@ -144,6 +136,15 @@ CREATE TRIGGER employee_valid_created_at
     BEFORE INSERT OR UPDATE ON employee
     FOR EACH ROW
     EXECUTE FUNCTION not_in_future();
+
+
+DROP TABLE IF EXISTS employee_role CASCADE;
+CREATE TABLE employee_role (
+    employee_id INTEGER NOT NULL REFERENCES employee(id),
+    role_id     INTEGER NOT NULL REFERENCES role(id),
+
+    PRIMARY KEY (employee_id, role_id)
+);
 
 
 DROP TABLE IF EXISTS work_shift CASCADE;
