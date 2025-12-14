@@ -16,6 +16,7 @@ import {
 import { useAuth } from '@/global/hooks/auth';
 import { mutate } from 'swr';
 import i18n from '@/i18n';
+import { TipSection } from './tipSection';
 
 type OrderSummaryProps = {
   onBack?: () => void;
@@ -36,11 +37,14 @@ export default function OrderSummary({
     clearCart,
     subtotal,
     discountTotal,
+    totalWithoutTip,
+    tipAmount,
     total,
     generateKey,
   } = useCart();
 
   const hasItems = itemsList.length > 0;
+  const [isSplitEnabled, setIsSplitEnabled] = useState(false);
 
   const navigate = useNavigate();
 
@@ -58,7 +62,13 @@ export default function OrderSummary({
   };
 
   const handleSave = async () => {
-    const order = { items: itemsList } as { items: CartItem[] };
+    const order = { 
+      items: itemsList,
+      tip: {
+        amount: tipAmount,
+        total: total
+      }
+    } as { items: CartItem[]; tip: any };
 
     try {
       const orderId = params.orderId;
@@ -84,7 +94,13 @@ export default function OrderSummary({
       showToast(t('payment.processing', 'Processing order...'));
 
       // Create or update the order first
-      const order = { items: itemsList } as { items: CartItem[] };
+      const order = { 
+        items: itemsList,
+        tip: {
+          amount: tipAmount,
+          total: total
+        }
+      } as { items: CartItem[]; tip: any };
       let orderId: number;
 
       const existingOrderId = params.orderId;
@@ -190,24 +206,36 @@ export default function OrderSummary({
               </div>
             )}
 
+            {/* Tip Display - Only show if not in split mode */}
+            {tipAmount > 0 && !isSplitEnabled && (
+              <div className="flex justify-between text-green-600">
+                <span>{t('orderSummary.tip')}</span>
+                <span>+ {formatPrice(tipAmount)}</span>
+              </div>
+            )}
+
             <div className="flex flex-col items-center gap-1 xl:flex-row xl:justify-between xl:gap-0">
               <span className="text-xl font-bold text-gray-800 xl:text-2xl">
                 {t('orderSummary.total')}
               </span>
               <span className="text-2xl font-bold text-blue-600 xl:text-2xl">
-                {formatPrice(total)}
+                {formatPrice(isSplitEnabled ? totalWithoutTip : total)}
               </span>
             </div>
           </div>
 
           {showPaymentSection ? (
             <>
+              {/* Show tip section only when NOT in split mode */}
+              {!isSplitEnabled && <TipSection />}
+              
               <SplitBillSection
-                total={total}
+                total={totalWithoutTip} // Pass WITHOUT tip for split
                 items={itemsList}
                 formatPrice={formatPrice}
+                onSplitEnabledChange={setIsSplitEnabled}
                 onCompletePayment={payments => {
-                  console.log('All paid:', payments);
+                  console.log('All paid with individual tips:', payments);
                   showToast(t('orderSummary.allPaid'));
                   clearCart();
                   setTimeout(() => navigate('/orders'), 600);

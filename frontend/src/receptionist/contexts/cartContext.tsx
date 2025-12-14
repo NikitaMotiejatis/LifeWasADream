@@ -54,10 +54,18 @@ type CartContextType = {
   cartDiscount: CartDiscount | null;
   setCartDiscount: (discount: CartDiscount | null) => void;
 
-  subtotal: Cents;
-  discountTotal: Cents;
-  cartDiscountAmount: Cents;
-  total: Cents;
+  subtotal: number;
+  discountTotal: number;
+  cartDiscountAmount: number;
+  totalWithoutTip: number;
+  tipAmount: number;
+  setTipAmount: (amount: number) => void;
+  total: number;
+
+  // Individual tips for split payments
+  individualTips: number[];
+  setIndividualTip: (index: number, amount: number) => void;
+  clearIndividualTips: () => void;
 
   currency: Currency;
   setCurrency: (c: Currency) => void;
@@ -104,6 +112,12 @@ export const CartProvider = ({ initItems = [], children }: { initItems?: CartIte
   });
   const [cartDiscount, setCartDiscount] = useState<CartDiscount | null>(null);
   const [isPaymentStarted, setIsPaymentStarted] = useState<boolean>(false);
+  
+  // Tip state for regular payments
+  const [tipAmount, setTipAmount] = useState<number>(0);
+  
+  // Individual tips for split payments (max 50 people)
+  const [individualTips, setIndividualTips] = useState<number[]>(Array(50).fill(0));
 
   const addToCart = (
     product: Product,
@@ -155,14 +169,33 @@ export const CartProvider = ({ initItems = [], children }: { initItems?: CartIte
     });
   };
 
-  const clearCart = () => setItems({});
+  const clearCart = () => {
+    setItems({});
+    setTipAmount(0);
+    setIndividualTips(Array(50).fill(0));
+  };
 
   const getFinalPrice = (product: Product, variations: Variation[]): Cents => {
     const extra = variations.reduce((sum, v) => sum + v.priceModifier, 0);
     return clampToCents(product.basePrice + extra);
   };
 
-  const { subtotal, itemDiscountsTotal, cartDiscountAmount, total } =
+  // Individual tip functions - FIXED with bounds checking
+  const setIndividualTip = (index: number, amount: number) => {
+    if (index < 0 || index >= 50) return;
+    
+    setIndividualTips(prev => {
+      const newTips = [...prev];
+      newTips[index] = amount;
+      return newTips;
+    });
+  };
+
+  const clearIndividualTips = () => {
+    setIndividualTips(Array(50).fill(0));
+  };
+
+  const { subtotal, itemDiscountsTotal, cartDiscountAmount, totalWithoutTip } =
     useMemo(() => {
       let subtotal = 0;
       let itemDiscountsTotal = 0;
@@ -205,16 +238,17 @@ export const CartProvider = ({ initItems = [], children }: { initItems?: CartIte
         }
       }
 
-      const total = Math.max(0, afterItemsTotal - cartDiscountAmount);
+      const totalWithoutTip = Math.max(0, afterItemsTotal - cartDiscountAmount);
 
       return {
         subtotal,
         itemDiscountsTotal,
         cartDiscountAmount,
-        total,
+        totalWithoutTip,
       };
     }, [items, promotions, cartDiscount]);
 
+  const total = totalWithoutTip + tipAmount;
   const discountTotal = itemDiscountsTotal + cartDiscountAmount;
   const itemsList = Object.values(items);
 
@@ -254,6 +288,12 @@ export const CartProvider = ({ initItems = [], children }: { initItems?: CartIte
         subtotal,
         discountTotal,
         cartDiscountAmount,
+        totalWithoutTip,
+        tipAmount,
+        setTipAmount,
+        individualTips,
+        setIndividualTip,
+        clearIndividualTips,
         total,
         currency,
         setCurrency,

@@ -56,6 +56,7 @@
     }
   },
   "common": {
+    "remove": "Pašalinti",
     "cancel": "Atšaukti",
     "clear": "Išvalyti",
     "review": "Peržiūrėti",
@@ -387,6 +388,19 @@
     "title": "Meniu"
   },
   "orderSummary": {
+    "tipAfterSplit": "Arbatpinigiai pridedami dalijant sąskaitą",
+    "splitInfo": "Kiekvienas asmenis gali pridėti savo arbatpinigių",
+    "individualTipsInfo": "Arbatpinigiai pridedami prie kiekvieno asmens sumos",
+    "addIndividualTip": "Pridėti arbatpinigių",
+    "individualTipForPayer": "Arbatpinigiai {payer}-ajam asmeniui",
+    "tipAdded": "Pridėti arbatpinigiai",
+    "baseAmount": "Pagrindinė suma",
+    "addTip": "Pridėti arbatpinigių",
+    "tip": "Arbatpinigiai",
+    "enterTipAmount": "Įveskite arbatpinigių sumą",
+    "noTipOnSplit": "Dalindami sąskaitą, arbatpinigių pridėti negalima",
+    "tipIncludedInSplit": "Arbatpinigiai įtraukti į padalijimą",
+    "tipAmountIncluded": "{amount} arbatpinigių suma įtraukta į kiekvieno asmens dalį",
     "clearAll": "Išvalyti viską",
     "completePayment": "Baigti apmokėjimą",
     "decreaseQuantity": "Sumažinti kiekį",

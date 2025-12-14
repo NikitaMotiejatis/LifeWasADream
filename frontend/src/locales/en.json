@@ -64,7 +64,9 @@
     "update": "Update",
     "add": "Add",
     "edit": "Edit",
-    "delete": "Delete"
+    "delete": "Delete",
+    "remove": "Remove"
+
   },
   "deliveries": {
     "buttons": {
@@ -381,6 +383,22 @@
     "title": "Menu"
   },
   "orderSummary": {
+    "enterTipAmount": "Enter tip amount",
+    "noTipOnSplit": "Tip cannot be added when splitting the bill",
+    "tipIncludedInSplit": "Tip is included in the split",
+    "tipAmountIncluded": "Tip amount of {amount} is included in each person's share",
+    "addTip": "Add Tip",
+    "tip": "Tip",
+    "tipPercentage": "Percentage",
+    "tipFixed": "Fixed Amount",
+    "customTipPercentage": "Custom Tip Percentage",
+    "customTipAmount": "Custom Tip Amount",
+    "tipAmount": "Tip Amount",
+    "baseTotal": "Base Total",
+    "finalTotal": "Final Total",
+    "tipPerPerson": "Tip per person",
+    "splitPerPerson": "Split per person",
+    "suggestedTips": "Suggested Tips",
     "clearAll": "Clear all",
     "completePayment": "Complete Payment",
     "decreaseQuantity": "Decrease quantity",
