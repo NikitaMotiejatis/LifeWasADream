@@ -120,7 +120,7 @@ func (s MockDataSource) GetOrderItems(orderId int32) ([]order.Item, error) {
 func (s *MockDataSource) CreateOrder(o order.Order) (int64, error) {
 	newId := int64(len(s.Orders) + 1)
 	s.Orders = append([]order.OrderSummary{{
-		Id:        int32(newId),
+		Id:        newId,
 		Total:     0,
 		CreatedAt: time.Now(),
 		Status:    "open",

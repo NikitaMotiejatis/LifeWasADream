@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { CartItem, generateKey, useCart, } from '@/receptionist/contexts/cartContext';
+import { CartItem, generateKey, useCart } from '@/receptionist/contexts/cartContext';
 import TrashcanIcon from '@/icons/trashcanIcon';
 import { useNavigate, useParams } from 'react-router-dom';
 import { SplitBillSection } from './splitBillSection';
@@ -7,6 +7,7 @@ import { useState } from 'react';
 import Toast from '@/global/components/toast';
 import { createStripeCheckout, redirectToStripeCheckout } from '@/utils/paymentService';
 import { useAuth } from '@/global/hooks/auth';
+import { mutate } from 'swr';
 
 type OrderSummaryProps = {
   onBack?: () => void;
@@ -58,6 +59,7 @@ export default function OrderSummary({
       } else {
         await authFetch(`order/`, "POST", JSON.stringify(order));
       }
+      await mutate('order'); // refresh orders list if cached
       
       showToast(t('orderSummary.saveSuccess', 'Order saved successfully'));
     } catch (e) {
@@ -85,11 +87,14 @@ export default function OrderSummary({
         // Update existing order
         await authFetchJson<string>(`order/${existingOrderId}`, "PATCH", JSON.stringify(order));
         orderId = parseInt(existingOrderId);
+        await mutate(`order/${existingOrderId}`);
       } else {
         // Create new order and get the order ID
         const response = await authFetchJson<{ id: number; message: string }>(`order/`, "POST", JSON.stringify(order));
         orderId = response.id;
+        await mutate(`order/${orderId}`);
       }
+      await mutate('order');
       
       showToast(t('payment.redirecting', 'Redirecting to payment...'));
       
