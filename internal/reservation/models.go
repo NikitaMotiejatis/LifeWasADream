@@ -23,14 +23,34 @@ type Reservation struct {
 	Status        string    `json:"status"`
 }
 
+// Payload for creating a reservation.
+type ReservationCreate struct {
+	CustomerName  string    `json:"customerName"`
+	CustomerPhone string    `json:"customerPhone"`
+	StaffId       string    `json:"staffId"`
+	ServiceId     string    `json:"serviceId"`
+	Datetime      time.Time `json:"datetime"`
+	Status        string    `json:"status"`
+}
+
+// Payload for updating a reservation; nil fields are ignored.
+type ReservationUpdate struct {
+	CustomerName  *string    `json:"customerName"`
+	CustomerPhone *string    `json:"customerPhone"`
+	StaffId       *string    `json:"staffId"`
+	ServiceId     *string    `json:"serviceId"`
+	Datetime      *time.Time `json:"datetime"`
+	Status        *string    `json:"status"`
+}
+
 type ReservationCounts struct {
-	All            int `json:"all"`
-	Pending        int `json:"pending"`
-	Confirmed      int `json:"confirmed"`
-	Completed      int `json:"completed"`
-	Cancelled      int `json:"cancelled"`
-	NoShow         int `json:"no_show"`
-	RefundPending  int `json:"refund_pending"`
+	All           int `json:"all"`
+	Pending       int `json:"pending"`
+	Confirmed     int `json:"confirmed"`
+	Completed     int `json:"completed"`
+	Cancelled     int `json:"cancelled"`
+	NoShow        int `json:"no_show"`
+	RefundPending int `json:"refund_pending"`
 }
 
 type Service struct {

@@ -5,8 +5,8 @@ import (
 	"dreampos/internal/config"
 	"dreampos/internal/data"
 	"dreampos/internal/order"
-	"dreampos/internal/reservation"
 	"dreampos/internal/payment"
+	"dreampos/internal/reservation"
 	"encoding/json"
 	"fmt"
 	"time"
@@ -29,7 +29,7 @@ func setupAuth(router *chi.Mux, config config.Config) *auth.AuthController {
 			SessionTokenName: "SESSION-TOKEN",
 			CsrfTokenName:    "X-XSRF-TOKEN",
 
-			UserRepo: 			data.MustCreatePostgresDb(config),
+			UserRepo: data.MustCreatePostgresDb(config),
 		},
 	}
 
@@ -38,8 +38,9 @@ func setupAuth(router *chi.Mux, config config.Config) *auth.AuthController {
 	return c
 }
 
-func setupApiRoutes(router *chi.Mux, config config.Config, authMiddleware func(http.Handler)http.Handler) {
+func setupApiRoutes(router *chi.Mux, config config.Config, authMiddleware func(http.Handler) http.Handler) {
 	apiRouter := chi.NewRouter()
+	db := data.MustCreatePostgresDb(config)
 
 	{
 		// TODO: if this becomes more complicated extract to controller
@@ -61,8 +62,8 @@ func setupApiRoutes(router *chi.Mux, config config.Config, authMiddleware func(h
 
 	{
 		c := order.OrderController{
-			OrderRepo: 	 data.MustCreatePostgresDb(config),
-			ProductRepo: data.MustCreatePostgresDb(config),
+			OrderRepo:   db,
+			ProductRepo: db,
 		}
 
 		apiRouter.With(authMiddleware).Mount("/order", c.Routes())
@@ -70,12 +71,12 @@ func setupApiRoutes(router *chi.Mux, config config.Config, authMiddleware func(h
 
 	{
 		r := reservation.ReservationController{
-			ReservationRepo: 	data.NewMockDataSource(),
-			ServiceRepo: 		data.NewMockDataSource(),
-			StaffRepo: 			data.NewMockDataSource(),
+			ReservationRepo: db,
+			ServiceRepo:     db,
+			StaffRepo:       db,
 		}
 
-		apiRouter.Mount("/reservation", r.Routes())
+		apiRouter.With(authMiddleware).Mount("/reservation", r.Routes())
 	}
 
 	router.Mount("/api", apiRouter)
@@ -83,11 +84,13 @@ func setupApiRoutes(router *chi.Mux, config config.Config, authMiddleware func(h
 
 func setupPaymentRoutes(router *chi.Mux, config config.Config, authMiddleware func(http.Handler) http.Handler) {
 	// Setup payment controller with Stripe configuration
+	db := data.MustCreatePostgresDb(config)
 	paymentService := &payment.PaymentService{
 		StripeSecretKey: config.StripeSecretKey,
 		StripePublicKey: config.StripePublicKey,
 		SuccessURL:      fmt.Sprintf("http://%s/payment/success", config.FrontendUrl), // When I save it automatically makes the spaces, after ':' !?
 		CancelURL:       fmt.Sprintf("http://%s/payment/cancel", config.FrontendUrl),
+		OrderTotals:     db,
 	}
 
 	paymentController := &payment.PaymentController{
