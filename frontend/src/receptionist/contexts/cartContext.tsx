@@ -25,7 +25,7 @@ export type CartItem = {
   product: Product;
   selectedVariations: Variation[];
   quantity: number;
-  instanceId?: string; // Added for split bill tracking
+  instanceId?: string;
 };
 
 export type Promotion =
@@ -61,17 +61,17 @@ type CartContextType = {
   discountTotal: number;
   cartDiscountAmount: number;
   totalWithoutTip: number;
-  
+
   // Tip Management
   tipAmount: number;
   setTipAmount: (amount: number) => void;
-  
+
   // Individual tips for split payments
   individualTips: number[];
   setIndividualTip: (index: number, amount: number) => void;
   clearIndividualTips: () => void;
   getIndividualTipsTotal: () => number;
-  
+
   // Final Totals
   total: number;
   splitModeTotal: (payerIndex?: number) => number;
@@ -91,7 +91,7 @@ type CartContextType = {
   // Payment State
   isPaymentStarted: boolean;
   setIsPaymentStarted: (isPaymentStarted: boolean) => void;
-  
+
   // Split Bill State
   isSplitMode: boolean;
   setIsSplitMode: (enabled: boolean) => void;
@@ -117,29 +117,42 @@ const clampToCents = (value: number): Cents =>
 const MAX_PAYERS = 50;
 const MAX_QUANTITY = 9999;
 
-export const CartProvider = ({ initItems = [], children }: { initItems?: CartItem[], children: ReactNode }) => {
+export const CartProvider = ({
+  initItems = [],
+  children,
+}: {
+  initItems?: CartItem[];
+  children: ReactNode;
+}) => {
   const { currency, setCurrency, formatPrice } = useCurrency();
-  
+
   // Cart Items State
-  const [items, setItems] = useState<Record<CartKey, CartItem>>(initItems.reduce((acc, item) => {
-    return { 
-      ...acc,
-      [generateKey(item.product, item.selectedVariations)]: item,
-    };
-  }, {} as Record<CartKey, CartItem>));
-  
+  const [items, setItems] = useState<Record<CartKey, CartItem>>(
+    initItems.reduce(
+      (acc, item) => {
+        return {
+          ...acc,
+          [generateKey(item.product, item.selectedVariations)]: item,
+        };
+      },
+      {} as Record<CartKey, CartItem>,
+    ),
+  );
+
   // Promotions & Discounts
   const [promotions, setPromotions] = useState<Promotions>({
     'iced-latte': { type: 'percent', value: 50 },
   });
-  
+
   const [cartDiscount, setCartDiscount] = useState<CartDiscount | null>(null);
   const [isPaymentStarted, setIsPaymentStarted] = useState<boolean>(false);
   const [isSplitMode, setIsSplitMode] = useState<boolean>(false);
-  
+
   // Tip Management
   const [tipAmount, setTipAmount] = useState<number>(0);
-  const [individualTips, setIndividualTips] = useState<number[]>(Array(MAX_PAYERS).fill(0));
+  const [individualTips, setIndividualTips] = useState<number[]>(
+    Array(MAX_PAYERS).fill(0),
+  );
 
   // Cart Operations
   const addToCart = (
@@ -159,9 +172,9 @@ export const CartProvider = ({ initItems = [], children }: { initItems?: CartIte
     setItems(prev => {
       const item = prev[key];
       if (!item) return prev;
-      
+
       const newQty = item.quantity + delta;
-      
+
       if (newQty <= 0) {
         const { [key]: _, ...rest } = prev;
         return rest;
@@ -198,7 +211,7 @@ export const CartProvider = ({ initItems = [], children }: { initItems?: CartIte
   // Individual Tip Management
   const setIndividualTip = (index: number, amount: number) => {
     if (index < 0 || index >= MAX_PAYERS) return;
-    
+
     setIndividualTips(prev => {
       const newTips = [...prev];
       newTips[index] = amount;
@@ -274,7 +287,6 @@ export const CartProvider = ({ initItems = [], children }: { initItems?: CartIte
       };
     }, [items, promotions, cartDiscount]);
 
-  // Calculate appropriate total based on mode
   const total = useMemo(() => {
     if (isSplitMode) {
       return totalWithoutTip + getIndividualTipsTotal();
@@ -282,12 +294,11 @@ export const CartProvider = ({ initItems = [], children }: { initItems?: CartIte
     return totalWithoutTip + tipAmount;
   }, [isSplitMode, totalWithoutTip, tipAmount, getIndividualTipsTotal]);
 
-  // Helper for split mode to get individual payer total
   const splitModeTotal = (payerIndex?: number) => {
     if (!isSplitMode || payerIndex === undefined) {
       return totalWithoutTip;
     }
-    
+
     const individualTip = individualTips[payerIndex] || 0;
     return totalWithoutTip + individualTip;
   };
@@ -318,7 +329,6 @@ export const CartProvider = ({ initItems = [], children }: { initItems?: CartIte
   return (
     <CartContext.Provider
       value={{
-        // Cart Items
         items,
         itemsList,
         addToCart,
@@ -326,45 +336,32 @@ export const CartProvider = ({ initItems = [], children }: { initItems?: CartIte
         removeItem,
         clearCart,
 
-        // Promotions & Discounts
         promotions,
         setPromotions,
         cartDiscount,
         setCartDiscount,
 
-        // Pricing
         subtotal,
         discountTotal,
         cartDiscountAmount,
         totalWithoutTip,
 
-        // Tip Management
         tipAmount,
         setTipAmount,
         individualTips,
         setIndividualTip,
         clearIndividualTips,
         getIndividualTipsTotal,
-
-        // Totals
         total,
         splitModeTotal,
-
-        // Currency
         currency,
         setCurrency,
         formatPrice,
-
-        // Utilities
         getFinalPrice,
         getDiscountFor,
         generateKey,
-
-        // Payment State
         isPaymentStarted,
         setIsPaymentStarted,
-        
-        // Split Bill State
         isSplitMode,
         setIsSplitMode,
       }}

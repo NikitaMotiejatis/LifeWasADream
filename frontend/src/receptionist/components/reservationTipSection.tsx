@@ -7,9 +7,9 @@ interface ReservationTipSectionProps {
   disabled?: boolean;
 }
 
-export const ReservationTipSection: React.FC<ReservationTipSectionProps> = ({ 
+export const ReservationTipSection: React.FC<ReservationTipSectionProps> = ({
   onTipAdded,
-  disabled = false 
+  disabled = false,
 }) => {
   const { t } = useTranslation();
   const [tipAmount, setTipAmount] = React.useState(0);

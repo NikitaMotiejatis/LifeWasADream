@@ -21,7 +21,7 @@ export const TipInput: React.FC<TipInputProps> = ({
   addTipText,
   enterTipLabel,
   showCurrency = true,
-  formatAmount = (amount) => amount.toFixed(2),
+  formatAmount = amount => amount.toFixed(2),
   className = '',
 }) => {
   const { t } = useTranslation();
@@ -31,14 +31,14 @@ export const TipInput: React.FC<TipInputProps> = ({
   const defaultMessages = {
     addTip: t('common.addTip'),
     enterTip: t('common.enterTipAmount'),
-    tip: t('common.tip')
+    tip: t('common.tip'),
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let val = e.target.value;
 
     const isValidDecimal = /^$|^\d*\.?\d{0,2}$/.test(val);
-    
+
     if (isValidDecimal) {
       if ((val.match(/\./g) || []).length <= 1) {
         setInputValue(val);
@@ -51,7 +51,7 @@ export const TipInput: React.FC<TipInputProps> = ({
       onChange(0);
     } else {
       const amount = parseFloat(inputValue) || 0;
-      
+
       if (inputValue.startsWith('.')) {
         const correctedValue = '0' + inputValue;
         onChange(parseFloat(correctedValue) || 0);
@@ -59,7 +59,7 @@ export const TipInput: React.FC<TipInputProps> = ({
         onChange(amount);
       }
     }
-    
+
     setShowInput(false);
     setInputValue('');
   };
@@ -77,7 +77,9 @@ export const TipInput: React.FC<TipInputProps> = ({
 
   if (showInput) {
     return (
-      <div className={`rounded-lg border border-gray-300 bg-gray-50 p-3 ${className}`}>
+      <div
+        className={`rounded-lg border border-gray-300 bg-gray-50 p-3 ${className}`}
+      >
         <div className="mb-2">
           <label className="mb-1 block text-sm font-medium text-gray-700">
             {enterTipLabel || defaultMessages.enterTip}
@@ -89,11 +91,13 @@ export const TipInput: React.FC<TipInputProps> = ({
               value={inputValue}
               onChange={handleInputChange}
               placeholder="0.00"
-              className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-right text-sm font-medium focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+              className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-right text-sm font-medium focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
               autoFocus
               disabled={disabled}
             />
-            {showCurrency && <span className="text-sm font-medium text-gray-600">€</span>}
+            {showCurrency && (
+              <span className="text-sm font-medium text-gray-600">€</span>
+            )}
           </div>
         </div>
         <div className="flex gap-2">
@@ -118,11 +122,16 @@ export const TipInput: React.FC<TipInputProps> = ({
 
   if (value > 0) {
     return (
-      <div className={`flex items-center justify-between rounded-lg border border-gray-300 bg-gray-50 p-3 ${className}`}>
+      <div
+        className={`flex items-center justify-between rounded-lg border border-gray-300 bg-gray-50 p-3 ${className}`}
+      >
         <div>
-          <p className="text-sm font-medium text-gray-700">{defaultMessages.tip}</p>
+          <p className="text-sm font-medium text-gray-700">
+            {defaultMessages.tip}
+          </p>
           <p className="text-lg font-bold text-green-600">
-            +{formatAmount(value)}{showCurrency && '€'}
+            +{formatAmount(value)}
+            {showCurrency && '€'}
           </p>
         </div>
         <div className="flex gap-2">

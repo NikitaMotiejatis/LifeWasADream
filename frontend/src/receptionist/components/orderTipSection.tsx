@@ -8,7 +8,7 @@ interface TipSectionProps {
   isSplitMode?: boolean;
 }
 
-export const TipSection: React.FC<TipSectionProps> = ({ 
+export const TipSection: React.FC<TipSectionProps> = ({
   disabled = false,
   isSplitMode = false,
 }) => {
@@ -18,9 +18,9 @@ export const TipSection: React.FC<TipSectionProps> = ({
   if (disabled) {
     return (
       <div className="mt-4 rounded-lg border border-gray-300 bg-gray-100 p-4">
-        <p className="text-sm font-medium text-gray-600 text-center">
-          {isSplitMode 
-            ? t('orderSummary.tipAfterSplit') 
+        <p className="text-center text-sm font-medium text-gray-600">
+          {isSplitMode
+            ? t('orderSummary.tipAfterSplit')
             : t('orderSummary.tipDisabled')}
         </p>
       </div>
@@ -36,7 +36,7 @@ export const TipSection: React.FC<TipSectionProps> = ({
       addTipText={t('orderSummary.addTip')}
       enterTipLabel={t('orderSummary.enterTipAmount')}
       showCurrency={false}
-      formatAmount={(amount) => formatPrice(amount)}
+      formatAmount={amount => formatPrice(amount)}
       className="mt-4"
     />
   );

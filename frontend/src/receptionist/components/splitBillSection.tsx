@@ -40,15 +40,15 @@ export const SplitBillSection: React.FC<SplitBillSectionProps> = ({
 }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { 
-    setIsPaymentStarted, 
-    setIndividualTip, 
+  const {
+    setIsPaymentStarted,
+    setIndividualTip,
     individualTips,
-    clearIndividualTips 
+    clearIndividualTips,
   } = useCart();
 
   const MAX_PAYERS = 50;
-  
+
   const [isSplitEnabled, setIsSplitEnabled] = useState(false);
   const [numPeople, setNumPeople] = useState(2);
   const [splitMode, setSplitMode] = useState<'equal' | 'byItems'>('equal');
@@ -70,7 +70,7 @@ export const SplitBillSection: React.FC<SplitBillSectionProps> = ({
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>(
     Array(MAX_PAYERS).fill('Cash'),
   );
-  
+
   const [paidStatus, setPaidStatus] = useState<boolean[]>(
     Array(MAX_PAYERS).fill(false),
   );
@@ -115,13 +115,13 @@ export const SplitBillSection: React.FC<SplitBillSectionProps> = ({
   };
 
   const baseAmounts = calculateBaseAmounts();
-  
+
   const activePayers = baseAmounts
-    .map((base, index) => ({ 
-      index: index + 1, 
+    .map((base, index) => ({
+      index: index + 1,
       baseAmount: base,
       tipAmount: individualTips[index] || 0,
-      totalAmount: base + (individualTips[index] || 0)
+      totalAmount: base + (individualTips[index] || 0),
     }))
     .filter(p => p.totalAmount > 0);
 
@@ -140,9 +140,13 @@ export const SplitBillSection: React.FC<SplitBillSectionProps> = ({
     }
   };
 
-  const handlePaymentMethodChange = (payerIndex: number, method: PaymentMethod) => {
-    if (paidStatus[payerIndex] || payerIndex < 0 || payerIndex >= MAX_PAYERS) return;
-    
+  const handlePaymentMethodChange = (
+    payerIndex: number,
+    method: PaymentMethod,
+  ) => {
+    if (paidStatus[payerIndex] || payerIndex < 0 || payerIndex >= MAX_PAYERS)
+      return;
+
     setPaymentMethods(prev => {
       const newMethods = [...prev];
       newMethods[payerIndex] = method;
@@ -162,7 +166,7 @@ export const SplitBillSection: React.FC<SplitBillSectionProps> = ({
 
   const handlePayerPayment = (payerIndex: number) => {
     if (payerIndex < 0 || payerIndex >= MAX_PAYERS) return;
-    
+
     const newPaid = [...paidStatus];
     newPaid[payerIndex] = true;
     setPaidStatus(newPaid);
@@ -215,7 +219,7 @@ export const SplitBillSection: React.FC<SplitBillSectionProps> = ({
         <button
           onClick={() => {
             if (paymentMethod === 'Card' && onStripePayment) {
-              onStripePayment(); // No payerIndex for non-split payments
+              onStripePayment();
             } else {
               navigate('/orders');
             }
@@ -284,7 +288,9 @@ export const SplitBillSection: React.FC<SplitBillSectionProps> = ({
             <input
               type="radio"
               checked={splitMode === 'equal'}
-              onChange={() => !anyPaid && !isProcessing && setSplitMode('equal')}
+              onChange={() =>
+                !anyPaid && !isProcessing && setSplitMode('equal')
+              }
               disabled={anyPaid || isProcessing}
               className="text-blue-600"
             />
@@ -296,7 +302,9 @@ export const SplitBillSection: React.FC<SplitBillSectionProps> = ({
             <input
               type="radio"
               checked={splitMode === 'byItems'}
-              onChange={() => !anyPaid && !isProcessing && setSplitMode('byItems')}
+              onChange={() =>
+                !anyPaid && !isProcessing && setSplitMode('byItems')
+              }
               disabled={anyPaid || isProcessing}
               className="text-blue-600"
             />
@@ -372,7 +380,7 @@ export const SplitBillSection: React.FC<SplitBillSectionProps> = ({
                 }`}
               >
                 <div className="mb-4">
-                  <div className="flex items-center justify-between mb-2">
+                  <div className="mb-2 flex items-center justify-between">
                     <span className="text-md font-bold">
                       {t('orderSummary.payer')} {index}{' '}
                       {paid && t('orderSummary.paid')}
@@ -381,8 +389,8 @@ export const SplitBillSection: React.FC<SplitBillSectionProps> = ({
                       {formatPrice(totalAmount)}
                     </span>
                   </div>
-                  
-                  <div className="text-sm text-gray-600 mb-3">
+
+                  <div className="mb-3 text-sm text-gray-600">
                     <div className="flex justify-between">
                       <span>{t('orderSummary.baseAmount')}:</span>
                       <span>{formatPrice(baseAmount)}</span>
@@ -394,17 +402,21 @@ export const SplitBillSection: React.FC<SplitBillSectionProps> = ({
                       </div>
                     )}
                   </div>
-                  
-                  {/* Individual Tip Input - Only show if this payer is NOT paid */}
+
+                  {/* Individual Tip Input */}
                   {!paid && (
                     <TipInput
                       value={tipAmount}
-                      onChange={(amount) => handleIndividualTipChange(payerIndex, amount)}
+                      onChange={amount =>
+                        handleIndividualTipChange(payerIndex, amount)
+                      }
                       disabled={paid || isProcessing}
                       addTipText={t('orderSummary.addIndividualTip')}
-                      enterTipLabel={t('orderSummary.individualTipForPayer', { payer: index })}
+                      enterTipLabel={t('orderSummary.individualTipForPayer', {
+                        payer: index,
+                      })}
                       showCurrency={false}
-                      formatAmount={(amount) => formatPrice(amount)}
+                      formatAmount={amount => formatPrice(amount)}
                       className="w-full"
                     />
                   )}
@@ -416,7 +428,9 @@ export const SplitBillSection: React.FC<SplitBillSectionProps> = ({
                       {(['Cash', 'Card', 'Gift card'] as const).map(m => (
                         <button
                           key={m}
-                          onClick={() => handlePaymentMethodChange(payerIndex, m)}
+                          onClick={() =>
+                            handlePaymentMethodChange(payerIndex, m)
+                          }
                           className={`rounded-lg py-2.5 text-xs font-medium transition ${
                             method === m
                               ? 'bg-blue-600 text-white'
@@ -438,14 +452,17 @@ export const SplitBillSection: React.FC<SplitBillSectionProps> = ({
                         }
                       }}
                       className="w-full rounded-xl bg-blue-600 py-5 text-xl font-bold text-white shadow-md transition hover:bg-blue-700"
-                      disabled={paid || isProcessing || (method === 'Card' && isProcessing)}
+                      disabled={
+                        paid ||
+                        isProcessing ||
+                        (method === 'Card' && isProcessing)
+                      }
                     >
-                      {method === 'Card' 
+                      {method === 'Card'
                         ? t('orderSummary.payWithCard')
                         : t('orderSummary.payWith', {
                             method: t(`orderSummary.paymentMethods.${method}`),
-                          })
-                      }
+                          })}
                     </button>
                   </>
                 )}

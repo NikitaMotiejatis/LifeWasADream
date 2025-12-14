@@ -291,16 +291,14 @@ export default function OrderSummary({
             </button>
           ) : (
             <div className="space-y-4">
-              {/* This is the main "Baigti apmokėjimą" button */}
               <button
-                onClick={() => handleStripePayment()} // Make sure this calls handleStripePayment without arguments
+                onClick={() => handleStripePayment()}
                 className="w-full rounded-xl bg-blue-600 py-4 text-lg font-bold text-white shadow-md transition hover:bg-blue-700 disabled:opacity-50"
                 disabled={isProcessing}
               >
                 {t('orderSummary.completePayment')}
               </button>
 
-              {/* Optional: Add alternative payment methods below */}
               <div className="grid grid-cols-2 gap-2">
                 <button
                   onClick={handleCashPayment}
