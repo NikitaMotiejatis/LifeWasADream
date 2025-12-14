@@ -715,6 +715,182 @@ func (pdb PostgresDb) GetOrderTotal(orderID int64) (int64, string, error) {
 }
 
 // -------------------------------------------------------------------------------------------------
+// order mutations ---------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
+
+func (pdb PostgresDb) CreateOrder(o order.Order) (int64, error) {
+	// Default metadata
+	const defaultEmployeeId = int32(10)
+	const defaultCurrency = "USD"
+
+	tx, err := pdb.Db.Beginx()
+	if err != nil {
+		slog.Error(err.Error())
+		return 0, ErrInternal
+	}
+	defer func() {
+		_ = tx.Rollback()
+	}()
+
+	var orderId int64
+	{
+		const insertOrder = `
+		INSERT INTO order_data (
+			id, employee_id, currency, discount, tip, service_charge
+		)
+		SELECT COALESCE(MAX(id), 0) + 1, $1, $2, 0, 0, 0
+		FROM order_data
+		RETURNING id
+		`
+		if err := tx.Get(&orderId, insertOrder, defaultEmployeeId, defaultCurrency); err != nil {
+			slog.Error(err.Error())
+			return 0, ErrInternal
+		}
+	}
+
+	// insert items
+	for _, item := range o.Items {
+		itemId := int64(item.Product.Id)
+		if itemId == 0 {
+			slog.Error("missing product id on item")
+			return 0, ErrInternal
+		}
+
+		var orderItemId int64
+		{
+			const insertItem = `
+			INSERT INTO order_item (id, order_id, item_id, quantity, discount)
+			SELECT COALESCE(MAX(id), 0) + 1, $1, $2, $3, 0
+			FROM order_item
+			RETURNING id
+			`
+			if err := tx.Get(&orderItemId, insertItem, orderId, itemId, item.Quantity); err != nil {
+				slog.Error(err.Error())
+				return 0, ErrInternal
+			}
+		}
+
+		// variations: link by name+item_id
+		if len(item.SelectedVariations) > 0 {
+			for _, v := range item.SelectedVariations {
+				var variationId int64
+				const findVariation = `
+				SELECT id
+				FROM item_variation
+				WHERE item_id = $1 AND name = $2
+				LIMIT 1
+				`
+				if err := tx.Get(&variationId, findVariation, itemId, v.Name); err != nil {
+					slog.Error(err.Error())
+					return 0, ErrInternal
+				}
+
+				const insertItemVariation = `
+				INSERT INTO order_item_variation (order_item_id, variation_id)
+				VALUES ($1, $2)
+				ON CONFLICT DO NOTHING
+				`
+				if _, err := tx.Exec(insertItemVariation, orderItemId, variationId); err != nil {
+					slog.Error(err.Error())
+					return 0, ErrInternal
+				}
+			}
+		}
+	}
+
+	if err := tx.Commit(); err != nil {
+		slog.Error(err.Error())
+		return 0, ErrInternal
+	}
+
+	return orderId, nil
+}
+
+func (pdb PostgresDb) UpdateOrder(orderId int32, o order.Order) error {
+	// Simplified: replace items by deleting and reinserting.
+	tx, err := pdb.Db.Beginx()
+	if err != nil {
+		slog.Error(err.Error())
+		return ErrInternal
+	}
+	defer func() {
+		_ = tx.Rollback()
+	}()
+
+	// delete variations first due to FK
+	{
+		const deleteVariations = `
+		DELETE FROM order_item_variation
+		WHERE order_item_id IN (SELECT id FROM order_item WHERE order_id = $1)
+		`
+		if _, err := tx.Exec(deleteVariations, orderId); err != nil {
+			slog.Error(err.Error())
+			return ErrInternal
+		}
+	}
+	{
+		const deleteItems = `
+		DELETE FROM order_item WHERE order_id = $1
+		`
+		if _, err := tx.Exec(deleteItems, orderId); err != nil {
+			slog.Error(err.Error())
+			return ErrInternal
+		}
+	}
+
+	for _, item := range o.Items {
+		itemId := int64(item.Product.Id)
+		if itemId == 0 {
+			slog.Error("missing product id on item")
+			return ErrInternal
+		}
+
+		var orderItemId int64
+		const insertItem = `
+		INSERT INTO order_item (id, order_id, item_id, quantity, discount)
+		SELECT COALESCE(MAX(id), 0) + 1, $1, $2, $3, 0
+		FROM order_item
+		RETURNING id
+		`
+		if err := tx.Get(&orderItemId, insertItem, orderId, itemId, item.Quantity); err != nil {
+			slog.Error(err.Error())
+			return ErrInternal
+		}
+
+		for _, v := range item.SelectedVariations {
+			var variationId int64
+			const findVariation = `
+			SELECT id
+			FROM item_variation
+			WHERE item_id = $1 AND name = $2
+			LIMIT 1
+			`
+			if err := tx.Get(&variationId, findVariation, itemId, v.Name); err != nil {
+				slog.Error(err.Error())
+				return ErrInternal
+			}
+
+			const insertItemVariation = `
+			INSERT INTO order_item_variation (order_item_id, variation_id)
+			VALUES ($1, $2)
+			ON CONFLICT DO NOTHING
+			`
+			if _, err := tx.Exec(insertItemVariation, orderItemId, variationId); err != nil {
+				slog.Error(err.Error())
+				return ErrInternal
+			}
+		}
+	}
+
+	if err := tx.Commit(); err != nil {
+		slog.Error(err.Error())
+		return ErrInternal
+	}
+
+	return nil
+}
+
+// -------------------------------------------------------------------------------------------------
 // reservation.ServiceRepo implementation ----------------------------------------------------------
 // -------------------------------------------------------------------------------------------------
 

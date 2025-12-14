@@ -117,6 +117,21 @@ func (s MockDataSource) GetOrderItems(orderId int32) ([]order.Item, error) {
 	}, nil
 }
 
+func (s *MockDataSource) CreateOrder(o order.Order) (int64, error) {
+	newId := int64(len(s.Orders) + 1)
+	s.Orders = append([]order.OrderSummary{{
+		Id:        int32(newId),
+		Total:     0,
+		CreatedAt: time.Now(),
+		Status:    "open",
+	}}, s.Orders...)
+	return newId, nil
+}
+
+func (s *MockDataSource) UpdateOrder(orderId int32, o order.Order) error {
+	return nil
+}
+
 // -------------------------------------------------------------------------------------------------
 // order.ProductRepo implimentation ----------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------
