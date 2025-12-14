@@ -115,27 +115,9 @@ func (pdb PostgresDb) GetOrders(filter order.OrderFilter) ([]order.OrderSummary,
 	return orders, nil
 }
 
+// TODO: implement or remove idk
 func (pdb PostgresDb) GetOrderCounts(filter order.OrderFilter) (order.OrderCounts, error) {
 	return order.OrderCounts{}, nil
-	//counts := order.OrderCounts{}
-	//for _, o := range s.Orders {
-	//	if filter.From != nil && o.CreatedAt.Before(*filter.From) {
-	//		continue
-	//	}
-	//	if filter.To != nil && o.CreatedAt.After(*filter.To) {
-	//		continue
-	//	}
-
-	//	counts.All += 1
-	//	switch o.Status {
-	//	case "open": 			counts.Open += 1
-	//	case "closed": 			counts.Closed += 1
-	//	case "refund_pending": 	counts.RefundPending += 1
-	//	case "refunded": 		counts.Refunded += 1
-	//	}
-	//}
-
-	//return counts, nil
 }
 
 func (pdb PostgresDb) CreateOrder(order order.Order) (int64, error) {
