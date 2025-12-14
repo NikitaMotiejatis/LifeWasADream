@@ -72,11 +72,17 @@ function buildISOString(
   return localDate.toISOString();
 }
 
-function buildQuery(status: string, from?: string, to?: string) {
+function buildQuery(
+  status: string,
+  from?: string,
+  to?: string,
+  search?: string,
+) {
   const params = new URLSearchParams();
   if (status !== 'all') params.set('status', status);
   if (from) params.set('from', from);
   if (to) params.set('to', to);
+  if (search) params.set('search', search);
   return params.toString();
 }
 
@@ -121,8 +127,8 @@ export default function ReservationList() {
   );
 
   const query = useMemo(
-    () => buildQuery(statusFilter, fromISO, toISO),
-    [statusFilter, fromISO, toISO],
+    () => buildQuery(statusFilter, fromISO, toISO, searchTerm),
+    [statusFilter, fromISO, toISO, searchTerm],
   );
 
   const {

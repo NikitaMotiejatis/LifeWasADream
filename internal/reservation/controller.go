@@ -35,6 +35,11 @@ func (c *ReservationController) Routes() http.Handler {
 func (c *ReservationController) listReservations(w http.ResponseWriter, r *http.Request) {
 	filter := ReservationFilter{}
 
+	search := r.URL.Query().Get("search")
+	if search != "" {
+		filter.Search = &search
+	}
+
 	status := r.URL.Query().Get("status")
 	if status != "" && status != "all" {
 		filter.Status = &status

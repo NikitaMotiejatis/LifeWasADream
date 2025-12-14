@@ -149,6 +149,33 @@ func (s *MockDataSource) GetReservations(filter reservation.ReservationFilter) (
 		if filter.To != nil && r.Datetime.After(*filter.To) {
 			continue
 		}
+		if filter.Search != nil && *filter.Search != "" {
+			search := strings.ToLower(*filter.Search)
+			staffName := ""
+			serviceName := ""
+
+			for _, st := range s.Staff {
+				if st.Id == r.StaffId {
+					staffName = st.Name
+					break
+				}
+			}
+			for _, svc := range s.Services {
+				if svc.Id == r.ServiceId {
+					serviceName = svc.NameKey
+					break
+				}
+			}
+
+			if !strings.Contains(strings.ToLower(r.Id), search) &&
+				!strings.Contains(strings.ToLower(r.CustomerName), search) &&
+				!strings.Contains(strings.ToLower(r.CustomerPhone), search) &&
+				!strings.Contains(strings.ToLower(staffName), search) &&
+				!strings.Contains(strings.ToLower(serviceName), search) {
+				continue
+			}
+		}
+		
 		result = append(result, r)
 	}
 	return result, nil
