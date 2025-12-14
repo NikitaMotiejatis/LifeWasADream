@@ -258,16 +258,16 @@ INSERT INTO order_item_variation (order_item_id, variation_id) VALUES
 -- 8. APPOINTMENTS & BILLS
 -- ================================================================================================
 
-INSERT INTO appointment (id, service_location_id, actioned_by, customer_name, customer_surname, customer_email, customer_phone, appointment_at, status) VALUES 
+INSERT INTO appointment (id, service_location_id, actioned_by, customer_name, customer_phone, appointment_at, status) VALUES 
 -- Past Appointments
-(1, 1, 3, 'Alice', 'Walker', 'alice@mail.com', '+44700001', NOW() - INTERVAL '10 days', 'PAID'),
-(2, 2, 3, 'Bob', 'Jones', 'bob@mail.com', '+44700002', NOW() - INTERVAL '9 days', 'PAID'),
-(3, 4, 7, 'Charlie', 'Brown', 'charlie@mail.com', '+14160001', NOW() - INTERVAL '8 days', 'PAID'),
-(4, 5, 7, 'David', 'Smith', 'david@mail.com', '+14160002', NOW() - INTERVAL '7 days', 'PAID'),
+(1, 1, 3, 'Alice Walker', '+44700001', NOW() - INTERVAL '10 days', 'PAID'),
+(2, 2, 3, 'Bob Jones', '+44700002', NOW() - INTERVAL '9 days', 'PAID'),
+(3, 4, 7, 'Charlie Brown', '+14160001', NOW() - INTERVAL '8 days', 'PAID'),
+(4, 5, 7, 'David Smith', '+14160002', NOW() - INTERVAL '7 days', 'PAID'),
 -- Future Appointments
-(5, 1, 3, 'Eve', 'Taylor', 'eve@mail.com', '+44700003', NOW() + INTERVAL '1 day', 'RESERVED'),
-(6, 6, 8, 'Frank', 'Miller', 'frank@mail.com', '+16040001', NOW() + INTERVAL '2 days', 'RESERVED'),
-(7, 4, 7, 'Grace', 'Wilson', 'grace@mail.com', '+14160003', NOW() + INTERVAL '3 days', 'RESERVED');
+(5, 1, 3, 'Eve Taylor', '+44700003', NOW() + INTERVAL '1 day', 'RESERVED'),
+(6, 6, 8, 'Frank Miller', '+16040001', NOW() + INTERVAL '2 days', 'RESERVED'),
+(7, 4, 7, 'Grace Wilson', '+14160003', NOW() + INTERVAL '3 days', 'RESERVED');
 
 INSERT INTO appointment_bill (id, appointment_id, amount, discount, tip, created_at) VALUES 
 (1, 1, 2500, 0, 250, NOW() - INTERVAL '10 days'),

@@ -390,13 +390,10 @@ CREATE TABLE appointment (
     service_location_id INTEGER             NOT NULL REFERENCES service_location(id),
     actioned_by         INTEGER             NOT NULL REFERENCES employee(id),
     customer_name       VARCHAR(64)         NOT NULL,
-    customer_surname    VARCHAR(64)         NOT NULL,
-    customer_email      VARCHAR(512)        NOT NULL UNIQUE,
     customer_phone      VARCHAR(16)         NOT NULL UNIQUE,
     appointment_at      TIMESTAMP           NOT NULL,
 	status              appointment_status  NOT NULL DEFAULT 'RESERVED'
 
-    CONSTRAINT valid_customer_email CHECK (customer_email ~ '^[^\.][a-zA-Z0-9\-\.+]{0,62}[^\.]+@([^\-][a-zA-Z0-9\-]{0,61}[^\-]\.)+[^\-][a-zA-Z0-9\-]{0,61}[^\-]$'),
     CONSTRAINT valid_customer_phone CHECK (customer_phone ~ '^\+[0-9]{3,15}$')
 );
 
