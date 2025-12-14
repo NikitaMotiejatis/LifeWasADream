@@ -249,6 +249,7 @@ INSERT INTO order_item (id, order_id, item_id, quantity, discount) VALUES
 INSERT INTO order_item_variation (order_item_id, variation_id) VALUES 
 (1, 2), -- OrderItem 1 (Item 1) -> Variation 2 (Item 1 Large)
 (4, 3), -- OrderItem 4 (Item 5) -> Variation 3 (Item 5 Oat Milk)
+(10, 5), -- OrderItem 10 (Item 10) -> Variation 6 (Item 10 Extra Cheese)
 (10, 6), -- OrderItem 10 (Item 10) -> Variation 6 (Item 10 Extra Cheese)
 (11, 7), -- OrderItem 11 (Item 11) -> Variation 7 (Item 11 Small)
 (16, 8); -- OrderItem 16 (Item 11) -> Variation 8 (Item 11 Large)

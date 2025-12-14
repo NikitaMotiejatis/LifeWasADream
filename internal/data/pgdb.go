@@ -46,18 +46,18 @@ func (pdb PostgresDb) GetUserDetails(username string) (auth.UserDetails, error) 
 		LIMIT 1
 		`
 
-		var users []struct{
+		var user struct{
 			Id				int32	`db:"id"`
 			PasswordHash 	string 	`db:"password_hash"`
 		}
 
-		err := pdb.Db.Select(&users, query, username)
-		if err != nil || len(users) != 1 {
+		err := pdb.Db.Get(&user, query, username)
+		if err != nil {
 			return auth.UserDetails{}, err
 		}
 		
-		userId = users[0].Id
-		userDetails.PasswordHash = users[0].PasswordHash
+		userId = user.Id
+		userDetails.PasswordHash = user.PasswordHash
 	}
 	{
 		const query = `
@@ -86,36 +86,23 @@ func (pdb PostgresDb) GetUserDetails(username string) (auth.UserDetails, error) 
 // -------------------------------------------------------------------------------------------------
 
 func (pdb PostgresDb) GetOrders(filter order.OrderFilter) ([]order.OrderSummary, error) {
-	filterStrings := []string{ "TRUE" }
 	if filter.OrderStatus != nil {
-		filterStrings = append(
-			filterStrings,
-			fmt.Sprintf("status = '%s'", strings.ToUpper(*filter.OrderStatus)),
-		)
-	}
-	if filter.From != nil {
-		filterStrings = append(
-			filterStrings,
-			fmt.Sprintf("'%s' <= created_at", (*filter.From).Format("2006-01-02 15:04:05")),
-		)
-	}
-	if filter.To != nil {
-		filterStrings = append(
-			filterStrings,
-			fmt.Sprintf("created_at <= '%s'", (*filter.To).Format("2006-01-02 15:04:05")),
-		)
+		*filter.OrderStatus = strings.ToUpper(*filter.OrderStatus)
 	}
 
-	query := fmt.Sprintf(`
+	const query = `
 	SELECT id, total, created_at, status
 	FROM order_detail
-	WHERE %s
-	ORDER BY id DESC
-	`, strings.Join(filterStrings, " AND "))
-
+	WHERE 
+		($1::order_status IS NULL OR status = $1::order_status)
+		AND ($2::timestamp IS NULL OR $2::timestamp <= created_at)
+		AND ($3::timestamp IS NULL OR created_at <= $3::timestamp)
+	ORDER BY
+		id DESC
+	`
 
 	orders := []order.OrderSummary{}
-	err := pdb.Db.Select(&orders, query)
+	err := pdb.Db.Select(&orders, query, filter.OrderStatus, filter.From, filter.To)
 	if err != nil {
 		slog.Error(err.Error())
 		return []order.OrderSummary{}, ErrInternal
@@ -152,29 +139,61 @@ func (pdb PostgresDb) GetOrderCounts(filter order.OrderFilter) (order.OrderCount
 }
 
 func (pdb PostgresDb) GetOrderItems(orderId int32) ([]order.Item, error) {
-	panic("not implemented")
-	//return []order.Item{
-	//	{
-	//		Product: s.Products[0],
-	//		SelectedVariations: []order.Variation{},
-	//		Quantity: 5,
-	//	},
-	//	{
-	//		Product: s.Products[0],
-	//		SelectedVariations: []order.Variation{
-	//			{
-	//				Name:          "Large",
-	//				PriceModifier: 200,
-	//			},
-	//		},
-	//		Quantity: 1,
-	//	},
-	//	{
-	//		Product: s.Products[1],
-	//		SelectedVariations: []order.Variation{},
-	//		Quantity: 3,
-	//	},
-	//}, nil
+	const query = `
+	SELECT id, item_id, quantity
+	FROM order_item
+	WHERE order_id = $1
+	`
+	var itemsDetails []struct {
+		Id			int32 	`db:"id"`
+		ItemId		int32 	`db:"item_id"`
+		Quantity	uint16	`db:"quantity"`
+	}
+
+	err := pdb.Db.Select(&itemsDetails, query, orderId)
+	if err != nil {
+		slog.Error(err.Error())
+		return []order.Item{}, ErrInternal
+	}
+
+	items := make([]order.Item, len(itemsDetails))
+	for i := range itemsDetails {
+		items[i].Quantity = itemsDetails[i].Quantity
+		items[i].SelectedVariations = []order.Variation{}
+		items[i].Product.Variations = []order.Variation{}
+		items[i].Product.Categories = []string{}
+
+		const productQuery =`
+		SELECT id, name, price_per_unit
+		FROM item
+		WHERE id = $1
+		LIMIT 1
+		`
+
+		err = pdb.Db.Get(&items[i].Product, productQuery, itemsDetails[i].ItemId)
+		if err != nil {
+			slog.Error(err.Error())
+			return []order.Item{}, ErrInternal
+		}
+
+		const selectedVariationQuery =`
+		SELECT item_variation.name, price_difference
+		FROM order_item
+		JOIN order_item_variation
+			ON order_item.id = order_item_variation.order_item_id
+		JOIN item_variation
+			ON order_item_variation.variation_id = item_variation.id
+		WHERE order_item.item_id = $1;
+		`
+
+		err = pdb.Db.Select(&items[i].SelectedVariations, selectedVariationQuery, itemsDetails[i].ItemId)
+		if err != nil {
+			slog.Error(err.Error())
+			return []order.Item{}, ErrInternal
+		}
+	}
+
+	return items, nil
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -182,19 +201,17 @@ func (pdb PostgresDb) GetOrderItems(orderId int32) ([]order.Item, error) {
 // -------------------------------------------------------------------------------------------------
 
 func (pdb PostgresDb) GetProducts(filter order.ProductFilter) ([]order.Product, error) {
+	if filter.Category == nil {
+		filter.Category = new(string)
+	}
+
 	var filteredProducts []order.Product
 
 	// TODO: (potentialy) In the future it may be a good idea
 	// to optimize this query by rewriting it, adding materialized table to DB, etc.
 	// Right now, it does not cause any performace issues (or is even close to doing that).
 	{
-		queryFilterConditions := []string{ "item.status = 'ACTIVE'" }
-
-		if filter.Category != nil {
-			queryFilterConditions = append(queryFilterConditions, fmt.Sprintf("category.name = '%s'", *filter.Category))
-		}
-
-		query := fmt.Sprintf(`
+		const query = `
 		SELECT item.id, item.name, price_per_unit
 		FROM item
 		JOIN item_category
@@ -202,13 +219,13 @@ func (pdb PostgresDb) GetProducts(filter order.ProductFilter) ([]order.Product, 
 		JOIN category
 			ON category.id = category_id
 		WHERE 
-			%s
+			item.status = 'ACTIVE'
+			AND ($1 = '' OR category.name = $1)
 		ORDER BY
 			item.name ASC
-		`, strings.Join(queryFilterConditions, " AND "))
+		`
 
-
-		err := pdb.Db.Select(&filteredProducts, query)
+		err := pdb.Db.Select(&filteredProducts, query, *filter.Category)
 		if err != nil {
 			slog.Error(err.Error())
 			return []order.Product{}, ErrInternal

@@ -11,7 +11,7 @@ type OrderRepo interface {
 // Options for filtering orders.
 // If a filter field should be ignored, it should be set to nil pointer.
 type OrderFilter struct {
-	OrderStatus	*string
-	From		*time.Time
-	To			*time.Time
+	OrderStatus	*string		`db:"order_status"`
+	From		*time.Time	`db:"from"`
+	To			*time.Time	`db:"to"`
 }
