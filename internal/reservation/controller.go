@@ -12,7 +12,7 @@ import (
 type ReservationController struct {
 	ReservationRepo ReservationRepo
 	ServiceRepo     ServiceRepo
-	StaffRepo		StaffRepo
+	StaffRepo       StaffRepo
 }
 
 // Routes sets up chi router for reservations
@@ -33,6 +33,10 @@ func (c *ReservationController) Routes() http.Handler {
 // GET /api/reservation
 // =====================
 func (c *ReservationController) listReservations(w http.ResponseWriter, r *http.Request) {
+	if w == nil || r == nil {
+		return
+	}
+
 	filter := ReservationFilter{}
 
 	search := r.URL.Query().Get("search")
@@ -47,24 +51,24 @@ func (c *ReservationController) listReservations(w http.ResponseWriter, r *http.
 
 	fromStr := r.URL.Query().Get("from")
 	if fromStr != "" {
-    	from, err := time.Parse(time.RFC3339, fromStr)
-    	if err != nil {
-        	http.Error(w, "invalid param 'from'", http.StatusBadRequest)
-        	return
-    	}
-	from = from.UTC()
-    filter.From = &from
-}
+		from, err := time.Parse(time.RFC3339, fromStr)
+		if err != nil {
+			http.Error(w, "invalid param 'from'", http.StatusBadRequest)
+			return
+		}
+		from = from.UTC()
+		filter.From = &from
+	}
 
 	toStr := r.URL.Query().Get("to")
 	if toStr != "" {
-    	to, err := time.Parse(time.RFC3339, toStr)
-    	if err != nil {
-        	http.Error(w, "invalid param 'to'", http.StatusBadRequest)
-        	return
-    	}
+		to, err := time.Parse(time.RFC3339, toStr)
+		if err != nil {
+			http.Error(w, "invalid param 'to'", http.StatusBadRequest)
+			return
+		}
 		to = to.UTC()
-    	filter.To = &to
+		filter.To = &to
 	}
 
 	reservations, err := c.ReservationRepo.GetReservations(filter)
@@ -74,13 +78,21 @@ func (c *ReservationController) listReservations(w http.ResponseWriter, r *http.
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(reservations)
+	w.WriteHeader(http.StatusOK)
+	if err := json.NewEncoder(w).Encode(reservations); err != nil {
+		http.Error(w, "failed to encode reservations", http.StatusInternalServerError)
+		return
+	}
 }
 
 // =====================
 // POST /api/reservation
 // =====================
 func (c *ReservationController) createReservation(w http.ResponseWriter, r *http.Request) {
+	if w == nil || r == nil {
+		return
+	}
+
 	var reservation Reservation
 	if err := json.NewDecoder(r.Body).Decode(&reservation); err != nil {
 		http.Error(w, "invalid reservation", http.StatusBadRequest)
@@ -95,15 +107,22 @@ func (c *ReservationController) createReservation(w http.ResponseWriter, r *http
 		reservation.Status = "pending"
 	}
 
-
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(reservation)
+	if err := json.NewEncoder(w).Encode(reservation); err != nil {
+		http.Error(w, "failed to encode reservation", http.StatusInternalServerError)
+		return
+	}
 }
 
 // =====================
 // GET /api/reservation/{id}
 // =====================
 func (c *ReservationController) getReservation(w http.ResponseWriter, r *http.Request) {
+	if w == nil || r == nil {
+		return
+	}
+
 	idStr := chi.URLParam(r, "id")
 	if idStr == "" {
 		http.Error(w, "missing reservation ID", http.StatusBadRequest)
@@ -123,35 +142,43 @@ func (c *ReservationController) getReservation(w http.ResponseWriter, r *http.Re
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(items)
+	w.WriteHeader(http.StatusOK)
+	if err := json.NewEncoder(w).Encode(items); err != nil {
+		http.Error(w, "failed to encode reservation items", http.StatusInternalServerError)
+		return
+	}
 }
 
 // =====================
 // GET /api/reservation/counts
 // =====================
 func (c *ReservationController) counts(w http.ResponseWriter, r *http.Request) {
+	if w == nil || r == nil {
+		return
+	}
+
 	filter := ReservationFilter{}
 
 	fromStr := r.URL.Query().Get("from")
 	if fromStr != "" {
-    	from, err := time.Parse(time.RFC3339, fromStr)
-    	if err != nil {
-        	http.Error(w, "invalid param 'from'", http.StatusBadRequest)
-        	return
-    	}
+		from, err := time.Parse(time.RFC3339, fromStr)
+		if err != nil {
+			http.Error(w, "invalid param 'from'", http.StatusBadRequest)
+			return
+		}
 		from = from.UTC()
-    	filter.From = &from
+		filter.From = &from
 	}
 
 	toStr := r.URL.Query().Get("to")
 	if toStr != "" {
-    	to, err := time.Parse(time.RFC3339, toStr)
-    	if err != nil {
-        	http.Error(w, "invalid param 'to'", http.StatusBadRequest)
-        	return
-    	}
+		to, err := time.Parse(time.RFC3339, toStr)
+		if err != nil {
+			http.Error(w, "invalid param 'to'", http.StatusBadRequest)
+			return
+		}
 		to = to.UTC()
-    	filter.To = &to
+		filter.To = &to
 	}
 
 	counts, err := c.ReservationRepo.GetReservationCounts(filter)
@@ -161,13 +188,21 @@ func (c *ReservationController) counts(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(counts)
+	w.WriteHeader(http.StatusOK)
+	if err := json.NewEncoder(w).Encode(counts); err != nil {
+		http.Error(w, "failed to encode counts", http.StatusInternalServerError)
+		return
+	}
 }
 
 // =====================
 // GET /api/reservation/services
 // =====================
 func (c *ReservationController) listServices(w http.ResponseWriter, r *http.Request) {
+	if w == nil || r == nil {
+		return
+	}
+
 	services, err := c.ServiceRepo.GetServices()
 	if err != nil {
 		http.Error(w, "failed to get services", http.StatusInternalServerError)
@@ -175,13 +210,21 @@ func (c *ReservationController) listServices(w http.ResponseWriter, r *http.Requ
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(services)
+	w.WriteHeader(http.StatusOK)
+	if err := json.NewEncoder(w).Encode(services); err != nil {
+		http.Error(w, "failed to encode services", http.StatusInternalServerError)
+		return
+	}
 }
 
 // =====================
 // GET /api/reservation/staff
 // =====================
 func (c *ReservationController) listStaff(w http.ResponseWriter, r *http.Request) {
+	if w == nil || r == nil {
+		return
+	}
+
 	staff, err := c.StaffRepo.GetStaff()
 	if err != nil {
 		http.Error(w, "failed to get staff", http.StatusInternalServerError)
@@ -189,7 +232,11 @@ func (c *ReservationController) listStaff(w http.ResponseWriter, r *http.Request
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(staff)
+	w.WriteHeader(http.StatusOK)
+	if err := json.NewEncoder(w).Encode(staff); err != nil {
+		http.Error(w, "failed to encode staff", http.StatusInternalServerError)
+		return
+	}
 }
 
 // =====================
