@@ -11,22 +11,22 @@ import {
   useNameValidation,
   usePhoneValidation,
 } from '@/utils/useInputValidation';
+import useSWR from 'swr';
+import { useAuth } from '@/global/hooks/auth';
 
-type Staff = { id: string; name: string; role: string };
-type Service = { id: string; title: string; price: number; duration: string };
+type Service = {
+  id: string;
+  nameKey: string;
+  price: number;
+  duration: number;
+};
 
-const staff: Staff[] = [
-  { id: 'anyone', name: 'Anyone', role: 'Any available staff' },
-  { id: 'james', name: 'James Chen', role: 'Colorist' },
-  { id: 'sarah', name: 'Sarah Johnson', role: 'Nail Technician' },
-];
-
-const services: Service[] = [
-  { id: '1', title: 'Haircut & Style', price: 65, duration: '60 min' },
-  { id: '2', title: 'Hair Color', price: 120, duration: '120 min' },
-  { id: '3', title: 'Manicure', price: 35, duration: '45 min' },
-  { id: '4', title: 'Pedicure', price: 50, duration: '60 min' },
-];
+type Staff = {
+  id: string;
+  name: string;
+  role: string;
+  services: Service[];
+};
 
 const timeSlots = [
   '09:00',
@@ -53,6 +53,19 @@ export default function NewReservationPage() {
     type: 'success' | 'error';
   } | null>(null);
   const [currentMonth, setCurrentMonth] = useState(new Date());
+
+  const { authFetch } = useAuth();
+
+  const { data: staff } = useSWR(
+    'reservation/staff',
+    url => authFetch<Staff[]>(url, 'GET'),
+    { revalidateOnMount: true },
+  );
+  const { data: services } = useSWR(
+    'reservation/services',
+    url => authFetch<Service[]>(url, 'GET'),
+    { revalidateOnMount: true },
+  );
 
   const generateCode = () => `RES-${Math.floor(100 + Math.random() * 900)}`;
 
@@ -105,6 +118,8 @@ export default function NewReservationPage() {
               selectedService={selectedService}
               setSelectedService={setSelectedService}
               formatPrice={formatPrice}
+              staff={staff || []}
+              services={services || []}
               t={t}
             />
 
@@ -128,6 +143,8 @@ export default function NewReservationPage() {
               selectedService={selectedService}
               formatPrice={formatPrice}
               onConfirm={handleConfirm}
+              staff={staff || []}
+              services={services || []}
               t={t}
             />
           </div>
@@ -145,6 +162,8 @@ function StaffAndServiceSelector({
   selectedService,
   setSelectedService,
   formatPrice,
+  staff,
+  services,
   t,
 }: {
   selectedStaff: string;
@@ -152,6 +171,8 @@ function StaffAndServiceSelector({
   selectedService: string | null;
   setSelectedService: (id: string | null) => void;
   formatPrice: (price: number) => string;
+  staff: Staff[];
+  services: Service[];
   t: any;
 }) {
   return (
@@ -175,7 +196,9 @@ function StaffAndServiceSelector({
             }`}
           >
             <div>
-              <div className="font-medium">{s.name}</div>
+              <div className="font-medium">
+                {s.name == 'Anyone' ? t(`reservations.staff.anyone`) : s.name}
+              </div>
               <div className="text-xs text-gray-500">
                 {t(`reservation.staff.${s.role}`)}
               </div>
@@ -202,7 +225,7 @@ function StaffAndServiceSelector({
         >
           <div>
             <div className="font-medium">
-              {t(`reservation.services.${service.title}`)}
+              {t(`reservation.services.${service.nameKey}`)}
             </div>
             <div className="text-xs text-gray-500">
               {t(`reservation.durations.${service.duration}`)}
@@ -334,6 +357,8 @@ function BookingSummary({
   selectedService,
   formatPrice,
   onConfirm,
+  staff,
+  services,
   t,
 }: {
   customerName: ReturnType<typeof useNameValidation>;
@@ -344,6 +369,8 @@ function BookingSummary({
   selectedService: string | null;
   formatPrice: (price: number) => string;
   onConfirm: () => void;
+  staff: Staff[];
+  services: Service[];
   t: any;
 }) {
   const selectedServiceObj = services.find(s => s.id === selectedService);
@@ -405,15 +432,17 @@ function BookingSummary({
         />
         <SummaryRow
           label={t('reservation.summary.staff')}
-          value={t(
-            `reservation.staff.${staff.find(s => s.id === selectedStaff)?.name || 'anyone'}`,
-          )}
+          value={
+            selectedStaff == 'anyone'
+              ? t(`reservations.staff.anyone`)
+              : staff.find(s => s.id === selectedStaff)?.name
+          }
         />
         <SummaryRow
           label={t('reservation.summary.service')}
           value={
             selectedServiceObj
-              ? t(`reservation.services.${selectedServiceObj.title}`)
+              ? t(`reservation.services.${selectedServiceObj.nameKey}`)
               : t('reservation.summary.notSelected')
           }
         />

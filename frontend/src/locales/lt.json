@@ -551,6 +551,7 @@
     "staffMember": "Darbuotojas",
     "staff": {
       "Anyone": "Bet kas",
+      "Any": "Bet kuris",
       "Colorist": "Dažytojas",
       "Nail Technician": "Nagų meistrė",
       "Any available staff": "Bet kuris darbuotojas"
@@ -561,9 +562,9 @@
     "time": "Laikas",
     "duration": "Trukmė",
     "durations": {
-      "120 min": "120 min",
-      "45 min": "45 min",
-      "60 min": "60 min",
+      "120": "120 min",
+      "45": "45 min",
+      "60": "60 min",
       "min": "min"
     },
 
@@ -580,16 +581,16 @@
       "staff": "Darbuotojas",
       "time": "Laikas",
       "total": "Iš viso"
-    }
+    },
+    "nameError": "Galimos tik raidės, tarpai, brūkšneliai ir apostrofai",
+    "phoneError": "Galimi tik skaičiai ir neprivalomas \"+\" pradžioje"
   },
 
-  "nameError": "Galimos tik raidės, tarpai, brūkšneliai ir apostrofai",
   "navigation": {
     "next": "Kitas",
     "previous": "Ankstesnis"
   },
   "pageTitle": "Nauja rezervacija",
-  "phoneError": "Galimi tik skaičiai ir neprivalomas \"+\" pradžioje",
   "services": {
     "Hair Color": "Dažymas",
     "Haircut & Style": "Plaukų kirpimas ir stilizavimas",
