@@ -14,13 +14,13 @@ const (
 )
 
 type Reservation struct {
-	Id           	string
-	CustomerName 	string
-	CustomerPhone 	string
-	StaffId        	string
-	ServiceId      	string
-	Datetime     	time.Time
-	Status       	string
+	Id            string    `json:"id"`
+	CustomerName  string    `json:"customerName"`
+	CustomerPhone string    `json:"customerPhone"`
+	StaffId       string    `json:"staffId"`
+	ServiceId     string    `json:"serviceId"`
+	Datetime      time.Time `json:"datetime"`
+	Status        string    `json:"status"`
 }
 
 type ReservationCounts struct {

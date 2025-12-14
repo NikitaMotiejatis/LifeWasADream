@@ -71,7 +71,11 @@ export default function ReservationListItem({
             <span>{serviceTitle}</span>
             <span className="hidden sm:inline">•</span>
             <span className="sm:hidden">|</span>
-            <span>{staffName}</span>
+            <span>
+              {staffName === 'Anyone'
+                ? t('reservations.staff.anyone')
+                : staffName}
+            </span>
           </div>
         </div>
 

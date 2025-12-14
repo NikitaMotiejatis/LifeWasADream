@@ -189,8 +189,8 @@ export default function ReservationList() {
             <ReservationListItem
               key={res.Id}
               reservation={res}
-              services={services}
-              staff={staff}
+              services={services as any}
+              staff={staff as any}
               formatPrice={formatPrice}
               onAction={openModal}
               onEdit={handleEditClick}
@@ -233,8 +233,8 @@ export default function ReservationList() {
             <EditReservationPanel
               mode="edit"
               reservationId={reservationIdToEdit}
-              services={services}
-              staffMembers={staff}
+              services={services as any}
+              staffMembers={staff as any}
               initialReservation={selectedReservation as any}
               onSave={handleSaveEdit}
               onCancel={handleCancelEdit}
