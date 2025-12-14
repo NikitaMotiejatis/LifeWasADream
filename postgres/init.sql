@@ -132,7 +132,7 @@ CREATE TABLE employee (
     email           VARCHAR(512)    NOT NULL UNIQUE,
     phone           VARCHAR(16)     NOT NULL UNIQUE,
     created_at      TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    business_id     INTEGER         NOT NULL REFERENCES business(id),
+    location_id     INTEGER         NOT NULL REFERENCES location(id),
 
     CONSTRAINT valid_password_hash  CHECK (password_hash ~ '^\$2(a|b|x|y)\$[0-9]{2}\$[a-zA-Z0-9./]{53}$'),
     CONSTRAINT valid_email          CHECK (email ~ '^[^\.][a-zA-Z0-9\-\.+]{0,62}[^\.]+@([^\-][a-zA-Z0-9\-]{0,61}[^\-]\.)+[^\-][a-zA-Z0-9\-]{0,61}[^\-]$'),
@@ -506,7 +506,8 @@ AS
         discount,
         tip,
         service_charge,
-        GREATEST(COALESCE(sum_of_totals, 0) + tip + service_charge - discount, 0) AS total
+        GREATEST(COALESCE(sum_of_totals, 0) + service_charge - discount, 0)         AS total,
+        GREATEST(COALESCE(sum_of_totals, 0) + service_charge - discount, 0) + tip   AS total_with_tip
     FROM order_data
     LEFT JOIN item_total_sum
         ON order_data.id = item_total_sum.order_id

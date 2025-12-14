@@ -84,7 +84,7 @@ INSERT INTO location_open (location_id, day_of_the_week, open_at, closes_at) VAL
 -- 4. EMPLOYEES & SHIFTS
 -- ================================================================================================
 
-INSERT INTO employee (id, username, first_name, last_name, password_hash, email, phone, created_at, business_id) VALUES 
+INSERT INTO employee (id, username, first_name, last_name, password_hash, email, phone, created_at, location_id) VALUES 
 -- Morning Roast
 (1, 'jbean', 'James', 'Bean', '$2a$14$ajq8Q7fbtFRQvXpdCq7Jcuy.Rx1h/L4J60Otx.gyNLbAYctGMJ9tK', 'james@morningroast.com', '+15551001', NOW() - INTERVAL '360 days', 1),
 (2, 'slatte', 'Sarah', 'Latte', '$2a$14$ajq8Q7fbtFRQvXpdCq7Jcuy.Rx1h/L4J60Otx.gyNLbAYctGMJ9tK', 'sarah@morningroast.com', '+15551002', NOW() - INTERVAL '350 days', 1),
@@ -210,17 +210,17 @@ INSERT INTO service_employee (service_location_id, employee_id) VALUES
 -- ================================================================================================
 
 -- 10 Orders across the 3 order-based businesses
-INSERT INTO order_data (id, employee_id, created_at, status, currency, discount, tip, service_charge) VALUES 
-(1, 1, NOW() - INTERVAL '5 days', 'CLOSED', 'USD', 0, 100, 0),
-(2, 1, NOW() - INTERVAL '4 days', 'CLOSED', 'USD', 0, 0, 0),
-(3, 2, NOW() - INTERVAL '3 days', 'OPEN', 'USD', 50, 200, 0),
-(4, 5, NOW() - INTERVAL '2 days', 'CLOSED', 'EUR', 0, 0, 0),
-(5, 5, NOW() - INTERVAL '2 days', 'REFUNDED', 'EUR', 0, 0, 0),
-(6, 6, NOW() - INTERVAL '1 day', 'OPEN', 'EUR', 0, 500, 0),
-(7, 9, NOW() - INTERVAL '12 hours', 'CLOSED', 'AUD', 0, 50, 0),
-(8, 9, NOW() - INTERVAL '10 hours', 'CLOSED', 'AUD', 0, 0, 0),
-(9, 10, NOW() - INTERVAL '2 hours', 'OPEN', 'AUD', 0, 100, 0),
-(10, 10, NOW() - INTERVAL '1 hour', 'CLOSED', 'AUD', 100, 0, 0);
+INSERT INTO order_data (employee_id, created_at, status, currency, discount, tip, service_charge) VALUES 
+(1, NOW() - INTERVAL '5 days', 'CLOSED', 'USD', 0, 100, 0),
+(1, NOW() - INTERVAL '4 days', 'CLOSED', 'USD', 0, 0, 0),
+(2, NOW() - INTERVAL '3 days', 'OPEN', 'USD', 50, 200, 0),
+(5, NOW() - INTERVAL '2 days', 'CLOSED', 'EUR', 0, 0, 0),
+(5, NOW() - INTERVAL '2 days', 'REFUNDED', 'EUR', 0, 0, 0),
+(6, NOW() - INTERVAL '1 day', 'OPEN', 'EUR', 0, 500, 0),
+(9, NOW() - INTERVAL '12 hours', 'CLOSED', 'AUD', 0, 50, 0),
+(9, NOW() - INTERVAL '10 hours', 'CLOSED', 'AUD', 0, 0, 0),
+(10, NOW() - INTERVAL '2 hours', 'OPEN', 'AUD', 0, 100, 0),
+(10, NOW() - INTERVAL '1 hour', 'CLOSED', 'AUD', 100, 0, 0);
 
 -- Order Items
 INSERT INTO order_item (order_id, item_id, quantity, discount) VALUES 

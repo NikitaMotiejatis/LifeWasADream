@@ -5,8 +5,9 @@ import "time"
 type OrderRepo interface {
 	GetOrders(filter OrderFilter) ([]OrderSummary, error)
 	GetOrderCounts(filter OrderFilter) (OrderCounts, error)
-	ModifyOrder(orderId int32, order Order) error
-	GetOrderItems(orderId int32) ([]Item, error)
+	CreateOrder(order Order) (int64, error)
+	ModifyOrder(orderId int64, order Order) error
+	GetOrderItems(orderId int64) ([]Item, error)
 }
 
 // Options for filtering orders.

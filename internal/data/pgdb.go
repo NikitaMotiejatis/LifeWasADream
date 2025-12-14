@@ -138,41 +138,94 @@ func (pdb PostgresDb) GetOrderCounts(filter order.OrderFilter) (order.OrderCount
 	//return counts, nil
 }
 
-func (pdb PostgresDb) ModifyOrder(orderId int32, order order.Order) error {
+func (pdb PostgresDb) CreateOrder(order order.Order) (int64, error) {
+	createOrderStatement := `
+	INSERT INTO order_data (employee_id, currency)
+		VALUES (1, 'EUR')
+		RETURNING id
+	`
+
+	orderId := int64(-1)
+	err := pdb.Db.QueryRow(createOrderStatement).Scan(&orderId)
+	if err != nil {
+		slog.Error(err.Error())
+		return 0, ErrInternal
+	}
+
+	err = pdb.ModifyOrder(orderId, order)
+	if err != nil {
+		slog.Error(err.Error())
+		return 0, ErrInternal
+	}
+
+	return orderId, nil
+}
+
+func (pdb PostgresDb) ModifyOrder(orderId int64, order order.Order) error {
+	checkIfOrderIsOpenQuery := `
+	SELECT COUNT(*)
+	FROM order_data
+	WHERE 
+		id = $1
+		AND status = 'OPEN'
+	`
+	matchedOrderCount := 0
+	err := pdb.Db.QueryRow(checkIfOrderIsOpenQuery, orderId).Scan(&matchedOrderCount)
+	if err != nil {
+		slog.Error(err.Error())
+		return ErrInternal
+	}
+	if matchedOrderCount != 1 {
+		slog.Error(fmt.Sprintf("expected to 1 row, got %d.", matchedOrderCount))
+		return ErrInternal
+	}
+
 	transaction, err := pdb.Db.Begin()
 	if err != nil {
 		slog.Error(err.Error())
 		return ErrInternal
 	}
 
-	_, err = pdb.Db.Exec("DELETE FROM order_item WHERE order_id = $1", orderId)
-	if err != nil {
-		slog.Error(err.Error())
-		_ = transaction.Rollback()
-		return ErrInternal
-	}
-
 	for _, item := range order.Items {
-		const insertItemStatement = `
-		INSERT INTO order_item (order_id, item_id, quantity)
-			VALUES ($1, $2, $3)
+		if item.Id > 0 {
+			itemModificationStatement := `
+			UPDATE order_item
+			SET
+				order_id = $2,
+				item_id  = $3,
+				quantity = $4
+			WHERE id = $1
 			RETURNING id
-		`
+			`
+			err = pdb.Db.QueryRow(itemModificationStatement, item.Id, orderId, item.Product.Id, item.Quantity).Scan(&item.Id)
+		} else {
+			itemModificationStatement := `
+			INSERT INTO order_item (order_id, item_id, quantity)
+				VALUES ($1, $2, $3)
+			RETURNING id
+			`
+			err = pdb.Db.QueryRow(itemModificationStatement, orderId, item.Product.Id, item.Quantity).Scan(&item.Id)
+		}
 
-		orderItemId := 0
-		err := pdb.Db.QueryRowx(insertItemStatement, orderId, item.Product.Id, item.Quantity).Scan(&orderItemId)
 		if err != nil {
 			slog.Error(err.Error())
 			_ = transaction.Rollback()
 			return ErrInternal
 		}
 
+		// Very safe
+		nukeVariationsStatement := `
+		DELETE FROM order_item_variation 
+		WHERE order_item_id = $1
+		`
+		_, err = pdb.Db.Exec(nukeVariationsStatement, item.Id)
+
 		for _, variation := range item.SelectedVariations {
 			const insertVariationStatement = `
 			INSERT INTO order_item_variation (order_item_id, variation_id)
 				VALUES ($1, $2)
 			`
-			_, err := pdb.Db.Exec(insertVariationStatement, orderItemId, variation.Id)
+			err = pdb.Db.QueryRow(insertVariationStatement, item.Id, variation.Id).Err()
 			if err != nil {
 				slog.Error(err.Error())
 				_ = transaction.Rollback()
@@ -186,15 +239,15 @@ func (pdb PostgresDb) ModifyOrder(orderId int32, order order.Order) error {
 	return nil
 }
 
-func (pdb PostgresDb) GetOrderItems(orderId int32) ([]order.Item, error) {
+func (pdb PostgresDb) GetOrderItems(orderId int64) ([]order.Item, error) {
 	const query = `
 	SELECT id, item_id, quantity
 	FROM order_item
 	WHERE order_id = $1
 	`
 	var itemsDetails []struct {
-		Id			int32 	`db:"id"`
-		ItemId		int32 	`db:"item_id"`
+		Id			int64 	`db:"id"`
+		ItemId		int64 	`db:"item_id"`
 		Quantity	uint16	`db:"quantity"`
 	}
 
@@ -206,6 +259,7 @@ func (pdb PostgresDb) GetOrderItems(orderId int32) ([]order.Item, error) {
 
 	items := make([]order.Item, len(itemsDetails))
 	for i := range itemsDetails {
+		items[i].Id = itemsDetails[i].Id
 		items[i].Quantity = itemsDetails[i].Quantity
 		items[i].SelectedVariations = []order.Variation{}
 		items[i].Product.Variations = []order.Variation{}
