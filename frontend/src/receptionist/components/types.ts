@@ -1,11 +1,11 @@
-import { Variation, Product } from '@/receptionist/contexts/cartContext';
+import { Variation, Product, type Cents } from '@/receptionist/contexts/cartContext';
 
 export type OrderItem = {
   id: string;
   product: ExtendedProduct;
   quantity: number;
   selectedVariations: Variation[];
-  finalPrice: number;
+  finalPrice: Cents;
 };
 
 export type ExtendedProduct = Product & {

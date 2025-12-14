@@ -18,8 +18,11 @@ export const useAuth = () => {
     try {
       const response = await fetch(`${BACKEND_URL}/auth/login`, {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify(loginInfo),
-        credentials: 'include',
+        credentials: "include",
       });
       const redirectPath = await response.text();
 
@@ -60,6 +63,7 @@ export const useAuth = () => {
       method: "GET",
       headers: {
         [CSRF_TOKEN_NAME]: getCookie(CSRF_TOKEN_NAME) ?? "",
+        Accept: "application/json",
       },
       credentials: 'include',
     })

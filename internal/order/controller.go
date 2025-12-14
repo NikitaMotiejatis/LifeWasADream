@@ -145,7 +145,10 @@ func (c OrderController) updateOrder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c.OrderRepo.ModifyOrder(orderId, order)
+	err = c.OrderRepo.ModifyOrder(orderId, order)
+	if err != nil {
+		http.Error(w, "failed to modify order", http.StatusBadRequest)
+	}
 
 	w.WriteHeader(http.StatusNoContent)
 }

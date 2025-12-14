@@ -11,22 +11,22 @@ import (
 )
 
 type MockDataSource struct {
-	Users			map[string]auth.UserDetails
-	Orders			[]order.OrderSummary
-	Products		[]order.Product
-	Reservations 	[]reservation.Reservation
-	Services 		[]reservation.Service
-	Staff 			[]reservation.Staff
+	Users        map[string]auth.UserDetails
+	Orders       []order.OrderSummary
+	Products     []order.Product
+	Reservations []reservation.Reservation
+	Services     []reservation.Service
+	Staff        []reservation.Staff
 }
 
 func NewMockDataSource() *MockDataSource {
 	return &MockDataSource{
-		Users:    		mockUsers,
-		Orders:   		mockOrders,
-		Products: 		mockProducts,
-		Reservations: 	mockReservations,
-		Services: 		mockServices,
-		Staff:			mockStaff,
+		Users:        mockUsers,
+		Orders:       mockOrders,
+		Products:     mockProducts,
+		Reservations: mockReservations,
+		Services:     mockServices,
+		Staff:        mockStaff,
 	}
 }
 
@@ -59,7 +59,7 @@ func (s MockDataSource) GetOrders(filter order.OrderFilter) ([]order.OrderSummar
 		if filter.To != nil && o.CreatedAt.After(*filter.To) {
 			continue
 		}
-		
+
 		orders = append(orders, o)
 	}
 
@@ -78,10 +78,14 @@ func (s MockDataSource) GetOrderCounts(filter order.OrderFilter) (order.OrderCou
 
 		counts.All += 1
 		switch o.Status {
-		case "open": 			counts.Open += 1
-		case "closed": 			counts.Closed += 1
-		case "refund_pending": 	counts.RefundPending += 1
-		case "refunded": 		counts.Refunded += 1
+		case "open":
+			counts.Open += 1
+		case "closed":
+			counts.Closed += 1
+		case "refund_pending":
+			counts.RefundPending += 1
+		case "refunded":
+			counts.Refunded += 1
 		}
 	}
 
@@ -91,9 +95,9 @@ func (s MockDataSource) GetOrderCounts(filter order.OrderFilter) (order.OrderCou
 func (s MockDataSource) GetOrderItems(orderId int32) ([]order.Item, error) {
 	return []order.Item{
 		{
-			Product: s.Products[0],
+			Product:            s.Products[0],
 			SelectedVariations: []order.Variation{},
-			Quantity: 5,
+			Quantity:           5,
 		},
 		{
 			Product: s.Products[0],
@@ -106,11 +110,26 @@ func (s MockDataSource) GetOrderItems(orderId int32) ([]order.Item, error) {
 			Quantity: 1,
 		},
 		{
-			Product: s.Products[1],
+			Product:            s.Products[1],
 			SelectedVariations: []order.Variation{},
-			Quantity: 3,
+			Quantity:           3,
 		},
 	}, nil
+}
+
+func (s *MockDataSource) CreateOrder(o order.Order) (int64, error) {
+	newId := int64(len(s.Orders) + 1)
+	s.Orders = append([]order.OrderSummary{{
+		Id:        newId,
+		Total:     0,
+		CreatedAt: time.Now(),
+		Status:    "open",
+	}}, s.Orders...)
+	return newId, nil
+}
+
+func (s *MockDataSource) UpdateOrder(orderId int32, o order.Order) error {
+	return nil
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -174,7 +193,7 @@ func (s *MockDataSource) GetReservations(filter reservation.ReservationFilter) (
 				continue
 			}
 		}
-		
+
 		result = append(result, r)
 	}
 	return result, nil
@@ -224,6 +243,47 @@ func (s *MockDataSource) GetReservationItems(reservationID int32) ([]reservation
 	return services, nil
 }
 
+func (s *MockDataSource) CreateReservation(res reservation.ReservationCreate) (int32, error) {
+	newId := int32(len(s.Reservations) + 1)
+	s.Reservations = append(s.Reservations, reservation.Reservation{
+		Id:            fmt.Sprintf("%d", newId),
+		CustomerName:  res.CustomerName,
+		CustomerPhone: res.CustomerPhone,
+		StaffId:       res.StaffId,
+		ServiceId:     res.ServiceId,
+		Datetime:      res.Datetime,
+		Status:        res.Status,
+	})
+	return newId, nil
+}
+
+func (s *MockDataSource) UpdateReservation(id int32, res reservation.ReservationUpdate) error {
+	for i := range s.Reservations {
+		if s.Reservations[i].Id == fmt.Sprintf("%d", id) {
+			if res.CustomerName != nil {
+				s.Reservations[i].CustomerName = *res.CustomerName
+			}
+			if res.CustomerPhone != nil {
+				s.Reservations[i].CustomerPhone = *res.CustomerPhone
+			}
+			if res.ServiceId != nil {
+				s.Reservations[i].ServiceId = *res.ServiceId
+			}
+			if res.StaffId != nil {
+				s.Reservations[i].StaffId = *res.StaffId
+			}
+			if res.Datetime != nil {
+				s.Reservations[i].Datetime = *res.Datetime
+			}
+			if res.Status != nil {
+				s.Reservations[i].Status = *res.Status
+			}
+			break
+		}
+	}
+	return nil
+}
+
 // -------------------------------------------------------------------------------------------------
 // reservation.ServiceRepo implementation ----------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------
@@ -235,7 +295,6 @@ func (s MockDataSource) GetServices() ([]reservation.Service, error) {
 func (s MockDataSource) GetStaff() ([]reservation.Staff, error) {
 	return s.Staff, nil
 }
-
 
 // -------------------------------------------------------------------------------------------------
 // Dummy init data ---------------------------------------------------------------------------------
@@ -277,11 +336,11 @@ func mustParseTime(dateStr string) time.Time {
 }
 
 func mustParseTimeUTC(s string) time.Time {
-    t, err := time.Parse(time.RFC3339, s+"Z")
-    if err != nil {
-        panic(err)
-    }
-    return t.UTC()
+	t, err := time.Parse(time.RFC3339, s+"Z")
+	if err != nil {
+		panic(err)
+	}
+	return t.UTC()
 }
 
 var mockOrders = []order.OrderSummary{
@@ -455,61 +514,61 @@ var mockProducts = []order.Product{
 
 var mockReservations = []reservation.Reservation{
 	{
-		Id:           "RES-301",
-		CustomerName: "Emma Wilson",
+		Id:            "RES-301",
+		CustomerName:  "Emma Wilson",
 		CustomerPhone: "+1234567890",
-		StaffId:        "2",
-		ServiceId:      "1",
-		Datetime:     mustParseTimeUTC("2025-11-28T10:00:00"),
-		Status:       "completed",
+		StaffId:       "2",
+		ServiceId:     "1",
+		Datetime:      mustParseTimeUTC("2025-11-28T10:00:00"),
+		Status:        "completed",
 	},
 	{
-		Id:           "RES-302",
-		CustomerName: "Liam Chen",
+		Id:            "RES-302",
+		CustomerName:  "Liam Chen",
 		CustomerPhone: "+1987654321",
-		StaffId:        "1",
-		ServiceId:      "3",
-		Datetime:     mustParseTimeUTC("2025-11-30T14:30:00"),
-		Status:       "pending",
+		StaffId:       "1",
+		ServiceId:     "3",
+		Datetime:      mustParseTimeUTC("2025-11-30T14:30:00"),
+		Status:        "pending",
 	},
 	{
-		Id:           "RES-303",
-		CustomerName: "Sophia Kim",
+		Id:            "RES-303",
+		CustomerName:  "Sophia Kim",
 		CustomerPhone: "+1555123456",
-		StaffId:        "3",
-		ServiceId:      "4",
-		Datetime:     mustParseTimeUTC("2025-12-20T11:00:00"),
-		Status:       "pending",
+		StaffId:       "3",
+		ServiceId:     "4",
+		Datetime:      mustParseTimeUTC("2025-12-20T11:00:00"),
+		Status:        "pending",
 	},
 	{
-		Id:           "RES-304",
-		CustomerName: "Noah Park",
+		Id:            "RES-304",
+		CustomerName:  "Noah Park",
 		CustomerPhone: "+1443123456",
-		StaffId:        "2",
-		ServiceId:      "2",
-		Datetime:     mustParseTimeUTC("2025-12-18T16:00:00"),
-		Status:       "cancelled",
+		StaffId:       "2",
+		ServiceId:     "2",
+		Datetime:      mustParseTimeUTC("2025-12-18T16:00:00"),
+		Status:        "cancelled",
 	},
 	{
-		Id:           "RES-305",
-		CustomerName: "Ava Brown",
+		Id:            "RES-305",
+		CustomerName:  "Ava Brown",
 		CustomerPhone: "+1333444555",
-		StaffId:        "1",
-		ServiceId:      "1",
-		Datetime:     mustParseTimeUTC("2025-11-20T09:30:00"),
-		Status:       "no_show",
+		StaffId:       "1",
+		ServiceId:     "1",
+		Datetime:      mustParseTimeUTC("2025-11-20T09:30:00"),
+		Status:        "no_show",
 	},
 }
 
 var mockServices = []reservation.Service{
-    {Id: "1", NameKey: "Haircut & Style", Price: 65, Duration: 60},
-    {Id: "2", NameKey: "Hair Color", Price: 120, Duration: 120},
-    {Id: "3", NameKey: "Manicure", Price: 35, Duration: 45},
-    {Id: "4", NameKey: "Pedicure", Price: 50, Duration: 60},
+	{Id: "1", NameKey: "Haircut & Style", Price: 65, Duration: 60},
+	{Id: "2", NameKey: "Hair Color", Price: 120, Duration: 120},
+	{Id: "3", NameKey: "Manicure", Price: 35, Duration: 45},
+	{Id: "4", NameKey: "Pedicure", Price: 50, Duration: 60},
 }
 
 var mockStaff = []reservation.Staff{
-	{Id: "1", Name: "Anyone", Role: "Any", Services: []string{"1","2","3","4"}},
-    {Id: "2", Name: "James Chen", Role: "Colorist", Services: []string{"1","2"}},
-    {Id: "3", Name: "Sarah Johnson", Role: "Nail Technician", Services: []string{"3"}},
+	{Id: "1", Name: "Anyone", Role: "Any", Services: []string{"1", "2", "3", "4"}},
+	{Id: "2", Name: "James Chen", Role: "Colorist", Services: []string{"1", "2"}},
+	{Id: "3", Name: "Sarah Johnson", Role: "Nail Technician", Services: []string{"3"}},
 }

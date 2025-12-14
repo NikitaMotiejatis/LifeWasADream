@@ -8,11 +8,12 @@ import { EditReservationPanel } from '@/receptionist/components/editReservation/
 import Toast from '@/global/components/toast';
 import { useAuth } from '@/global/hooks/auth';
 import useSWR from 'swr';
+import type { Cents } from '@/receptionist/contexts/cartContext';
 
 type Service = {
   id: string;
   nameKey: string;
-  price: number;
+  price: Cents;
 };
 
 type Staff = {
@@ -93,7 +94,7 @@ type ReservationFiltersState = {
 export default function ReservationList() {
   const { t } = useTranslation();
   const { formatPrice } = useCurrency();
-  const { authFetch } = useAuth();
+  const { authFetch, authFetchJson } = useAuth();
 
   const [filters, setFilters] = useState<ReservationFiltersState>({
     searchTerm: '',
@@ -127,12 +128,12 @@ export default function ReservationList() {
 
   const { data: staff } = useSWR(
     'reservation/staff',
-    url => authFetch<Staff[]>(url, 'GET'),
+    url => authFetchJson<Staff[]>(url, 'GET'),
     { revalidateOnMount: true },
   );
   const { data: services } = useSWR(
     'reservation/services',
-    url => authFetch<Service[]>(url, 'GET'),
+    url => authFetchJson<Service[]>(url, 'GET'),
     { revalidateOnMount: true },
   );
 
@@ -295,11 +296,11 @@ function Reservations({
   services,
 }: ReservationsProps) {
   const { t } = useTranslation();
-  const { authFetch } = useAuth();
+  const { authFetchJson } = useAuth();
 
   const { data: reservations, error } = useSWR(
     `reservation?${ordersQuery}`,
-    (url: string) => authFetch<Reservation[]>(url, 'GET'),
+    (url: string) => authFetchJson<Reservation[]>(url, 'GET'),
     { suspense: true, revalidateOnMount: true },
   );
 

@@ -64,14 +64,6 @@ CREATE TABLE role_permission (
     PRIMARY KEY (role_id, permission_id)
 );
 
-DROP TABLE IF EXISTS employee_role CASCADE;
-CREATE TABLE employee_role (
-    employee_id INTEGER NOT NULL REFERENCES employee(id),
-    role_id     INTEGER NOT NULL REFERENCES role(id),
-
-    PRIMARY KEY (employee_id, role_id)
-);
-
 
 DROP TABLE IF EXISTS currency_info CASCADE;
 CREATE TABLE currency_info (
@@ -144,6 +136,15 @@ CREATE TRIGGER employee_valid_created_at
     BEFORE INSERT OR UPDATE ON employee
     FOR EACH ROW
     EXECUTE FUNCTION not_in_future();
+
+
+DROP TABLE IF EXISTS employee_role CASCADE;
+CREATE TABLE employee_role (
+    employee_id INTEGER NOT NULL REFERENCES employee(id),
+    role_id     INTEGER NOT NULL REFERENCES role(id),
+
+    PRIMARY KEY (employee_id, role_id)
+);
 
 
 DROP TABLE IF EXISTS work_shift CASCADE;
@@ -389,13 +390,10 @@ CREATE TABLE appointment (
     service_location_id INTEGER             NOT NULL REFERENCES service_location(id),
     actioned_by         INTEGER             NOT NULL REFERENCES employee(id),
     customer_name       VARCHAR(64)         NOT NULL,
-    customer_surname    VARCHAR(64)         NOT NULL,
-    customer_email      VARCHAR(512)        NOT NULL UNIQUE,
     customer_phone      VARCHAR(16)         NOT NULL UNIQUE,
     appointment_at      TIMESTAMP           NOT NULL,
 	status              appointment_status  NOT NULL DEFAULT 'RESERVED'
 
-    CONSTRAINT valid_customer_email CHECK (customer_email ~ '^[^\.][a-zA-Z0-9\-\.+]{0,62}[^\.]+@([^\-][a-zA-Z0-9\-]{0,61}[^\-]\.)+[^\-][a-zA-Z0-9\-]{0,61}[^\-]$'),
     CONSTRAINT valid_customer_phone CHECK (customer_phone ~ '^\+[0-9]{3,15}$')
 );
 

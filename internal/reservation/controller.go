@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
+	"regexp"
 	"time"
 
 	"github.com/go-chi/chi/v5"
@@ -21,6 +22,7 @@ func (c *ReservationController) Routes() http.Handler {
 
 	router.Get("/", c.listReservations)
 	router.Post("/", c.createReservation)
+	router.Put("/{id}", c.updateReservation)
 	router.Get("/counts", c.counts)
 	router.Get("/services", c.listServices)
 	router.Get("/staff", c.listStaff)
@@ -93,24 +95,57 @@ func (c *ReservationController) createReservation(w http.ResponseWriter, r *http
 		return
 	}
 
-	var reservation Reservation
+	writeJSONError := func(msg string, code int) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(code)
+		_ = json.NewEncoder(w).Encode(map[string]string{"error": msg})
+	}
+
+	var reservation ReservationCreate
 	if err := json.NewDecoder(r.Body).Decode(&reservation); err != nil {
-		http.Error(w, "invalid reservation", http.StatusBadRequest)
+		writeJSONError("invalid reservation payload", http.StatusBadRequest)
 		return
 	}
 
-	reservation.Id = c.generateReservationID()
 	if reservation.Datetime.IsZero() {
-		reservation.Datetime = time.Now()
+		reservation.Datetime = time.Now().UTC()
 	}
 	if reservation.Status == "" {
 		reservation.Status = "pending"
 	}
+	if reservation.CustomerName == "" {
+		writeJSONError("customer name is required", http.StatusBadRequest)
+		return
+	}
+	if reservation.CustomerPhone == "" {
+		writeJSONError("customer phone is required", http.StatusBadRequest)
+		return
+	}
+	// Match DB constraint: + and 3-15 digits
+	phonePattern := regexp.MustCompile(`^\+[0-9]{3,15}$`)
+	if !phonePattern.MatchString(reservation.CustomerPhone) {
+		writeJSONError("customer phone must match +[3-15 digits]", http.StatusBadRequest)
+		return
+	}
+	if reservation.ServiceId == "" {
+		writeJSONError("serviceId is required", http.StatusBadRequest)
+		return
+	}
+
+	id, err := c.ReservationRepo.CreateReservation(reservation)
+	if err != nil {
+		writeJSONError("failed to create reservation", http.StatusInternalServerError)
+		return
+	}
+
+	response := map[string]any{
+		"id": id,
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	if err := json.NewEncoder(w).Encode(reservation); err != nil {
-		http.Error(w, "failed to encode reservation", http.StatusInternalServerError)
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		writeJSONError("failed to encode reservation", http.StatusInternalServerError)
 		return
 	}
 }
@@ -147,6 +182,42 @@ func (c *ReservationController) getReservation(w http.ResponseWriter, r *http.Re
 		http.Error(w, "failed to encode reservation items", http.StatusInternalServerError)
 		return
 	}
+}
+
+// =====================
+// PUT /api/reservation/{id}
+// =====================
+func (c *ReservationController) updateReservation(w http.ResponseWriter, r *http.Request) {
+	if w == nil || r == nil {
+		return
+	}
+
+	writeJSONError := func(msg string, code int) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(code)
+		_ = json.NewEncoder(w).Encode(map[string]string{"error": msg})
+	}
+
+	idStr := chi.URLParam(r, "id")
+	id, err := strconv.ParseInt(idStr, 10, 32)
+	if err != nil {
+		writeJSONError("invalid reservation ID", http.StatusBadRequest)
+		return
+	}
+
+	var update ReservationUpdate
+	if err := json.NewDecoder(r.Body).Decode(&update); err != nil {
+		writeJSONError("invalid reservation", http.StatusBadRequest)
+		return
+	}
+
+	err = c.ReservationRepo.UpdateReservation(int32(id), update)
+	if err != nil {
+		writeJSONError("failed to update reservation", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
 }
 
 // =====================
