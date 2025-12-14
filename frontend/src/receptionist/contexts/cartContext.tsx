@@ -1,18 +1,21 @@
 import { createContext, useContext, useMemo, useState, ReactNode } from 'react';
 import { Currency, useCurrency } from '@/global/contexts/currencyContext';
 
+// Monetary values are kept in cents to avoid floating point drift.
+export type Cents = number;
+
 export type Variation = {
   id: number;
   name: string;
   nameKey?: string;
-  priceModifier: number;
+  priceModifier: Cents;
 };
 
 export type Product = {
   id: string;
   name: string;
   nameKey?: string;
-  basePrice: number;
+  basePrice: Cents;
   categories?: string[];
   variations?: Variation[];
 };
@@ -26,14 +29,14 @@ export type CartItem = {
 
 export type Promotion =
   | { type: 'percent'; value: number }
-  | { type: 'fixed'; value: number }
-  | { type: 'price'; value: number };
+  | { type: 'fixed'; value: Cents }
+  | { type: 'price'; value: Cents };
 
 export type Promotions = Record<string, Promotion>;
 
 export type CartDiscount =
   | { type: 'percent'; value: number }
-  | { type: 'fixed'; value: number };
+  | { type: 'fixed'; value: Cents };
 
 export type CartKey = string;
 
@@ -51,19 +54,19 @@ type CartContextType = {
   cartDiscount: CartDiscount | null;
   setCartDiscount: (discount: CartDiscount | null) => void;
 
-  subtotal: number;
-  discountTotal: number;
-  cartDiscountAmount: number;
-  total: number;
+  subtotal: Cents;
+  discountTotal: Cents;
+  cartDiscountAmount: Cents;
+  total: Cents;
 
   currency: Currency;
   setCurrency: (c: Currency) => void;
-  formatPrice: (price: number) => string;
+  formatPrice: (price: Cents) => string;
 
-  getFinalPrice: (product: Product, variations: Variation[]) => number;
+  getFinalPrice: (product: Product, variations: Variation[]) => Cents;
   getDiscountFor: (
     productId: string,
-  ) => { amount: number; formatted: string } | null;
+  ) => { amount: Cents; formatted: string } | null;
 
   generateKey: (product: Product, variations: Variation[]) => CartKey;
 
@@ -84,6 +87,9 @@ export const generateKey = (
 
   return `${product.id}___${variationKey || 'default'}`;
 };
+
+const clampToCents = (value: number): Cents =>
+  Math.max(0, Math.round(value));
 
 export const CartProvider = ({ initItems = [], children }: { initItems?: CartItem[], children: ReactNode }) => {
   const { currency, setCurrency, formatPrice } = useCurrency();
@@ -151,9 +157,9 @@ export const CartProvider = ({ initItems = [], children }: { initItems?: CartIte
 
   const clearCart = () => setItems({});
 
-  const getFinalPrice = (product: Product, variations: Variation[]): number => {
+  const getFinalPrice = (product: Product, variations: Variation[]): Cents => {
     const extra = variations.reduce((sum, v) => sum + v.priceModifier, 0);
-    return Math.max(0, product.basePrice + extra);
+    return clampToCents(product.basePrice + extra);
   };
 
   const { subtotal, itemDiscountsTotal, cartDiscountAmount, total } =
@@ -171,11 +177,13 @@ export const CartProvider = ({ initItems = [], children }: { initItems?: CartIte
 
         if (promo) {
           if (promo.type === 'percent') {
-            priceAfterPromo *= 1 - promo.value / 100;
+            priceAfterPromo = clampToCents(
+              basePrice * (1 - promo.value / 100),
+            );
           } else if (promo.type === 'fixed') {
-            priceAfterPromo = Math.max(0, priceAfterPromo - promo.value);
+            priceAfterPromo = clampToCents(priceAfterPromo - promo.value);
           } else if (promo.type === 'price') {
-            priceAfterPromo = promo.value;
+            priceAfterPromo = clampToCents(promo.value);
           }
         }
 
@@ -189,7 +197,9 @@ export const CartProvider = ({ initItems = [], children }: { initItems?: CartIte
       let cartDiscountAmount = 0;
       if (cartDiscount && afterItemsTotal > 0) {
         if (cartDiscount.type === 'percent') {
-          cartDiscountAmount = afterItemsTotal * (cartDiscount.value / 100);
+          cartDiscountAmount = clampToCents(
+            afterItemsTotal * (cartDiscount.value / 100),
+          );
         } else if (cartDiscount.type === 'fixed') {
           cartDiscountAmount = Math.min(afterItemsTotal, cartDiscount.value);
         }
@@ -218,9 +228,10 @@ export const CartProvider = ({ initItems = [], children }: { initItems?: CartIte
     const base = getFinalPrice(item.product, item.selectedVariations);
     let discount = 0;
 
-    if (promo.type === 'percent') discount = base * (promo.value / 100);
-    else if (promo.type === 'fixed') discount = promo.value;
-    else if (promo.type === 'price') discount = Math.max(0, base - promo.value);
+    if (promo.type === 'percent')
+      discount = clampToCents(base * (promo.value / 100));
+    else if (promo.type === 'fixed') discount = Math.min(base, promo.value);
+    else if (promo.type === 'price') discount = clampToCents(base - promo.value);
 
     return discount > 0
       ? { amount: discount, formatted: formatPrice(discount) }

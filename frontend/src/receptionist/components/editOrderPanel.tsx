@@ -1,6 +1,10 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useCart, type Variation } from '@/receptionist/contexts/cartContext';
+import {
+  useCart,
+  type Variation,
+  type Cents,
+} from '@/receptionist/contexts/cartContext';
 import VariationModal from '@/receptionist/components/variationModal';
 import ProductGrid from './productGrid';
 import OrderSummary from './orderSummary';
@@ -10,6 +14,9 @@ import { createMockOrderItems } from './utils';
 import { ShoppingCartIcon } from '@/icons/shoppingCartItemIcon';
 import { PlusIcon } from '@/icons/plusIcon';
 import { useCurrency } from '@/global/contexts/currencyContext';
+
+const clampToCents = (value: number): Cents =>
+  Math.max(0, Math.round(value));
 
 export function EditOrderPanel({
   orderId,
@@ -50,11 +57,13 @@ export function EditOrderPanel({
 
         if (promo) {
           if (promo.type === 'percent') {
-            priceAfterPromo *= 1 - promo.value / 100;
+            priceAfterPromo = clampToCents(
+              basePrice * (1 - promo.value / 100),
+            );
           } else if (promo.type === 'fixed') {
-            priceAfterPromo = Math.max(0, priceAfterPromo - promo.value);
+            priceAfterPromo = clampToCents(priceAfterPromo - promo.value);
           } else if (promo.type === 'price') {
-            priceAfterPromo = promo.value;
+            priceAfterPromo = clampToCents(promo.value);
           }
         }
 
@@ -68,7 +77,9 @@ export function EditOrderPanel({
       let cartDiscountAmount = 0;
       if (cartDiscount && afterItemsTotal > 0) {
         if (cartDiscount.type === 'percent') {
-          cartDiscountAmount = afterItemsTotal * (cartDiscount.value / 100);
+          cartDiscountAmount = clampToCents(
+            afterItemsTotal * (cartDiscount.value / 100),
+          );
         } else if (cartDiscount.type === 'fixed') {
           cartDiscountAmount = Math.min(afterItemsTotal, cartDiscount.value);
         }

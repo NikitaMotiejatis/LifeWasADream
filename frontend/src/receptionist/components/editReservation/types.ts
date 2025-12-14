@@ -1,5 +1,12 @@
-export type ReservationStatus = 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'no_show' | 'refund_pending';
+import type { Cents } from '@/receptionist/contexts/cartContext';
 
+export type ReservationStatus =
+  | 'pending'
+  | 'confirmed'
+  | 'completed'
+  | 'cancelled'
+  | 'no_show'
+  | 'refund_pending';
 
 export type Reservation = {
   id: string;
@@ -9,9 +16,9 @@ export type Reservation = {
   duration: number;
   customerName: string;
   customerPhone: string;
-  status: ReservationStatus; 
+  status: ReservationStatus;
   notes: string;
-  price: number;
+  price: Cents;
 };
 
 export type Service = {
@@ -19,7 +26,7 @@ export type Service = {
   name: string;
   nameKey: string;
   duration: number;
-  price: number;
+  price: Cents;
 };
 
 export type Staff = {

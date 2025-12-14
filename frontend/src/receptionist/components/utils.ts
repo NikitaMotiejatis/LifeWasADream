@@ -30,21 +30,21 @@ export const createMockOrderItems = (): OrderItem[] => [
       {
         name: 'Large',
         nameKey: 'variationModal.variations.Large',
-        priceModifier: 0.8,
+        priceModifier: 80,
       },
       {
         name: 'Almond Milk',
         nameKey: 'variationModal.variations.Almond Milk',
-        priceModifier: 0.5,
+        priceModifier: 50,
       },
     ],
-    finalPrice: 4.5 + 0.8 + 0.5,
+    finalPrice: 450 + 80 + 50,
   },
   {
     id: '2',
     product: realMenu.find(p => p.id === 'croissant') || realMenu[1],
     quantity: 1,
     selectedVariations: [],
-    finalPrice: 3.0,
+    finalPrice: 300,
   },
 ];

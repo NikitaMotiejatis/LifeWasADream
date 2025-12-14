@@ -6,6 +6,16 @@ import { useNavigate } from 'react-router-dom';
 
 type PaymentMethod = 'Cash' | 'Card' | 'Gift card';
 
+const splitEvenly = (amount: number, parts: number): number[] => {
+  if (parts <= 0) return [];
+  const base = Math.floor(amount / parts);
+  const remainder = amount % parts;
+
+  return Array.from({ length: parts }, (_, i) =>
+    i < remainder ? base + 1 : base,
+  );
+};
+
 type SplitBillSectionProps = {
   total: number;
   items: CartItem[];
@@ -78,8 +88,9 @@ export const SplitBillSection: React.FC<SplitBillSectionProps> = ({
       }
     });
   } else {
-    const equal = total / numPeople;
-    payerTotals.fill(equal);
+    splitEvenly(total, numPeople).forEach((amount, index) => {
+      payerTotals[index] = amount;
+    });
   }
 
   const activePayers = payerTotals

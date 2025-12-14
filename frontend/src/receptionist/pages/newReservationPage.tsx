@@ -13,11 +13,12 @@ import {
 } from '@/utils/useInputValidation';
 import useSWR from 'swr';
 import { useAuth } from '@/global/hooks/auth';
+import type { Cents } from '@/receptionist/contexts/cartContext';
 
 type Service = {
   id: string;
   nameKey: string;
-  price: number;
+  price: Cents;
   duration: number;
 };
 
@@ -52,6 +53,7 @@ export default function NewReservationPage() {
     message: string;
     type: 'success' | 'error';
   } | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentMonth, setCurrentMonth] = useState(new Date());
 
   const { authFetch } = useAuth();
@@ -67,14 +69,12 @@ export default function NewReservationPage() {
     { revalidateOnMount: true },
   );
 
-  const generateCode = () => `RES-${Math.floor(100 + Math.random() * 900)}`;
-
   const showToast = (message: string, type: 'success' | 'error') => {
     setToast({ message, type });
     setTimeout(() => setToast(null), 5800);
   };
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     if (!customerName.value.trim() || !customerPhone.value.trim()) {
       showToast(t('reservation.toast.missingInfo'), 'error');
       return;
@@ -84,21 +84,44 @@ export default function NewReservationPage() {
       return;
     }
 
-    const code = generateCode();
-    showToast(
-      t('reservation.toast.success', {
-        code,
-        phone: customerPhone.value.trim(),
-      }),
-      'success',
-    );
+    const [hours, minutes] = selectedTime.split(':').map(Number);
+    const dt = new Date(selectedDate);
+    dt.setHours(hours);
+    dt.setMinutes(minutes);
+    dt.setSeconds(0);
+    dt.setMilliseconds(0);
 
-    customerName.reset();
-    customerPhone.reset();
-    setSelectedStaff('anyone');
-    setSelectedService(null);
-    setSelectedDate(null);
-    setSelectedTime(null);
+    const payload = {
+      customerName: customerName.value.trim(),
+      customerPhone: customerPhone.value.trim(),
+      staffId: selectedStaff === 'anyone' ? '' : selectedStaff,
+      serviceId: selectedService,
+      datetime: dt.toISOString(),
+      status: 'pending',
+    };
+
+    try {
+      setIsSubmitting(true);
+      await authFetch('reservation', 'POST', payload);
+      showToast(
+        t('reservation.toast.success', {
+          code: dt.getTime(),
+          phone: customerPhone.value.trim(),
+        }),
+        'success',
+      );
+      customerName.reset();
+      customerPhone.reset();
+      setSelectedStaff('anyone');
+      setSelectedService(null);
+      setSelectedDate(null);
+      setSelectedTime(null);
+    } catch (err) {
+      console.error(err);
+      showToast(t('somethingWentWrong'), 'error');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const customerName = useNameValidation();
@@ -134,19 +157,20 @@ export default function NewReservationPage() {
               i18n={i18n}
             />
 
-            <BookingSummary
-              customerName={customerName}
-              customerPhone={customerPhone}
-              selectedDate={selectedDate}
-              selectedTime={selectedTime}
-              selectedStaff={selectedStaff}
-              selectedService={selectedService}
-              formatPrice={formatPrice}
-              onConfirm={handleConfirm}
-              staff={staff || []}
-              services={services || []}
-              t={t}
-            />
+      <BookingSummary
+        customerName={customerName}
+        customerPhone={customerPhone}
+        selectedDate={selectedDate}
+        selectedTime={selectedTime}
+        selectedStaff={selectedStaff}
+        selectedService={selectedService}
+        formatPrice={formatPrice}
+        onConfirm={handleConfirm}
+        isSubmitting={isSubmitting}
+        staff={staff || []}
+        services={services || []}
+        t={t}
+      />
           </div>
         </main>
 
@@ -360,6 +384,7 @@ function BookingSummary({
   staff,
   services,
   t,
+  isSubmitting = false,
 }: {
   customerName: ReturnType<typeof useNameValidation>;
   customerPhone: ReturnType<typeof usePhoneValidation>;
@@ -372,6 +397,7 @@ function BookingSummary({
   staff: Staff[];
   services: Service[];
   t: any;
+  isSubmitting?: boolean;
 }) {
   const selectedServiceObj = services.find(s => s.id === selectedService);
 
@@ -456,9 +482,10 @@ function BookingSummary({
 
       <button
         onClick={onConfirm}
-        className="w-full rounded-lg bg-blue-600 py-4 font-semibold text-white transition hover:bg-blue-700"
+        disabled={isSubmitting}
+        className="w-full rounded-lg bg-blue-600 py-4 font-semibold text-white transition hover:bg-blue-700 disabled:opacity-60"
       >
-        {t('reservation.confirmButton')}
+        {isSubmitting ? t('payment.processing') : t('reservation.confirmButton')}
       </button>
 
       <p className="mt-3 text-center text-xs text-gray-500">

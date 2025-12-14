@@ -8,11 +8,12 @@ import { EditReservationPanel } from '@/receptionist/components/editReservation/
 import Toast from '@/global/components/toast';
 import { useAuth } from '@/global/hooks/auth';
 import useSWR from 'swr';
+import type { Cents } from '@/receptionist/contexts/cartContext';
 
 type Service = {
   id: string;
   nameKey: string;
-  price: number;
+  price: Cents;
 };
 
 type Staff = {

@@ -3,10 +3,12 @@ package payment
 import (
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/stripe/stripe-go/v81"
 	"github.com/stripe/stripe-go/v81/checkout/session"
+	"strconv"
 )
 
 var (
@@ -22,23 +24,33 @@ type PaymentService struct {
 	StripePublicKey string
 	SuccessURL      string
 	CancelURL       string
-	// TODO: Add database connection when orders are implemented
+	OrderTotals     OrderTotalProvider
+}
+
+type OrderTotalProvider interface {
+	GetOrderTotal(orderID int64) (int64, string, error)
 }
 
 // CreateStripeCheckoutSession creates a Stripe Checkout session
 func (s *PaymentService) CreateStripeCheckoutSession(req StripeCheckoutRequest) (*StripeCheckoutResponse, error) {
-	if req.Amount <= 0 {
+	if s.OrderTotals == nil {
+		return nil, fmt.Errorf("%w: order total provider not configured", ErrInternal)
+	}
+
+	amountCents, currency, err := s.OrderTotals.GetOrderTotal(req.OrderID)
+	if err != nil {
+		return nil, ErrInternal
+	}
+	if amountCents <= 0 {
 		return nil, ErrInvalidAmount
 	}
-
-	if req.Currency == "" {
-		req.Currency = "eur" // TO CHANGE: default to EUR
+	if currency == "" {
+		return nil, ErrInvalidCurrency
 	}
 
-	stripe.Key = s.StripeSecretKey
+	stripeCurrency := strings.ToLower(currency)
 
-	// Convert amount to cents (Stripe requires smallest currency unit)
-	amountInCents := int64(req.Amount * 100)
+	stripe.Key = s.StripeSecretKey
 
 	params := &stripe.CheckoutSessionParams{
 		PaymentMethodTypes: stripe.StringSlice([]string{
@@ -47,12 +59,12 @@ func (s *PaymentService) CreateStripeCheckoutSession(req StripeCheckoutRequest) 
 		LineItems: []*stripe.CheckoutSessionLineItemParams{
 			{
 				PriceData: &stripe.CheckoutSessionLineItemPriceDataParams{
-					Currency: stripe.String(req.Currency),
+					Currency: stripe.String(stripeCurrency),
 					ProductData: &stripe.CheckoutSessionLineItemPriceDataProductDataParams{
 						Name:        stripe.String(fmt.Sprintf("Order #%d", req.OrderID)),
 						Description: stripe.String(fmt.Sprintf("Payment for Order #%d", req.OrderID)),
 					},
-					UnitAmount: stripe.Int64(amountInCents),
+					UnitAmount: stripe.Int64(amountCents),
 				},
 				Quantity: stripe.Int64(1),
 			},
@@ -104,7 +116,7 @@ func (s *PaymentService) VerifyStripePayment(sessionID string) (*Payment, error)
 	// TODO: Update payment status in database when orders are implemented
 	payment := &Payment{
 		StripeSessionID: sess.ID,
-		Amount:          float64(sess.AmountTotal) / 100,
+		AmountCents:     int64(sess.AmountTotal),
 		Currency:        string(sess.Currency),
 		PaymentMethod:   "stripe",
 		Status:          "completed",
@@ -113,8 +125,9 @@ func (s *PaymentService) VerifyStripePayment(sessionID string) (*Payment, error)
 
 	// Extract order_id from metadata
 	if orderID, ok := sess.Metadata["order_id"]; ok {
-		// payment.OrderID = orderID // TODO: Parse and set when database is ready
-		_ = orderID
+		if parsed, err := strconv.ParseInt(orderID, 10, 64); err == nil {
+			payment.OrderID = parsed
+		}
 	}
 
 	return payment, nil
