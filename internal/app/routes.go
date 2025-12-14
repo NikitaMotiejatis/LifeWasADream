@@ -70,10 +70,21 @@ func setupApiRoutes(router *chi.Mux, config config.Config, authMiddleware func(h
 	}
 
 	{
+		// Create SMS service for reservations
+		smsService := reservation.NewTwilioSMSService(
+			config.TwilioAccountSid,
+			config.TwilioAuthToken,
+			config.TwilioFromNumber,
+			config.TwilioEnabled,
+			data.NewMockDataSource(), // ServiceRepo
+			data.NewMockDataSource(), // StaffRepo
+		)
+
 		r := reservation.ReservationController{
 			ReservationRepo: db,
 			ServiceRepo:     db,
 			StaffRepo:       db,
+			SMSService:      smsService,
 		}
 
 		apiRouter.With(authMiddleware).Mount("/reservation", r.Routes())

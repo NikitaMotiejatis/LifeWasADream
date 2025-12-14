@@ -26,6 +26,12 @@ type Config struct {
 	StripeSecretKey     string
 	StripePublicKey     string
 	StripeWebhookSecret string
+
+	// Twilio SMS configuration
+	TwilioAccountSid string
+	TwilioAuthToken  string
+	TwilioFromNumber string
+	TwilioEnabled    bool
 }
 
 func LoadConfig() (*Config, error) {
@@ -33,6 +39,8 @@ func LoadConfig() (*Config, error) {
 	if err != nil {
 		return &Config{}, fmt.Errorf("failed to read VITE_PORT: %w", err)
 	}
+
+	twilioEnabled := os.Getenv("TWILIO_ENABLED") == "true"
 
 	config := &Config{
 		Url:         os.Getenv("URL"),
@@ -51,6 +59,11 @@ func LoadConfig() (*Config, error) {
 		StripeSecretKey:     os.Getenv("STRIPE_SECRET_KEY"),
 		StripePublicKey:     os.Getenv("STRIPE_PUBLIC_KEY"),
 		StripeWebhookSecret: os.Getenv("STRIPE_WEBHOOK_SECRET"),
+
+		TwilioAccountSid: os.Getenv("TWILIO_ACCOUNT_SID"),
+		TwilioAuthToken:  os.Getenv("TWILIO_AUTH_TOKEN"),
+		TwilioFromNumber: os.Getenv("TWILIO_FROM_NUMBER"),
+		TwilioEnabled:    twilioEnabled,
 	}
 
 	return config, nil

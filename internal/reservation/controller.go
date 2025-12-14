@@ -14,6 +14,7 @@ type ReservationController struct {
 	ReservationRepo ReservationRepo
 	ServiceRepo     ServiceRepo
 	StaffRepo       StaffRepo
+	SMSService      SMSService
 }
 
 // Routes sets up chi router for reservations
@@ -140,6 +141,15 @@ func (c *ReservationController) createReservation(w http.ResponseWriter, r *http
 
 	response := map[string]any{
 		"id": id,
+	}
+
+	// Send SMS confirmation if status is confirmed and SMS service is available
+	if reservation.Status == string(ReservationConfirmed) && c.SMSService != nil {
+		if err := c.SMSService.SendReservationConfirmation(&reservation); err != nil {
+			// Log the error but don't fail the reservation creation
+			// TODO: Add proper logging
+			_ = err
+		}
 	}
 
 	w.Header().Set("Content-Type", "application/json")

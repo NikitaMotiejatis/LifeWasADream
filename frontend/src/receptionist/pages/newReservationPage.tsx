@@ -73,6 +73,9 @@ export default function NewReservationPage() {
     setToast({ message, type });
     setTimeout(() => setToast(null), 5800);
   };
+  
+  const customerName = useNameValidation();
+  const customerPhone = usePhoneValidation();
 
   const handleConfirm = async () => {
     if (!customerName.value.trim() || !customerPhone.value.trim()) {
@@ -97,12 +100,12 @@ export default function NewReservationPage() {
       staffId: selectedStaff === 'anyone' ? '' : selectedStaff,
       serviceId: selectedService,
       datetime: dt.toISOString(),
-      status: 'pending',
+      status: 'confirmed', // This will trigger SMS sending
     };
 
     try {
       setIsSubmitting(true);
-      await authFetch('reservation', 'POST', JSON.stringify(payload));
+      const response = await authFetch('reservation', 'POST', JSON.stringify(payload));
       showToast(
         t('reservation.toast.success', {
           code: dt.getTime(),
@@ -110,22 +113,21 @@ export default function NewReservationPage() {
         }),
         'success',
       );
+
+      // Reset form
       customerName.reset();
       customerPhone.reset();
       setSelectedStaff('anyone');
       setSelectedService(null);
       setSelectedDate(null);
       setSelectedTime(null);
-    } catch (err) {
-      console.error(err);
-      showToast(t('somethingWentWrong'), 'error');
+    } catch (error) {
+      console.error('Failed to create reservation:', error);
+      showToast(t('reservation.toast.error'), 'error');
     } finally {
       setIsSubmitting(false);
     }
   };
-
-  const customerName = useNameValidation();
-  const customerPhone = usePhoneValidation();
 
   return (
     <div className="flex h-screen">
