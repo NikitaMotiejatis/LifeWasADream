@@ -109,6 +109,30 @@ CREATE TRIGGER business_valid_created_at
     FOR EACH ROW
     EXECUTE FUNCTION not_in_future();
 
+-- ------------------------------------------------------------------------------------------------
+-- Location data ----------------------------------------------------------------------------------
+-- ------------------------------------------------------------------------------------------------
+
+DROP TABLE IF EXISTS location CASCADE;
+CREATE TABLE location (
+	id              INTEGER     PRIMARY KEY,
+	business_id     INTEGER     NOT NULL REFERENCES business(id),
+	country_code    CHAR(3)     NOT NULL REFERENCES country(code),
+	city            VARCHAR(64) NOT NULL,
+    street          VARCHAR(64) NOT NULL,
+    postal_code     VARCHAR(16) NOT NULL
+);
+
+DROP TABLE IF EXISTS location_open CASCADE;
+CREATE TABLE location_open (
+	location_id 	INTEGER NOT NULL,
+	day_of_the_week weekday NOT NULL,
+	open_at 	    TIME	NOT NULL,
+	closes_at 	    TIME 	NOT NULL,
+
+    CONSTRAINT open_before_close CHECK (open_at < closes_at),
+    PRIMARY KEY(location_id, day_of_the_week)
+);
 
 -- ------------------------------------------------------------------------------------------------
 -- Employee Data --------------------------------------------------------------------------------------
@@ -163,31 +187,6 @@ CREATE TABLE employee_shift (
     work_shift_id   INTEGER NOT NULL REFERENCES work_shift(id),
 
     PRIMARY KEY(user_id, work_shift_id)
-);
-
--- ------------------------------------------------------------------------------------------------
--- Location data ----------------------------------------------------------------------------------
--- ------------------------------------------------------------------------------------------------
-
-DROP TABLE IF EXISTS location CASCADE;
-CREATE TABLE location (
-	id              INTEGER     PRIMARY KEY,
-	business_id     INTEGER     NOT NULL REFERENCES business(id),
-	country_code    CHAR(3)     NOT NULL REFERENCES country(code),
-	city            VARCHAR(64) NOT NULL,
-    street          VARCHAR(64) NOT NULL,
-    postal_code     VARCHAR(16) NOT NULL
-);
-
-DROP TABLE IF EXISTS location_open CASCADE;
-CREATE TABLE location_open (
-	location_id 	INTEGER NOT NULL,
-	day_of_the_week weekday NOT NULL,
-	open_at 	    TIME	NOT NULL,
-	closes_at 	    TIME 	NOT NULL,
-
-    CONSTRAINT open_before_close CHECK (open_at < closes_at),
-    PRIMARY KEY(location_id, day_of_the_week)
 );
 
 -- ------------------------------------------------------------------------------------------------

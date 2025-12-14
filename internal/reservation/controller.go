@@ -3,8 +3,8 @@ package reservation
 import (
 	"encoding/json"
 	"net/http"
-	"strconv"
 	"regexp"
+	"strconv"
 	"time"
 
 	"github.com/go-chi/chi/v5"
@@ -14,6 +14,7 @@ type ReservationController struct {
 	ReservationRepo ReservationRepo
 	ServiceRepo     ServiceRepo
 	StaffRepo       StaffRepo
+	SMSService      SMSService
 }
 
 // Routes sets up chi router for reservations
@@ -101,7 +102,7 @@ func (c *ReservationController) createReservation(w http.ResponseWriter, r *http
 		_ = json.NewEncoder(w).Encode(map[string]string{"error": msg})
 	}
 
-	var reservation ReservationCreate
+	var reservation Reservation
 	if err := json.NewDecoder(r.Body).Decode(&reservation); err != nil {
 		writeJSONError("invalid reservation payload", http.StatusBadRequest)
 		return
@@ -140,6 +141,15 @@ func (c *ReservationController) createReservation(w http.ResponseWriter, r *http
 
 	response := map[string]any{
 		"id": id,
+	}
+
+	// Send SMS confirmation if status is confirmed and SMS service is available
+	if reservation.Status == string(ReservationConfirmed) && c.SMSService != nil {
+		if err := c.SMSService.SendReservationConfirmation(&reservation); err != nil {
+			// Log the error but don't fail the reservation creation
+			// TODO: Add proper logging
+			_ = err
+		}
 	}
 
 	w.Header().Set("Content-Type", "application/json")

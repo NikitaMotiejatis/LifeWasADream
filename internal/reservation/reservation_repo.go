@@ -6,7 +6,7 @@ type ReservationRepo interface {
 	GetReservations(filter ReservationFilter) ([]Reservation, error)
 	GetReservationCounts(filter ReservationFilter) (ReservationCounts, error)
 	GetReservationItems(reservationId int32) ([]Service, error)
-	CreateReservation(res ReservationCreate) (int32, error)
+	CreateReservation(res Reservation) (int32, error)
 	UpdateReservation(id int32, res ReservationUpdate) error
 }
 
