@@ -7,7 +7,7 @@ import {
 import TrashcanIcon from '@/icons/trashcanIcon';
 import { useNavigate, useParams } from 'react-router-dom';
 import { SplitBillSection } from './splitBillSection';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Toast from '@/global/components/toast';
 import {
   createStripeCheckout,
@@ -41,10 +41,11 @@ export default function OrderSummary({
     tipAmount,
     total,
     generateKey,
+    isSplitMode,
+    setIsSplitMode,
   } = useCart();
 
   const hasItems = itemsList.length > 0;
-  const [isSplitEnabled, setIsSplitEnabled] = useState(false);
 
   const navigate = useNavigate();
 
@@ -52,6 +53,14 @@ export default function OrderSummary({
     message: string;
     type: 'success' | 'error';
   } | null>(null);
+
+  // Sync local split state with context
+  useEffect(() => {
+    // Reset split mode when cart is cleared or no items
+    if (!hasItems && isSplitMode) {
+      setIsSplitMode(false);
+    }
+  }, [hasItems, isSplitMode, setIsSplitMode]);
 
   const showToast = (
     message: string,
@@ -67,8 +76,12 @@ export default function OrderSummary({
       tip: {
         amount: tipAmount,
         total: total
-      }
-    } as { items: CartItem[]; tip: any };
+      },
+      isSplit: isSplitMode,
+      individualTips: isSplitMode ? Array.from({ length: 50 }, (_, i) => 
+        ({ index: i, amount: 0 }) // Placeholder for individual tips
+      ) : []
+    };
 
     try {
       const orderId = params.orderId;
@@ -99,8 +112,9 @@ export default function OrderSummary({
         tip: {
           amount: tipAmount,
           total: total
-        }
-      } as { items: CartItem[]; tip: any };
+        },
+        isSplit: isSplitMode
+      };
       let orderId: number;
 
       const existingOrderId = params.orderId;
@@ -145,6 +159,10 @@ export default function OrderSummary({
       );
       console.error('Stripe payment error:', error);
     }
+  };
+
+  const handleSplitEnabledChange = (enabled: boolean) => {
+    setIsSplitMode(enabled);
   };
 
   return (
@@ -207,7 +225,7 @@ export default function OrderSummary({
             )}
 
             {/* Tip Display - Only show if not in split mode */}
-            {tipAmount > 0 && !isSplitEnabled && (
+            {tipAmount > 0 && !isSplitMode && (
               <div className="flex justify-between text-green-600">
                 <span>{t('orderSummary.tip')}</span>
                 <span>+ {formatPrice(tipAmount)}</span>
@@ -219,20 +237,20 @@ export default function OrderSummary({
                 {t('orderSummary.total')}
               </span>
               <span className="text-2xl font-bold text-blue-600 xl:text-2xl">
-                {formatPrice(isSplitEnabled ? totalWithoutTip : total)}
+                {formatPrice(isSplitMode ? totalWithoutTip : total)}
               </span>
             </div>
           </div>
 
           {showPaymentSection ? (
             <>
-              {!isSplitEnabled && <TipSection />}
+              {!isSplitMode && <TipSection />}
               
               <SplitBillSection
                 total={totalWithoutTip}
                 items={itemsList}
                 formatPrice={formatPrice}
-                onSplitEnabledChange={setIsSplitEnabled}
+                onSplitEnabledChange={handleSplitEnabledChange}
                 onCompletePayment={payments => {
                   console.log('All paid with individual tips:', payments);
                   showToast(t('orderSummary.allPaid'));
@@ -268,7 +286,7 @@ export default function OrderSummary({
 function CartItemRow({ item }: { item: CartItem }) {
   const { t } = useTranslation();
   const { product, selectedVariations, quantity } = item;
-  const { formatPrice, updateQuantity, removeItem, getFinalPrice } = useCart();
+  const { formatPrice, updateQuantity, removeItem, getFinalPrice, generateKey } = useCart();
 
   const finalPrice = getFinalPrice(product, selectedVariations);
   const key = generateKey(product, selectedVariations);

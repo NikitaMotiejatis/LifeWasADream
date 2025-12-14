@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import DropdownSelector from '@/global/components/dropdownSelector';
 import { useCart, type CartItem } from '@/receptionist/contexts/cartContext';
 import { useNavigate } from 'react-router-dom';
+import { TipInput } from './tipInput';
 
 type PaymentMethod = 'Cash' | 'Card' | 'Gift card';
 
@@ -22,7 +23,7 @@ type SplitBillSectionProps = {
   formatPrice: (amount: number) => string;
   onSplitEnabledChange?: (enabled: boolean) => void;
   onCompletePayment?: (
-    payments: { amount: number; method: PaymentMethod }[],
+    payments: { amount: number; method: PaymentMethod; tip: number }[],
   ) => void;
   onStripePayment?: () => void;
 };
@@ -44,6 +45,8 @@ export const SplitBillSection: React.FC<SplitBillSectionProps> = ({
     clearIndividualTips 
   } = useCart();
 
+  const MAX_PAYERS = 50;
+  
   const [isSplitEnabled, setIsSplitEnabled] = useState(false);
   const [numPeople, setNumPeople] = useState(2);
   const [splitMode, setSplitMode] = useState<'equal' | 'byItems'>('equal');
@@ -63,18 +66,11 @@ export const SplitBillSection: React.FC<SplitBillSectionProps> = ({
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('Cash');
 
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>(
-    Array(50).fill('Cash'),
-  );
-  const [paidStatus, setPaidStatus] = useState<boolean[]>(
-    Array(50).fill(false),
-  );
-
-  const [showTipInputs, setShowTipInputs] = useState<boolean[]>(
-    Array(9999).fill(false)
+    Array(MAX_PAYERS).fill('Cash'),
   );
   
-  const [tipInputValues, setTipInputValues] = useState<string[]>(
-    Array(9999).fill('')
+  const [paidStatus, setPaidStatus] = useState<boolean[]>(
+    Array(MAX_PAYERS).fill(false),
   );
 
   const anyPaid = paidStatus.some(Boolean);
@@ -98,93 +94,41 @@ export const SplitBillSection: React.FC<SplitBillSectionProps> = ({
     return base + mod;
   };
 
-  const baseAmounts = Array.from({ length: numPeople }, () => 0);
+  const calculateBaseAmounts = () => {
+    const baseAmounts = Array.from({ length: numPeople }, () => 0);
 
-  if (splitMode === 'byItems') {
-    expandedItems.forEach((item, idx) => {
-      const payer = assignments[idx] || 1;
-      if (payer >= 1 && payer <= numPeople) {
-        baseAmounts[payer - 1] += getUnitPrice(item);
-      }
-    });
-  } else {
-    const equal = total / numPeople;
-    baseAmounts.fill(equal);
-  }
+    if (splitMode === 'byItems') {
+      expandedItems.forEach((item, idx) => {
+        const payer = assignments[idx] || 1;
+        if (payer >= 1 && payer <= numPeople) {
+          baseAmounts[payer - 1] += getUnitPrice(item);
+        }
+      });
+    } else {
+      const equalAmount = total / numPeople;
+      baseAmounts.fill(equalAmount);
+    }
 
-  const payerTotals = baseAmounts.map((base, index) => {
-    const tip = individualTips[index] || 0;
-    return base + tip;
-  });
+    return baseAmounts;
+  };
 
-  const activePayers = payerTotals
-    .map((amount, i) => ({ index: i + 1, amount, baseAmount: baseAmounts[i] }))
-    .filter(p => p.amount > 0);
+  const baseAmounts = calculateBaseAmounts();
+  
+  const activePayers = baseAmounts
+    .map((base, index) => ({ 
+      index: index + 1, 
+      baseAmount: base,
+      tipAmount: individualTips[index] || 0,
+      totalAmount: base + (individualTips[index] || 0)
+    }))
+    .filter(p => p.totalAmount > 0);
 
   const allPaid = activePayers.every(p => paidStatus[p.index - 1]);
-
-  const handleTipInputToggle = (index: number) => {
-    if (paidStatus[index] || index < 0 || index >= 50) return;
-    
-    setShowTipInputs(prev => {
-      const newShowInputs = [...prev];
-      newShowInputs[index] = !newShowInputs[index];
-      return newShowInputs;
-    });
-    
-    if (!showTipInputs[index]) {
-      setTipInputValues(prev => {
-        const newValues = [...prev];
-        newValues[index] = '';
-        return newValues;
-      });
-    }
-  };
-
-  const handleTipInputChange = (index: number, value: string) => {
-    if (paidStatus[index] || index < 0 || index >= 50) return;
-    
-
-    if (value === '' || /^(\d+)?(\.\d{0,2})?$/.test(value)) {
-      if ((value.match(/\./g) || []).length <= 1) {
-        setTipInputValues(prev => {
-          const newValues = [...prev];
-          newValues[index] = value;
-          return newValues;
-        });
-        
-        if (value === '' || value === '.' || value === '0.') {
-          setIndividualTip(index, 0);
-        } else {
-          const amount = parseFloat(value);
-          if (!isNaN(amount)) {
-            setIndividualTip(index, amount);
-          }
-        }
-      }
-    }
-  };
-
-  const handleTipSubmit = (index: number) => {
-    if (paidStatus[index] || index < 0 || index >= 50) return;
-    
-    const value = tipInputValues[index];
-    let amount = 0;
-    
-    if (value && value !== '.' && value !== '0.') {
-      amount = parseFloat(value) || 0;
-    }
-    
-    setIndividualTip(index, amount);
-    handleTipInputToggle(index);
-  };
 
   const handleSplitEnable = () => {
     setIsSplitEnabled(true);
     clearIndividualTips();
-    setPaidStatus(Array(9999).fill(false));
-    setShowTipInputs(Array(9999).fill(false));
-    setTipInputValues(Array(9999).fill(''));
+    setPaidStatus(Array(MAX_PAYERS).fill(false));
   };
 
   const handleSplitDisable = () => {
@@ -195,15 +139,21 @@ export const SplitBillSection: React.FC<SplitBillSectionProps> = ({
   };
 
   const handlePaymentMethodChange = (payerIndex: number, method: PaymentMethod) => {
-    if (paidStatus[payerIndex] || payerIndex < 0 || payerIndex >= 50) return;
+    if (paidStatus[payerIndex] || payerIndex < 0 || payerIndex >= MAX_PAYERS) return;
     
-    const newMethods = [...paymentMethods];
-    newMethods[payerIndex] = method;
-    setPaymentMethods(newMethods);
+    setPaymentMethods(prev => {
+      const newMethods = [...prev];
+      newMethods[payerIndex] = method;
+      return newMethods;
+    });
+  };
+
+  const handleIndividualTipChange = (payerIndex: number, amount: number) => {
+    setIndividualTip(payerIndex, amount);
   };
 
   const handlePayerPayment = (payerIndex: number) => {
-    if (payerIndex < 0 || payerIndex >= 50) return;
+    if (payerIndex < 0 || payerIndex >= MAX_PAYERS) return;
     
     const newPaid = [...paidStatus];
     newPaid[payerIndex] = true;
@@ -213,9 +163,9 @@ export const SplitBillSection: React.FC<SplitBillSectionProps> = ({
     if (allActivePaid && onCompletePayment) {
       onCompletePayment(
         activePayers.map(p => ({
-          amount: p.amount,
+          amount: p.totalAmount,
           method: paymentMethods[p.index - 1] || 'Cash',
-          tip: individualTips[p.index - 1] || 0,
+          tip: p.tipAmount,
         })),
       );
     }
@@ -317,7 +267,7 @@ export const SplitBillSection: React.FC<SplitBillSectionProps> = ({
               {numPeople}
             </span>
             <button
-              onClick={() => setNumPeople(Math.min(50, numPeople + 1))}
+              onClick={() => setNumPeople(Math.min(MAX_PAYERS, numPeople + 1))}
               disabled={anyPaid}
               className="h-8 w-8 rounded-full bg-blue-600 text-lg font-bold text-white hover:bg-blue-700 disabled:opacity-70"
             >
@@ -395,7 +345,7 @@ export const SplitBillSection: React.FC<SplitBillSectionProps> = ({
                           setAssignments(newAssign);
                         }
                       }}
-                      buttonClassName="w-36 px-3 py-2 text-sm"
+                      buttonClassName={`w-36 px-3 py-2 text-sm ${anyPaid ? 'opacity-50 cursor-not-allowed' : ''}`}
                       menuClassName="w-36 right-0"
                     />
                   </div>
@@ -406,16 +356,10 @@ export const SplitBillSection: React.FC<SplitBillSectionProps> = ({
         )}
 
         <div className="space-y-4">
-          {activePayers.map(({ index, amount, baseAmount }) => {
+          {activePayers.map(({ index, baseAmount, tipAmount, totalAmount }) => {
             const payerIndex = index - 1;
             const paid = paidStatus[payerIndex];
             const method = paymentMethods[payerIndex] || 'Cash';
-            const showTipInput = showTipInputs[payerIndex];
-            const individualTip = individualTips[payerIndex] || 0;
-            const tipInputValue = tipInputValues[payerIndex] || '';
-
-            // FIX: Each payer is only locked if THEY are paid
-            const isPayerLocked = paid;
 
             return (
               <div
@@ -433,7 +377,7 @@ export const SplitBillSection: React.FC<SplitBillSectionProps> = ({
                       {paid && t('orderSummary.paid')}
                     </span>
                     <span className="text-xl font-bold text-blue-600">
-                      {formatPrice(amount)}
+                      {formatPrice(totalAmount)}
                     </span>
                   </div>
                   
@@ -442,83 +386,26 @@ export const SplitBillSection: React.FC<SplitBillSectionProps> = ({
                       <span>{t('orderSummary.baseAmount')}:</span>
                       <span>{formatPrice(baseAmount)}</span>
                     </div>
-                    {individualTip > 0 && (
+                    {tipAmount > 0 && (
                       <div className="flex justify-between text-green-600">
                         <span>{t('orderSummary.tip')}:</span>
-                        <span>+{formatPrice(individualTip)}</span>
+                        <span>+{formatPrice(tipAmount)}</span>
                       </div>
                     )}
                   </div>
                   
                   {/* Individual Tip Input - Only show if this payer is NOT paid */}
-                  {!paid && !showTipInput && individualTip === 0 && (
-                    <button
-                      onClick={() => handleTipInputToggle(payerIndex)}
-                      className="w-full rounded-lg border border-gray-300 py-2 text-sm font-medium hover:bg-gray-50"
-                      disabled={isPayerLocked}
-                    >
-                      {t('orderSummary.addIndividualTip')}
-                    </button>
-                  )}
-                  
-                  {!paid && showTipInput && (
-                    <div className="mb-3 rounded-lg border border-gray-300 bg-white p-3">
-                      <label className="mb-2 block text-sm font-medium text-gray-700">
-                        {t('orderSummary.individualTipForPayer', { payer: index })}
-                      </label>
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="text"
-                          inputMode="decimal"
-                          value={tipInputValue}
-                          onChange={(e) => handleTipInputChange(payerIndex, e.target.value)}
-                          placeholder="0.00"
-                          className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-right focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                          disabled={isPayerLocked}
-                          autoFocus
-                        />
-                        <span className="text-sm font-medium text-gray-600">€</span>
-                      </div>
-                      <div className="mt-2 flex gap-2">
-                        <button
-                          onClick={() => handleTipInputToggle(payerIndex)}
-                          className="flex-1 rounded-lg border border-gray-400 py-1 text-xs font-medium hover:bg-gray-100"
-                          disabled={isPayerLocked}
-                        >
-                          {t('common.cancel')}
-                        </button>
-                        <button
-                          onClick={() => handleTipSubmit(payerIndex)}
-                          className="flex-1 rounded-lg bg-blue-600 py-1 text-xs font-medium text-white hover:bg-blue-700"
-                          disabled={isPayerLocked}
-                        >
-                          {t('common.add')}
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                  
-                  {!paid && individualTip > 0 && !showTipInput && (
-                    <div className="mb-3 flex items-center justify-between rounded-lg border border-green-200 bg-green-50 p-3">
-                      <div>
-                        <p className="text-sm font-medium text-green-800">{t('orderSummary.tipAdded')}</p>
-                        <p className="text-lg font-bold text-green-600">+{formatPrice(individualTip)}</p>
-                      </div>
-                      <button
-                        onClick={() => {
-                          setIndividualTip(payerIndex, 0);
-                          setTipInputValues(prev => {
-                            const newValues = [...prev];
-                            newValues[payerIndex] = '';
-                            return newValues;
-                          });
-                        }}
-                        className="text-sm font-medium text-red-600 hover:text-red-800"
-                        disabled={isPayerLocked}
-                      >
-                        {t('common.remove')}
-                      </button>
-                    </div>
+                  {!paid && (
+                    <TipInput
+                      value={tipAmount}
+                      onChange={(amount) => handleIndividualTipChange(payerIndex, amount)}
+                      disabled={paid}
+                      addTipText={t('orderSummary.addIndividualTip')}
+                      enterTipLabel={t('orderSummary.individualTipForPayer', { payer: index })}
+                      showCurrency={false}
+                      formatAmount={(amount) => formatPrice(amount)}
+                      className="w-full"
+                    />
                   )}
                 </div>
 
@@ -534,7 +421,7 @@ export const SplitBillSection: React.FC<SplitBillSectionProps> = ({
                               ? 'bg-blue-600 text-white'
                               : 'border border-gray-300 hover:bg-gray-50'
                           }`}
-                          disabled={isPayerLocked}
+                          disabled={paid}
                         >
                           {t(`orderSummary.paymentMethods.${m}`)}
                         </button>
@@ -544,7 +431,7 @@ export const SplitBillSection: React.FC<SplitBillSectionProps> = ({
                     <button
                       onClick={() => handlePayerPayment(payerIndex)}
                       className="w-full rounded-xl bg-blue-600 py-5 text-xl font-bold text-white shadow-md transition hover:bg-blue-700"
-                      disabled={isPayerLocked}
+                      disabled={paid}
                     >
                       {t('orderSummary.payWith', {
                         method: t(`orderSummary.paymentMethods.${method}`),
