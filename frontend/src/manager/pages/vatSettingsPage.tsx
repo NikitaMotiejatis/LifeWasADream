@@ -106,14 +106,6 @@ const VatSettingsPage: React.FC = () => {
     return matchesCategory;
   });
 
-  // Calculate stats
-  const stats = {
-    totalItems: items.length,
-    itemsUsingDefault: items.filter(item => item.customVatRate === null).length,
-    itemsWithCustomVat: items.filter(item => item.customVatRate !== null)
-      .length,
-  };
-
   // Get effective VAT rate for item (custom or default)
   const getEffectiveVatRate = (item: ItemVatRate) => {
     return item.customVatRate !== null ? item.customVatRate : defaultVatValue;
@@ -304,35 +296,6 @@ const VatSettingsPage: React.FC = () => {
                 {defaultVatValue}%
               </p>
               <p className="text-sm text-blue-700">{t('vat.appliesToAll')}</p>
-            </div>
-          </div>
-        </div>
-        {/* Stats Overview */}
-        <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2">
-          <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
-            <div className="flex items-center gap-3">
-              <Package className="h-5 w-5 text-blue-600" />
-              <div>
-                <p className="text-sm font-medium text-blue-900">
-                  {t('itemVat.stats.totalItems')}
-                </p>
-                <p className="text-2xl font-bold text-blue-800">
-                  {stats.totalItems}
-                </p>
-              </div>
-            </div>
-          </div>
-          <div className="rounded-lg border border-purple-200 bg-purple-50 p-4">
-            <div className="flex items-center gap-3">
-              <Tag className="h-5 w-5 text-purple-600" />
-              <div>
-                <p className="text-sm font-medium text-purple-900">
-                  {t('itemVat.stats.customVat')}
-                </p>
-                <p className="text-2xl font-bold text-purple-800">
-                  {stats.itemsWithCustomVat}
-                </p>
-              </div>
             </div>
           </div>
         </div>
