@@ -416,7 +416,7 @@ export const SplitBillSection: React.FC<SplitBillSectionProps> = ({
                         payer: index,
                       })}
                       showCurrency={false}
-                      formatAmount={amount => formatPrice(amount)}
+                      formatAmount={formatPrice}
                       className="w-full"
                     />
                   )}

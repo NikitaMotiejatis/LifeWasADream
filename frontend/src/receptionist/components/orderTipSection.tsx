@@ -36,7 +36,7 @@ export const TipSection: React.FC<TipSectionProps> = ({
       addTipText={t('orderSummary.addTip')}
       enterTipLabel={t('orderSummary.enterTipAmount')}
       showCurrency={false}
-      formatAmount={amount => formatPrice(amount)}
+      formatAmount={formatPrice}
       className="mt-4"
     />
   );

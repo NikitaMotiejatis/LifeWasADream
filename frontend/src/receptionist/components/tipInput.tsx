@@ -21,7 +21,7 @@ export const TipInput: React.FC<TipInputProps> = ({
   addTipText,
   enterTipLabel,
   showCurrency = true,
-  formatAmount = amount => amount.toFixed(2),
+  formatAmount,
   className = '',
 }) => {
   const { t } = useTranslation();
@@ -47,19 +47,7 @@ export const TipInput: React.FC<TipInputProps> = ({
   };
 
   const handleSubmit = () => {
-    if (inputValue === '' || inputValue === '.') {
-      onChange(0);
-    } else {
-      const amount = parseFloat(inputValue) || 0;
-
-      if (inputValue.startsWith('.')) {
-        const correctedValue = '0' + inputValue;
-        onChange(parseFloat(correctedValue) || 0);
-      } else {
-        onChange(amount);
-      }
-    }
-
+    onChange(100 * (parseFloat('0' + inputValue + '0') || 0));
     setShowInput(false);
     setInputValue('');
   };
