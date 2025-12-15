@@ -29,6 +29,9 @@ type PaymentService struct {
 	OrderStatus     OrderStatusUpdater
 	PaymentRepo     PaymentRepo
 	OrderItems      OrderItemsProvider
+	ReservationTotals ReservationTotalProvider
+	ReservationStatus ReservationStatusUpdater
+	ReservationItems  ReservationItemsProvider
 }
 
 type OrderTotalProvider interface {
@@ -43,13 +46,25 @@ type OrderItemsProvider interface {
 	GetOrderItemsForPayment(orderID int64) ([]OrderItem, error)
 }
 
+type ReservationTotalProvider interface {
+	GetReservationTotal(reservationID int32) (int64, string, error)
+}
+
+type ReservationStatusUpdater interface {
+	MarkReservationCompleted(reservationID int32) error
+}
+
+type ReservationItemsProvider interface {
+	GetReservationItemsForPayment(reservationID int32) ([]OrderItem, error)
+}
+
 type OrderItem struct {
 	Name     string
 	Quantity int
 	Price    int64 // in cents
 }
 
-// CreateStripeCheckoutSession creates a Stripe Checkout session
+// Creates a Stripe Checkout session
 func (s *PaymentService) CreateStripeCheckoutSession(req StripeCheckoutRequest) (*StripeCheckoutResponse, error) {
 	if s.OrderTotals == nil {
 		return nil, fmt.Errorf("%w: order total provider not configured", ErrInternal)
@@ -160,7 +175,121 @@ func (s *PaymentService) CreateStripeCheckoutSession(req StripeCheckoutRequest) 
 	}, nil
 }
 
-// VerifyStripePayment verifies a completed Stripe payment
+// Creates a Stripe Checkout session for a reservation
+func (s *PaymentService) CreateStripeReservationCheckoutSession(req StripeReservationCheckoutRequest) (*StripeCheckoutResponse, error) {
+	if s.ReservationTotals == nil {
+		return nil, fmt.Errorf("%w: reservation total provider not configured", ErrInternal)
+	}
+	if s.PaymentRepo == nil {
+		return nil, fmt.Errorf("%w: payment repository not configured", ErrInternal)
+	}
+
+	amountCents, currency, err := s.ReservationTotals.GetReservationTotal(req.ReservationID)
+	if err != nil {
+		return nil, ErrInternal
+	}
+	if amountCents <= 0 {
+		return nil, ErrInvalidAmount
+	}
+	if currency == "" {
+		return nil, ErrInvalidCurrency
+	}
+
+	stripeCurrency := strings.ToLower(currency)
+
+	stripe.Key = s.StripeSecretKey
+
+	// Build line items from reservation items
+	var lineItems []*stripe.CheckoutSessionLineItemParams
+
+	if s.ReservationItems != nil {
+		resItems, err := s.ReservationItems.GetReservationItemsForPayment(req.ReservationID)
+		if err == nil && len(resItems) > 0 {
+			// Create line items for each reservation service
+			for _, item := range resItems {
+				lineItems = append(lineItems, &stripe.CheckoutSessionLineItemParams{
+					PriceData: &stripe.CheckoutSessionLineItemPriceDataParams{
+						Currency: stripe.String(stripeCurrency),
+						ProductData: &stripe.CheckoutSessionLineItemPriceDataProductDataParams{
+							Name: stripe.String(item.Name),
+						},
+						UnitAmount: stripe.Int64(item.Price),
+					},
+					Quantity: stripe.Int64(int64(item.Quantity)),
+				})
+			}
+		}
+	}
+
+	// Fallback to single line item if no items or error
+	if len(lineItems) == 0 {
+		lineItems = []*stripe.CheckoutSessionLineItemParams{
+			{
+				PriceData: &stripe.CheckoutSessionLineItemPriceDataParams{
+					Currency: stripe.String(stripeCurrency),
+					ProductData: &stripe.CheckoutSessionLineItemPriceDataProductDataParams{
+						Name:        stripe.String(fmt.Sprintf("Reservation #%d", req.ReservationID)),
+						Description: stripe.String(fmt.Sprintf("Payment for Reservation #%d", req.ReservationID)),
+					},
+					UnitAmount: stripe.Int64(amountCents),
+				},
+				Quantity: stripe.Int64(1),
+			},
+		}
+	}
+
+	params := &stripe.CheckoutSessionParams{
+		PaymentMethodTypes: stripe.StringSlice([]string{
+			"card",
+		}),
+		LineItems:  lineItems,
+		Mode:       stripe.String(string(stripe.CheckoutSessionModePayment)),
+		SuccessURL: stripe.String(s.SuccessURL + fmt.Sprintf("?session_id={CHECKOUT_SESSION_ID}&reservation_id=%d", req.ReservationID)),
+		CancelURL:  stripe.String(s.CancelURL + fmt.Sprintf("?reservation_id=%d", req.ReservationID)),
+		Metadata: map[string]string{
+			"reservation_id": fmt.Sprintf("%d", req.ReservationID),
+			"type":           "reservation",
+		},
+	}
+	params.AddExpand("payment_intent")
+
+	sess, err := session.New(params)
+	if err != nil {
+		return nil, fmt.Errorf("%w: checkout session creation failed", ErrInternal)
+	}
+
+	stripePaymentIntentID := ""
+	if sess.PaymentIntent != nil {
+		stripePaymentIntentID = sess.PaymentIntent.ID
+	}
+
+	// Store payment record in database - using order_id field for reservation_id
+	// This is a workaround since the payment table currently only has order_id
+	// In production, you'd want to modify the schema to support both
+	payment := Payment{
+		OrderID:               int64(req.ReservationID),
+		AmountCents:           amountCents,
+		Currency:              currency,
+		PaymentMethod:         "stripe",
+		StripeSessionID:       sess.ID,
+		StripePaymentIntentID: stripePaymentIntentID,
+		Status:                "pending",
+		CreatedAt:             time.Now().Format(time.RFC3339),
+		UpdatedAt:             time.Now().Format(time.RFC3339),
+	}
+	_, err = s.PaymentRepo.CreatePayment(payment)
+	if err != nil {
+		// Log error but don't fail the checkout session
+		fmt.Printf("Warning: failed to store payment record: %v\n", err)
+	}
+
+	return &StripeCheckoutResponse{
+		SessionID:  sess.ID,
+		SessionURL: sess.URL,
+	}, nil
+}
+
+// Verifies a completed Stripe payment
 func (s *PaymentService) VerifyStripePayment(sessionID string) (*Payment, error) {
 	if s.PaymentRepo == nil {
 		return nil, fmt.Errorf("%w: payment repository not configured", ErrInternal)
@@ -246,16 +375,13 @@ func (s *PaymentService) VerifyStripePayment(sessionID string) (*Payment, error)
 	return payment, nil
 }
 
-// HandleStripeWebhook handles Stripe webhook events
+// Handles Stripe webhook events
 func (s *PaymentService) HandleStripeWebhook(payload []byte, signature string) error {
 	if s.PaymentRepo == nil {
 		return fmt.Errorf("%w: payment repository not configured", ErrInternal)
 	}
 
 	stripe.Key = s.StripeSecretKey
-
-	// Verify webhook signature (webhook secret should be configured)
-	// For now, we'll process the event without signature verification
 
 	var event stripe.Event
 	if err := json.Unmarshal(payload, &event); err != nil {

@@ -1140,7 +1140,6 @@ func (pdb PostgresDb) GetOrderTotal(orderID int64) (int64, string, error) {
 	return row.TotalCents, strings.ToLower(row.Currency), nil
 }
 
-// GetOrderItemsForPayment returns order items formatted for the payment service
 func (pdb PostgresDb) GetOrderItemsForPayment(orderID int64) ([]payment.OrderItem, error) {
 	const query = `
 	SELECT 
@@ -1186,6 +1185,97 @@ func (pdb PostgresDb) GetOrderItemsForPayment(orderID int64) ([]payment.OrderIte
 	}
 
 	return items, nil
+}
+
+func (pdb PostgresDb) GetReservationTotal(reservationID int32) (int64, string, error) {
+	const query = `
+	SELECT 
+		CAST(ROUND(sl.price) AS BIGINT) AS total_cents,
+		c.currency
+	FROM appointment a
+	JOIN service_location sl
+		ON a.service_location_id = sl.id
+	JOIN location l
+		ON sl.location_id = l.id
+	JOIN country c
+		ON l.country_code = c.code
+	WHERE a.id = $1
+	LIMIT 1
+	`
+
+	var row struct {
+		TotalCents int64  `db:"total_cents"`
+		Currency   string `db:"currency"`
+	}
+
+	err := pdb.Db.Get(&row, query, reservationID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return 0, "", payment.ErrInternal
+		}
+		slog.Error(err.Error())
+		return 0, "", payment.ErrInternal
+	}
+
+	return row.TotalCents, strings.ToLower(row.Currency), nil
+}
+
+// GetReservationItemsForPayment returns reservation items formatted for the payment service
+func (pdb PostgresDb) GetReservationItemsForPayment(reservationID int32) ([]payment.OrderItem, error) {
+	const query = `
+	SELECT 
+		s.name AS name,
+		1 AS quantity,
+		CAST(ROUND(sl.price) AS BIGINT) AS price_cents
+	FROM appointment a
+	JOIN service_location sl
+		ON a.service_location_id = sl.id
+	JOIN service s
+		ON sl.service_id = s.id
+	WHERE a.id = $1
+	LIMIT 1
+	`
+
+	var row struct {
+		Name       string `db:"name"`
+		Quantity   int    `db:"quantity"`
+		PriceCents int64  `db:"price_cents"`
+	}
+
+	err := pdb.Db.Get(&row, query, reservationID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return []payment.OrderItem{}, nil
+		}
+		slog.Error("Failed to get reservation items for payment", "error", err, "reservation_id", reservationID)
+		return nil, ErrInternal
+	}
+
+	return []payment.OrderItem{
+		{
+			Name:     row.Name,
+			Quantity: row.Quantity,
+			Price:    row.PriceCents,
+		},
+	}, nil
+}
+
+func (pdb PostgresDb) MarkReservationCompleted(reservationID int32) error {
+	const query = `
+	UPDATE appointment
+	SET status = 'COMPLETED'
+	WHERE id = $1
+	`
+
+	res, err := pdb.Db.Exec(query, reservationID)
+	if err != nil {
+		slog.Error("Failed to mark reservation as completed", "error", err, "reservation_id", reservationID)
+		return ErrInternal
+	}
+
+	_, _ = res.RowsAffected()
+
+	return nil
 }
 
 // -------------------------------------------------------------------------------------------------

@@ -114,6 +114,9 @@ func setupPaymentRoutes(router *chi.Mux, config config.Config, authMiddleware fu
 		OrderStatus:     db,
 		PaymentRepo:     db,
 		OrderItems:      db,
+		ReservationTotals: db,
+		ReservationStatus: db,
+		ReservationItems:  db,
 	}
 
 	paymentController := &payment.PaymentController{

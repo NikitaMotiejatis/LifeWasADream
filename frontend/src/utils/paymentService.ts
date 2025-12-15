@@ -6,6 +6,12 @@ export interface StripeCheckoutRequest {
   currency: string;
 }
 
+export interface StripeReservationCheckoutRequest {
+  reservation_id: number;
+  amount: number;
+  currency: string;
+}
+
 export interface StripeCheckoutResponse {
   session_id: string;
   session_url: string;
@@ -42,6 +48,30 @@ export const createStripeCheckout = async (
   if (!response.ok) {
     const error = await response.text();
     throw new Error(`Failed to create checkout session: ${error}`);
+  }
+
+  return response.json();
+};
+
+export const createStripeReservationCheckout = async (
+  reservationId: number,
+  amount: number,
+  currency: string = 'eur',
+): Promise<StripeCheckoutResponse> => {
+  const { authFetch } = useAuth();
+  const response = await authFetch(
+    'payment/stripe/create-reservation-checkout-session',
+    'POST',
+    JSON.stringify({
+      reservation_id: reservationId,
+      amount,
+      currency,
+    } as StripeReservationCheckoutRequest)
+  );
+
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(`Failed to create reservation checkout session: ${error}`);
   }
 
   return response.json();
