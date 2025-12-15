@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import ManagerLayout from '../components/managerLayout';
-import { Package, Percent, AlertTriangle, Pencil, Tag } from 'lucide-react';
+import { Package, Percent, AlertTriangle, Tag } from 'lucide-react';
 
 interface ItemVatRate {
   id: number;
@@ -17,87 +17,82 @@ interface ItemVatRate {
 const VatSettingsPage: React.FC = () => {
   const { t } = useTranslation();
 
-// Items with their VAT rates (price in CENTS)
-const [items, setItems] = useState<ItemVatRate[]>([
-  {
-    id: 1,
-    itemId: 'PROD-001',
-    itemName: t('products.Espresso Shot'),
-    category: t('menu.categories.hot drinks'),
-    vatRate: 21,
-    customVatRate: null,
-    sku: 'ESP001',
-    price: 350, 
-  },
-  {
-    id: 2,
-    itemId: 'PROD-002',
-    itemName: t('products.croissant'),
-    category: t('menu.categories.pastries'),
-    vatRate: 9,
-    customVatRate: null,
-    sku: 'CRS002',
-    price: 250, 
-  },
-  {
-    id: 3,
-    itemId: 'PROD-003',
-    itemName: t('products.House Blend Coffee'),
-    category: t('stockUpdates.categories.Raw Materials'),
-    vatRate: 5,
-    customVatRate: 5,
-    sku: 'BEAN003',
-    price: 1599,
-  },
-  {
-    id: 4,
-    itemId: 'PROD-004',
-    itemName: t('products.Iced Latte'),
-    category: t('menu.categories.cold drinks'),
-    vatRate: 15,
-    customVatRate: 15,
-    sku: 'ICED004',
-    price: 450, 
-  },
-  {
-    id: 5,
-    itemId: 'PROD-005',
-    itemName: t('products.orangeJuice'),
-    category: t('menu.categories.cold drinks'),
-    vatRate: 9,
-    customVatRate: null,
-    sku: 'WTR005',
-    price: 150,
-  },
-  {
-    id: 6,
-    itemId: 'PROD-006',
-    itemName: t('products.Blueberry Muffin'),
-    category: t('menu.categories.pastries'),
-    vatRate: 12,
-    customVatRate: 12,
-    sku: 'CAKE006',
-    price: 699, 
-  },
-]);
+  // Items with their VAT rates (price in CENTS)
+  const [items, setItems] = useState<ItemVatRate[]>([
+    {
+      id: 1,
+      itemId: 'PROD-001',
+      itemName: t('products.Espresso Shot'),
+      category: t('menu.categories.hot drinks'),
+      vatRate: 21,
+      customVatRate: null,
+      sku: 'ESP001',
+      price: 350,
+    },
+    {
+      id: 2,
+      itemId: 'PROD-002',
+      itemName: t('products.croissant'),
+      category: t('menu.categories.pastries'),
+      vatRate: 9,
+      customVatRate: null,
+      sku: 'CRS002',
+      price: 250,
+    },
+    {
+      id: 3,
+      itemId: 'PROD-003',
+      itemName: t('products.House Blend Coffee'),
+      category: t('stockUpdates.categories.Raw Materials'),
+      vatRate: 5,
+      customVatRate: 5,
+      sku: 'BEAN003',
+      price: 1599,
+    },
+    {
+      id: 4,
+      itemId: 'PROD-004',
+      itemName: t('products.Iced Latte'),
+      category: t('menu.categories.cold drinks'),
+      vatRate: 15,
+      customVatRate: 15,
+      sku: 'ICED004',
+      price: 450,
+    },
+    {
+      id: 5,
+      itemId: 'PROD-005',
+      itemName: t('products.orangeJuice'),
+      category: t('menu.categories.cold drinks'),
+      vatRate: 9,
+      customVatRate: null,
+      sku: 'WTR005',
+      price: 150,
+    },
+    {
+      id: 6,
+      itemId: 'PROD-006',
+      itemName: t('products.Blueberry Muffin'),
+      category: t('menu.categories.pastries'),
+      vatRate: 12,
+      customVatRate: 12,
+      sku: 'CAKE006',
+      price: 699,
+    },
+  ]);
 
   // Get default VAT rate
 
-  const [defaultVatValue, setDefaultVatValue] = useState<number>(21);
+  const defaultVatValue = 21;
   const [editingItemId, setEditingItemId] = useState<number | null>(null);
   const [vatRateInput, setVatRateInput] = useState<string>('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [bulkSelection, setBulkSelection] = useState<number[]>([]);
   const [bulkVatRate, setBulkVatRate] = useState<string>('');
   const [validationError, setValidationError] = useState<string | null>(null);
-  const [editingDefaultVat, setEditingDefaultVat] = useState(false);
-  const [defaultVatInput, setDefaultVatInput] = useState<string>('');
   const [bulkValidationError, setBulkValidationError] = useState<string | null>(
     null,
   );
-  const [defaultVatValidationError, setDefaultVatValidationError] = useState<
-    string | null
-  >(null);
 
   const categories = [
     'all',
@@ -133,12 +128,6 @@ const [items, setItems] = useState<ItemVatRate[]>([
     setValidationError(null);
   };
 
-  // Start editing default VAT
-  const handleEditDefaultVat = () => {
-    setEditingDefaultVat(true);
-    setDefaultVatInput(defaultVatValue.toString());
-    setDefaultVatValidationError(null);
-  };
   // Helper function to convert cents to display format
   const centsToDisplay = (cents: number): string => {
     return (cents / 100).toFixed(2);
@@ -209,40 +198,11 @@ const [items, setItems] = useState<ItemVatRate[]>([
     handleCancel();
   };
 
-  const handleSaveDefaultVat = () => {
-    const validation = validateRate(defaultVatInput);
-    if (!validation.valid && validation.error) {
-      setDefaultVatValidationError(validation.error);
-      return;
-    }
-    const newDefaultRate = parseFloat(defaultVatInput);
-    setDefaultVatValue(newDefaultRate);
-
-    setItems(prev =>
-      prev.map(item => {
-        if (item.customVatRate === null) {
-          return {
-            ...item,
-            vatRate: newDefaultRate,
-          };
-        }
-        return item;
-      }),
-    );
-
-    setEditingDefaultVat(false);
-    setDefaultVatInput('');
-    setDefaultVatValidationError(null);
-  };
-
   // Cancel editing
   const handleCancel = () => {
     setEditingItemId(null);
     setVatRateInput('');
     setValidationError(null);
-    setEditingDefaultVat(false);
-    setDefaultVatInput('');
-    setDefaultVatValidationError(null);
   };
 
   // Reset item to default VAT
@@ -315,14 +275,6 @@ const [items, setItems] = useState<ItemVatRate[]>([
     setBulkValidationError(null);
   };
 
-  // Clear default VAT validation error when user types
-  const handleDefaultVatInputChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    setDefaultVatInput(e.target.value.replace(/[^0-9.]/g, ''));
-    setDefaultVatValidationError(null);
-  };
-
   // Clear item validation error when user types
   const handleVatRateInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setVatRateInput(e.target.value.replace(/[^0-9.]/g, ''));
@@ -342,74 +294,19 @@ const [items, setItems] = useState<ItemVatRate[]>([
 
         {/* Default VAT Section */}
         <div className="mb-6 rounded-lg border border-blue-200 bg-blue-50 p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Percent className="h-5 w-5 text-blue-600" />
-              <div>
-                <p className="text-sm font-medium text-blue-900">
-                  {t('vat.currentDefault')}
-                </p>
-                {editingDefaultVat ? (
-                  <div className="mt-1 space-y-2">
-                    <div className="flex items-center gap-2">
-                      <div className="relative">
-                        <input
-                          type="text"
-                          inputMode="decimal"
-                          value={defaultVatInput}
-                          onChange={handleDefaultVatInputChange}
-                          placeholder={t('itemVat.ratePlaceholder')}
-                          className={`w-24 rounded-md border ${defaultVatValidationError ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'} px-3 py-2 pr-8 text-sm`}
-                        />
-                        <span className="absolute top-1/2 right-3 -translate-y-1/2 text-gray-500">
-                          %
-                        </span>
-                      </div>
-                      <div className="flex gap-2">
-                        <button
-                          onClick={handleSaveDefaultVat}
-                          className="rounded bg-green-600 px-3 py-2 text-sm font-medium text-white hover:bg-green-700"
-                        >
-                          {t('common.save')}
-                        </button>
-                        <button
-                          onClick={handleCancel}
-                          className="rounded border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-                        >
-                          {t('common.cancel')}
-                        </button>
-                      </div>
-                    </div>
-                    {defaultVatValidationError && (
-                      <p className="text-sm text-red-600">
-                        {defaultVatValidationError}
-                      </p>
-                    )}
-                  </div>
-                ) : (
-                  <>
-                    <p className="text-2xl font-bold text-blue-800">
-                      {defaultVatValue}%
-                    </p>
-                    <p className="text-sm text-blue-700">
-                      {t('vat.appliesToAll')}
-                    </p>
-                  </>
-                )}
-              </div>
+          <div className="flex items-center gap-3">
+            <Percent className="h-5 w-5 text-blue-600" />
+            <div>
+              <p className="text-sm font-medium text-blue-900">
+                {t('vat.currentDefault')}
+              </p>
+              <p className="text-2xl font-bold text-blue-800">
+                {defaultVatValue}%
+              </p>
+              <p className="text-sm text-blue-700">{t('vat.appliesToAll')}</p>
             </div>
-            {!editingDefaultVat && (
-              <button
-                onClick={handleEditDefaultVat}
-                className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-              >
-                <Pencil className="mr-2 inline h-4 w-4" />
-                {t('common.edit')}
-              </button>
-            )}
           </div>
         </div>
-
         {/* Stats Overview */}
         <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2">
           <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
@@ -503,7 +400,7 @@ const [items, setItems] = useState<ItemVatRate[]>([
               <select
                 value={selectedCategory}
                 onChange={e => setSelectedCategory(e.target.value)}
-                className="rounded-md border border-gray-300 px-3 py-2 w-64" 
+                className="w-80 rounded-md border border-gray-300 px-3 py-2"
               >
                 {categories.map(category => (
                   <option key={category} value={category}>
