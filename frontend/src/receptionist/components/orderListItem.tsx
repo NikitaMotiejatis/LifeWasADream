@@ -39,13 +39,15 @@ export default function OrderListItem({ order, formatPrice, onAction }: Props) {
         </div>
 
         <div className="flex items-center gap-2">
-          <button
-            onClick={() => onAction('edit', order)}
-            className="rounded-lg bg-blue-600 px-5 py-2 text-xs font-medium text-white shadow-sm hover:bg-blue-700"
-            aria-label={t('orders.actions.view')}
-          >
-            {t('orders.actions.view')}
-          </button>
+          {status !== 'closed' && status !== 'refunded' && (
+            <button
+              onClick={() => onAction('edit', order)}
+              className="rounded-lg bg-blue-600 px-5 py-2 text-xs font-medium text-white shadow-sm hover:bg-blue-700"
+              aria-label={t('orders.actions.view')}
+            >
+              {t('orders.actions.view')}
+            </button>
+          )}
 
           {status === 'closed' ? (
             <button
