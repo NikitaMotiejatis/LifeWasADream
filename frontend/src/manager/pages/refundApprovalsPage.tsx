@@ -43,6 +43,18 @@ export default function RefundApprovalsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<Refund | null>(null);
+  const [toast, setToast] = useState<{
+    message: string;
+    type: 'success' | 'error';
+  } | null>(null);
+
+  const showToast = (
+    message: string,
+    type: 'success' | 'error' = 'success',
+  ) => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 5800);
+  };
 
   const fetchRefunds = useCallback(async () => {
     setIsLoading(true);
@@ -52,7 +64,12 @@ export default function RefundApprovalsPage() {
     } catch (error) {
       console.error('Failed to fetch pending refunds:', error);
       setRequests([]); // Set to empty array on error
-      alert('Failed to fetch pending refunds. Check console for details.');
+      showToast(
+        error instanceof Error
+          ? error.message
+          : 'Failed to fetch pending refunds.',
+        'error',
+      );
     } finally {
       setIsLoading(false);
     }
@@ -70,11 +87,12 @@ export default function RefundApprovalsPage() {
     try {
       const response = await processRefundAction(refundId, 'approve');
       await fetchRefunds(); // Re-fetch to update the list
-      alert(response.message);
+      showToast(response.message, 'success');
     } catch (error) {
       console.error('Failed to approve refund:', error);
-      alert(
-        `Failed to approve refund: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      showToast(
+        error instanceof Error ? error.message : 'Failed to approve refund.',
+        'error',
       );
     }
   };
@@ -91,11 +109,12 @@ export default function RefundApprovalsPage() {
         reason,
       );
       await fetchRefunds(); // Re-fetch to update the list
-      alert(response.message);
+      showToast(response.message, 'success');
     } catch (error) {
       console.error('Failed to reject refund:', error);
-      alert(
-        `Failed to reject refund: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      showToast(
+        error instanceof Error ? error.message : 'Failed to reject refund.',
+        'error',
       );
     }
   };
@@ -143,6 +162,7 @@ export default function RefundApprovalsPage() {
 
   return (
     <ManagerLayout>
+      <Toast toast={toast} />
       <header className="mb-8">
         <h1 className="text-2xl font-semibold text-gray-900">
           {t('manager.refunds.pageTitle')}

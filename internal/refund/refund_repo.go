@@ -28,29 +28,35 @@ func NewMockRefundRepo() *MockRefundRepo {
 				ID:             1,
 				OrderID:        101,
 				Amount:         50.00,
+				AmountCents:    5000,
 				Reason:         "Customer requested full refund",
 				Status:         StatusPending,
 				RequestedAt:    time.Now().Add(-24 * time.Hour),
-				StripeChargeID: "ch_1QmBvCEYcB69ywE0gF3xK1aM", // Valid Stripe test charge ID
+				PaymentMethod:  "stripe",
+				StripePaymentIntentID: "pi_1QmBvCEYcB69ywE0gF3xK1aM", // Example Stripe test payment intent ID
 			},
 			2: {
 				ID:             2,
 				OrderID:        102,
 				Amount:         10.50,
+				AmountCents:    1050,
 				Reason:         "Item out of stock",
 				Status:         StatusPending,
 				RequestedAt:    time.Now().Add(-12 * time.Hour),
-				StripeChargeID: "ch_1QmBvCEYcB69ywE0nJ7pQ2bN", // Valid Stripe test charge ID
+				PaymentMethod:  "stripe",
+				StripePaymentIntentID: "pi_1QmBvCEYcB69ywE0nJ7pQ2bN", // Example Stripe test payment intent ID
 			},
 			3: {
 				ID:             3,
 				OrderID:        103,
 				Amount:         25.00,
+				AmountCents:    2500,
 				Reason:         "Partial refund for damaged goods",
 				Status:         StatusCompleted,
 				RequestedAt:    time.Now().Add(-48 * time.Hour),
 				ProcessedAt:    func() *time.Time { t := time.Now().Add(-24 * time.Hour); return &t }(),
-				StripeChargeID: "ch_1QmBvCEYcB69ywE0rT9vS3cO",
+				PaymentMethod:  "stripe",
+				StripePaymentIntentID: "pi_1QmBvCEYcB69ywE0rT9vS3cO",
 				StripeRefundID: "re_1QmBvCEYcB69ywE0aBcDeF1g", // Example completed refund ID
 			},
 		},

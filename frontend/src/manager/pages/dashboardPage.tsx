@@ -5,12 +5,9 @@ import ManagerLayout from '../components/managerLayout';
 import { Package, AlertTriangle, DollarSign, ShoppingCart } from 'lucide-react';
 import RefundApprovalModal from '../components/refundApprovalModal';
 import { useCurrency } from '@/global/contexts/currencyContext';
-import {
-  Refund,
-  getPendingRefunds,
-  processRefundAction,
-} from '@/utils/refundService';
 import i18n from '@/i18n';
+import { Refund, getPendingRefunds, processRefundAction } from '@/utils/refundService';
+import Toast from '@/global/components/toast';
 
 // Mock Data Structure
 interface DashboardData {
@@ -273,6 +270,18 @@ export default function DashboardPage() {
   const [refundLoading, setRefundLoading] = useState(true);
   const [selectedRefund, setSelectedRefund] = useState<Refund | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [toast, setToast] = useState<{
+    message: string;
+    type: 'success' | 'error';
+  } | null>(null);
+
+  const showToast = (
+    message: string,
+    type: 'success' | 'error' = 'success',
+  ) => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 5800);
+  };
 
   const fetchRefunds = useCallback(async () => {
     setRefundLoading(true);
@@ -300,26 +309,30 @@ export default function DashboardPage() {
 
   const handleApprove = async (id: number) => {
     try {
-      await processRefundAction(id, 'approve');
+      const res = await processRefundAction(id, 'approve');
+      showToast(res.message, 'success');
       // Re-fetch refunds to update the list
       await fetchRefunds();
     } catch (error) {
       console.error('Failed to approve refund:', error);
-      alert(
-        `Failed to approve refund: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      showToast(
+        error instanceof Error ? error.message : 'Failed to approve refund.',
+        'error',
       );
     }
   };
 
   const handleReject = async (id: number, reason: string) => {
     try {
-      await processRefundAction(id, 'disapprove', reason);
+      const res = await processRefundAction(id, 'disapprove', reason);
+      showToast(res.message, 'success');
       // Re-fetch refunds to update the list
       await fetchRefunds();
     } catch (error) {
       console.error('Failed to reject refund:', error);
-      alert(
-        `Failed to reject refund: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      showToast(
+        error instanceof Error ? error.message : 'Failed to reject refund.',
+        'error',
       );
     }
   };
@@ -340,6 +353,7 @@ export default function DashboardPage() {
 
   return (
     <ManagerLayout>
+      <Toast toast={toast} />
       <header className="mb-8">
         <h1 className="text-2xl font-semibold text-gray-900">
           {t('manager.dashboard.pageTitle')}

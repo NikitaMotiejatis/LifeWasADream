@@ -18,6 +18,7 @@ type Props = {
 
 export default function OrderListItem({ order, formatPrice, onAction }: Props) {
   const { t } = useTranslation();
+  const status = order.status?.toLowerCase();
 
   return (
     <div className="group rounded-lg bg-white p-5 shadow-sm transition-all hover:shadow-lg hover:ring-2 hover:ring-blue-500/20">
@@ -38,22 +39,22 @@ export default function OrderListItem({ order, formatPrice, onAction }: Props) {
         </div>
 
         <div className="flex items-center gap-2">
-          {order.status === 'open' ? (
-              <button
-                onClick={() => onAction('edit', order)}
-                className="rounded-lg bg-blue-600 px-5 py-2 text-xs font-medium text-white shadow-sm hover:bg-blue-700"
-                aria-label={t('orders.actions.view')}
-              >
-                {t('orders.actions.view')}
-              </button>
-          ) : order.status === 'closed' ? (
+          <button
+            onClick={() => onAction('edit', order)}
+            className="rounded-lg bg-blue-600 px-5 py-2 text-xs font-medium text-white shadow-sm hover:bg-blue-700"
+            aria-label={t('orders.actions.view')}
+          >
+            {t('orders.actions.view')}
+          </button>
+
+          {status === 'closed' ? (
             <button
               onClick={() => onAction('refund', order)}
               className="rounded-lg border border-purple-400 bg-purple-50 px-5 py-2 text-xs font-medium text-purple-700 hover:bg-purple-100"
             >
               {t('orders.actions.refund')}
             </button>
-          ) : order.status === 'refund_pending' ? (
+          ) : status === 'refund_pending' ? (
             <div className="flex items-center gap-3">
               <span className="text-sm font-medium text-orange-600">
                 {t('orders.status.refundInProgress')}
@@ -65,9 +66,11 @@ export default function OrderListItem({ order, formatPrice, onAction }: Props) {
                 {t('orders.actions.cancelRefund')}
               </button>
             </div>
-          ) : order.status === 'refunded' ? (
-            <div className="flex items-center gap-3 text-xs text-gray-600">Refunded</div>
-          ) : (<> </>)}
+          ) : status === 'refunded' ? (
+            <div className="flex items-center gap-3 text-xs text-gray-600">
+              {t('orders.filters.refunded')}
+            </div>
+          ) : null}
         </div>
       </div>
     </div>

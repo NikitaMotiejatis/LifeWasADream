@@ -17,6 +17,7 @@ import (
 	"dreampos/internal/config"
 	"dreampos/internal/order"
 	"dreampos/internal/payment"
+	"dreampos/internal/refund"
 	"dreampos/internal/reservation"
 )
 
@@ -90,9 +91,9 @@ func (pdb PostgresDb) GetUserDetails(username string) (auth.UserDetails, error) 
 }
 
 func (pdb PostgresDb) GetUserCurrency(username string) (string, error) {
-    var currency string
+	var currency string
 
-    const query = `
+	const query = `
     SELECT c.currency
     FROM employee e
     JOIN location l ON e.location_id = l.id
@@ -101,16 +102,16 @@ func (pdb PostgresDb) GetUserCurrency(username string) (string, error) {
     LIMIT 1;
     `
 
-    err := pdb.Db.Get(&currency, query, username)
-    if err != nil {
-        if errors.Is(err, sql.ErrNoRows) {
-            return "", fmt.Errorf("user not found")
-        }
-        slog.Error(err.Error())
-        return "", ErrInternal
-    }
+	err := pdb.Db.Get(&currency, query, username)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return "", fmt.Errorf("user not found")
+		}
+		slog.Error(err.Error())
+		return "", ErrInternal
+	}
 
-    return strings.ToUpper(currency), nil
+	return strings.ToUpper(currency), nil
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -270,8 +271,27 @@ func (pdb PostgresDb) ModifyOrder(orderId int64, order order.Order) error {
 	return nil
 }
 
+func (pdb PostgresDb) MarkOrderClosed(orderID int64) error {
+	const query = `
+	UPDATE order_data
+	SET status = 'CLOSED'
+	WHERE id = $1
+		AND status = 'OPEN'
+	`
+
+	res, err := pdb.Db.Exec(query, orderID)
+	if err != nil {
+		slog.Error("Failed to mark order as closed", "error", err, "order_id", orderID)
+		return ErrInternal
+	}
+
+	_, _ = res.RowsAffected()
+
+	return nil
+}
+
 func (pdb PostgresDb) CreateRefundRequest(orderId int64, refundData order.RefundData) error {
-	transaction, err := pdb.Db.Begin()
+	transaction, err := pdb.Db.Beginx()
 	if err != nil {
 		slog.Error(err.Error())
 		return ErrInternal
@@ -286,9 +306,15 @@ func (pdb PostgresDb) CreateRefundRequest(orderId int64, refundData order.Refund
 			AND status = 'CLOSED'
 		`
 
-		err = pdb.Db.QueryRow(orderStatusStatement, orderId).Err()
+		res, err := transaction.Exec(orderStatusStatement, orderId)
 		if err != nil {
 			slog.Error(err.Error())
+			_ = transaction.Rollback()
+			return ErrInternal
+		}
+		rows, err := res.RowsAffected()
+		if err != nil || rows != 1 {
+			slog.Error("unexpected rows affected when setting refund pending", "rows", rows, "error", err)
 			_ = transaction.Rollback()
 			return ErrInternal
 		}
@@ -299,14 +325,14 @@ func (pdb PostgresDb) CreateRefundRequest(orderId int64, refundData order.Refund
 			VALUES ($1, $2, $3, $4, $5)
 		`
 
-		err = pdb.Db.QueryRow(
+		_, err = transaction.Exec(
 			refundDataStatement,
 			orderId,
 			refundData.Name,
 			refundData.Phone,
 			refundData.Email,
 			refundData.Reason,
-		).Err()
+		)
 		if err != nil {
 			slog.Error(err.Error())
 			_ = transaction.Rollback()
@@ -320,7 +346,7 @@ func (pdb PostgresDb) CreateRefundRequest(orderId int64, refundData order.Refund
 }
 
 func (pdb PostgresDb) CancelRefundRequest(orderId int64) error {
-	transaction, err := pdb.Db.Begin()
+	transaction, err := pdb.Db.Beginx()
 	if err != nil {
 		slog.Error(err.Error())
 		return ErrInternal
@@ -335,9 +361,15 @@ func (pdb PostgresDb) CancelRefundRequest(orderId int64) error {
 			AND status = 'REFUND_PENDING'
 		`
 
-		err = pdb.Db.QueryRow(orderStatusStatement, orderId).Err()
+		res, err := transaction.Exec(orderStatusStatement, orderId)
 		if err != nil {
 			slog.Error(err.Error())
+			_ = transaction.Rollback()
+			return ErrInternal
+		}
+		rows, err := res.RowsAffected()
+		if err != nil || rows != 1 {
+			slog.Error("unexpected rows affected when cancelling refund request", "rows", rows, "error", err)
 			_ = transaction.Rollback()
 			return ErrInternal
 		}
@@ -348,7 +380,7 @@ func (pdb PostgresDb) CancelRefundRequest(orderId int64) error {
 		WHERE order_id = $1
 		`
 
-		res, err := pdb.Db.Exec(refundDataStatement, orderId)
+		res, err := transaction.Exec(refundDataStatement, orderId)
 		if err != nil {
 			slog.Error(err.Error())
 			_ = transaction.Rollback()
@@ -373,6 +405,210 @@ func (pdb PostgresDb) CancelRefundRequest(orderId int64) error {
 	return nil
 }
 
+// -------------------------------------------------------------------------------------------------
+// refund.RefundRepo implementation ----------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
+
+func (pdb PostgresDb) GetPendingRefunds() ([]refund.Refund, error) {
+	const query = `
+	SELECT
+		od.id AS order_id,
+		rd.reason AS reason,
+		od.created_at AS requested_at,
+		CAST(ROUND(odetail.total) AS BIGINT) AS amount_cents,
+		COALESCE(p.stripe_payment_intent_id, '') AS stripe_payment_intent_id,
+		COALESCE(p.payment_method::TEXT, '') AS payment_method
+	FROM order_data od
+	JOIN order_detail odetail
+		ON odetail.id = od.id
+	JOIN refund_data rd
+		ON rd.order_id = od.id
+	LEFT JOIN payment p
+		ON p.order_id = od.id
+	WHERE od.status = 'REFUND_PENDING'
+	ORDER BY od.id DESC
+	`
+
+	var rows []struct {
+		OrderID              int64     `db:"order_id"`
+		Reason               string    `db:"reason"`
+		RequestedAt          time.Time `db:"requested_at"`
+		AmountCents          int64     `db:"amount_cents"`
+		StripePaymentIntentID string   `db:"stripe_payment_intent_id"`
+		PaymentMethod        string    `db:"payment_method"`
+	}
+
+	if err := pdb.Db.Select(&rows, query); err != nil {
+		slog.Error("Failed to get pending refunds", "error", err)
+		return nil, ErrInternal
+	}
+
+	refunds := make([]refund.Refund, 0, len(rows))
+	for _, row := range rows {
+		orderID := uint32(row.OrderID)
+		refunds = append(refunds, refund.Refund{
+			ID:                    orderID,
+			OrderID:               orderID,
+			Amount:                float64(row.AmountCents) / 100.0,
+			AmountCents:           row.AmountCents,
+			Reason:                row.Reason,
+			Status:                refund.StatusPending,
+			RequestedAt:           row.RequestedAt,
+			StripePaymentIntentID: row.StripePaymentIntentID,
+			PaymentMethod:         strings.ToLower(row.PaymentMethod),
+		})
+	}
+
+	return refunds, nil
+}
+
+func (pdb PostgresDb) GetRefundByID(id uint32) (*refund.Refund, error) {
+	const query = `
+	SELECT
+		od.id AS order_id,
+		rd.reason AS reason,
+		od.created_at AS requested_at,
+		CAST(ROUND(odetail.total) AS BIGINT) AS amount_cents,
+		COALESCE(p.stripe_payment_intent_id, '') AS stripe_payment_intent_id,
+		COALESCE(p.payment_method::TEXT, '') AS payment_method
+	FROM order_data od
+	JOIN order_detail odetail
+		ON odetail.id = od.id
+	JOIN refund_data rd
+		ON rd.order_id = od.id
+	LEFT JOIN payment p
+		ON p.order_id = od.id
+	WHERE od.id = $1
+		AND od.status = 'REFUND_PENDING'
+	LIMIT 1
+	`
+
+	var row struct {
+		OrderID              int64     `db:"order_id"`
+		Reason               string    `db:"reason"`
+		RequestedAt          time.Time `db:"requested_at"`
+		AmountCents          int64     `db:"amount_cents"`
+		StripePaymentIntentID string   `db:"stripe_payment_intent_id"`
+		PaymentMethod        string    `db:"payment_method"`
+	}
+
+	if err := pdb.Db.Get(&row, query, id); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, errors.New("refund not found")
+		}
+		slog.Error("Failed to get refund by ID", "error", err, "order_id", id)
+		return nil, ErrInternal
+	}
+
+	orderID := uint32(row.OrderID)
+	return &refund.Refund{
+		ID:                    orderID,
+		OrderID:               orderID,
+		Amount:                float64(row.AmountCents) / 100.0,
+		AmountCents:           row.AmountCents,
+		Reason:                row.Reason,
+		Status:                refund.StatusPending,
+		RequestedAt:           row.RequestedAt,
+		StripePaymentIntentID: row.StripePaymentIntentID,
+		PaymentMethod:         strings.ToLower(row.PaymentMethod),
+	}, nil
+}
+
+func (pdb PostgresDb) UpdateRefundStatus(id uint32, status refund.RefundStatus, stripeRefundID string) (*refund.Refund, error) {
+	transaction, err := pdb.Db.Beginx()
+	if err != nil {
+		slog.Error(err.Error())
+		return nil, ErrInternal
+	}
+
+	rollback := func(err error) (*refund.Refund, error) {
+		_ = transaction.Rollback()
+		return nil, err
+	}
+
+	switch status {
+	case refund.StatusDisapproved:
+		{
+			const updateOrder = `
+			UPDATE order_data
+			SET status = 'CLOSED'
+			WHERE id = $1 AND status = 'REFUND_PENDING'
+			`
+			res, err := transaction.Exec(updateOrder, id)
+			if err != nil {
+				slog.Error("Failed to update order status for disapproved refund", "error", err, "order_id", id)
+				return rollback(ErrInternal)
+			}
+			rows, err := res.RowsAffected()
+			if err != nil || rows != 1 {
+				slog.Error("Unexpected rows affected when disapproving refund", "rows", rows, "error", err, "order_id", id)
+				return rollback(errors.New("refund not found"))
+			}
+		}
+		{
+			const deleteRefundData = `DELETE FROM refund_data WHERE order_id = $1`
+			if _, err := transaction.Exec(deleteRefundData, id); err != nil {
+				slog.Error("Failed to delete refund_data for disapproved refund", "error", err, "order_id", id)
+				return rollback(ErrInternal)
+			}
+		}
+	case refund.StatusCompleted:
+		{
+			const updateOrder = `
+			UPDATE order_data
+			SET status = 'REFUNDED'
+			WHERE id = $1 AND status = 'REFUND_PENDING'
+			`
+			res, err := transaction.Exec(updateOrder, id)
+			if err != nil {
+				slog.Error("Failed to update order status for completed refund", "error", err, "order_id", id)
+				return rollback(ErrInternal)
+			}
+			rows, err := res.RowsAffected()
+			if err != nil || rows != 1 {
+				slog.Error("Unexpected rows affected when completing refund", "rows", rows, "error", err, "order_id", id)
+				return rollback(errors.New("refund not found"))
+			}
+		}
+		{
+			const deleteRefundData = `DELETE FROM refund_data WHERE order_id = $1`
+			if _, err := transaction.Exec(deleteRefundData, id); err != nil {
+				slog.Error("Failed to delete refund_data for completed refund", "error", err, "order_id", id)
+				return rollback(ErrInternal)
+			}
+		}
+	default:
+		{
+			const ensurePending = `
+			SELECT id
+			FROM order_data
+			WHERE id = $1 AND status = 'REFUND_PENDING'
+			LIMIT 1
+			`
+			var orderID int64
+			if err := transaction.Get(&orderID, ensurePending, id); err != nil {
+				if errors.Is(err, sql.ErrNoRows) {
+					return rollback(errors.New("refund not found"))
+				}
+				slog.Error("Failed to verify refund status update", "error", err, "order_id", id)
+				return rollback(ErrInternal)
+			}
+		}
+	}
+
+	if err := transaction.Commit(); err != nil {
+		slog.Error("Failed to commit refund status update", "error", err, "order_id", id)
+		return nil, ErrInternal
+	}
+
+	return &refund.Refund{
+		ID:             id,
+		OrderID:        id,
+		Status:         status,
+		StripeRefundID: stripeRefundID,
+	}, nil
+}
+
 func (pdb PostgresDb) GetOrderItems(orderId int64) ([]order.Item, error) {
 	const query = `
 	SELECT id, item_id, quantity
@@ -380,9 +616,9 @@ func (pdb PostgresDb) GetOrderItems(orderId int64) ([]order.Item, error) {
 	WHERE order_id = $1
 	`
 	var itemsDetails []struct {
-		Id			int64 	`db:"id"`
-		ItemId		int64 	`db:"item_id"`
-		Quantity	uint16	`db:"quantity"`
+		Id       int64  `db:"id"`
+		ItemId   int64  `db:"item_id"`
+		Quantity uint16 `db:"quantity"`
 	}
 
 	err := pdb.Db.Select(&itemsDetails, query, orderId)
@@ -412,7 +648,7 @@ func (pdb PostgresDb) GetOrderItems(orderId int64) ([]order.Item, error) {
 			return []order.Item{}, ErrInternal
 		}
 
-		const selectedVariationQuery =`
+		const selectedVariationQuery = `
 		SELECT item_variation.id, item_variation.name, price_difference
 		FROM order_item
 		JOIN order_item_variation
@@ -813,6 +1049,216 @@ func (pdb PostgresDb) GetOrderTotal(orderID int64) (int64, string, error) {
 	}
 
 	return row.TotalCents, strings.ToLower(row.Currency), nil
+}
+
+// GetOrderItemsForPayment returns order items formatted for the payment service
+func (pdb PostgresDb) GetOrderItemsForPayment(orderID int64) ([]payment.OrderItem, error) {
+	const query = `
+	SELECT 
+		CONCAT(item.name, 
+			CASE 
+				WHEN COUNT(iv.name) > 0 
+				THEN CONCAT(' (', STRING_AGG(iv.name, ', '), ')') 
+				ELSE '' 
+			END
+		) AS name,
+		oi.quantity,
+		CAST(GREATEST(ROUND(
+			(item.price_per_unit + COALESCE(SUM(iv.price_difference), 0) - oi.discount)
+		), 0) AS BIGINT) AS price_cents
+	FROM order_item oi
+	JOIN item ON oi.item_id = item.id
+	LEFT JOIN order_item_variation oiv ON oiv.order_item_id = oi.id
+	LEFT JOIN item_variation iv ON oiv.variation_id = iv.id
+	WHERE oi.order_id = $1
+	GROUP BY oi.id, item.name, item.price_per_unit, oi.quantity, oi.discount
+	ORDER BY oi.id
+	`
+
+	var rows []struct {
+		Name       string `db:"name"`
+		Quantity   int    `db:"quantity"`
+		PriceCents int64  `db:"price_cents"`
+	}
+
+	err := pdb.Db.Select(&rows, query, orderID)
+	if err != nil {
+		slog.Error("Failed to get order items for payment", "error", err, "order_id", orderID)
+		return nil, ErrInternal
+	}
+
+	items := make([]payment.OrderItem, len(rows))
+	for i, row := range rows {
+		items[i] = payment.OrderItem{
+			Name:     row.Name,
+			Quantity: row.Quantity,
+			Price:    row.PriceCents,
+		}
+	}
+
+	return items, nil
+}
+
+// -------------------------------------------------------------------------------------------------
+// payment.PaymentRepo implementation --------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
+
+func (pdb PostgresDb) CreatePayment(pmt payment.Payment) (int64, error) {
+	const query = `
+	INSERT INTO payment (order_id, amount, currency, payment_method, stripe_session_id, stripe_payment_intent_id, status)
+	VALUES ($1, $2, $3::currency, $4::payment_method, $5, $6, $7::payment_status)
+	RETURNING id
+	`
+
+	var paymentID int64
+	err := pdb.Db.QueryRow(
+		query,
+		pmt.OrderID,
+		pmt.AmountCents,
+		strings.ToUpper(pmt.Currency),
+		strings.ToUpper(pmt.PaymentMethod),
+		pmt.StripeSessionID,
+		pmt.StripePaymentIntentID,
+		strings.ToUpper(pmt.Status),
+	).Scan(&paymentID)
+
+	if err != nil {
+		slog.Error("Failed to create payment", "error", err)
+		return 0, ErrInternal
+	}
+
+	return paymentID, nil
+}
+
+func (pdb PostgresDb) UpdatePaymentStatus(sessionID string, status string) error {
+	const query = `
+	UPDATE payment
+	SET status = $1::payment_status, updated_at = CURRENT_TIMESTAMP
+	WHERE stripe_session_id = $2
+	`
+
+	result, err := pdb.Db.Exec(query, strings.ToUpper(status), sessionID)
+	if err != nil {
+		slog.Error("Failed to update payment status", "error", err, "session_id", sessionID)
+		return ErrInternal
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		slog.Error("Failed to check rows affected", "error", err)
+		return ErrInternal
+	}
+
+	if rowsAffected == 0 {
+		return payment.ErrPaymentNotFound
+	}
+
+	return nil
+}
+
+func (pdb PostgresDb) UpdatePaymentIntentID(sessionID string, paymentIntentID string) error {
+	const query = `
+	UPDATE payment
+	SET stripe_payment_intent_id = $1, updated_at = CURRENT_TIMESTAMP
+	WHERE stripe_session_id = $2
+	`
+
+	result, err := pdb.Db.Exec(query, paymentIntentID, sessionID)
+	if err != nil {
+		slog.Error("Failed to update payment intent ID", "error", err, "session_id", sessionID)
+		return ErrInternal
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		slog.Error("Failed to check rows affected", "error", err)
+		return ErrInternal
+	}
+
+	if rowsAffected == 0 {
+		return payment.ErrPaymentNotFound
+	}
+
+	return nil
+}
+
+func (pdb PostgresDb) GetPaymentBySessionID(sessionID string) (*payment.Payment, error) {
+	const query = `
+	SELECT id, order_id, amount, currency, payment_method, stripe_session_id, stripe_payment_intent_id, status, created_at, updated_at
+	FROM payment
+	WHERE stripe_session_id = $1
+	LIMIT 1
+	`
+
+	var pmt payment.Payment
+	err := pdb.Db.Get(&pmt, query, sessionID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, payment.ErrPaymentNotFound
+		}
+		slog.Error("Failed to get payment by session ID", "error", err, "session_id", sessionID)
+		return nil, ErrInternal
+	}
+
+	// Convert enum values to lowercase for consistency with JSON responses
+	pmt.Status = strings.ToLower(pmt.Status)
+	pmt.PaymentMethod = strings.ToLower(pmt.PaymentMethod)
+	pmt.Currency = strings.ToLower(pmt.Currency)
+
+	return &pmt, nil
+}
+
+func (pdb PostgresDb) GetPaymentByOrderID(orderID int64) (*payment.Payment, error) {
+	const query = `
+	SELECT id, order_id, amount, currency, payment_method, stripe_session_id, stripe_payment_intent_id, status, created_at, updated_at
+	FROM payment
+	WHERE order_id = $1
+	ORDER BY created_at DESC
+	LIMIT 1
+	`
+
+	var pmt payment.Payment
+	err := pdb.Db.Get(&pmt, query, orderID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, payment.ErrPaymentNotFound
+		}
+		slog.Error("Failed to get payment by order ID", "error", err, "order_id", orderID)
+		return nil, ErrInternal
+	}
+
+	// Convert enum values to lowercase for consistency with JSON responses
+	pmt.Status = strings.ToLower(pmt.Status)
+	pmt.PaymentMethod = strings.ToLower(pmt.PaymentMethod)
+	pmt.Currency = strings.ToLower(pmt.Currency)
+
+	return &pmt, nil
+}
+
+func (pdb PostgresDb) GetPaymentByPaymentIntentID(paymentIntentID string) (*payment.Payment, error) {
+	const query = `
+	SELECT id, order_id, amount, currency, payment_method, stripe_session_id, stripe_payment_intent_id, status, created_at, updated_at
+	FROM payment
+	WHERE stripe_payment_intent_id = $1
+	LIMIT 1
+	`
+
+	var pmt payment.Payment
+	err := pdb.Db.Get(&pmt, query, paymentIntentID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, payment.ErrPaymentNotFound
+		}
+		slog.Error("Failed to get payment by payment intent ID", "error", err, "payment_intent_id", paymentIntentID)
+		return nil, ErrInternal
+	}
+
+	// Convert enum values to lowercase for consistency with JSON responses
+	pmt.Status = strings.ToLower(pmt.Status)
+	pmt.PaymentMethod = strings.ToLower(pmt.PaymentMethod)
+	pmt.Currency = strings.ToLower(pmt.Currency)
+
+	return &pmt, nil
 }
 
 // -------------------------------------------------------------------------------------------------
