@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:8081/api/refund';
+import { useAuth } from "@/global/hooks/auth";
 
 export type RefundStatus =
   | 'Pending'
@@ -29,13 +29,8 @@ export interface RefundActionRequest {
  * @returns A promise that resolves to an array of Refund objects.
  */
 export const getPendingRefunds = async (): Promise<Refund[]> => {
-  const response = await fetch(API_BASE_URL, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    credentials: 'include',
-  });
+  const { authFetch } = useAuth();
+  const response = await authFetch("refund", "GET");
 
   if (!response.ok) {
     const error = await response.text();
@@ -60,14 +55,12 @@ export const processRefundAction = async (
 ): Promise<{ message: string }> => {
   const requestBody: RefundActionRequest = { action, reason };
 
-  const response = await fetch(`${API_BASE_URL}/${refundId}/action`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    credentials: 'include',
-    body: JSON.stringify(requestBody),
-  });
+  const { authFetch } = useAuth();
+  const response = await authFetch(
+    `refund/${refundId}/action`,
+    'POST',
+    JSON.stringify(requestBody),
+  );
 
   const responseBody = await response.json();
 

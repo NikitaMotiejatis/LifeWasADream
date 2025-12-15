@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:8081/api/payment';
+import { useAuth } from "@/global/hooks/auth";
 
 export interface StripeCheckoutRequest {
   order_id: number;
@@ -28,18 +28,16 @@ export const createStripeCheckout = async (
   amount: number,
   currency: string = 'eur',
 ): Promise<StripeCheckoutResponse> => {
-  const response = await fetch(`${API_BASE_URL}/stripe/create-checkout-session`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    credentials: 'include', // Include cookies for authentication
-    body: JSON.stringify({
+  const { authFetch } = useAuth();
+  const response = await authFetch(
+    'payment/stripe/create-checkout-session',
+    'POST',
+    JSON.stringify({
       order_id: orderId,
       amount,
       currency,
-    } as StripeCheckoutRequest),
-  });
+    } as StripeCheckoutRequest)
+  );
 
   if (!response.ok) {
     const error = await response.text();
@@ -52,13 +50,11 @@ export const createStripeCheckout = async (
 export const verifyStripePayment = async (
   sessionId: string,
 ): Promise<PaymentVerification> => {
-  const response = await fetch(`${API_BASE_URL}/stripe/verify/${sessionId}`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    credentials: 'include',
-  });
+  const { authFetch } = useAuth();
+  const response = await authFetch(
+    `payment/stripe/verify/${sessionId}`,
+    'GET',
+  );
 
   if (!response.ok) {
     const error = await response.text();
