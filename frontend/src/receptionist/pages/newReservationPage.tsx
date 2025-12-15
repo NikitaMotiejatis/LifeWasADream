@@ -14,7 +14,6 @@ import {
 import useSWR from 'swr';
 import { useAuth } from '@/global/hooks/auth';
 import type { Cents } from '@/receptionist/contexts/cartContext';
-import { ReservationTipSection } from '@/receptionist/components/reservationTipSection';
 
 type Service = {
   id: string;
@@ -50,7 +49,6 @@ export default function NewReservationPage() {
   const [selectedService, setSelectedService] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
-  const [tipAmount, setTipAmount] = useState<number>(0);
   const [toast, setToast] = useState<{
     message: string;
     type: 'success' | 'error';
@@ -79,10 +77,6 @@ export default function NewReservationPage() {
   const customerName = useNameValidation();
   const customerPhone = usePhoneValidation();
 
-  const handleTipAdded = (amount: number) => {
-    setTipAmount(amount);
-  };
-
   const handleConfirm = async () => {
     if (!customerName.value.trim() || !customerPhone.value.trim()) {
       showToast(t('reservation.toast.missingInfo'), 'error');
@@ -94,7 +88,7 @@ export default function NewReservationPage() {
     }
 
     const selectedServiceObj = services?.find(s => s.id === selectedService);
-    const totalAmount = (selectedServiceObj?.price || 0) + tipAmount;
+    const totalAmount = selectedServiceObj?.price || 0;
 
     const [hours, minutes] = selectedTime.split(':').map(Number);
     const dt = new Date(selectedDate);
@@ -134,7 +128,6 @@ export default function NewReservationPage() {
       setSelectedService(null);
       setSelectedDate(null);
       setSelectedTime(null);
-      setTipAmount(0);
     } catch (error) {
       console.error('Failed to create reservation:', error);
       showToast(t('reservation.toast.error'), 'error');
@@ -401,8 +394,6 @@ function BookingSummary({
   selectedService,
   formatPrice,
   onConfirm,
-  onTipAdded,
-  tipAmount,
   staff,
   services,
   t,
@@ -416,8 +407,6 @@ function BookingSummary({
   selectedService: string | null;
   formatPrice: (price: number) => string;
   onConfirm: () => void;
-  onTipAdded: (amount: number) => void;
-  tipAmount: number;
   staff: Staff[];
   services: Service[];
   t: any;
@@ -425,11 +414,7 @@ function BookingSummary({
 }) {
   const selectedServiceObj = services.find(s => s.id === selectedService);
   const servicePrice = selectedServiceObj?.price || 0;
-  const totalAmount = servicePrice + tipAmount;
-
-  const handleConfirmWithTip = () => {
-    onConfirm();
-  };
+  const totalAmount = servicePrice;
 
   return (
     <div className="rounded-xl bg-white p-5 shadow-lg">
@@ -507,13 +492,6 @@ function BookingSummary({
         {/* Price breakdown with tip */}
         {selectedServiceObj && (
           <>
-            <div className="pt-3">
-              <ReservationTipSection
-                onTipAdded={onTipAdded}
-                disabled={!selectedServiceObj}
-              />
-            </div>
-
             <div className="space-y-2 border-t pt-3">
               <div className="flex justify-between">
                 <span className="text-gray-600">
@@ -521,13 +499,6 @@ function BookingSummary({
                 </span>
                 <span className="font-medium">{formatPrice(servicePrice)}</span>
               </div>
-
-              {tipAmount > 0 && (
-                <div className="flex justify-between text-green-600">
-                  <span className="text-gray-600">{t('reservation.tip')}:</span>
-                  <span className="font-medium">+{formatPrice(tipAmount)}</span>
-                </div>
-              )}
 
               <div className="flex justify-between border-t pt-2 text-lg font-bold">
                 <span>{t('reservation.summary.total')}:</span>
@@ -539,7 +510,7 @@ function BookingSummary({
       </div>
 
       <button
-        onClick={handleConfirmWithTip}
+        onClick={onConfirm}
         disabled={isSubmitting}
         className="w-full rounded-lg bg-blue-600 py-4 font-semibold text-white transition hover:bg-blue-700"
       >
