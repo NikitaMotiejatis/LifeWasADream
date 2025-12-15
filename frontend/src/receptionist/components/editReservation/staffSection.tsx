@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import type { Reservation, Staff } from './types';
+import i18n from '@/i18n';
 
 interface StaffSectionProps {
   staffMembers: Staff[];
@@ -7,7 +8,11 @@ interface StaffSectionProps {
   handleChange: (field: keyof Reservation, value: any) => void;
 }
 
-export function StaffSection({ staffMembers, reservation, handleChange }: StaffSectionProps) {
+export function StaffSection({
+  staffMembers,
+  reservation,
+  handleChange,
+}: StaffSectionProps) {
   const { t } = useTranslation();
 
   return (
@@ -28,10 +33,16 @@ export function StaffSection({ staffMembers, reservation, handleChange }: StaffS
           >
             <div>
               <div className="font-medium">
-                {staff.name} 
+                {staff.name == 'Anyone'
+                  ? t(`reservations.staff.anyone`)
+                  : staff.name}
               </div>
               <div className="text-xs text-gray-500">
-                {staff.role}
+                {staff.role === 'Any'
+                  ? t('reservation.staff.Any')
+                  : i18n.exists(`reservation.staff.${staff.role}`)
+                    ? t(`reservation.staff.${staff.role}`)
+                    : staff.role}
               </div>
             </div>
             {reservation.staff === staff.id && (

@@ -567,10 +567,11 @@
     "staffMember": "Darbuotojas",
     "staff": {
       "Anyone": "Bet kas",
-      "Any": "Bet kuris",
-      "Colorist": "Dažytojas",
-      "Nail Technician": "Nagų meistrė",
-      "Any available staff": "Bet kuris darbuotojas"
+      "Any": "Bet kuris (-i)",
+      "Staff": "Darbuotojas (-a)",
+      "Colorist": "Dažytojas (-a)",
+      "Nail Technician": "Nagų meistras (-ė)",
+      "Any available staff": "Bet kuris darbuotojas (-a)"
     },
 
     "dateTime": "Data ir laikas",
@@ -578,9 +579,6 @@
     "time": "Laikas",
     "duration": "Trukmė",
     "durations": {
-      "120": "120 min",
-      "45": "45 min",
-      "60": "60 min",
       "min": "min"
     },
 
@@ -607,12 +605,6 @@
     "previous": "Ankstesnis"
   },
   "pageTitle": "Nauja rezervacija",
-  "services": {
-    "Hair Color": "Dažymas",
-    "Haircut & Style": "Plaukų kirpimas ir stilizavimas",
-    "Manicure": "Manikiūras",
-    "Pedicure": "Pedikiūras"
-  },
   "smsNote": "Patvirtinimas bus išsiųstas SMS žinute",
   "staff": {
     "Any available staff": "Bet kuris laisvas darbuotojas",
@@ -696,10 +688,12 @@
     "noReservations": "Rezervacijų nerasta",
     "notFound": "Nerasta",
     "services": {
-      "1": "Plaukų kirpimas ir stilizavimas",
-      "2": "Plaukų dažymas",
-      "3": "Manikiūras",
-      "4": "Pedikiūras"
+      "1": "Vyriškas kirpimas",
+      "2": "Moteriškas kirpimas",
+      "3": "Plaukų dažymas",
+      "4": "Švediškas masažas",
+      "5": "Giliųjų audinių masažas",
+      "6": "Veido masažas"
     },
     "staff": {
       "anyone": "Bet kuris darbuotojas"
