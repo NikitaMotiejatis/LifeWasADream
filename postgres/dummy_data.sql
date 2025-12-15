@@ -141,10 +141,10 @@ INSERT INTO item (id, name, location_id, price_per_unit, vat, status) VALUES
 INSERT INTO item_variation (id, item_id, name, price_difference) VALUES 
 (1, 1, 'Small', 0),
 (2, 1, 'Large', 50),
-(3, 5, 'Oat Milk', 50),
-(4, 5, 'Almond Milk', 50),
-(5, 10, 'No Onions', 0),
-(6, 10, 'Extra Cheese', 100),
+(3, 5, 'Small', 0),
+(4, 5, 'Large', 50),
+(5, 5, 'Oat Milk', 50),
+(6, 5, 'Almond Milk', 50),
 (7, 11, 'Small', 0),
 (8, 11, 'Large', 150);
 
@@ -252,8 +252,6 @@ INSERT INTO order_item (order_id, item_id, quantity, discount) VALUES
 INSERT INTO order_item_variation (order_item_id, variation_id) VALUES 
 (1, 2), -- OrderItem 1 (Item 1) -> Variation 2 (Item 1 Large)
 (4, 3), -- OrderItem 4 (Item 5) -> Variation 3 (Item 5 Oat Milk)
-(10, 5), -- OrderItem 10 (Item 10) -> Variation 6 (Item 10 Extra Cheese)
-(10, 6), -- OrderItem 10 (Item 10) -> Variation 6 (Item 10 Extra Cheese)
 (11, 7), -- OrderItem 11 (Item 11) -> Variation 7 (Item 11 Small)
 (16, 8); -- OrderItem 16 (Item 11) -> Variation 8 (Item 11 Large)
 
@@ -263,14 +261,15 @@ INSERT INTO order_item_variation (order_item_id, variation_id) VALUES
 
 INSERT INTO appointment (id, service_location_id, actioned_by, customer_name, customer_phone, appointment_at, status) VALUES 
 -- Past Appointments
-(1, 1, 3, 'Alice Walker', '+44700001', NOW() - INTERVAL '10 days', 'PAID'),
-(2, 2, 3, 'Bob Jones', '+44700002', NOW() - INTERVAL '9 days', 'PAID'),
-(3, 4, 7, 'Charlie Brown', '+14160001', NOW() - INTERVAL '8 days', 'PAID'),
-(4, 5, 7, 'David Smith', '+14160002', NOW() - INTERVAL '7 days', 'PAID'),
+(1, 1, 3, 'Alice Walker', '+44700001', NOW() - INTERVAL '10 days', 'COMPLETED'),
+(2, 2, 3, 'Bob Jones', '+44700002', NOW() - INTERVAL '9 days', 'COMPLETED'),
+(3, 4, 7, 'Charlie Brown', '+14160001', NOW() - INTERVAL '8 days', 'REFUND_PENDING'),
+(4, 5, 7, 'David Smith', '+14160002', NOW() - INTERVAL '7 days', 'REFUNDED'),
 -- Future Appointments
-(5, 1, 3, 'Eve Taylor', '+44700003', NOW() + INTERVAL '1 day', 'RESERVED'),
-(6, 6, 8, 'Frank Miller', '+16040001', NOW() + INTERVAL '2 days', 'RESERVED'),
-(7, 4, 7, 'Grace Wilson', '+14160003', NOW() + INTERVAL '3 days', 'RESERVED');
+(5, 1, 3, 'Eve Taylor', '+44700003', NOW() + INTERVAL '1 day', 'CANCELLED'),
+(6, 6, 8, 'Frank Miller', '+16040001', NOW() + INTERVAL '2 days', 'PENDING'),
+(7, 4, 7, 'Grace Wilson', '+14160003', NOW() + INTERVAL '3 days', 'PENDING'),
+(8, 3, 7, 'Grace WWilson', '+14160004', NOW() + INTERVAL '10 days', 'PENDING');
 
 INSERT INTO appointment_bill (id, appointment_id, amount, discount, tip, created_at) VALUES 
 (1, 1, 2500, 0, 250, NOW() - INTERVAL '10 days'),

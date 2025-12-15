@@ -438,7 +438,8 @@
       "cancelRefund": "Cancel refund",
       "close": "Close order",
       "edit": "Edit",
-      "refund": "Refund"
+      "refund": "Refund",
+      "view": "View"
     },
     "filters": {
       "all": "All",
@@ -627,14 +628,14 @@
       "edit": "Edit"
     },
     "filters": {
-      "all": "All ({{count}})",
-      "cancelled": "Cancelled ({{count}})",
-      "completed": "Completed ({{count}})",
+      "all": "All",
+      "cancelled": "Cancelled",
+      "completed": "Completed",
       "from": "From",
-      "in_service": "In Service ({{count}})",
-      "no_show": "No Show ({{count}})",
-      "pending": "Pending ({{count}})",
-      "refund_pending": "Refund Pending ({{count}})",
+      "in_service": "In Service",
+      "no_show": "No Show",
+      "pending": "Pending",
+      "refund_pending": "Refund Pending",
       "searchPlaceholder": "Search by name, phone, code, service or staff...",
       "to": "To"
     },

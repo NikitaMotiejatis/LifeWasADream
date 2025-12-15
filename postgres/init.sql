@@ -381,7 +381,7 @@ CREATE TABLE order_discount (
 -- -------------------------------------------------------------------------------------------------
 
 DROP TYPE IF EXISTS appointment_status CASCADE;
-CREATE TYPE appointment_status AS ENUM('RESERVED', 'SERVING', 'CANCELLED', 'PAID');
+CREATE TYPE appointment_status AS ENUM('PENDING', 'COMPLETED', 'CANCELLED', 'REFUND_PENDING', 'REFUNDED');
 
 DROP TABLE IF EXISTS appointment CASCADE;
 CREATE TABLE appointment (
@@ -391,7 +391,7 @@ CREATE TABLE appointment (
     customer_name       VARCHAR(64)         NOT NULL,
     customer_phone      VARCHAR(16)         NOT NULL UNIQUE,
     appointment_at      TIMESTAMP           NOT NULL,
-	status              appointment_status  NOT NULL DEFAULT 'RESERVED'
+	status              appointment_status  NOT NULL DEFAULT 'PENDING'
 
     CONSTRAINT valid_customer_phone CHECK (customer_phone ~ '^\+[0-9]{3,15}$')
 );
@@ -488,15 +488,19 @@ AS
      SELECT
         order_item_id,
         order_id,
+        price_per_unit,
+        unit_discount,
         vat,
         quantity,
-        SUM(price_per_unit + COALESCE(price_difference, 0) - unit_discount)                         ::DECIMAL(15) AS gross,
-        SUM(price_per_unit + COALESCE(price_difference, 0) - unit_discount) / (0.01 * (100 + vat))  ::DECIMAL(15) AS net,
-        SUM(price_per_unit + COALESCE(price_difference, 0) - unit_discount) * quantity              ::DECIMAL(15) AS total
+        ((price_per_unit + SUM(COALESCE(price_difference, 0)) - unit_discount)                         )::DECIMAL(15) AS gross,
+        ((price_per_unit + SUM(COALESCE(price_difference, 0)) - unit_discount) / (0.01 * (100 + vat))  )::DECIMAL(15) AS net,
+        ((price_per_unit + SUM(COALESCE(price_difference, 0)) - unit_discount) * quantity              )::DECIMAL(15) AS total
     FROM order_item_detail
     GROUP BY 
         order_item_id,
         order_id,
+        price_per_unit,
+        unit_discount,
         vat,
         quantity
 ;

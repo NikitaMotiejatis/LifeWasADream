@@ -24,7 +24,6 @@ func (c OrderController) Routes() http.Handler {
 	router.Get("/{orderId:^[0-9]{1,10}$}", c.getOrder)
 	router.Post("/{orderId:^[0-9]{1,10}$}/ask-refund", c.askForRefund)
 	router.Delete("/{orderId:^[0-9]{1,10}$}/ask-refund/cancel", c.cancelRefundRequest)
-	router.Get("/counts", c.counts)
 	router.Get("/products", c.getProducts)
 
 	return router
