@@ -63,6 +63,7 @@
     "status": "Status",
     "update": "Update",
     "add": "Add",
+    "save":"Save",
     "edit": "Edit",
     "delete": "Delete",
     "remove": "Remove",
