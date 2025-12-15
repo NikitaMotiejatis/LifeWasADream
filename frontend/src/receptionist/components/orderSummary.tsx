@@ -44,6 +44,7 @@ export default function OrderSummary({
     isSplitMode,
     setIsSplitMode,
     individualTips,
+    currency,
   } = useCart();
 
   const hasItems = itemsList.length > 0;
@@ -74,6 +75,7 @@ export default function OrderSummary({
     const order = {
       items: itemsList,
       tip: -1, // Tip is set only at checkout. -1 means tip property is to be ignored.
+      currency: currency.toLowerCase(),
     };
 
     try {
@@ -107,6 +109,7 @@ export default function OrderSummary({
       const order = {
         items: itemsList,
         tip: tipAmount,
+        currency: currency.toLowerCase(),
       };
 
       let orderId: number;
@@ -138,7 +141,7 @@ export default function OrderSummary({
       const checkoutResponse = await createStripeCheckout(
         orderId,
         paymentAmount,
-        'eur',
+        currency.toLowerCase(),
       );
 
       if (payerIndex === undefined || !isSplitMode) {

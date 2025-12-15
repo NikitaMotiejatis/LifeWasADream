@@ -7,13 +7,15 @@ import ReservationModal from '@/receptionist/components/reservationModal';
 import { EditReservationPanel } from '@/receptionist/components/editReservation/editReservationPanel';
 import Toast from '@/global/components/toast';
 import { useAuth } from '@/global/hooks/auth';
-import useSWR from 'swr';
+import useSWR, { mutate } from 'swr';
 import type { Cents } from '@/receptionist/contexts/cartContext';
+import type { Reservation as EditReservation } from '@/receptionist/components/editReservation/types';
 
 type Service = {
   id: string;
   nameKey: string;
   price: Cents;
+  duration: number;
 };
 
 type Staff = {
@@ -30,7 +32,13 @@ export type Reservation = {
   staffId: string;
   serviceId: string;
   datetime: string;
-  status: 'pending' | 'completed' | 'cancelled' | 'no_show' | 'refund_pending';
+  status:
+    | 'pending'
+    | 'confirmed'
+    | 'completed'
+    | 'cancelled'
+    | 'refund_pending'
+    | 'refunded';
 };
 
 function buildISOString(
@@ -121,7 +129,7 @@ export default function ReservationList() {
 
   const [modalOpen, setModalOpen] = useState(false);
   const [modalType, setModalType] = useState<
-    'complete' | 'cancel' | 'noshow' | 'refund' | 'cancel_refund'
+    'complete' | 'cancel' | 'refund' | 'cancel_refund'
   >('complete');
   const [selectedReservation, setSelectedReservation] =
     useState<Reservation | null>(null);
@@ -130,6 +138,8 @@ export default function ReservationList() {
   const [reservationIdToEdit, setReservationIdToEdit] = useState<string | null>(
     null,
   );
+  const [selectedReservationToEdit, setSelectedReservationToEdit] =
+    useState<EditReservation | null>(null);
 
   const [toast, setToast] = useState<{
     message: string;
@@ -144,20 +154,76 @@ export default function ReservationList() {
 
   const handleEditClick = (reservation: Reservation) => {
     setReservationIdToEdit(reservation.id);
-    setSelectedReservation(reservation as any);
+    const selectedService = services?.find(s => s.id === reservation.serviceId);
+    setSelectedReservationToEdit({
+      id: reservation.id,
+      service: reservation.serviceId,
+      staff: reservation.staffId,
+      datetime: new Date(reservation.datetime),
+      duration: selectedService?.duration ?? 60,
+      customerName: reservation.customerName,
+      customerPhone: reservation.customerPhone,
+      status: reservation.status as any,
+      notes: '',
+      price: selectedService?.price ?? 0,
+    });
     setEditModalOpen(true);
   };
 
   const handleSaveEdit = async (reservationData: any) => {
     try {
       if (!reservationData) throw new Error('No reservation data received');
-      await authFetch(
+
+      const staffId =
+        reservationData.staffId ??
+        reservationData.staff ??
+        selectedReservationToEdit?.staff ??
+        null;
+      const serviceId =
+        reservationData.serviceId ??
+        reservationData.service ??
+        selectedReservationToEdit?.service ??
+        null;
+
+      const datetimeValue = reservationData.datetime ?? selectedReservationToEdit?.datetime;
+      const datetime =
+        datetimeValue instanceof Date
+          ? datetimeValue.toISOString()
+          : typeof datetimeValue === 'string'
+            ? datetimeValue
+            : null;
+
+      const payload: Record<string, unknown> = {
+        customerName: reservationData.customerName,
+        customerPhone: reservationData.customerPhone,
+        staffId: staffId,
+        serviceId: serviceId,
+        datetime: datetime,
+        status: reservationData.status,
+      };
+
+      for (const key of Object.keys(payload)) {
+        if (payload[key] === null || payload[key] === undefined || payload[key] === '') {
+          delete payload[key];
+        }
+      }
+
+      const res = await authFetch(
         `reservation/${reservationData.id}`,
         'PUT',
-        JSON.stringify(reservationData),
+        JSON.stringify(payload),
       );
+      if (!res.ok) {
+        const errBody = await res.json().catch(() => null);
+        const msg = errBody?.error || `Request failed (${res.status})`;
+        throw new Error(msg);
+      }
+
       setEditModalOpen(false);
+      setSelectedReservationToEdit(null);
+      setReservationIdToEdit(null);
       setToast({ message: t('reservations.toast.updated'), type: 'success' });
+      await mutate(`reservation?${query}`);
     } catch (err: any) {
       console.error(err);
       setToast({ message: `Error: ${err.message}`, type: 'error' });
@@ -205,30 +271,61 @@ export default function ReservationList() {
         />
       </div>
 
-      <ReservationModal
-        open={modalOpen}
-        type={modalType}
-        reservation={selectedReservation}
-        onClose={() => setModalOpen(false)}
-        onConfirm={() => {
-          if (!selectedReservation) return;
-          const actions: Record<typeof modalType, () => void> = {
-            complete: () => showToast('reservations.toast.completed'),
-            cancel: () => showToast('reservations.toast.cancelled'),
-            noshow: () => showToast('reservations.toast.noShow'),
-            refund: () => showToast('reservations.toast.refundRequested'),
-            cancel_refund: () =>
-              showToast('reservations.toast.refundCancelled'),
-          };
-          actions[modalType]();
-        }}
-      />
+        <ReservationModal
+          open={modalOpen}
+          type={modalType}
+          reservation={selectedReservation}
+          onClose={() => setModalOpen(false)}
+          onConfirm={async () => {
+            if (!selectedReservation) return;
 
-      {editModalOpen && reservationIdToEdit && (
+            const updateStatus = async (status: Reservation['status']) => {
+              const res = await authFetch(
+                `reservation/${selectedReservation.id}`,
+                'PUT',
+                JSON.stringify({ status }),
+              );
+              if (!res.ok) {
+                const errBody = await res.json().catch(() => null);
+                const msg = errBody?.error || `Request failed (${res.status})`;
+                throw new Error(msg);
+              }
+            };
+
+            try {
+              if (modalType === 'cancel') {
+                await updateStatus('cancelled');
+                showToast('reservations.toast.cancelled');
+              } else if (modalType === 'complete') {
+                await updateStatus('completed');
+                showToast('reservations.toast.completed');
+              } else if (modalType === 'refund') {
+                await updateStatus('refund_pending');
+                showToast('reservations.toast.refundRequested');
+              } else if (modalType === 'cancel_refund') {
+                await updateStatus('completed');
+                showToast('reservations.toast.refundCancelled');
+              }
+
+              await mutate(`reservation?${query}`);
+              setModalOpen(false);
+              setSelectedReservation(null);
+            } catch (err: any) {
+              setToast({ message: `Error: ${err.message}`, type: 'error' });
+              setTimeout(() => setToast(null), 5000);
+            }
+          }}
+        />
+
+      {editModalOpen && reservationIdToEdit && selectedReservationToEdit && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div
             className="absolute inset-0 bg-black/50"
-            onClick={() => setEditModalOpen(false)}
+            onClick={() => {
+              setEditModalOpen(false);
+              setSelectedReservationToEdit(null);
+              setReservationIdToEdit(null);
+            }}
           />
           <div className="relative max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-2xl bg-white p-7 shadow-2xl">
             <EditReservationPanel
@@ -236,9 +333,13 @@ export default function ReservationList() {
               reservationId={reservationIdToEdit}
               services={services as any}
               staffMembers={staff as any}
-              initialReservation={selectedReservation as any}
+              initialReservation={selectedReservationToEdit as any}
               onSave={handleSaveEdit}
-              onCancel={() => setEditModalOpen(false)}
+              onCancel={() => {
+                setEditModalOpen(false);
+                setSelectedReservationToEdit(null);
+                setReservationIdToEdit(null);
+              }}
             />
           </div>
         </div>
@@ -251,7 +352,7 @@ export default function ReservationList() {
 type ReservationsProps = {
   ordersQuery: string;
   openModal: (
-    type: 'complete' | 'cancel' | 'noshow' | 'refund' | 'cancel_refund',
+    type: 'complete' | 'cancel' | 'refund' | 'cancel_refund',
     res: Reservation,
   ) => void;
   formatPrice: (amount: number) => string;
@@ -301,9 +402,18 @@ function Reservations({
     );
   }
 
+  const visibleReservations = reservations.filter(res => res.status !== 'cancelled');
+  if (visibleReservations.length === 0) {
+    return (
+      <p className="py-12 text-center text-gray-400">
+        {t('reservations.noReservations')}
+      </p>
+    );
+  }
+
   return (
     <>
-      {reservations.map(res => {
+      {visibleReservations.map(res => {
         const resStaff = staff.find(s => s.id === res.staffId);
         const resService = services.find(s => s.id === res.serviceId);
         return (

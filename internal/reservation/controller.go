@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"regexp"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/go-chi/chi/v5"
@@ -217,6 +218,18 @@ func (c *ReservationController) updateReservation(w http.ResponseWriter, r *http
 	if err := json.NewDecoder(r.Body).Decode(&update); err != nil {
 		writeJSONError("invalid reservation", http.StatusBadRequest)
 		return
+	}
+
+	if update.CustomerName != nil && strings.TrimSpace(*update.CustomerName) == "" {
+		writeJSONError("customer name is required", http.StatusBadRequest)
+		return
+	}
+	if update.CustomerPhone != nil {
+		phonePattern := regexp.MustCompile(`^\+[0-9]{3,15}$`)
+		if !phonePattern.MatchString(*update.CustomerPhone) {
+			writeJSONError("customer phone must match +[3-15 digits]", http.StatusBadRequest)
+			return
+		}
 	}
 
 	err = c.ReservationRepo.UpdateReservation(int32(id), update)

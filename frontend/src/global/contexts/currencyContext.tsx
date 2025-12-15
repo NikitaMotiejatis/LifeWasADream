@@ -52,6 +52,7 @@ export const CurrencyProvider = ({ children }: { children: ReactNode }) => {
   const [currency, setCurrencyState] = useState<Currency>('USD');
   const [syncWithLanguage, setSyncWithLanguageState] = useState<boolean>(true);
   const [manuallyOverridden, setManuallyOverridden] = useState<boolean>(false);
+  const [initialized, setInitialized] = useState<boolean>(false);
 
   useEffect(() => {
     const savedCurrency = localStorage.getItem('currency') as Currency | null;
@@ -64,13 +65,14 @@ export const CurrencyProvider = ({ children }: { children: ReactNode }) => {
     } else {
       setCurrencyState(getDefaultCurrency(i18n.language));
     }
+    setInitialized(true);
   }, []);
 
   useEffect(() => {
-    if (!syncWithLanguage || manuallyOverridden) return;
+    if (!initialized || !syncWithLanguage || manuallyOverridden) return;
     const next = getDefaultCurrency(i18n.language);
     if (next !== currency) setCurrencyState(next);
-  }, [i18n.language, syncWithLanguage, manuallyOverridden, currency]);
+  }, [initialized, i18n.language, syncWithLanguage, manuallyOverridden, currency]);
 
   const setCurrency = useCallback((c: Currency) => {
     setCurrencyState(c);

@@ -178,6 +178,8 @@ const RefundQueue = ({
   const { t } = useTranslation();
   const { formatPrice } = useCurrency();
   const visibleRequests = requests.slice(0, 3);
+  const refundAmountToCents = (amount: number): number =>
+    Number.isFinite(amount) ? Math.round(amount * 100) : 0;
 
   return (
     <div className="rounded-lg bg-white p-6 shadow-md lg:col-span-1">
@@ -236,7 +238,7 @@ const RefundQueue = ({
                   {new Date(request.requestedAt).toLocaleDateString()}
                 </td>
                 <td className="px-2 py-2 text-sm whitespace-nowrap text-gray-900">
-                  {formatPrice(request.amount)}
+                  {formatPrice(refundAmountToCents(request.amount))}
                 </td>
                 <td className="px-2 py-2 text-sm text-gray-500">
                   {i18n.exists(`transferRequests.reasons.${request.reason}`)

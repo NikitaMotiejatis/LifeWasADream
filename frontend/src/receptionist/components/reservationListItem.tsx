@@ -20,7 +20,7 @@ type Props = {
   staff?: Staff[];
   formatPrice: (n: number) => string;
   onAction: (
-    type: 'complete' | 'cancel' | 'noshow' | 'refund' | 'cancel_refund',
+    type: 'complete' | 'cancel' | 'refund' | 'cancel_refund',
     reservation: Reservation,
   ) => void;
   onEdit: (reservation: Reservation) => void;
@@ -106,12 +106,6 @@ export default function ReservationListItem({
                 className="rounded-lg border border-red-500 bg-red-50 px-3 py-2 text-xs text-red-600 transition-colors hover:bg-red-100"
               >
                 {t('reservations.actions.cancel')}
-              </button>
-              <button
-                onClick={() => onAction('noshow', reservation)}
-                className="rounded-lg border border-orange-500 bg-orange-50 px-3 py-2 text-xs text-orange-600 transition-colors hover:bg-orange-100"
-              >
-                {t('reservations.actions.noShow')}
               </button>
             </>
           )}
