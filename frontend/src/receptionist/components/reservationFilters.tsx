@@ -73,8 +73,6 @@ export default function ReservationFilters({
             'all',
             'pending',
             'completed',
-            'cancelled',
-            'no_show',
             'refund_pending',
           ] as const
         ).map(status => (

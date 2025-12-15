@@ -130,7 +130,7 @@ export default function ReservationList() {
 
   const [modalOpen, setModalOpen] = useState(false);
   const [modalType, setModalType] = useState<
-    'complete' | 'cancel' | 'noshow' | 'refund' | 'cancel_refund'
+    'complete' | 'cancel' | 'refund' | 'cancel_refund'
   >('complete');
   const [selectedReservation, setSelectedReservation] =
     useState<Reservation | null>(null);
@@ -272,24 +272,51 @@ export default function ReservationList() {
         />
       </div>
 
-      <ReservationModal
-        open={modalOpen}
-        type={modalType}
-        reservation={selectedReservation}
-        onClose={() => setModalOpen(false)}
-        onConfirm={() => {
-          if (!selectedReservation) return;
-          const actions: Record<typeof modalType, () => void> = {
-            complete: () => showToast('reservations.toast.completed'),
-            cancel: () => showToast('reservations.toast.cancelled'),
-            noshow: () => showToast('reservations.toast.noShow'),
-            refund: () => showToast('reservations.toast.refundRequested'),
-            cancel_refund: () =>
-              showToast('reservations.toast.refundCancelled'),
-          };
-          actions[modalType]();
-        }}
-      />
+        <ReservationModal
+          open={modalOpen}
+          type={modalType}
+          reservation={selectedReservation}
+          onClose={() => setModalOpen(false)}
+          onConfirm={async () => {
+            if (!selectedReservation) return;
+
+            const updateStatus = async (status: Reservation['status']) => {
+              const res = await authFetch(
+                `reservation/${selectedReservation.id}`,
+                'PUT',
+                JSON.stringify({ status }),
+              );
+              if (!res.ok) {
+                const errBody = await res.json().catch(() => null);
+                const msg = errBody?.error || `Request failed (${res.status})`;
+                throw new Error(msg);
+              }
+            };
+
+            try {
+              if (modalType === 'cancel') {
+                await updateStatus('cancelled');
+                showToast('reservations.toast.cancelled');
+              } else if (modalType === 'complete') {
+                await updateStatus('completed');
+                showToast('reservations.toast.completed');
+              } else if (modalType === 'refund') {
+                await updateStatus('refund_pending');
+                showToast('reservations.toast.refundRequested');
+              } else if (modalType === 'cancel_refund') {
+                await updateStatus('completed');
+                showToast('reservations.toast.refundCancelled');
+              }
+
+              await mutate(`reservation?${query}`);
+              setModalOpen(false);
+              setSelectedReservation(null);
+            } catch (err: any) {
+              setToast({ message: `Error: ${err.message}`, type: 'error' });
+              setTimeout(() => setToast(null), 5000);
+            }
+          }}
+        />
 
       {editModalOpen && reservationIdToEdit && selectedReservationToEdit && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
@@ -326,7 +353,7 @@ export default function ReservationList() {
 type ReservationsProps = {
   ordersQuery: string;
   openModal: (
-    type: 'complete' | 'cancel' | 'noshow' | 'refund' | 'cancel_refund',
+    type: 'complete' | 'cancel' | 'refund' | 'cancel_refund',
     res: Reservation,
   ) => void;
   formatPrice: (amount: number) => string;
@@ -376,9 +403,18 @@ function Reservations({
     );
   }
 
+  const visibleReservations = reservations.filter(res => res.status !== 'cancelled');
+  if (visibleReservations.length === 0) {
+    return (
+      <p className="py-12 text-center text-gray-400">
+        {t('reservations.noReservations')}
+      </p>
+    );
+  }
+
   return (
     <>
-      {reservations.map(res => {
+      {visibleReservations.map(res => {
         const resStaff = staff.find(s => s.id === res.staffId);
         const resService = services.find(s => s.id === res.serviceId);
         return (
