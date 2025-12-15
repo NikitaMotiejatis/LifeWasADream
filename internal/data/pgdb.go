@@ -733,68 +733,25 @@ func (pdb PostgresDb) CreateReservation(res reservation.Reservation) (int32, err
 }
 
 func (pdb PostgresDb) UpdateReservation(id int32, res reservation.ReservationUpdate) error {
-	setParts := []string{}
-	args := []any{}
-
-	if res.CustomerName != nil {
-		setParts = append(setParts, fmt.Sprintf("customer_name = $%d", len(args)+1))
-		args = append(args, *res.CustomerName)
-	}
-	if res.CustomerPhone != nil {
-		setParts = append(setParts, fmt.Sprintf("customer_phone = $%d", len(args)+1))
-		args = append(args, *res.CustomerPhone)
-	}
-	if res.Datetime != nil {
-		setParts = append(setParts, fmt.Sprintf("appointment_at = $%d", len(args)+1))
-		args = append(args, *res.Datetime)
-	}
-	if res.Status != nil {
-		status := mapApiReservationStatusToAppointment(*res.Status)
-		if status != "" {
-			setParts = append(setParts, fmt.Sprintf("status = $%d", len(args)+1))
-			args = append(args, status)
-		}
-	}
-	if res.ServiceId != nil {
-		if serviceId, err := strconv.ParseInt(*res.ServiceId, 10, 32); err == nil {
-			// update service location to first matching for service
-			var serviceLocationId int32
-			const query = `
-			SELECT id
-			FROM service_location
-			WHERE service_id = $1
-			ORDER BY id
-			LIMIT 1
-			`
-			err := pdb.Db.Get(&serviceLocationId, query, serviceId)
-			if err != nil {
-				slog.Error(err.Error())
-				return ErrInternal
-			}
-			setParts = append(setParts, fmt.Sprintf("service_location_id = $%d", len(args)+1))
-			args = append(args, serviceLocationId)
-		}
-	}
-	if res.StaffId != nil {
-		if staffId, err := strconv.ParseInt(*res.StaffId, 10, 32); err == nil {
-			setParts = append(setParts, fmt.Sprintf("actioned_by = $%d", len(args)+1))
-			args = append(args, int32(staffId))
-		}
-	}
-
-	if len(setParts) == 0 {
-		return nil
-	}
-
-	args = append(args, id)
-
-	query := fmt.Sprintf(`
+	query := `
 	UPDATE appointment
-	SET %s
-	WHERE id = $%d
-	`, strings.Join(setParts, ", "), len(args))
+	SET
+		actioned_by    = COALESCE($2, actioned_by),
+		customer_name  = COALESCE($3, customer_name),
+		customer_phone = COALESCE($4, customer_phone),
+		appointment_at = COALESCE($5, appointment_at),
+		status 		   = COALESCE(UPPER($6)::appointment_status, status)
+	WHERE id = $1
+	`
 
-	_, err := pdb.Db.Exec(query, args...)
+	_, err := pdb.Db.Exec(query,
+		id,
+		res.StaffId,
+		res.CustomerName,
+		res.CustomerPhone,
+		res.Datetime,
+		res.Status,
+	)
 	if err != nil {
 		slog.Error(err.Error())
 		return ErrInternal

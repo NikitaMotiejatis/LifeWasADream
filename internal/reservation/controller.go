@@ -208,8 +208,7 @@ func (c *ReservationController) updateReservation(w http.ResponseWriter, r *http
 		_ = json.NewEncoder(w).Encode(map[string]string{"error": msg})
 	}
 
-	idStr := chi.URLParam(r, "id")
-	id, err := strconv.ParseInt(idStr, 10, 32)
+	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 32)
 	if err != nil {
 		writeJSONError("invalid reservation ID", http.StatusBadRequest)
 		return

@@ -172,7 +172,7 @@ export default function ReservationList() {
       await authFetch(
         `reservation/${reservationData.id}`,
         'PUT',
-        reservationData,
+        JSON.stringify(reservationData),
       );
       setEditModalOpen(false);
       setToast({ message: t('reservations.toast.updated'), type: 'success' });
