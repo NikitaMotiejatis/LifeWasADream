@@ -111,6 +111,8 @@ func setupPaymentRoutes(router *chi.Mux, config config.Config, authMiddleware fu
 		SuccessURL:      fmt.Sprintf("http://%s/payment/success", config.FrontendUrl), // When I save it automatically makes the spaces, after ':' !?
 		CancelURL:       fmt.Sprintf("http://%s/payment/cancel", config.FrontendUrl),
 		OrderTotals:     db,
+		PaymentRepo:     db,
+		OrderItems:      db,
 	}
 
 	paymentController := &payment.PaymentController{

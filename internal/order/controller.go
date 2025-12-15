@@ -94,11 +94,16 @@ func (c OrderController) createOrder(w http.ResponseWriter, r *http.Request) {
 	orderId, err := c.OrderRepo.CreateOrder(order)
 	if err != nil {
 		http.Error(w, "failed to create order", http.StatusBadRequest)
+		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	if err := json.NewEncoder(w).Encode(orderId); err != nil {
+	response := map[string]any{
+		"id":      orderId,
+		"message": "order created",
+	}
+	if err := json.NewEncoder(w).Encode(response); err != nil {
 		http.Error(w, "failed to encode response", http.StatusInternalServerError)
 		return
 	}
@@ -149,9 +154,19 @@ func (c OrderController) updateOrder(w http.ResponseWriter, r *http.Request) {
 	err = c.OrderRepo.ModifyOrder(orderId, order)
 	if err != nil {
 		http.Error(w, "failed to modify order", http.StatusBadRequest)
+		return
 	}
 
-	w.WriteHeader(http.StatusNoContent)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	response := map[string]any{
+		"id":      orderId,
+		"message": "order updated",
+	}
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		http.Error(w, "failed to encode response", http.StatusInternalServerError)
+		return
+	}
 }
 
 func (c OrderController) askForRefund(w http.ResponseWriter, r *http.Request) {

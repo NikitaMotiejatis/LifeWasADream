@@ -380,9 +380,9 @@ func (pdb PostgresDb) GetOrderItems(orderId int64) ([]order.Item, error) {
 	WHERE order_id = $1
 	`
 	var itemsDetails []struct {
-		Id			int64 	`db:"id"`
-		ItemId		int64 	`db:"item_id"`
-		Quantity	uint16	`db:"quantity"`
+		Id       int64  `db:"id"`
+		ItemId   int64  `db:"item_id"`
+		Quantity uint16 `db:"quantity"`
 	}
 
 	err := pdb.Db.Select(&itemsDetails, query, orderId)
@@ -412,7 +412,7 @@ func (pdb PostgresDb) GetOrderItems(orderId int64) ([]order.Item, error) {
 			return []order.Item{}, ErrInternal
 		}
 
-		const selectedVariationQuery =`
+		const selectedVariationQuery = `
 		SELECT item_variation.id, item_variation.name, price_difference
 		FROM order_item
 		JOIN order_item_variation
@@ -813,6 +813,190 @@ func (pdb PostgresDb) GetOrderTotal(orderID int64) (int64, string, error) {
 	}
 
 	return row.TotalCents, strings.ToLower(row.Currency), nil
+}
+
+// GetOrderItemsForPayment returns order items formatted for the payment service
+func (pdb PostgresDb) GetOrderItemsForPayment(orderID int64) ([]payment.OrderItem, error) {
+	const query = `
+	SELECT 
+		CONCAT(item.name, 
+			CASE 
+				WHEN COUNT(iv.name) > 0 
+				THEN CONCAT(' (', STRING_AGG(iv.name, ', '), ')') 
+				ELSE '' 
+			END
+		) AS name,
+		oi.quantity,
+		CAST(GREATEST(ROUND(
+			(item.price_per_unit + COALESCE(SUM(iv.price_difference), 0) - oi.discount)
+		), 0) AS BIGINT) AS price_cents
+	FROM order_item oi
+	JOIN item ON oi.item_id = item.id
+	LEFT JOIN order_item_variation oiv ON oiv.order_item_id = oi.id
+	LEFT JOIN item_variation iv ON oiv.variation_id = iv.id
+	WHERE oi.order_id = $1
+	GROUP BY oi.id, item.name, item.price_per_unit, oi.quantity, oi.discount
+	ORDER BY oi.id
+	`
+
+	var rows []struct {
+		Name       string `db:"name"`
+		Quantity   int    `db:"quantity"`
+		PriceCents int64  `db:"price_cents"`
+	}
+
+	err := pdb.Db.Select(&rows, query, orderID)
+	if err != nil {
+		slog.Error("Failed to get order items for payment", "error", err, "order_id", orderID)
+		return nil, ErrInternal
+	}
+
+	items := make([]payment.OrderItem, len(rows))
+	for i, row := range rows {
+		items[i] = payment.OrderItem{
+			Name:     row.Name,
+			Quantity: row.Quantity,
+			Price:    row.PriceCents,
+		}
+	}
+
+	return items, nil
+}
+
+// -------------------------------------------------------------------------------------------------
+// payment.PaymentRepo implementation --------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
+
+func (pdb PostgresDb) CreatePayment(pmt payment.Payment) (int64, error) {
+	const query = `
+	INSERT INTO payment (order_id, amount, currency, payment_method, stripe_session_id, stripe_payment_intent_id, status)
+	VALUES ($1, $2, $3::currency, $4::payment_method, $5, $6, $7::payment_status)
+	RETURNING id
+	`
+
+	var paymentID int64
+	err := pdb.Db.QueryRow(
+		query,
+		pmt.OrderID,
+		pmt.AmountCents,
+		strings.ToUpper(pmt.Currency),
+		strings.ToUpper(pmt.PaymentMethod),
+		pmt.StripeSessionID,
+		pmt.StripePaymentIntentID,
+		strings.ToUpper(pmt.Status),
+	).Scan(&paymentID)
+
+	if err != nil {
+		slog.Error("Failed to create payment", "error", err)
+		return 0, ErrInternal
+	}
+
+	return paymentID, nil
+}
+
+func (pdb PostgresDb) UpdatePaymentStatus(sessionID string, status string) error {
+	const query = `
+	UPDATE payment
+	SET status = $1::payment_status, updated_at = CURRENT_TIMESTAMP
+	WHERE stripe_session_id = $2
+	`
+
+	result, err := pdb.Db.Exec(query, strings.ToUpper(status), sessionID)
+	if err != nil {
+		slog.Error("Failed to update payment status", "error", err, "session_id", sessionID)
+		return ErrInternal
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		slog.Error("Failed to check rows affected", "error", err)
+		return ErrInternal
+	}
+
+	if rowsAffected == 0 {
+		return payment.ErrPaymentNotFound
+	}
+
+	return nil
+}
+
+func (pdb PostgresDb) GetPaymentBySessionID(sessionID string) (*payment.Payment, error) {
+	const query = `
+	SELECT id, order_id, amount, currency, payment_method, stripe_session_id, stripe_payment_intent_id, status, created_at, updated_at
+	FROM payment
+	WHERE stripe_session_id = $1
+	LIMIT 1
+	`
+
+	var pmt payment.Payment
+	err := pdb.Db.Get(&pmt, query, sessionID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, payment.ErrPaymentNotFound
+		}
+		slog.Error("Failed to get payment by session ID", "error", err, "session_id", sessionID)
+		return nil, ErrInternal
+	}
+
+	// Convert enum values to lowercase for consistency with JSON responses
+	pmt.Status = strings.ToLower(pmt.Status)
+	pmt.PaymentMethod = strings.ToLower(pmt.PaymentMethod)
+	pmt.Currency = strings.ToLower(pmt.Currency)
+
+	return &pmt, nil
+}
+
+func (pdb PostgresDb) GetPaymentByOrderID(orderID int64) (*payment.Payment, error) {
+	const query = `
+	SELECT id, order_id, amount, currency, payment_method, stripe_session_id, stripe_payment_intent_id, status, created_at, updated_at
+	FROM payment
+	WHERE order_id = $1
+	ORDER BY created_at DESC
+	LIMIT 1
+	`
+
+	var pmt payment.Payment
+	err := pdb.Db.Get(&pmt, query, orderID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, payment.ErrPaymentNotFound
+		}
+		slog.Error("Failed to get payment by order ID", "error", err, "order_id", orderID)
+		return nil, ErrInternal
+	}
+
+	// Convert enum values to lowercase for consistency with JSON responses
+	pmt.Status = strings.ToLower(pmt.Status)
+	pmt.PaymentMethod = strings.ToLower(pmt.PaymentMethod)
+	pmt.Currency = strings.ToLower(pmt.Currency)
+
+	return &pmt, nil
+}
+
+func (pdb PostgresDb) GetPaymentByPaymentIntentID(paymentIntentID string) (*payment.Payment, error) {
+	const query = `
+	SELECT id, order_id, amount, currency, payment_method, stripe_session_id, stripe_payment_intent_id, status, created_at, updated_at
+	FROM payment
+	WHERE stripe_payment_intent_id = $1
+	LIMIT 1
+	`
+
+	var pmt payment.Payment
+	err := pdb.Db.Get(&pmt, query, paymentIntentID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, payment.ErrPaymentNotFound
+		}
+		slog.Error("Failed to get payment by payment intent ID", "error", err, "payment_intent_id", paymentIntentID)
+		return nil, ErrInternal
+	}
+
+	// Convert enum values to lowercase for consistency with JSON responses
+	pmt.Status = strings.ToLower(pmt.Status)
+	pmt.PaymentMethod = strings.ToLower(pmt.PaymentMethod)
+	pmt.Currency = strings.ToLower(pmt.Currency)
+
+	return &pmt, nil
 }
 
 // -------------------------------------------------------------------------------------------------

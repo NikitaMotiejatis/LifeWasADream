@@ -37,6 +37,11 @@ func (c *PaymentController) createStripeCheckoutSession(w http.ResponseWriter, r
 		return
 	}
 
+	if req.OrderID <= 0 {
+		http.Error(w, "order ID is required", http.StatusBadRequest)
+		return
+	}
+
 	response, err := c.Service.CreateStripeCheckoutSession(req)
 	if err != nil {
 		// Expose only safe erros to client

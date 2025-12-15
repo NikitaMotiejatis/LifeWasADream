@@ -250,6 +250,50 @@ CREATE TRIGGER business_valid_created_at
     FOR EACH ROW
     EXECUTE FUNCTION not_in_future();
 
+-- ------------------------------------------------------------------------------------------------
+-- Payment ----------------------------------------------------------------------------------------
+-- ------------------------------------------------------------------------------------------------
+
+DROP TYPE IF EXISTS payment_status CASCADE;
+CREATE TYPE payment_status AS ENUM('PENDING', 'COMPLETED', 'FAILED', 'CANCELLED');
+
+DROP TYPE IF EXISTS payment_method CASCADE;
+CREATE TYPE payment_method AS ENUM('STRIPE', 'CASH', 'CARD');
+
+DROP TABLE IF EXISTS payment CASCADE;
+CREATE TABLE payment (
+    id                      SERIAL PRIMARY KEY,
+    order_id                INTEGER         NOT NULL REFERENCES order_data(id),
+    amount                  DECIMAL(15)     NOT NULL,
+    currency                currency        NOT NULL,
+    payment_method          payment_method  NOT NULL,
+    stripe_session_id       VARCHAR(255)    DEFAULT NULL,
+    stripe_payment_intent_id VARCHAR(255)   DEFAULT NULL,
+    status                  payment_status  NOT NULL DEFAULT 'PENDING',
+    created_at              TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at              TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT positive_amount CHECK (amount > 0)
+);
+
+DROP INDEX IF EXISTS payment_order_id_index CASCADE;
+CREATE INDEX payment_order_id_index ON payment(order_id);
+
+DROP INDEX IF EXISTS payment_stripe_session_id_index CASCADE;
+CREATE INDEX payment_stripe_session_id_index ON payment(stripe_session_id);
+
+DROP INDEX IF EXISTS payment_stripe_payment_intent_id_index CASCADE;
+CREATE INDEX payment_stripe_payment_intent_id_index ON payment(stripe_payment_intent_id);
+
+DROP TRIGGER IF EXISTS payment_valid_created_at ON payment;
+CREATE TRIGGER payment_valid_created_at
+    BEFORE INSERT OR UPDATE ON payment
+    FOR EACH ROW
+    EXECUTE FUNCTION not_in_future();
+
+-- ------------------------------------------------------------------------------------------------
+-- Item -------------------------------------------------------------------------------------------
+-- ------------------------------------------------------------------------------------------------
 
 DROP TYPE IF EXISTS item_status CASCADE;
 CREATE TYPE item_status AS ENUM('ACTIVE', 'ARCHIVED');
