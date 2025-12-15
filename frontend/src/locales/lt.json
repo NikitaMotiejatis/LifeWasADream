@@ -64,7 +64,8 @@
     "add": "Pridėti",
     "edit": "Redaguoti",
     "delete": "Ištrinti",
-    "tip": "Arbatpinigiai"
+    "tip": "Arbatpinigiai",
+    "save": "Išsaugoti"
   },
   "deliveries": {
     "buttons": {
@@ -767,7 +768,8 @@
       "refunds": "Grąžinimų tvirtinimai",
       "reports": "Ataskaitos ir analizė",
       "inventory": "Atsargų apžvalga",
-      "vatSettings": "PVM nustatymai"
+      "vatSettings": "PVM nustatymai",
+      "itemVatSettings": "Prekių PVM"
     },
     "settings": {
       "group": "Nustatymai",
@@ -1039,6 +1041,15 @@
     "saveChanges": "Išsaugoti pakeitimus"
   },
   "vat": {
+    "categoryRates": "Kategorijų PVM tarifai",
+    "categoryExplanation": "Nustatykite PVM tarifus visoms kategorijoms. Pakeičia numatytąjį tarifą.",
+    "categoriesWithCustom": "kategorijos su individualiais tarifais",
+    "usingDefault": "Naudoja numatytąjį",
+    "usingCategory": "Naudoja kategorijos tarifą",
+    "usingIndividual": "Individualus tarifas",
+    "usingDefaultOnly": "Naudoja tik numatytąjį tarifą",
+    "totalProducts": "Iš viso produktų",
+    "itemsUsingDefault": "{{count}} prekės",
     "title": "PVM tarifai",
     "subtitle": "Tvarkykite PVM tarifus. Nustatykite pagrindinį, kuris bus taikomas visiems produktams.",
     "currentDefault": "Dabartinis PVM visiems produktams:",
@@ -1078,5 +1089,38 @@
       "duplicate": "{{rate}}% PVM tarifas jau egzistuoja"
     }
   },
-  "somethingWentWrong": "Kažkas nutiko ne taip."
+  "somethingWentWrong": "Kažkas nutiko ne taip.",
+  "itemVat": {
+    "searchPlaceholder": "Ieškoti produktų...",
+    "allCategories": "Visos kategorijos",
+    "ratePlaceholder": "Įveskite tarifą",
+    "custom": "Individualus",
+    "usingDefault": "Naudoja numatytąjį PVM tarifą",
+    "usingCustom": "Naudoja individualų PVM tarifą",
+    "currentlyUsingDefault": "Šiuo metu naudoja numatytąjį PVM tarifą",
+    "currentlyCustom": "Šiuo metu naudoja individualų PVM tarifą",
+    "reset": "Atstatyti į numatytąjį",
+    "stats": {
+      "totalItems": "Iš viso prekių",
+      "customVat": "Individualus PVM",
+      "defaultVat": "Numatytasis PVM"
+    },
+    "bulkActions": {
+      "selected": "Pažymėta {{count}} prekių",
+      "apply": "Taikyti PVM tarifą"
+    },
+    "table": {
+      "item": "Prekė",
+      "category": "Kategorija",
+      "vatRate": "PVM Tarifas",
+      "actions": "Veiksmai"
+    },
+    "noItemsFound": "Prekių nerasta",
+    "clearSearch": "Išvalyti paiešką",
+    "source": {
+      "custom": "Individualus tarifas",
+      "category": "Kategorijos tarifas",
+      "default": "Numatytasis tarifas"
+    }
+  }
 }

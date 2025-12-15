@@ -8,6 +8,7 @@ import HamburgerIcon from '@/icons/hamburgerIcon';
 import SearchIcon from '@/icons/searchIcon';
 import CheckmarkIcon from '@/icons/checkmarkIcon';
 import TaxIcon from '@/icons/taxIcon';
+import VatItemIcon from '@/icons/vatItemIcon';
 
 export default function SidebarManager() {
   const { t } = useTranslation();
@@ -65,9 +66,9 @@ export default function SidebarManager() {
           >
             {t('sidebar.manager.inventory')}
           </MenuGroupItem>
-                    <MenuGroupItem
-            to="/vat-settings" 
-            icon={TaxIcon} 
+          <MenuGroupItem
+            to="/vat-settings"
+            icon={TaxIcon}
             active={isActive('/vat-settings')}
           >
             {t('sidebar.manager.vatSettings')}

@@ -63,6 +63,7 @@
     "status": "Status",
     "update": "Update",
     "add": "Add",
+    "save": "Save",
     "edit": "Edit",
     "delete": "Delete",
     "remove": "Remove",
@@ -731,7 +732,8 @@
       "refunds": "Refund Approvals",
       "reports": "Reports & Analytics",
       "inventory": "Inventory Overview",
-      "vatSettings": "VAT Settings"
+      "vatSettings": "VAT Settings",
+      "itemVatSettings": "Item VAT"
     },
     "settings": {
       "group": "Settings",
@@ -1001,6 +1003,15 @@
     "saveChanges": "Save Changes"
   },
   "vat": {
+    "categoryRates": "Category VAT Rates",
+    "categoryExplanation": "Set VAT rates for entire categories. Overrides default rate.",
+    "categoriesWithCustom": "categories with custom rates",
+    "usingDefault": "Using default",
+    "usingCategory": "Using category rate",
+    "usingIndividual": "Individual rate",
+    "usingDefaultOnly": "Using only default rate",
+    "totalProducts": "Total products",
+    "itemsUsingDefault": "{{count}} items",
     "title": "VAT Rates",
     "subtitle": "Manage VAT rates. Set one as default to apply to all products.",
     "currentDefault": "Current VAT for all products:",
@@ -1057,5 +1068,38 @@
     "cancelled": "Payment Cancelled",
     "cancelledMessage": "Your payment was cancelled. No charges were made.",
     "tryAgain": "Try Again"
+  },
+  "itemVat": {
+    "searchPlaceholder": "Search products...",
+    "allCategories": "All Categories",
+    "ratePlaceholder": "Enter rate",
+    "custom": "Custom",
+    "usingDefault": "Using default VAT rate",
+    "usingCustom": "Using custom VAT rate",
+    "currentlyUsingDefault": "Currently using default VAT rate",
+    "currentlyCustom": "Currently using custom VAT rate",
+    "reset": "Reset to default",
+    "stats": {
+      "totalItems": "Total Items",
+      "customVat": "Custom VAT",
+      "defaultVat": "Default VAT"
+    },
+    "bulkActions": {
+      "selected": "{{count}} items selected",
+      "apply": "Apply VAT Rate"
+    },
+    "table": {
+      "item": "Item",
+      "category": "Category",
+      "vatRate": "VAT Rate",
+      "actions": "Actions"
+    },
+    "noItemsFound": "No products found",
+    "clearSearch": "Clear search",
+    "source": {
+      "custom": "Individual rate",
+      "category": "Category rate",
+      "default": "Default rate"
+    }
   }
 }
