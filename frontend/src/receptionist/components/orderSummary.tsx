@@ -73,12 +73,7 @@ export default function OrderSummary({
   const handleSave = async () => {
     const order = {
       items: itemsList,
-      tip: {
-        amount: tipAmount,
-        total: total,
-      },
-      isSplit: isSplitMode,
-      individualTips: isSplitMode ? individualTips : [],
+      tip: -1, // Tip is set only at checkout. -1 means tip property is to be ignored.
     };
 
     try {

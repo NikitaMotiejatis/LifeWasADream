@@ -3,7 +3,8 @@ package order
 import "time"
 
 type Order struct {
-	Items		[]Item `json:"items"`
+	Items		[]Item 	`json:"items"`
+	Tip			int64 	`json:"tip"`
 }
 
 type OrderSummary struct {
