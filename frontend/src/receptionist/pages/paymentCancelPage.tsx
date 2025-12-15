@@ -40,7 +40,13 @@ export default function PaymentCancelPage() {
               {t('payment.backToOrders', 'Back to Orders')}
             </button>
             <button
-              onClick={() => navigate('/new-order')}
+              onClick={() => {
+                if (orderId) {
+                  navigate(`/edit-order/${orderId}`);
+                } else {
+                  navigate('/new-order');
+                }
+              }}
               className="w-full rounded-lg border border-gray-300 px-6 py-3 font-medium text-gray-700 hover:bg-gray-50"
             >
               {t('payment.tryAgain', 'Try Again')}
