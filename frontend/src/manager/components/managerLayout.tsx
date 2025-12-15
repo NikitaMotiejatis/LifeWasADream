@@ -25,4 +25,3 @@ export default function ManagerLayout({ children }: ManagerLayoutProps) {
     </div>
   );
 }
-

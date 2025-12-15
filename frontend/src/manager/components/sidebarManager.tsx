@@ -8,7 +8,6 @@ import HamburgerIcon from '@/icons/hamburgerIcon';
 import SearchIcon from '@/icons/searchIcon';
 import CheckmarkIcon from '@/icons/checkmarkIcon';
 import TaxIcon from '@/icons/taxIcon';
-import VatItemIcon from '@/icons/vatItemIcon';
 
 export default function SidebarManager() {
   const { t } = useTranslation();

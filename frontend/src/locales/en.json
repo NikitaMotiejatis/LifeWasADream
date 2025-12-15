@@ -343,7 +343,7 @@
       "confirmReject": "Confirm rejection",
       "modal": {
         "title": "Refund Request Review",
-        "subtitle": "Detailed information for refund request {{orderId}}",
+        "subtitle": "Detailed information for refund request",
         "customerInfo": "Customer Information",
         "requestedBy": "Requested by",
         "refundAmount": "Refund Amount",
@@ -911,6 +911,10 @@
       "pcs_many": "{{count}} pcs",
       "pcs_one": "{{count}} pc",
       "pcs_other": "{{count}} pcs"
+    },
+    "reasons": {
+      "Customer requested full refund": "Customer requested full refund",
+      "Item out of stock": "Item out of stock"
     }
   },
   "validation": {
@@ -1100,6 +1104,18 @@
       "custom": "Individual rate",
       "category": "Category rate",
       "default": "Default rate"
-    }
-  }
+    },
+    "filterByCategory": "Filter by category"
+  },
+  "refundId": "Refund ID:",
+  "orderId": "Order ID:",
+  "requestedAt": "Requested At:",
+  "orderDetailsSimpl": "Order Details (Simplified)",
+  "month": "this month",
+  "quarter": "last quarter",
+  "year": "last year",
+  "Downtown Branch": "Downtown Branch",
+  "Eastside Branch": "Eastside Branch",
+  "North Branch": "North Branch",
+  "Westside Branch": "Westside Branch"
 }
