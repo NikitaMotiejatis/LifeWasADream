@@ -82,19 +82,19 @@ INSERT INTO location_open (location_id, day_of_the_week, open_at, closes_at) VAL
 
 INSERT INTO employee (id, username, first_name, last_name, password_hash, email, phone, created_at, location_id) VALUES 
 -- Morning Roast
-(1, 'jbean', 'James', 'Bean', '$2a$14$ajq8Q7fbtFRQvXpdCq7Jcuy.Rx1h/L4J60Otx.gyNLbAYctGMJ9tK', 'james@morningroast.com', '+15551001', NOW() - INTERVAL '360 days', 1),
-(2, 'slatte', 'Sarah', 'Latte', '$2a$14$ajq8Q7fbtFRQvXpdCq7Jcuy.Rx1h/L4J60Otx.gyNLbAYctGMJ9tK', 'sarah@morningroast.com', '+15551002', NOW() - INTERVAL '350 days', 1),
+(1, 'jbean', 'James', 'Bean', '$2a$12$k8sRjlINxLzAiakxjM1x6OdLT4oZRd23YQCSd/zvha4nXUHMCMDOy', 'james@morningroast.com', '+15551001', NOW() - INTERVAL '360 days', 1),
+(2, 'slatte', 'Sarah', 'Latte', '$2a$12$k8sRjlINxLzAiakxjM1x6OdLT4oZRd23YQCSd/zvha4nXUHMCMDOy', 'sarah@morningroast.com', '+15551002', NOW() - INTERVAL '350 days', 1),
 -- Urban Cuts
-(3, 'hclipper', 'Harry', 'Clipper', '$2a$14$ajq8Q7fbtFRQvXpdCq7Jcuy.Rx1h/L4J60Otx.gyNLbAYctGMJ9tK', 'harry@urbancuts.com', '+15552001', NOW() - INTERVAL '290 days', 2),
-(4, 'sallystyle', 'Sally', 'Style', '$2a$14$ajq8Q7fbtFRQvXpdCq7Jcuy.Rx1h/L4J60Otx.gyNLbAYctGMJ9tK', 'sally@urbancuts.com', '+15552002', NOW() - INTERVAL '280 days', 2),
+(3, 'hclipper', 'Harry', 'Clipper', '$2a$12$k8sRjlINxLzAiakxjM1x6OdLT4oZRd23YQCSd/zvha4nXUHMCMDOy', 'harry@urbancuts.com', '+15552001', NOW() - INTERVAL '290 days', 2),
+(4, 'sallystyle', 'Sally', 'Style', '$2a$12$k8sRjlINxLzAiakxjM1x6OdLT4oZRd23YQCSd/zvha4nXUHMCMDOy', 'sally@urbancuts.com', '+15552002', NOW() - INTERVAL '280 days', 2),
 -- Tech Gadgets
-(5, 'ggeek', 'Gary', 'Geek', '$2a$14$ajq8Q7fbtFRQvXpdCq7Jcuy.Rx1h/L4J60Otx.gyNLbAYctGMJ9tK', 'gary@techgadgets.com', '+15553001', NOW() - INTERVAL '240 days', 3),
-(6, 'lt06', 'Lisa', 'Tech', '$2a$14$ajq8Q7fbtFRQvXpdCq7Jcuy.Rx1h/L4J60Otx.gyNLbAYctGMJ9tK', 'lisa@techgadgets.com', '+15553002', NOW() - INTERVAL '230 days', 3),
+(5, 'ggeek', 'Gary', 'Geek', '$2a$12$k8sRjlINxLzAiakxjM1x6OdLT4oZRd23YQCSd/zvha4nXUHMCMDOy', 'gary@techgadgets.com', '+15553001', NOW() - INTERVAL '240 days', 3),
+(6, 'lt06', 'Lisa', 'Tech', '$2a$12$k8sRjlINxLzAiakxjM1x6OdLT4oZRd23YQCSd/zvha4nXUHMCMDOy', 'lisa@techgadgets.com', '+15553002', NOW() - INTERVAL '230 days', 3),
 -- Serenity Spa
-(7, 'mindym', 'Mindy', 'Massage', '$2a$14$ajq8Q7fbtFRQvXpdCq7Jcuy.Rx1h/L4J60Otx.gyNLbAYctGMJ9tK', 'mindy@serenity.com', '+15554001', NOW() - INTERVAL '190 days', 4),
-(8, 'zenmaster', 'Zen', 'Master', '$2a$14$ajq8Q7fbtFRQvXpdCq7Jcuy.Rx1h/L4J60Otx.gyNLbAYctGMJ9tK', 'zen@serenity.com', '+15554002', NOW() - INTERVAL '180 days', 4),
+(7, 'mindym', 'Mindy', 'Massage', '$2a$12$k8sRjlINxLzAiakxjM1x6OdLT4oZRd23YQCSd/zvha4nXUHMCMDOy', 'mindy@serenity.com', '+15554001', NOW() - INTERVAL '190 days', 4),
+(8, 'zenmaster', 'Zen', 'Master', '$2a$12$k8sRjlINxLzAiakxjM1x6OdLT4oZRd23YQCSd/zvha4nXUHMCMDOy', 'zen@serenity.com', '+15554002', NOW() - INTERVAL '180 days', 4),
 -- Burger Joint
-(9, 'flipperpatty', 'Patty', 'Flipper', '$2a$14$ajq8Q7fbtFRQvXpdCq7Jcuy.Rx1h/L4J60Otx.gyNLbAYctGMJ9tK', 'patty@burgerjoint.com', '+15555001', NOW() - INTERVAL '140 days', 5),
+(9, 'flipperpatty', 'Patty', 'Flipper', '$2a$12$k8sRjlINxLzAiakxjM1x6OdLT4oZRd23YQCSd/zvha4nXUHMCMDOy', 'patty@burgerjoint.com', '+15555001', NOW() - INTERVAL '140 days', 5),
 (10, 'cashier1', 'Bun', 'Toaster', '$2a$12$k8sRjlINxLzAiakxjM1x6OdLT4oZRd23YQCSd/zvha4nXUHMCMDOy', 'bun@burgerjoint.com', '+15555002', NOW() - INTERVAL '130 days', 5),
 (11, 'manager1', 'mr', 'manager', '$2a$12$k8sRjlINxLzAiakxjM1x6OdLT4oZRd23YQCSd/zvha4nXUHMCMDOy', 'bu@burgerjoint.com', '+15555003', NOW() - INTERVAL '230 days', 5);
 
@@ -110,6 +110,8 @@ INSERT INTO employee_shift (user_id, work_shift_id) VALUES
 
 -- Employee Roles (must be after employees are inserted)
 INSERT INTO employee_role (employee_id, role_id) VALUES
+(1, 3),
+(7, 3),
 (10, 3),
 (11, 2)
 ;
