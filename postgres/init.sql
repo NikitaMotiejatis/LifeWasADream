@@ -116,6 +116,7 @@ CREATE TRIGGER business_valid_created_at
 DROP TABLE IF EXISTS location CASCADE;
 CREATE TABLE location (
 	id              INTEGER     PRIMARY KEY,
+    name            VARCHAR(64) NOT NULL,
 	business_id     INTEGER     NOT NULL REFERENCES business(id),
 	country_code    CHAR(3)     NOT NULL REFERENCES country(code),
 	city            VARCHAR(64) NOT NULL,
@@ -148,7 +149,7 @@ CREATE TABLE employee (
     email           VARCHAR(512)    NOT NULL UNIQUE,
     phone           VARCHAR(16)     NOT NULL UNIQUE,
     created_at      TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    location_id     INTEGER         NOT NULL REFERENCES location(id),
+    business_id     INTEGER         NOT NULL REFERENCES business(id),
 
     CONSTRAINT valid_password_hash  CHECK (password_hash ~ '^\$2(a|b|x|y)\$[0-9]{2}\$[a-zA-Z0-9./]{53}$'),
     CONSTRAINT valid_email          CHECK (email ~ '^[^\.][a-zA-Z0-9\-\.+]{0,62}[^\.]+@([^\-][a-zA-Z0-9\-]{0,61}[^\-]\.)+[^\-][a-zA-Z0-9\-]{0,61}[^\-]$'),

@@ -5,8 +5,6 @@ import (
 	"errors"
 	"net/http"
 	"time"
-
-	"github.com/golang-jwt/jwt/v5"
 )
 
 
@@ -21,7 +19,7 @@ func (c AuthController) login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	sessionToken, csrfToken, redirectPath, err := c.AuthService.login(user, c.SessionTokenDuration)
+	sessionToken, csrfToken, response, err := c.AuthService.login(user, c.SessionTokenDuration)
 	if errors.Is(err, ErrTokenGenerationFailed) {
 		http.Error(w, "failed to generate token", http.StatusInternalServerError)
 		return
@@ -47,23 +45,7 @@ func (c AuthController) login(w http.ResponseWriter, r *http.Request) {
 		HttpOnly:   false,
 		SameSite:   http.SameSiteStrictMode,
 	})
-
-	var claims JwtSessionToken
-	if _, err := jwt.ParseWithClaims(sessionToken, &claims, func(t *jwt.Token) (any, error) {
-		return c.AuthService.TokenService.JwtSecret, nil
-	}); err != nil {
-		http.Error(w, "failed to parse own token for login response", http.StatusInternalServerError)
-		return
-	}
 	
-	response := struct {
-		RedirectPath	string   `json:"redirectPath"`
-		Currency		string   `json:"currency"`
-	}{
-		RedirectPath:	redirectPath,
-		Currency:		claims.Currency,
-	}
-
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(response)

@@ -17,78 +17,70 @@ type AuthService struct {
 	CsrfTokenName		string
 
 	UserRepo			UserRepo
-	//Users 				map[string]UserDetails
 }
 
 var (
+	ErrBadParams				= errors.New("bad parameters")
 	ErrWrongPassword			= errors.New("wrong password")
 	ErrTokenGenerationFailed 	= errors.New("token generation failed")
 )
 
-type LoginInfo struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
-}
-
-type UserDetails struct {
-	PasswordHash 	string
-	Roles			[]string
-}
-
-type User struct {
-	Username	string 		`json:"username"`
-	Roles		[]string	`json:"roles"`
-}
-
-func (s AuthService) login(user LoginInfo, sessionTokenDuration time.Duration) (string, string, string, error) {
+func (s AuthService) login(user LoginInfo, sessionTokenDuration time.Duration) (string, string, LoginResponse, error) {
 	userDetails, err := s.UserRepo.GetUserDetails(user.Username)
 	if err != nil {
-		return "", "", "", ErrUserNotFound
+		return "", "", LoginResponse{}, ErrUserNotFound
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(userDetails.PasswordHash), []byte(user.Password)); err != nil {
-		return "", "", "", ErrWrongPassword
+		return "", "", LoginResponse{}, ErrWrongPassword
 	}
-
-	currency, err := s.UserRepo.GetUserCurrency(user.Username)
-	if err != nil {
-		slog.Warn("failed to get user currency, falling back to USD", "username", user.Username, "err", err)
-		currency = "USD"
-	}
-	currency = strings.ToUpper(currency)
 
 	csrfToken, err := s.TokenService.generateCsrfToken(64)
 	if err != nil {
 		slog.Error("failed to generate CSRF token: " + err.Error())
-		return "", "", "", ErrTokenGenerationFailed
+		return "", "", LoginResponse{}, ErrTokenGenerationFailed
 	}
 
 	claims := JwtSessionToken{
 		Username: 		user.Username, 
 		ExpiresUnix:	time.Now().Add(sessionTokenDuration).Unix(), 
 		CsrfToken:		csrfToken,
-		Currency:		currency,
 	}
 	sessionToken, err := s.TokenService.generateSessionToken(claims)
 	if err != nil {
 		slog.Error("failed to generate session token: " + err.Error())
-		return "", "", "", ErrTokenGenerationFailed
+		return "", "", LoginResponse{}, ErrTokenGenerationFailed
 	}
 
-	redirectPath := "/login"
+	var response LoginResponse
+
+	response.Currency, err = s.UserRepo.GetUserCurrency(user.Username)
+	if err != nil {
+		slog.Warn("failed to get user currency, falling back to USD", "username", user.Username, "err", err)
+		response.Currency = "USD"
+	}
+	response.Currency = strings.ToUpper(response.Currency)
+
+	response.RedirectPath = "/login"
 	if slices.Contains(userDetails.Roles, "CASHIER") {
-		redirectPath = "/newOrder"
+		response.RedirectPath = "/newOrder"
 	} else if slices.Contains(userDetails.Roles, "RECEPTIONIST") {
-		redirectPath = "/newReservation"
+		response.RedirectPath = "/newReservation"
 	} else if slices.Contains(userDetails.Roles, "MANAGER") {
-		redirectPath = "/dashboard"
+		response.RedirectPath = "/dashboard"
 	} else if slices.Contains(userDetails.Roles, "CLERK") {
-		redirectPath = "/stockUpdates"
+		response.RedirectPath = "/stockUpdates"
 	} else if slices.Contains(userDetails.Roles, "SUPPLIER") {
-		redirectPath = "/invoiceStatus"
+		response.RedirectPath = "/invoiceStatus"
 	}
 
-	return sessionToken, csrfToken, redirectPath, nil
+	response.BusinessInfo, err = s.UserRepo.GetBusinessInfo(user.Username)
+	if err != nil {
+		slog.Error(err.Error())
+		return "", "", LoginResponse{}, ErrBadParams
+	}
+
+	return sessionToken, csrfToken, response, nil
 }
 
 func (s AuthService) validate(sessionCookieValue string, csrfToken string) error {
