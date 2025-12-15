@@ -33,24 +33,6 @@ export type Reservation = {
   status: 'pending' | 'completed' | 'cancelled' | 'no_show' | 'refund_pending';
 };
 
-export type Counts = {
-  all: number;
-  pending: number;
-  completed: number;
-  cancelled: number;
-  no_show: number;
-  refund_pending: number;
-};
-
-const defaultCounts: Counts = {
-  all: 0,
-  pending: 0,
-  completed: 0,
-  cancelled: 0,
-  no_show: 0,
-  refund_pending: 0,
-};
-
 function buildISOString(
   date: string,
   time: string,
@@ -209,7 +191,6 @@ export default function ReservationList() {
           setStatusFilter={v =>
             setFilters(prev => ({ ...prev, statusFilter: v }))
           }
-          counts={defaultCounts} // counts will be fetched in SWR below
         />
       </div>
 

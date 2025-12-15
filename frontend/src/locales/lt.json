@@ -666,14 +666,14 @@
       "edit": "Redaguoti"
     },
     "filters": {
-      "all": "Visi ({{count}})",
-      "cancelled": "Atšaukti ({{count}})",
-      "completed": "Baigti ({{count}})",
+      "all": "Visi",
+      "cancelled": "Atšaukti",
+      "completed": "Baigti",
       "from": "Nuo",
-      "in_service": "Aptarnaujami ({{count}})",
-      "no_show": "Neatvyko ({{count}})",
-      "pending": "Laukiantys ({{count}})",
-      "refund_pending": "Laukia grąžinimo ({{count}})",
+      "in_service": "Aptarnaujami",
+      "no_show": "Neatvyko",
+      "pending": "Laukiantys",
+      "refund_pending": "Laukia grąžinimo",
       "searchPlaceholder": "Ieškoti pagal vardą, telefoną, kodą, paslaugą ar darbuotoją...",
       "to": "Iki"
     },

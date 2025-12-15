@@ -15,14 +15,6 @@ type Props = {
   setTimeTo: (v: string) => void;
   statusFilter: string;
   setStatusFilter: (v: any) => void;
-  counts: {
-    all: number;
-    pending: number;
-    completed: number;
-    cancelled: number;
-    no_show: number;
-    refund_pending: number;
-  };
 };
 
 export default function ReservationFilters({
@@ -38,7 +30,6 @@ export default function ReservationFilters({
   setTimeTo,
   statusFilter,
   setStatusFilter,
-  counts,
 }: Props) {
   const { t } = useTranslation();
   const lang = i18n.language;
@@ -96,7 +87,7 @@ export default function ReservationFilters({
                 : 'border border-gray-300 hover:bg-gray-100'
             }`}
           >
-            {t(`reservations.filters.${status}`, { count: counts[status] })}
+            {t(`reservations.filters.${status}`)}
           </button>
         ))}
       </div>

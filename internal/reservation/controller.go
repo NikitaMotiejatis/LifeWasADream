@@ -24,7 +24,6 @@ func (c *ReservationController) Routes() http.Handler {
 	router.Get("/", c.listReservations)
 	router.Post("/", c.createReservation)
 	router.Put("/{id}", c.updateReservation)
-	router.Get("/counts", c.counts)
 	router.Get("/services", c.listServices)
 	router.Get("/staff", c.listStaff)
 	router.Get("/{id}", c.getReservation)

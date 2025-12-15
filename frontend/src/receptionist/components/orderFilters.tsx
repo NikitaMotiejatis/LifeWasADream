@@ -1,21 +1,17 @@
 import { useTranslation } from 'react-i18next';
 import SearchIcon from '@/icons/searchIcon';
-import { Counts, OrderFilter } from './orderList';
+import { OrderFilter } from './orderList';
 
 type Props = {
   orderFilter: OrderFilter;
   setOrderFilter: (v: OrderFilter) => void;
-  counts?: Counts;
 };
 
 export default function OrderFilters({
   orderFilter,
   setOrderFilter,
-  counts,
 }: Props) {
   const { t } = useTranslation();
-
-  const countString = (count?: number) => (count != undefined) ? ` (${count})` : "";
 
   return (
     <div className="flex flex-col gap-4">
@@ -30,11 +26,11 @@ export default function OrderFilters({
                 : 'border border-gray-400 hover:bg-gray-100'
             }`}
           >
-            {status === 'all'             && (t('orders.filters.all')             + countString(counts?.all))}
-            {status === 'open'            && (t('orders.filters.open')            + countString(counts?.open))}
-            {status === 'closed'          && (t('orders.filters.closed')          + countString(counts?.closed))}
-            {status === 'refund_pending'  && (t('orders.filters.refund_pending')  + countString(counts?.refund_pending))}
-            {status === 'refunded'        && (t('orders.filters.refunded')        + countString(counts?.refunded))}
+            {status === 'all'             && (t('orders.filters.all'))}
+            {status === 'open'            && (t('orders.filters.open'))}
+            {status === 'closed'          && (t('orders.filters.closed'))}
+            {status === 'refund_pending'  && (t('orders.filters.refund_pending'))}
+            {status === 'refunded'        && (t('orders.filters.refunded'))}
           </button>
         ))}
       </div>

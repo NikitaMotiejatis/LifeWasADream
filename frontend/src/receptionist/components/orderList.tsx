@@ -64,14 +64,7 @@ export default function OrderList() {
     type: 'success' | 'error';
   } | null>(null);
 
-  const { authFetch, authFetchJson } = useAuth();
-  const { data: counts } = useSWR(
-    `order/counts${toQueryString(orderFilter)}`,
-    (url) => authFetchJson<Counts>(url, "GET"),
-    {
-      revalidateOnMount: true,
-    },
-  );
+  const { authFetch } = useAuth();
 
   const openModal = (
     type: 'edit' | 'pay' | 'refund' | 'cancel',
@@ -110,7 +103,6 @@ export default function OrderList() {
           <OrderFilters
             orderFilter={orderFilter}
             setOrderFilter={setOrderFilter}
-            counts={counts}
           />
         </div>
 
