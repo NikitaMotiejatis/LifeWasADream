@@ -196,14 +196,16 @@ func (pdb PostgresDb) GetOrderCounts(filter order.OrderFilter) (order.OrderCount
 }
 
 func (pdb PostgresDb) CreateOrder(order order.Order) (int64, error) {
+	currency := strings.ToUpper(order.Currency)
+
 	createOrderStatement := `
 	INSERT INTO order_data (employee_id, currency)
-		VALUES (1, 'EUR')
+		VALUES (1, $1)
 		RETURNING id
 	`
 
 	orderId := int64(-1)
-	err := pdb.Db.QueryRow(createOrderStatement).Scan(&orderId)
+	err := pdb.Db.QueryRow(createOrderStatement, currency).Scan(&orderId)
 	if err != nil {
 		slog.Error(err.Error())
 		return 0, ErrInternal
