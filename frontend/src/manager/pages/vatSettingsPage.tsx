@@ -263,7 +263,7 @@ const VatSettingsPage: React.FC = () => {
         return item;
       }),
     );
-
+    setSelectedCategory('all');
     setBulkSelection([]);
     setBulkVatRate('');
     setBulkValidationError(null);
@@ -393,21 +393,35 @@ const VatSettingsPage: React.FC = () => {
           </div>
         )}
 
-        {/* Search and Filters */}
-        <div className="mb-6 rounded-lg border bg-white p-4">
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div className="flex items-center">
-              <select
-                value={selectedCategory}
-                onChange={e => setSelectedCategory(e.target.value)}
-                className="w-80 rounded-md border border-gray-300 px-3 py-2"
+        {/* Category Filter */}
+        <div className="mb-6">
+          <label className="mb-2 block text-sm font-medium text-gray-700">
+            {t('itemVat.filterByCategory')}
+          </label>
+          <div className="relative">
+            <select
+              value={selectedCategory}
+              onChange={e => setSelectedCategory(e.target.value)}
+              className="w-full appearance-none rounded-lg border-2 border-gray-300 bg-white px-4 py-3 pr-10 text-base transition-colors hover:border-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none"
+            >
+              {categories.map(category => (
+                <option key={category} value={category}>
+                  {category === 'all' ? t('itemVat.allCategories') : category}
+                </option>
+              ))}
+            </select>
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+              <svg
+                className="h-5 w-5 text-gray-400"
+                fill="currentColor"
+                viewBox="0 0 20 20"
               >
-                {categories.map(category => (
-                  <option key={category} value={category}>
-                    {category === 'all' ? t('itemVat.allCategories') : category}
-                  </option>
-                ))}
-              </select>
+                <path
+                  fillRule="evenodd"
+                  d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                  clipRule="evenodd"
+                />
+              </svg>
             </div>
           </div>
         </div>
