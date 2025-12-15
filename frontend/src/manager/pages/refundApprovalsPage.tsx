@@ -36,6 +36,9 @@ const StatCard = ({
   </div>
 );
 
+const refundAmountToCents = (amount: number): number =>
+  Number.isFinite(amount) ? Math.round(amount * 100) : 0;
+
 export default function RefundApprovalsPage() {
   const { t } = useTranslation();
   const { formatPrice } = useCurrency();
@@ -132,8 +135,8 @@ export default function RefundApprovalsPage() {
   const pendingRequests = (requests || []).filter(r => r.status === 'Pending'); // Filter is technically redundant as the backend only returns pending, but kept for safety
 
   // Mock stats for the cards
-  const totalPendingAmount = pendingRequests.reduce(
-    (sum, req) => sum + req.amount,
+  const totalPendingAmountCents = pendingRequests.reduce(
+    (sum, req) => sum + refundAmountToCents(req.amount),
     0,
   );
   const pendingCount = pendingRequests.length;
@@ -148,7 +151,7 @@ export default function RefundApprovalsPage() {
     },
     {
       key: 'totalAmount',
-      value: `${formatPrice(totalPendingAmount)}`,
+      value: `${formatPrice(totalPendingAmountCents)}`,
       icon: DollarSign,
       iconColor: 'text-green-500',
     },
@@ -239,7 +242,7 @@ export default function RefundApprovalsPage() {
                     {t('manager.refunds.card.refundAmount')}
                   </p>
                   <p className="text-xl font-bold text-gray-900">
-                    {formatPrice(request.amount)}
+                    {formatPrice(refundAmountToCents(request.amount))}
                   </p>
                   <p className="text-sm text-gray-500">
                     {t('manager.refunds.card.branch')}
