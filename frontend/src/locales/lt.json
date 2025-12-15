@@ -434,7 +434,8 @@
       "cancelRefund": "Atšaukti grąžinimą",
       "close": "Uždaryti",
       "edit": "Redaguoti",
-      "refund": "Grąžinti pinigus"
+      "refund": "Grąžinti pinigus",
+      "view": "Žiurėti"
     },
     "filters": {
       "all": "Visi",

@@ -438,7 +438,8 @@
       "cancelRefund": "Cancel refund",
       "close": "Close order",
       "edit": "Edit",
-      "refund": "Refund"
+      "refund": "Refund",
+      "view": "View"
     },
     "filters": {
       "all": "All",
