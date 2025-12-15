@@ -1,30 +1,25 @@
 import { useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import DropdownSelector from './dropdownSelector';
 
-const branches = [
-  { value: 'downtown' as const, labelKey: 'topbar.branchSelect' as const },
-  { value: 'north' as const, labelKey: 'topbar.northBranch' as const },
-  { value: 'west' as const, labelKey: 'topbar.westBranch' as const },
-] as const;
-
-type BranchValue = (typeof branches)[number]['value'];
-
 export default function BranchSelector() {
-  const { t } = useTranslation();
-  const [selected, setSelected] = useState<BranchValue>('downtown');
+  const businessInfo = JSON.parse(localStorage.getItem('businessInfo') || '');
+  const [selected, setSelected] = useState<string>(businessInfo.locations[0].id.toString());
 
-  const options = branches.map(b => ({
-    value: b.value,
-    label: t(b.labelKey),
-  }));
+  localStorage.setItem('selectedLocation', selected);
+
+  const locationOptions = businessInfo
+    .locations
+    .map((l: { id: number, name: string }) => {
+        return { value: l.id.toString(), label: l.name }
+    });
 
   return (
     <DropdownSelector
-      options={options}
+      options={locationOptions}
       selected={selected}
       onChange={setSelected}
-      buttonClassName="w-48 px-3 py-1.5"
+      buttonClassName='w-96 px-3 py-2'
+      menuClassName='w-96'
     />
   );
 }
