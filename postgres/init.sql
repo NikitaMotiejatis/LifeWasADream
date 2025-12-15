@@ -488,15 +488,19 @@ AS
      SELECT
         order_item_id,
         order_id,
+        price_per_unit,
+        unit_discount,
         vat,
         quantity,
-        SUM(price_per_unit + COALESCE(price_difference, 0) - unit_discount)                         ::DECIMAL(15) AS gross,
-        SUM(price_per_unit + COALESCE(price_difference, 0) - unit_discount) / (0.01 * (100 + vat))  ::DECIMAL(15) AS net,
-        SUM(price_per_unit + COALESCE(price_difference, 0) - unit_discount) * quantity              ::DECIMAL(15) AS total
+        ((price_per_unit + SUM(COALESCE(price_difference, 0)) - unit_discount)                         )::DECIMAL(15) AS gross,
+        ((price_per_unit + SUM(COALESCE(price_difference, 0)) - unit_discount) / (0.01 * (100 + vat))  )::DECIMAL(15) AS net,
+        ((price_per_unit + SUM(COALESCE(price_difference, 0)) - unit_discount) * quantity              )::DECIMAL(15) AS total
     FROM order_item_detail
     GROUP BY 
         order_item_id,
         order_id,
+        price_per_unit,
+        unit_discount,
         vat,
         quantity
 ;
