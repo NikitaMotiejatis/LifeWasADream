@@ -6,7 +6,7 @@ BEGIN TRANSACTION;
 
 -- Roles
 INSERT INTO role (id, name) VALUES 
-(1, 'OWNER'), (2, 'MANAGER'), (3, 'CASHIER'), (4, 'STYLIST'), (5, 'RECEPTIONIST');
+(1, 'OWNER'), (2, 'MANAGER'), (3, 'CASHIER'), (4, 'STYLIST'), (5, 'RECEPTIONIST'), (6, 'CLERK'), (7, 'SUPPLIER');
 
 -- Permissions
 INSERT INTO permissions (id, name) VALUES 
@@ -96,7 +96,9 @@ INSERT INTO employee (id, username, first_name, last_name, password_hash, email,
 -- Burger Joint
 (9, 'flipperpatty', 'Patty', 'Flipper', '$2a$12$k8sRjlINxLzAiakxjM1x6OdLT4oZRd23YQCSd/zvha4nXUHMCMDOy', 'patty@burgerjoint.com', '+15555001', NOW() - INTERVAL '140 days', 5),
 (10, 'cashier1', 'Bun', 'Toaster', '$2a$12$k8sRjlINxLzAiakxjM1x6OdLT4oZRd23YQCSd/zvha4nXUHMCMDOy', 'bun@burgerjoint.com', '+15555002', NOW() - INTERVAL '130 days', 5),
-(11, 'manager1', 'mr', 'manager', '$2a$12$k8sRjlINxLzAiakxjM1x6OdLT4oZRd23YQCSd/zvha4nXUHMCMDOy', 'bu@burgerjoint.com', '+15555003', NOW() - INTERVAL '230 days', 5);
+(11, 'manager1', 'mr', 'manager', '$2a$12$k8sRjlINxLzAiakxjM1x6OdLT4oZRd23YQCSd/zvha4nXUHMCMDOy', 'bu@burgerjoint.com', '+15555003', NOW() - INTERVAL '230 days', 5),
+(12, 'clerk1', 'Elizabeth', 'Queen', '$2a$12$k8sRjlINxLzAiakxjM1x6OdLT4oZRd23YQCSd/zvha4nXUHMCMDOy', 'eq@burgerjoint.com', '+15555004', NOW() - INTERVAL '230 days', 5),
+(13, 'supplier1', 'James', 'Bond', '$2a$12$k8sRjlINxLzAiakxjM1x6OdLT4oZRd23YQCSd/zvha4nXUHMCMDOy', 'jb@burgerjoint.com', '+15555005', NOW() - INTERVAL '230 days', 5);
 
 INSERT INTO work_shift (id, day_of_the_week, start_time, end_time) VALUES 
 (1, 'MONDAY', '08:00', '16:00'),
@@ -113,7 +115,9 @@ INSERT INTO employee_role (employee_id, role_id) VALUES
 (1, 3),
 (7, 3),
 (10, 3),
-(11, 2)
+(11, 2),
+(12, 6),
+(13, 7)
 ;
 
 -- ================================================================================================
