@@ -41,3 +41,10 @@ type Item struct {
 	SelectedVariations	[]Variation	`json:"selectedVariations"`
 	Quantity			uint16		`json:"quantity"`
 }
+
+type RefundData struct {
+	Name	string `json:"name"`
+	Phone	string `json:"phone"`
+	Email	string `json:"email"`
+	Reason	string `json:"reason"`
+}

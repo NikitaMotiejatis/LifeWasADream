@@ -61,7 +61,7 @@ export default function OrderListItem({ order, formatPrice, onAction }: Props) {
             >
               {t('orders.actions.refund')}
             </button>
-          ) : (
+          ) : order.status === 'refund_pending' ? (
             <div className="flex items-center gap-3">
               <span className="text-sm font-medium text-orange-600">
                 {t('orders.status.refundInProgress')}
@@ -73,7 +73,9 @@ export default function OrderListItem({ order, formatPrice, onAction }: Props) {
                 {t('orders.actions.cancelRefund')}
               </button>
             </div>
-          )}
+          ) : order.status === 'refunded' ? (
+            <div className="flex items-center gap-3 text-xs text-gray-600">Refunded</div>
+          ) : (<> </>)}
         </div>
       </div>
     </div>

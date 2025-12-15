@@ -95,7 +95,8 @@ INSERT INTO employee (id, username, first_name, last_name, password_hash, email,
 (8, 'zenmaster', 'Zen', 'Master', '$2a$14$ajq8Q7fbtFRQvXpdCq7Jcuy.Rx1h/L4J60Otx.gyNLbAYctGMJ9tK', 'zen@serenity.com', '+15554002', NOW() - INTERVAL '180 days', 4),
 -- Burger Joint
 (9, 'flipperpatty', 'Patty', 'Flipper', '$2a$14$ajq8Q7fbtFRQvXpdCq7Jcuy.Rx1h/L4J60Otx.gyNLbAYctGMJ9tK', 'patty@burgerjoint.com', '+15555001', NOW() - INTERVAL '140 days', 5),
-(10, 'cashier1', 'Bun', 'Toaster', '$2a$12$k8sRjlINxLzAiakxjM1x6OdLT4oZRd23YQCSd/zvha4nXUHMCMDOy', 'bun@burgerjoint.com', '+15555002', NOW() - INTERVAL '130 days', 5);
+(10, 'cashier1', 'Bun', 'Toaster', '$2a$12$k8sRjlINxLzAiakxjM1x6OdLT4oZRd23YQCSd/zvha4nXUHMCMDOy', 'bun@burgerjoint.com', '+15555002', NOW() - INTERVAL '130 days', 5),
+(11, 'manager1', 'mr', 'manager', '$2a$12$k8sRjlINxLzAiakxjM1x6OdLT4oZRd23YQCSd/zvha4nXUHMCMDOy', 'bu@burgerjoint.com', '+15555003', NOW() - INTERVAL '230 days', 5);
 
 INSERT INTO work_shift (id, day_of_the_week, start_time, end_time) VALUES 
 (1, 'MONDAY', '08:00', '16:00'),
@@ -109,7 +110,9 @@ INSERT INTO employee_shift (user_id, work_shift_id) VALUES
 
 -- Employee Roles (must be after employees are inserted)
 INSERT INTO employee_role (employee_id, role_id) VALUES
-(10, 3);
+(10, 3),
+(11, 2)
+;
 
 -- ================================================================================================
 -- 5. ITEMS & INVENTORY (For Order-Based Businesses)
@@ -217,7 +220,7 @@ INSERT INTO order_data (employee_id, created_at, status, currency, discount, tip
 (5, NOW() - INTERVAL '2 days', 'CLOSED', 'EUR', 0, 0, 0),
 (5, NOW() - INTERVAL '2 days', 'REFUNDED', 'EUR', 0, 0, 0),
 (6, NOW() - INTERVAL '1 day', 'OPEN', 'EUR', 0, 500, 0),
-(9, NOW() - INTERVAL '12 hours', 'CLOSED', 'AUD', 0, 50, 0),
+(9, NOW() - INTERVAL '12 hours', 'REFUND_PENDING', 'AUD', 0, 50, 0),
 (9, NOW() - INTERVAL '10 hours', 'CLOSED', 'AUD', 0, 0, 0),
 (10, NOW() - INTERVAL '2 hours', 'OPEN', 'AUD', 0, 100, 0),
 (10, NOW() - INTERVAL '1 hour', 'CLOSED', 'AUD', 100, 0, 0);
@@ -274,5 +277,12 @@ INSERT INTO appointment_bill (id, appointment_id, amount, discount, tip, created
 (2, 2, 5000, 500, 0, NOW() - INTERVAL '9 days'),
 (3, 3, 8000, 0, 1000, NOW() - INTERVAL '8 days'),
 (4, 4, 12000, 0, 2000, NOW() - INTERVAL '7 days');
+
+-- ================================================================================================
+-- 9. PAYMENTS & REFUNDS
+-- ================================================================================================
+
+INSERT INTO refund_data (order_id, name, phone, email, reason) VALUES
+(9, 'Grace Wilson', '+14160003', 'relax@serenity.com', 'Not good burger.');
 
 COMMIT TRANSACTION;

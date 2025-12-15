@@ -229,6 +229,109 @@ func (pdb PostgresDb) ModifyOrder(orderId int64, order order.Order) error {
 	return nil
 }
 
+func (pdb PostgresDb) CreateRefundRequest(orderId int64, refundData order.RefundData) error {
+	transaction, err := pdb.Db.Begin()
+	if err != nil {
+		slog.Error(err.Error())
+		return ErrInternal
+	}
+
+	{
+		const orderStatusStatement = `
+		UPDATE order_data
+		SET status = 'REFUND_PENDING'
+		WHERE
+			id = $1
+			AND status = 'CLOSED'
+		`
+
+		err = pdb.Db.QueryRow(orderStatusStatement, orderId).Err()
+		if err != nil {
+			slog.Error(err.Error())
+			_ = transaction.Rollback()
+			return ErrInternal
+		}
+	}
+	{
+		const refundDataStatement = `
+		INSERT INTO refund_data (order_id, name, phone, email, reason)
+			VALUES ($1, $2, $3, $4, $5)
+		`
+
+		err = pdb.Db.QueryRow(
+			refundDataStatement,
+			orderId,
+			refundData.Name,
+			refundData.Phone,
+			refundData.Email,
+			refundData.Reason,
+		).Err()
+		if err != nil {
+			slog.Error(err.Error())
+			_ = transaction.Rollback()
+			return ErrInternal
+		}
+	}
+
+	_ = transaction.Commit()
+
+	return nil
+}
+
+func (pdb PostgresDb) CancelRefundRequest(orderId int64) error {
+	transaction, err := pdb.Db.Begin()
+	if err != nil {
+		slog.Error(err.Error())
+		return ErrInternal
+	}
+
+	{
+		const orderStatusStatement = `
+		UPDATE order_data
+		SET status = 'CLOSED'
+		WHERE
+			id = $1
+			AND status = 'REFUND_PENDING'
+		`
+
+		err = pdb.Db.QueryRow(orderStatusStatement, orderId).Err()
+		if err != nil {
+			slog.Error(err.Error())
+			_ = transaction.Rollback()
+			return ErrInternal
+		}
+	}
+	{
+		const refundDataStatement = `
+		DELETE FROM refund_data
+		WHERE order_id = $1
+		`
+
+		res, err := pdb.Db.Exec(refundDataStatement, orderId)
+		if err != nil {
+			slog.Error(err.Error())
+			_ = transaction.Rollback()
+			return ErrInternal
+		}
+
+		numberOfRows, err := res.RowsAffected()
+		if err != nil {
+			slog.Error(err.Error())
+			_ = transaction.Rollback()
+			return ErrInternal
+		}
+		if numberOfRows > 1 {
+			slog.Error("tried to delete more than one refund request at a time")
+			_ = transaction.Rollback()
+			return ErrInternal
+		}
+	}
+
+	_ = transaction.Commit()
+
+	return nil
+}
+
 func (pdb PostgresDb) GetOrderItems(orderId int64) ([]order.Item, error) {
 	const query = `
 	SELECT id, item_id, quantity

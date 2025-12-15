@@ -6,12 +6,12 @@ import (
 	"dreampos/internal/data"
 	"dreampos/internal/order"
 	"dreampos/internal/payment"
+	"dreampos/internal/refund"
 	"dreampos/internal/reservation"
 	"encoding/json"
 	"fmt"
-	"time"
-
 	"net/http"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 )
@@ -38,7 +38,7 @@ func setupAuth(router *chi.Mux, config config.Config) *auth.AuthController {
 	return c
 }
 
-func setupApiRoutes(router *chi.Mux, config config.Config, authMiddleware func(http.Handler) http.Handler) {
+func setupApiRoutes(router *chi.Mux, config config.Config, authMiddleware func(http.Handler) http.Handler, refundService refund.Service) {
 	apiRouter := chi.NewRouter()
 	db := data.MustCreatePostgresDb(config)
 
@@ -90,13 +90,22 @@ func setupApiRoutes(router *chi.Mux, config config.Config, authMiddleware func(h
 		apiRouter.With(authMiddleware).Mount("/reservation", r.Routes())
 	}
 
+	{
+		c := refund.RefundController{
+			RefundRepo:    refund.NewMockRefundRepo(),
+			RefundService: refundService, // Pass the refund service for Stripe integration
+		}
+
+		apiRouter.Mount("/refund", c.Routes())
+	}
+
 	router.Mount("/api", apiRouter)
 }
 
-func setupPaymentRoutes(router *chi.Mux, config config.Config, authMiddleware func(http.Handler) http.Handler) {
+func setupPaymentRoutes(router *chi.Mux, config config.Config, authMiddleware func(http.Handler) http.Handler, paymentService *payment.PaymentService) {
 	// Setup payment controller with Stripe configuration
 	db := data.MustCreatePostgresDb(config)
-	paymentService := &payment.PaymentService{
+	paymentService = &payment.PaymentService{
 		StripeSecretKey: config.StripeSecretKey,
 		StripePublicKey: config.StripePublicKey,
 		SuccessURL:      fmt.Sprintf("http://%s/payment/success", config.FrontendUrl), // When I save it automatically makes the spaces, after ':' !?
@@ -108,6 +117,6 @@ func setupPaymentRoutes(router *chi.Mux, config config.Config, authMiddleware fu
 		Service: paymentService,
 	}
 
-	// Mount payment routes with authentication
+	// Mount payment routes
 	router.Mount("/api/payment", paymentController.Routes())
 }

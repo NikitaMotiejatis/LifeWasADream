@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import ManagerLayout from '../components/managerLayout';
-import { mockRefundRequests, RefundRequest } from '../mockData';
+import { Refund, getPendingRefunds, processRefundAction } from '@/utils/refundService';
 import RefundApprovalModal from '../components/refundApprovalModal';
 import { Clock, DollarSign, AlertTriangle } from 'lucide-react';
 
@@ -19,38 +19,60 @@ const StatCard = ({ title, value, subtext, icon: Icon, iconColor }: { title: str
 
 export default function RefundApprovalsPage() {
   const { t } = useTranslation();
-  const [requests, setRequests] = useState<RefundRequest[]>([]);
+  const [requests, setRequests] = useState<Refund[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
-  const [selectedRequest, setSelectedRequest] = useState<RefundRequest | null>(null);
+  const [selectedRequest, setSelectedRequest] = useState<Refund | null>(null);
 
-  useEffect(() => {
-    // Simulate data fetching
-    setTimeout(() => {
-      setRequests(mockRefundRequests.filter(r => r.status === 'Pending'));
+  const fetchRefunds = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const pendingRefunds = await getPendingRefunds();
+      setRequests(pendingRefunds || []); // Ensure it's always an array
+    } catch (error) {
+      console.error('Failed to fetch pending refunds:', error);
+      setRequests([]); // Set to empty array on error
+      alert('Failed to fetch pending refunds. Check console for details.');
+    } finally {
       setIsLoading(false);
-    }, 200);
+    }
   }, []);
 
-  const handleApprove = (id: string) => {
-    setIsLoading(true);
-    setTimeout(() => {
-      setRequests(prev => prev.filter(r => r.id !== id));
-      setIsLoading(false);
-      alert(`Approved refund request ${id}`);
-    }, 200);
+  useEffect(() => {
+    fetchRefunds();
+  }, [fetchRefunds]);
+
+  const handleApprove = async () => {
+    if (!selectedRequest) return;
+
+    const refundId = selectedRequest.id;
+
+    try {
+      const response = await processRefundAction(refundId, 'approve');
+      await fetchRefunds(); // Re-fetch to update the list
+      alert(response.message);
+    } catch (error) {
+      console.error('Failed to approve refund:', error);
+      alert(`Failed to approve refund: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
   };
 
-  const handleReject = (id: string, reason: string) => {
-    setIsLoading(true);
-    setTimeout(() => {
-      setRequests(prev => prev.filter(r => r.id !== id));
-      setIsLoading(false);
-      alert(`Rejected refund request ${id} with reason: ${reason}`);
-    }, 200);
+  const handleReject = async (reason: string) => {
+    if (!selectedRequest) return;
+
+    const refundId = selectedRequest.id;
+
+    try {
+      const response = await processRefundAction(refundId, 'disapprove', reason);
+      await fetchRefunds(); // Re-fetch to update the list
+      alert(response.message);
+    } catch (error) {
+      console.error('Failed to reject refund:', error);
+      alert(`Failed to reject refund: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
   };
 
-  const openModal = (request: RefundRequest) => {
+  const openModal = (request: Refund) => {
     setSelectedRequest(request);
     setModalOpen(true);
   };
@@ -60,7 +82,7 @@ export default function RefundApprovalsPage() {
     setModalOpen(false);
   };
 
-  const pendingRequests = requests.filter(r => r.status === 'Pending');
+  const pendingRequests = (requests || []).filter(r => r.status === 'Pending'); // Filter is technically redundant as the backend only returns pending, but kept for safety
 
   // Mock stats for the cards
   const totalPendingAmount = pendingRequests.reduce((sum, req) => sum + req.amount, 0).toFixed(2);
@@ -123,46 +145,36 @@ export default function RefundApprovalsPage() {
             <div key={request.id} className="bg-white p-6 rounded-lg shadow-md border-l-4 border-yellow-500">
               <div className="flex justify-between items-start mb-4">
                 <div>
-                  <h2 className="text-lg font-semibold text-gray-900">
-                    {t('manager.refunds.card.orderTitle', { orderId: request.orderId })}
-                  </h2>
-                  <p className="text-xs text-gray-500">
-                    {t('manager.refunds.card.requestMeta', { id: request.id, date: request.date })}
-                  </p>
-                </div>
-                <span className="px-3 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800">
-                  {t('manager.refunds.card.status')}
-                </span>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4 border-t pt-4">
-                <div>
-                  <p className="text-xs font-medium text-gray-500 uppercase mb-1">{t('manager.refunds.card.customerInfo')}</p>
-                  <p className="text-base font-medium text-gray-900">{request.customerName}</p>
-                  <p className="text-sm text-gray-500">{t('manager.refunds.card.requestedBy', { user: request.requestedBy })}</p>
-                </div>
-
-                <div className="text-right">
-                  <p className="text-xs font-medium text-gray-500 uppercase mb-1">{t('manager.refunds.card.refundAmount')}</p>
-                  <p className="text-xl font-bold text-gray-900">${request.amount.toFixed(2)}</p>
-                  <p className="text-sm text-gray-500">{t('manager.refunds.card.branch')}</p>
-                </div>
-              </div>
-
-              <div className="mt-4 pt-4 border-t">
-                <p className="text-xs font-medium text-gray-500 uppercase mb-2">{t('manager.refunds.card.reasonTitle')}</p>
-                <p className="text-base font-medium text-red-600 mb-4">{request.reason}</p>
-
-                <p className="text-xs font-medium text-gray-500 uppercase mb-1">{t('manager.refunds.card.itemsTitle')}</p>
-                <div className="space-y-1">
-                  {request.orderItems.map((item, index) => (
-                    <div key={index} className="flex justify-between text-sm text-gray-700">
-                      <span>{item.quantity}x {item.name}</span>
-                      <span>${(item.quantity * item.price).toFixed(2)}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
+	                  <h2 className="text-lg font-semibold text-gray-900">
+	                    {t('manager.refunds.card.orderTitle', { orderId: request.orderId })}
+	                  </h2>
+	                  <p className="text-xs text-gray-500">
+	                    {t('manager.refunds.card.requestMeta', { id: request.id, date: new Date(request.requestedAt).toLocaleDateString() })}
+	                  </p>
+	                </div>
+	                <span className="px-3 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800">
+	                  {t('manager.refunds.card.status')}
+	                </span>
+	              </div>
+	
+	              <div className="grid grid-cols-2 gap-4 border-t pt-4">
+	                <div>
+	                  <p className="text-xs font-medium text-gray-500 uppercase mb-1">{t('manager.refunds.card.reasonTitle')}</p>
+	                  <p className="text-base font-medium text-red-600">{request.reason}</p>
+	                </div>
+	
+	                <div className="text-right">
+	                  <p className="text-xs font-medium text-gray-500 uppercase mb-1">{t('manager.refunds.card.refundAmount')}</p>
+	                  <p className="text-xl font-bold text-gray-900">${request.amount.toFixed(2)}</p>
+	                  <p className="text-sm text-gray-500">{t('manager.refunds.card.branch')}</p>
+	                </div>
+	              </div>
+	
+	              <div className="mt-4 pt-4 border-t">
+	                <p className="text-xs font-medium text-gray-500 uppercase mb-2">Order Details (Simplified)</p>
+	                <p className="text-sm text-gray-700">Order ID: {request.orderId}</p>
+	                <p className="text-sm text-gray-700">Refund ID: {request.id}</p>
+	              </div>
 
               {/* Action Buttons */}
               <div className="mt-6 pt-4 border-t flex">
@@ -180,12 +192,12 @@ export default function RefundApprovalsPage() {
 
       {selectedRequest && (
         <RefundApprovalModal
-          request={selectedRequest}
-          isOpen={modalOpen}
-          onClose={closeModal}
-          onApprove={handleApprove}
-          onReject={handleReject}
-        />
+	          request={selectedRequest}
+	          isOpen={modalOpen}
+	          onClose={closeModal}
+	          onApprove={handleApprove}
+	          onReject={handleReject}
+	        />
       )}
     </ManagerLayout>
   );

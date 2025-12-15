@@ -54,7 +54,6 @@ export default function OrderList() {
     from: undefined,
     to: undefined,
   });
-  const [orders, setOrders] = useState<Order[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalType, setModalType] = useState<
     'edit' | 'pay' | 'refund' | 'cancel'
@@ -65,7 +64,7 @@ export default function OrderList() {
     type: 'success' | 'error';
   } | null>(null);
 
-  const { authFetchJson } = useAuth();
+  const { authFetch, authFetchJson } = useAuth();
   const { data: counts } = useSWR(
     `order/counts${toQueryString(orderFilter)}`,
     (url) => authFetchJson<Counts>(url, "GET"),
@@ -79,22 +78,17 @@ export default function OrderList() {
     order: Order,
   ) => {
     if (type === 'edit') {
-      navigate(`/edit-order/${order.id}`);
-    } else {
-      setModalType(type);
-      setSelectedOrder(order);
-      setModalOpen(true);
+        navigate(`/edit-order/${order.id}`);
     }
+
+    setModalType(type);
+    setSelectedOrder(order);
+    setModalOpen(true);
   };
 
   const closeModal = () => {
     setModalOpen(false);
     setSelectedOrder(null);
-  };
-
-  const updateOrderStatus = (id: number, status: OrderStatus) => {
-    setOrders(prev => prev.map(o => (o.id === id ? { ...o, status } : o)));
-    closeModal();
   };
 
   const showToast = (
@@ -132,24 +126,36 @@ export default function OrderList() {
         type={modalType}
         order={selectedOrder}
         onClose={closeModal}
-        onConfirm={() => {
+        onConfirm={async (refundData) => {
           if (!selectedOrder) return;
 
-          switch (modalType) {
-            case 'pay':
-              updateOrderStatus(selectedOrder.id, 'closed');
-              break;
-            case 'refund':
-              updateOrderStatus(selectedOrder.id, 'refund_pending');
+          if (modalType === 'refund') {
+            const response = await authFetch(
+              `order/${selectedOrder.id}/ask-refund`,
+              'POST',
+              JSON.stringify(refundData)
+            );
+
+            if (response.ok) {
               showToast(t('orders.toast.refundRequested'));
-              break;
-            case 'cancel':
-              updateOrderStatus(selectedOrder.id, 'closed');
-              showToast(t('orders.toast.refundCancelled'));
-              break;
-            default:
-              break;
+            } else {
+              showToast('Failed to create refund request', 'error');
+            }
+          } else if (modalType === 'cancel') {
+            const response = await authFetch(
+              `order/${selectedOrder.id}/ask-refund/cancel`,
+              'DELETE',
+            );
+
+            if (response.ok) {
+              showToast('Canceled refund request.');
+            } else {
+              showToast('Failed to cancel refund request.', 'error');
+            }
           }
+
+          closeModal();
+          setOrderFilter(() => { return { ...orderFilter, orderStatus: 'closed' }});
         }}
       />
       <Toast toast={toast} />

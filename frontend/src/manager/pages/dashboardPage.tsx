@@ -1,10 +1,10 @@
 import { useTranslation } from 'react-i18next';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ManagerLayout from '../components/managerLayout';
 import { Package, AlertTriangle, DollarSign, ShoppingCart } from 'lucide-react';
 import RefundApprovalModal from '../components/refundApprovalModal';
-import { mockRefundRequests, RefundRequest } from '../mockData';
+import { Refund, getPendingRefunds, processRefundAction } from '@/utils/refundService';
 
 // Mock Data Structure
 interface DashboardData {
@@ -132,8 +132,8 @@ const RefundQueue = ({
   onSeeAll,
 }: {
   isLoading: boolean;
-  requests: RefundRequest[];
-  onReview: (request: RefundRequest) => void;
+  requests: Refund[];
+  onReview: (request: Refund) => void;
   onSeeAll: () => void;
 }) => {
   const { t } = useTranslation();
@@ -173,7 +173,7 @@ const RefundQueue = ({
             {visibleRequests.map(request => (
               <tr key={request.id}>
                 <td className="px-2 py-2 whitespace-nowrap text-sm text-gray-900">{request.id}</td>
-                <td className="px-2 py-2 whitespace-nowrap text-sm text-gray-500">{request.date}</td>
+                <td className="px-2 py-2 whitespace-nowrap text-sm text-gray-500">{new Date(request.requestedAt).toLocaleDateString()}</td>
                 <td className="px-2 py-2 whitespace-nowrap text-sm text-gray-900">${request.amount.toFixed(2)}</td>
                 <td className="px-2 py-2 text-sm text-gray-500">{request.reason}</td>
                 <td className="px-2 py-2 whitespace-nowrap text-sm font-medium">
@@ -198,29 +198,58 @@ export default function DashboardPage() {
   const navigate = useNavigate();
   const [data, setData] = useState<DashboardData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [refundRequests, setRefundRequests] = useState<RefundRequest[]>([]);
+  const [refundRequests, setRefundRequests] = useState<Refund[]>([]);
   const [refundLoading, setRefundLoading] = useState(true);
-  const [selectedRefund, setSelectedRefund] = useState<RefundRequest | null>(null);
+  const [selectedRefund, setSelectedRefund] = useState<Refund | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  useEffect(() => {
-    setTimeout(() => {
-      setData(mockDashboardData);
-      setRefundRequests(mockRefundRequests.filter(r => r.status === 'Pending'));
-      setIsLoading(false);
+  const fetchRefunds = useCallback(async () => {
+    setRefundLoading(true);
+    try {
+      const refunds = await getPendingRefunds();
+      setRefundRequests(refunds || []); // Ensure it's always an array
+    } catch (error) {
+      console.error('Failed to fetch refunds:', error);
+      setRefundRequests([]); // Set to empty array on error
+    } finally {
       setRefundLoading(false);
-    }, 200);
+    }
   }, []);
 
-  const handleApprove = (id: string) => {
-    setRefundRequests(prev => prev.filter(r => r.id !== id));
+  useEffect(() => {
+    // Fetch dashboard data (mock for now since backend doesn't provide this)
+    setTimeout(() => {
+      setData(mockDashboardData);
+      setIsLoading(false);
+    }, 200);
+
+    // Fetch refunds from backend
+    fetchRefunds();
+  }, [fetchRefunds]);
+
+  const handleApprove = async (id: number) => {
+    try {
+      await processRefundAction(id, 'approve');
+      // Re-fetch refunds to update the list
+      await fetchRefunds();
+    } catch (error) {
+      console.error('Failed to approve refund:', error);
+      alert(`Failed to approve refund: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
   };
 
-  const handleReject = (id: string) => {
-    setRefundRequests(prev => prev.filter(r => r.id !== id));
+  const handleReject = async (id: number, reason: string) => {
+    try {
+      await processRefundAction(id, 'disapprove', reason);
+      // Re-fetch refunds to update the list
+      await fetchRefunds();
+    } catch (error) {
+      console.error('Failed to reject refund:', error);
+      alert(`Failed to reject refund: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
   };
 
-  const openModal = (request: RefundRequest) => {
+  const openModal = (request: Refund) => {
     setSelectedRefund(request);
     setIsModalOpen(true);
   };
@@ -296,10 +325,13 @@ export default function DashboardPage() {
           request={selectedRefund}
           isOpen={isModalOpen}
           onClose={closeModal}
-          onApprove={handleApprove}
-          onReject={(id, reason) => {
-            console.info('Rejected', id, reason);
-            handleReject(id);
+          onApprove={() => {
+            handleApprove(selectedRefund.id);
+            closeModal();
+          }}
+          onReject={(reason) => {
+            handleReject(selectedRefund.id, reason);
+            closeModal();
           }}
         />
       )}
