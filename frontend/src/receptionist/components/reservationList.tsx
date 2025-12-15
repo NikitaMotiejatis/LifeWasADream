@@ -1,4 +1,4 @@
-import { useState, Suspense, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useCurrency } from '@/global/contexts/currencyContext';
 import ReservationFilters from '@/receptionist/components/reservationFilters';
@@ -195,22 +195,14 @@ export default function ReservationList() {
       </div>
 
       <div className="mt-6 space-y-3">
-        <Suspense
-          fallback={
-            <div className="p-10 text-center text-gray-500">
-              {t('reservations.loading')}
-            </div>
-          }
-        >
-          <Reservations
-            ordersQuery={query}
-            openModal={openModal}
-            formatPrice={formatPrice}
-            onEdit={handleEditClick}
-            staff={staff || []}
-            services={services || []}
-          />
-        </Suspense>
+        <Reservations
+          ordersQuery={query}
+          openModal={openModal}
+          formatPrice={formatPrice}
+          onEdit={handleEditClick}
+          staff={staff || []}
+          services={services || []}
+        />
       </div>
 
       <ReservationModal
@@ -279,11 +271,19 @@ function Reservations({
   const { t } = useTranslation();
   const { authFetchJson } = useAuth();
 
-  const { data: reservations, error } = useSWR(
+  const { data: reservations, error, isLoading } = useSWR(
     `reservation?${ordersQuery}`,
     (url: string) => authFetchJson<Reservation[]>(url, 'GET'),
-    { suspense: true, revalidateOnMount: true },
+    { revalidateOnMount: true },
   );
+
+  if (isLoading) {
+    return (
+      <div className="p-10 text-center text-gray-500">
+        {t('reservations.loading')}
+      </div>
+    );
+  }
 
   if (error) {
     return (
