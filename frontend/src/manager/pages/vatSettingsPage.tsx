@@ -144,11 +144,6 @@ const [items, setItems] = useState<ItemVatRate[]>([
     return (cents / 100).toFixed(2);
   };
 
-  // Helper function to convert display format to cents
-  const displayToCents = (displayPrice: string): number => {
-    const price = parseFloat(displayPrice);
-    return Math.round(price * 100);
-  };
   // Validate rate input
   const validateRate = (
     rateStr: string,
@@ -508,7 +503,7 @@ const [items, setItems] = useState<ItemVatRate[]>([
               <select
                 value={selectedCategory}
                 onChange={e => setSelectedCategory(e.target.value)}
-                className="rounded-md border border-gray-300 px-3 py-2"
+                className="rounded-md border border-gray-300 px-3 py-2 w-64" 
               >
                 {categories.map(category => (
                   <option key={category} value={category}>
@@ -572,7 +567,7 @@ const [items, setItems] = useState<ItemVatRate[]>([
                             {item.itemName}
                           </p>
                           <p className="text-sm text-gray-500">
-                            {item.sku} • ${item.price.toFixed(2)}
+                            {item.sku} • ${centsToDisplay(item.price)}
                           </p>
                         </div>
                       </td>
