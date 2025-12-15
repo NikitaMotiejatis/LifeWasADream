@@ -49,10 +49,7 @@ export default function RefundApprovalModal({
     handleClose();
   };
 
-  const amountCents = Number.isFinite(request.amount)
-    ? Math.round(request.amount * 100)
-    : 0;
-
+  
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center"
@@ -83,7 +80,7 @@ export default function RefundApprovalModal({
                       {t('manager.refunds.modal.refundAmount')}
                     </p>
                     <p className="text-3xl font-bold text-gray-900">
-                      {formatPrice(amountCents)}
+                      {formatPrice(request.amount * 100)}
                     </p>
                     <p className="mt-2 text-sm text-gray-500">
                       {t('refundId') +
