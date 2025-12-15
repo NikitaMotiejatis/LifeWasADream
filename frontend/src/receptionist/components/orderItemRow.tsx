@@ -5,6 +5,7 @@ import { EditVariationsForm } from './editVariationsForm';
 import { PlusIcon } from '@/icons/plusIcon';
 import { EditIcon } from '@/icons/editIcon';
 import { useCurrency } from '@/global/contexts/currencyContext';
+import i18n from '@/i18n';
 
 interface OrderItemRowProps {
   item: OrderItem;
@@ -60,12 +61,16 @@ export function OrderItemRow({
                 title={
                   item.product.nameKey
                     ? t(item.product.nameKey)
-                    : item.product.name
+                    : i18n.exists(`products.${item.product.name}`)
+                      ? t(`products.${item.product.name}`)
+                      : item.product.name
                 }
               >
                 {item.product.nameKey
                   ? t(item.product.nameKey)
-                  : item.product.name}
+                  : i18n.exists(`products.${item.product.name}`)
+                    ? t(`products.${item.product.name}`)
+                    : item.product.name}
               </h3>
 
               {item.product.variations &&
@@ -85,10 +90,13 @@ export function OrderItemRow({
                           <span>
                             {item.selectedVariations
                               .map(v =>
-                                t(
-                                  `variationModal.variations.${v.name}`,
-                                  v.name,
-                                ),
+                                v.nameKey
+                                  ? t(v.nameKey)
+                                  : i18n.exists(
+                                        `variationModal.variations.${v.name}`,
+                                      )
+                                    ? t(`variationModal.variations.${v.name}`)
+                                    : v.name,
                               )
                               .join(', ')}
                           </span>
@@ -116,7 +124,13 @@ export function OrderItemRow({
                 item.selectedVariations.length > 0 && (
                   <div className="mt-2 text-sm text-gray-500">
                     {item.selectedVariations
-                      .map(v => t(`variationModal.${v.nameKey}`, v.name))
+                      .map(v =>
+                        v.nameKey
+                          ? t(v.nameKey)
+                          : i18n.exists(`variationModal.variations.${v.name}`)
+                            ? t(`variationModal.variations.${v.name}`)
+                            : v.name,
+                      )
                       .join(', ')}
                   </div>
                 )}

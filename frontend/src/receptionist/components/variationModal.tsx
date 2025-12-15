@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Product, useCart, Variation } from '../contexts/cartContext';
+import i18n from '@/i18n';
 
 export default function VariationModal({
   product,
@@ -41,7 +42,11 @@ export default function VariationModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <div className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-2xl">
         <h3 className="mb-4 text-xl font-bold">
-          {product.nameKey ? t(product.nameKey) : product.name}
+          {product.nameKey
+            ? t(product.nameKey)
+            : i18n.exists(`products.${product.name}`)
+              ? t(`products.${product.name}`)
+              : product.name}
         </h3>
 
         {sizeOptions.length > 0 && (

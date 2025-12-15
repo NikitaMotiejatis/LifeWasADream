@@ -429,6 +429,8 @@
       "to": "To"
     },
     "loading": "Loading orders...",
+    "loadingProducts": "Loading items...",
+    "notFoundProducts": "No items found.",
     "modal": {
       "confirmButton": {
         "cancel": "Confirm Cancellation",
@@ -480,7 +482,21 @@
     "lemonade": "Fresh Lemonade",
     "orangeJuice": "Orange Juice",
     "smoothieBerry": "Smoothie – Berry Blast",
-    "smoothieMango": "Smoothie – Mango Paradise"
+    "smoothieMango": "Smoothie – Mango Paradise",
+    "House Blend Coffee": "House Blend Coffee",
+    "Espresso Shot": "Espresso Shot",
+    "Blueberry Muffin": "Blueberry Muffin",
+    "Bagel with Cream Cheese": "Bagel with Cream Cheese",
+    "Iced Latte": "Iced Latte",
+    "USB-C Cable": "USB-C Cable",
+    "Wireless Mouse": "Wireless Mouse",
+    "Mechanical Keyboard": "Mechanical Keyboard",
+    "HDMI Adapter": "HDMI Adapter",
+    "Cheeseburger": "Cheeseburger",
+    "Fries": "Fries",
+    "Soda": "Soda",
+    "Double Burger": "Double Burger",
+    "Onion Rings": "Onion Rings"
   },
   "reservation": {
     "weekdays": {

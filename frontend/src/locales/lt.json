@@ -433,6 +433,8 @@
       "to": "Iki"
     },
     "loading": "Kraunamas užsakymų sąrašas...",
+    "loadingProducts": "Kraunamas prekių sąrašas...",
+    "notFoundProducts": "Prekių nerasta.",
     "modal": {
       "confirmButton": {
         "cancel": "Patvirtinti atšaukimą",
@@ -484,7 +486,21 @@
     "lemonade": "Šviežias limonadas",
     "orangeJuice": "Apelsinų sultys",
     "smoothieBerry": "Kokteilis – Uogų sprogimas",
-    "smoothieMango": "Kokteilis – Mangų rojus"
+    "smoothieMango": "Kokteilis – Mangų rojus",
+    "House Blend Coffee": "Naminė kava",
+    "Espresso Shot": "Espreso kava",
+    "Blueberry Muffin": "Mėlynių keksiukas",
+    "Bagel with Cream Cheese": "Beigelis su kreminiu sūriu",
+    "Iced Latte": "Šalta latė kava",
+    "USB-C Cable": "USB-C laidas",
+    "Wireless Mouse": "Belaidė pelė",
+    "Mechanical Keyboard": "Mechaninė klaviatūra",
+    "HDMI Adapter": "HDMI adapteris",
+    "Cheeseburger": "Sūrainis",
+    "Fries": "Bulvytės fri",
+    "Soda": "Gazuotas gėrimas",
+    "Double Burger": "Dvigubas mėsainis",
+    "Onion Rings": "Svogūnų žiedai"
   },
   "reservation": {
     "weekdays": {
