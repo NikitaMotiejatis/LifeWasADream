@@ -43,6 +43,9 @@ export default function LoginPage() {
     if (userData.currency) {
       overrideFromBackend(userData.currency as Currency, false);
     }
+    if (userData.businessInfo) {
+      localStorage.setItem('businessInfo', JSON.stringify(userData.businessInfo));
+    }
   };
 
   return (

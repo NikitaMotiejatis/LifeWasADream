@@ -93,14 +93,19 @@ func (pdb PostgresDb) GetUserDetails(username string) (auth.UserDetails, error) 
 func (pdb PostgresDb) GetUserCurrency(username string) (string, error) {
 	var currency string
 
-	const query = `
-    SELECT c.currency
-    FROM employee e
-    JOIN location l ON e.location_id = l.id
-    JOIN country c ON l.country_code = c.code
-    WHERE e.username = $1
-    LIMIT 1;
-    `
+    const query = `
+    SELECT country.currency
+	FROM employee
+	JOIN business
+		ON business.id = employee.business_id
+	JOIN location
+		ON location.business_id = business.id
+	JOIN country
+		ON country.code = location.country_code
+	WHERE employee.username = $1
+	ORDER BY location.name ASC
+	LIMIT 1
+	`
 
 	err := pdb.Db.Get(&currency, query, username)
 	if err != nil {
@@ -112,6 +117,43 @@ func (pdb PostgresDb) GetUserCurrency(username string) (string, error) {
 	}
 
 	return strings.ToUpper(currency), nil
+}
+
+func (pdb PostgresDb) GetBusinessInfo(username string) (auth.BusinessInfo, error) {
+    var businessInfo auth.BusinessInfo
+
+	{
+		query := `
+		SELECT business.id
+		FROM employee
+		JOIN business
+			ON business.id = employee.business_id
+		WHERE employee.username = $1
+		LIMIT 1
+		`
+		err := pdb.Db.Get(&businessInfo.Id, query, username)
+		if err != nil {
+			slog.Error(err.Error())
+			return auth.BusinessInfo{}, ErrInternal
+		}
+	}
+	{
+		const query = `
+		SELECT location.id, location.name
+		FROM business
+		JOIN location
+			ON location.business_id = business.id
+		WHERE business.id = $1
+		ORDER BY location.name ASC
+		`
+		err := pdb.Db.Select(&businessInfo.Locations, query, businessInfo.Id)
+		if err != nil {
+			slog.Error(err.Error())
+			return auth.BusinessInfo{}, ErrInternal
+		}
+	}
+
+    return businessInfo, nil
 }
 
 // -------------------------------------------------------------------------------------------------

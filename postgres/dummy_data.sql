@@ -51,22 +51,26 @@ INSERT INTO business (id, name, description, type, email, phone, created_at) VAL
 -- 3. LOCATIONS (2 Per Business)
 -- ================================================================================================
 
-INSERT INTO location (id, business_id, country_code, city, street, postal_code) VALUES 
--- Morning Roast Locations
-(1, 1, 'US', 'Seattle', 'Pike Place', '98101'),
-(2, 1, 'US', 'Portland', 'Pearl District', '97209'),
--- Urban Cuts Locations
-(3, 2, 'GB', 'London', 'Oxford Street', 'W1D 1BS'),
-(4, 2, 'GB', 'Manchester', 'Market Street', 'M1 1WR'),
--- Tech Gadgets Locations
-(5, 3, 'DE', 'Berlin', 'Alexanderplatz', '10178'),
-(6, 3, 'DE', 'Munich', 'Marienplatz', '80331'),
--- Serenity Spa Locations
-(7, 4, 'CA', 'Toronto', 'Queen Street West', 'M5V 2A2'),
-(8, 4, 'CA', 'Vancouver', 'Robson Street', 'V6B 2B2'),
--- Burger Joint Locations
-(9, 5, 'AU', 'Sydney', 'George Street', '2000'),
-(10, 5, 'AU', 'Melbourne', 'Bourke Street', '3000');
+INSERT INTO location (id, name, business_id, country_code, city, street, postal_code) VALUES 
+-- Morning Roast Locations (Business ID 1 - Coffee Shop)
+(1, 'Morning Roast Downtown', 1, 'US', 'Seattle', 'Pike Place', '98101'),
+(2, 'Morning Roast Pearl St.', 1, 'US', 'Portland', 'Pearl District', '97209'),
+
+-- Urban Cuts Locations (Business ID 2 - Barbershop/Salon)
+(3, 'Urban Cuts Oxford', 2, 'GB', 'London', 'Oxford Street', 'W1D 1BS'),
+(4, 'Urban Cuts Market Square', 2, 'GB', 'Manchester', 'Market Street', 'M1 1WR'),
+
+-- Tech Gadgets Locations (Business ID 3 - Retail Electronics)
+(5, 'Tech Gadgets Center', 3, 'DE', 'Berlin', 'Alexanderplatz', '10178'),
+(6, 'Tech Gadgets South', 3, 'DE', 'Munich', 'Marienplatz', '80331'),
+
+-- Serenity Spa Locations (Business ID 4 - Spa/Wellness)
+(7, 'Serenity Spa Queen West', 4, 'CA', 'Toronto', 'Queen Street West', 'M5V 2A2'),
+(8, 'Serenity Spa Robson', 4, 'CA', 'Vancouver', 'Robson Street', 'V6B 2B2'),
+
+-- Burger Joint Locations (Business ID 5 - Fast Food)
+(9, 'Burger Joint Circular Quay', 5, 'AU', 'Sydney', 'George Street', '2000'),
+(10, 'Burger Joint Bourke St.', 5, 'AU', 'Melbourne', 'Bourke Street', '3000');
 
 -- Location Opening Times (Sample)
 INSERT INTO location_open (location_id, day_of_the_week, open_at, closes_at) VALUES 
@@ -80,7 +84,7 @@ INSERT INTO location_open (location_id, day_of_the_week, open_at, closes_at) VAL
 -- 4. EMPLOYEES & SHIFTS
 -- ================================================================================================
 
-INSERT INTO employee (id, username, first_name, last_name, password_hash, email, phone, created_at, location_id) VALUES 
+INSERT INTO employee (id, username, first_name, last_name, password_hash, email, phone, created_at, business_id) VALUES 
 -- Morning Roast
 (1, 'jbean', 'James', 'Bean', '$2a$12$k8sRjlINxLzAiakxjM1x6OdLT4oZRd23YQCSd/zvha4nXUHMCMDOy', 'james@morningroast.com', '+15551001', NOW() - INTERVAL '360 days', 1),
 (2, 'slatte', 'Sarah', 'Latte', '$2a$12$k8sRjlINxLzAiakxjM1x6OdLT4oZRd23YQCSd/zvha4nXUHMCMDOy', 'sarah@morningroast.com', '+15551002', NOW() - INTERVAL '350 days', 1),
