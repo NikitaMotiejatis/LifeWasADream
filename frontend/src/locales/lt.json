@@ -322,7 +322,7 @@
       "confirmReject": "Patvirtinti atmetimą",
       "modal": {
         "title": "Grąžinimo Prašymo Peržiūra",
-        "subtitle": "Detali informacija apie grąžinimo prašymą {{orderId}}",
+        "subtitle": "Detali informacija apie grąžinimo prašymą",
         "customerInfo": "Kliento Informacija",
         "requestedBy": "Pateikė",
         "refundAmount": "Grąžinimo Suma",
@@ -951,6 +951,10 @@
       "pcs_few": "{{count}} vnt.",
       "pcs_many": "{{count}} vnt.",
       "pcs_one": "{{count}} vnt."
+    },
+    "reasons": {
+      "Customer requested full refund": "Klientas paprašė pilnos kompensacijos",
+      "Item out of stock": "Prekės sandėlyje nėra"
     }
   },
   "validation": {
@@ -1121,6 +1125,18 @@
       "custom": "Individualus tarifas",
       "category": "Kategorijos tarifas",
       "default": "Numatytasis tarifas"
-    }
-  }
+    },
+    "filterByCategory": "Filtruoti pagal kategoriją"
+  },
+  "refundId": "Grąžinimo ID:",
+  "orderId": "Užsakymo ID:",
+  "requestedAt": "Pateikimo data:",
+  "orderDetailsSimpl": "Užsakymo detalės (Supaprastinta)",
+  "month": "šis mėnuo",
+  "quarter": "praėjęs ketvirtis",
+  "year": "praėję metai",
+  "Downtown Branch": "Centrinis filialas",
+  "Eastside Branch": "Rytinis filialas",
+  "North Branch": "Šiaurinis filialas",
+  "Westside Branch": "Vakarinis filialas"
 }

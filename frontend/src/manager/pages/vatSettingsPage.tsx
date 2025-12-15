@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import ManagerLayout from '../components/managerLayout';
 import { Package, Percent, AlertTriangle, Tag } from 'lucide-react';
+import { useCurrency } from '@/global/contexts/currencyContext';
 
 interface ItemVatRate {
   id: number;
@@ -16,6 +17,7 @@ interface ItemVatRate {
 
 const VatSettingsPage: React.FC = () => {
   const { t } = useTranslation();
+  const { formatPrice } = useCurrency();
 
   // Items with their VAT rates (price in CENTS)
   const [items, setItems] = useState<ItemVatRate[]>([
@@ -122,7 +124,7 @@ const VatSettingsPage: React.FC = () => {
 
   // Helper function to convert cents to display format
   const centsToDisplay = (cents: number): string => {
-    return (cents / 100).toFixed(2);
+    return formatPrice(cents / 100);
   };
 
   // Validate rate input
@@ -441,7 +443,7 @@ const VatSettingsPage: React.FC = () => {
                             {item.itemName}
                           </p>
                           <p className="text-sm text-gray-500">
-                            {item.sku} • ${centsToDisplay(item.price)}
+                            {item.sku} • {centsToDisplay(item.price)}
                           </p>
                         </div>
                       </td>

@@ -71,7 +71,7 @@ export default function OrderList() {
     order: Order,
   ) => {
     if (type === 'edit') {
-        navigate(`/edit-order/${order.id}`);
+      navigate(`/edit-order/${order.id}`);
     }
 
     setModalType(type);
@@ -107,7 +107,7 @@ export default function OrderList() {
         </div>
 
         <div className="mt-6 space-y-3">
-          <Suspense fallback={<div>Loading...</div>}>
+          <Suspense fallback={<div>{t('orders.loading')}</div>}>
             <Orders orderFilter={orderFilter} openModal={openModal} />
           </Suspense>
         </div>
@@ -118,14 +118,14 @@ export default function OrderList() {
         type={modalType}
         order={selectedOrder}
         onClose={closeModal}
-        onConfirm={async (refundData) => {
+        onConfirm={async refundData => {
           if (!selectedOrder) return;
 
           if (modalType === 'refund') {
             const response = await authFetch(
               `order/${selectedOrder.id}/ask-refund`,
               'POST',
-              JSON.stringify(refundData)
+              JSON.stringify(refundData),
             );
 
             if (response.ok) {
@@ -147,7 +147,9 @@ export default function OrderList() {
           }
 
           closeModal();
-          setOrderFilter(() => { return { ...orderFilter, orderStatus: 'closed' }});
+          setOrderFilter(() => {
+            return { ...orderFilter, orderStatus: 'closed' };
+          });
         }}
       />
       <Toast toast={toast} />
@@ -167,7 +169,7 @@ function Orders({ orderFilter, openModal }: OrdersProps) {
 
   const { data: orders, error } = useSWR(
     `order${toQueryString(orderFilter)}`,
-    (url: string) => authFetchJson<Order[]>(url, "GET"),
+    (url: string) => authFetchJson<Order[]>(url, 'GET'),
     {
       suspense: true,
       revalidateOnMount: true,
