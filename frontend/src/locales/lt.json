@@ -1138,5 +1138,8 @@
   "Downtown Branch": "Centrinis filialas",
   "Eastside Branch": "Rytinis filialas",
   "North Branch": "Šiaurinis filialas",
-  "Westside Branch": "Vakarinis filialas"
+  "Westside Branch": "Vakarinis filialas",
+  "Failed to fetch pending refunds:": "Nepavyko užkrauti laukiančių pinigų grąžinimų:",
+  "Failed to approve refund.": "Nepavyko patvirtinti pinigų grąžinimo.",
+  "Failed to reject refund.": "Nepavyko atmesti pinigų grąžinimo."
 }

@@ -2,6 +2,9 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useCurrency } from '@/global/contexts/currencyContext';
 import {
+  isEmailValidForRequest,
+  isPhoneValidForRequest,
+  useEmailValidation,
   useNameValidation,
   usePhoneValidation,
 } from '@/utils/useInputValidation';
@@ -36,15 +39,14 @@ export default function OrderModal({
 
   const name = useNameValidation();
   const phone = usePhoneValidation();
-
-  const [email, setEmail] = useState('');
+  const email = useEmailValidation();
   const [reason, setReason] = useState('');
 
   useEffect(() => {
     if (!open) {
       name.reset();
       phone.reset();
-      setEmail('');
+      email.reset();
       setReason('');
     }
   }, [open]);
@@ -52,7 +54,11 @@ export default function OrderModal({
   if (!open || !order) return null;
 
   const isFormInvalid =
-    type === 'refund' && (!name.isValid || !phone.isValid || !reason.trim());
+    type === 'refund' &&
+    (!name.isValid ||
+      !isPhoneValidForRequest(phone.value) ||
+      !isEmailValidForRequest(email.value) ||
+      !reason.trim());
 
   const handleConfirm = () => {
     if (type === 'edit') {
@@ -66,7 +72,7 @@ export default function OrderModal({
       onConfirm({
         name: name.value.trim(),
         phone: phone.value.trim(),
-        email: email.trim(),
+        email: email.value.trim(),
         reason: reason.trim(),
       });
     } else {
@@ -148,12 +154,13 @@ export default function OrderModal({
 
             <div>
               <label className="mb-1 block text-sm font-medium text-gray-700">
-                {t('orders.modal.emailLabel')}
+                {t('orders.modal.emailLabel')}{' '}
+                <span className="text-red-500">*</span>
               </label>
               <input
                 type="email"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
+                value={email.value}
+                onChange={email.handleChange}
                 className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
                 placeholder={t('orders.modal.emailPlaceholder')}
               />
