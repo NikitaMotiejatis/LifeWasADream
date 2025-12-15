@@ -73,7 +73,7 @@ export default function NewReservationPage() {
     setToast({ message, type });
     setTimeout(() => setToast(null), 5800);
   };
-  
+
   const customerName = useNameValidation();
   const customerPhone = usePhoneValidation();
 
@@ -105,7 +105,11 @@ export default function NewReservationPage() {
 
     try {
       setIsSubmitting(true);
-      const response = await authFetch('reservation', 'POST', JSON.stringify(payload));
+      const response = await authFetch(
+        'reservation',
+        'POST',
+        JSON.stringify(payload),
+      );
       showToast(
         t('reservation.toast.success', {
           code: dt.getTime(),
@@ -159,20 +163,20 @@ export default function NewReservationPage() {
               i18n={i18n}
             />
 
-      <BookingSummary
-        customerName={customerName}
-        customerPhone={customerPhone}
-        selectedDate={selectedDate}
-        selectedTime={selectedTime}
-        selectedStaff={selectedStaff}
-        selectedService={selectedService}
-        formatPrice={formatPrice}
-        onConfirm={handleConfirm}
-        isSubmitting={isSubmitting}
-        staff={staff || []}
-        services={services || []}
-        t={t}
-      />
+            <BookingSummary
+              customerName={customerName}
+              customerPhone={customerPhone}
+              selectedDate={selectedDate}
+              selectedTime={selectedTime}
+              selectedStaff={selectedStaff}
+              selectedService={selectedService}
+              formatPrice={formatPrice}
+              onConfirm={handleConfirm}
+              isSubmitting={isSubmitting}
+              staff={staff || []}
+              services={services || []}
+              t={t}
+            />
           </div>
         </main>
 
@@ -226,7 +230,11 @@ function StaffAndServiceSelector({
                 {s.name == 'Anyone' ? t(`reservations.staff.anyone`) : s.name}
               </div>
               <div className="text-xs text-gray-500">
-                {t(`reservation.staff.${s.role}`)}
+                {s.role === 'Any'
+                  ? t('reservation.staff.Any')
+                  : i18n.exists(`reservation.staff.${s.role}`)
+                    ? t(`reservation.staff.${s.role}`)
+                    : s.role}
               </div>
             </div>
             {selectedStaff === s.id && (
@@ -251,10 +259,10 @@ function StaffAndServiceSelector({
         >
           <div>
             <div className="font-medium">
-              {t(`reservation.services.${service.nameKey}`)}
+              {t(`reservations.services.${service.id}`)}
             </div>
             <div className="text-xs text-gray-500">
-              {t(`reservation.durations.${service.duration}`)}
+              {service.duration + ' ' + t(`reservation.durations.min`)}
             </div>
           </div>
           <div className="font-semibold text-blue-600">
@@ -487,7 +495,9 @@ function BookingSummary({
         disabled={isSubmitting}
         className="w-full rounded-lg bg-blue-600 py-4 font-semibold text-white transition hover:bg-blue-700 disabled:opacity-60"
       >
-        {isSubmitting ? t('payment.processing') : t('reservation.confirmButton')}
+        {isSubmitting
+          ? t('payment.processing')
+          : t('reservation.confirmButton')}
       </button>
 
       <p className="mt-3 text-center text-xs text-gray-500">

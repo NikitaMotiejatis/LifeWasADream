@@ -429,6 +429,8 @@
       "to": "To"
     },
     "loading": "Loading orders...",
+    "loadingProducts": "Loading items...",
+    "notFoundProducts": "No items found.",
     "modal": {
       "confirmButton": {
         "cancel": "Confirm Cancellation",
@@ -480,7 +482,21 @@
     "lemonade": "Fresh Lemonade",
     "orangeJuice": "Orange Juice",
     "smoothieBerry": "Smoothie – Berry Blast",
-    "smoothieMango": "Smoothie – Mango Paradise"
+    "smoothieMango": "Smoothie – Mango Paradise",
+    "House Blend Coffee": "House Blend Coffee",
+    "Espresso Shot": "Espresso Shot",
+    "Blueberry Muffin": "Blueberry Muffin",
+    "Bagel with Cream Cheese": "Bagel with Cream Cheese",
+    "Iced Latte": "Iced Latte",
+    "USB-C Cable": "USB-C Cable",
+    "Wireless Mouse": "Wireless Mouse",
+    "Mechanical Keyboard": "Mechanical Keyboard",
+    "HDMI Adapter": "HDMI Adapter",
+    "Cheeseburger": "Cheeseburger",
+    "Fries": "Fries",
+    "Soda": "Soda",
+    "Double Burger": "Double Burger",
+    "Onion Rings": "Onion Rings"
   },
   "reservation": {
     "weekdays": {
@@ -519,9 +535,7 @@
     "dateTimeTitle": "Select Date & Time",
     "bookingSummary": "Reservation Summary",
     "durations": {
-      "120": "120 min",
-      "45": "45 min",
-      "60": "60 min"
+      "min": "min"
     },
     "months": {
       "0": "January",
@@ -544,16 +558,11 @@
     },
     "pageTitle": "New Reservation",
     "phoneError": "Only numbers and optional \"+\" at the beginning",
-    "services": {
-      "Hair Color": "Hair Color",
-      "Haircut & Style": "Haircut & Style",
-      "Manicure": "Manicure",
-      "Pedicure": "Pedicure"
-    },
     "smsNote": "Confirmation will be sent via SMS",
     "staff": {
       "Anyone": "Anyone",
       "Any": "Any",
+      "Staff": "Staff",
       "Colorist": "Colorist",
       "Nail Technician": "Nail Technician",
       "Any available staff": "Any available staff"
@@ -640,10 +649,12 @@
     "noReservations": "No reservations found",
     "notFound": "Not found",
     "services": {
-      "1": "Haircut & Style",
-      "2": "Hair Color",
-      "3": "Manicure",
-      "4": "Pedicure"
+      "1": "Men's Haircut",
+      "2": "Women's Haircut",
+      "3": "Hair Coloring",
+      "4": "Swedish Massage",
+      "5": "Deep Tissue Massage",
+      "6": "Face Massage"
     },
     "staff": {
       "anyone": "Any Staff"

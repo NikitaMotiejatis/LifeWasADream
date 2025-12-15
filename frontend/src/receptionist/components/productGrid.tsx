@@ -5,6 +5,7 @@ import VariationModal from '@/receptionist/components/variationModal';
 import SearchIcon from '@/icons/searchIcon';
 import { useAuth } from '@/global/hooks/auth';
 import useSWR from 'swr';
+import i18n from '@/i18n';
 
 type ProductGridProps = {
   onProductClick?: (product: Product) => void;
@@ -71,16 +72,22 @@ export default function ProductGrid({ onProductClick }: ProductGridProps) {
         </div>
       </div>
 
-    <div className="grid grid-cols-3 gap-4">
-      <Suspense fallback={<div className="p-10 text-center text-gray-500">Loading...</div>}>
-        <Items 
-          includes={search}
-          category={category}
-          onProductClick={onProductClick}
-          handleProductClick={handleProductClick}>
-        </Items>
-      </Suspense>
-    </div>
+      <div className="grid grid-cols-3 gap-4">
+        <Suspense
+          fallback={
+            <div className="p-10 text-center text-gray-500">
+              {t('orders.loadingProducts')}
+            </div>
+          }
+        >
+          <Items
+            includes={search}
+            category={category}
+            onProductClick={onProductClick}
+            handleProductClick={handleProductClick}
+          ></Items>
+        </Suspense>
+      </div>
 
       {selectedProduct && selectedProduct.variations && (
         <VariationModal
@@ -103,63 +110,89 @@ type ItemProps = {
   handleProductClick: (product: Product) => void;
 };
 
-function Items({ includes, category, onProductClick, handleProductClick } : ItemProps) {
+function Items({
+  includes,
+  category,
+  onProductClick,
+  handleProductClick,
+}: ItemProps) {
   const { t } = useTranslation();
-  const { formatPrice, isPaymentStarted} = useCart();
+  const { formatPrice, isPaymentStarted } = useCart();
   const { authFetchJson } = useAuth();
 
   const { data: filteredProducts } = useSWR(
     `order/products?category=${category}`,
-    (url: string) => authFetchJson<Product[]>(url, "GET"),
-    { 
+    (url: string) => authFetchJson<Product[]>(url, 'GET'),
+    {
       suspense: true,
       revalidateOnMount: true,
-    }
+    },
   );
 
   if (!filteredProducts) {
-      return <div className="text-center text-gray-500">No items found.</div>;
+    return (
+      <div className="text-center text-gray-500">
+        {t('orders.notFoundProducts')}
+      </div>
+    );
   }
 
   return (
     <>
-      {filteredProducts && filteredProducts.map(product => (
-        <button
-          key={product.id}
-          onClick={() =>
-            onProductClick
-              ? onProductClick(product)
-              : handleProductClick(product)
-          }
-          disabled={isPaymentStarted}
-          className={`group relative flex flex-col items-center rounded-lg border border-gray-200 bg-white p-4 text-center shadow-sm transition-all ${
-            isPaymentStarted
-              ? 'cursor-not-allowed opacity-65'
-              : 'cursor-pointer hover:-translate-y-0.5 hover:shadow-md active:scale-95'
-          }`}
-          title={product.nameKey ? t(product.nameKey) : product.name}
-        >
-          <div className="mb-3 aspect-square w-full max-w-24 rounded-lg bg-gray-200 shadow-inner" />
+      {filteredProducts &&
+        filteredProducts.map(product => (
+          <button
+            key={product.id}
+            onClick={() =>
+              onProductClick
+                ? onProductClick(product)
+                : handleProductClick(product)
+            }
+            disabled={isPaymentStarted}
+            className={`group relative flex flex-col items-center rounded-lg border border-gray-200 bg-white p-4 text-center shadow-sm transition-all ${
+              isPaymentStarted
+                ? 'cursor-not-allowed opacity-65'
+                : 'cursor-pointer hover:-translate-y-0.5 hover:shadow-md active:scale-95'
+            }`}
+            title={
+              product.nameKey
+                ? t(product.nameKey)
+                : i18n.exists(`products.${product.name}`)
+                  ? t(`products.${product.name}`)
+                  : product.name
+            }
+          >
+            <div className="mb-3 aspect-square w-full max-w-24 rounded-lg bg-gray-200 shadow-inner" />
 
-          <div className="w-full px-2">
-            <p
-              className="line-clamp-2 text-center text-sm leading-snug font-medium"
-              title={product.nameKey ? t(product.nameKey) : product.name}
-            >
-              {product.nameKey ? t(product.nameKey) : product.name}
+            <div className="w-full px-2">
+              <p
+                className="line-clamp-2 text-center text-sm leading-snug font-medium"
+                title={
+                  product.nameKey
+                    ? t(product.nameKey)
+                    : i18n.exists(`products.${product.name}`)
+                      ? t(`products.${product.name}`)
+                      : product.name
+                }
+              >
+                {product.nameKey
+                  ? t(product.nameKey)
+                  : i18n.exists(`products.${product.name}`)
+                    ? t(`products.${product.name}`)
+                    : product.name}
+              </p>
+            </div>
+            <p className="mt-1 text-gray-600">
+              {t('menu.fromPrice', { price: formatPrice(product.basePrice) })}
             </p>
-          </div>
-          <p className="mt-1 text-gray-600">
-            {t('menu.fromPrice', { price: formatPrice(product.basePrice) })}
-          </p>
 
-          {product.variations && product.variations.length > 0 && (
-            <p className="mt-2 flex items-center gap-1 text-xs font-medium text-blue-600">
-              {t('menu.customizable')}
-            </p>
-          )}
-        </button>
-      ))}
+            {product.variations && product.variations.length > 0 && (
+              <p className="mt-2 flex items-center gap-1 text-xs font-medium text-blue-600">
+                {t('menu.customizable')}
+              </p>
+            )}
+          </button>
+        ))}
     </>
   );
 }

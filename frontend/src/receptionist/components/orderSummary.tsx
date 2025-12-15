@@ -1,13 +1,21 @@
 import { useTranslation } from 'react-i18next';
-import { CartItem, generateKey, useCart } from '@/receptionist/contexts/cartContext';
+import {
+  CartItem,
+  generateKey,
+  useCart,
+} from '@/receptionist/contexts/cartContext';
 import TrashcanIcon from '@/icons/trashcanIcon';
 import { useNavigate, useParams } from 'react-router-dom';
 import { SplitBillSection } from './splitBillSection';
 import { useState } from 'react';
 import Toast from '@/global/components/toast';
-import { createStripeCheckout, redirectToStripeCheckout } from '@/utils/paymentService';
+import {
+  createStripeCheckout,
+  redirectToStripeCheckout,
+} from '@/utils/paymentService';
 import { useAuth } from '@/global/hooks/auth';
 import { mutate } from 'swr';
+import i18n from '@/i18n';
 
 type OrderSummaryProps = {
   onBack?: () => void;
@@ -55,60 +63,69 @@ export default function OrderSummary({
     try {
       const orderId = params.orderId;
       if (orderId) {
-        await authFetch(`order/${orderId}`, "PATCH", JSON.stringify(order));
+        await authFetch(`order/${orderId}`, 'PATCH', JSON.stringify(order));
       } else {
-        await authFetch(`order/`, "POST", JSON.stringify(order));
+        await authFetch(`order/`, 'POST', JSON.stringify(order));
       }
       await mutate('order'); // refresh orders list if cached
-      
+
       showToast(t('orderSummary.saveSuccess', 'Order saved successfully'));
     } catch (e) {
       console.error(e);
-      showToast(
-        t('orderSummary.saveError', 'Failed to save order'),
-        'error'
-      );
+      showToast(t('orderSummary.saveError', 'Failed to save order'), 'error');
       return;
     }
 
     navigate('/orders');
-  }
+  };
 
   const handleStripePayment = async () => {
     try {
       showToast(t('payment.processing', 'Processing order...'));
-      
+
       // Create or update the order first
       const order = { items: itemsList } as { items: CartItem[] };
       let orderId: number;
-      
+
       const existingOrderId = params.orderId;
       if (existingOrderId) {
         // Update existing order
-        await authFetchJson<string>(`order/${existingOrderId}`, "PATCH", JSON.stringify(order));
+        await authFetchJson<string>(
+          `order/${existingOrderId}`,
+          'PATCH',
+          JSON.stringify(order),
+        );
         orderId = parseInt(existingOrderId);
         await mutate(`order/${existingOrderId}`);
       } else {
         // Create new order and get the order ID
-        const response = await authFetchJson<{ id: number; message: string }>(`order/`, "POST", JSON.stringify(order));
+        const response = await authFetchJson<{ id: number; message: string }>(
+          `order/`,
+          'POST',
+          JSON.stringify(order),
+        );
         orderId = response.id;
         await mutate(`order/${orderId}`);
       }
       await mutate('order');
-      
+
       showToast(t('payment.redirecting', 'Redirecting to payment...'));
-      
-      const checkoutResponse = await createStripeCheckout(orderId, total, 'eur');
-      
+
+      const checkoutResponse = await createStripeCheckout(
+        orderId,
+        total,
+        'eur',
+      );
+
       // Clear cart before redirecting
       clearCart();
-      
+
       // Redirect to Stripe checkout
       redirectToStripeCheckout(checkoutResponse.session_url);
     } catch (error) {
       showToast(
         t('payment.error', 'Payment failed. Please try again.'),
-        'error'
+        'error',
       );
       console.error('Stripe payment error:', error);
     }
@@ -234,15 +251,21 @@ function CartItemRow({ item }: { item: CartItem }) {
       <div className="mb-3 flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <p className="font-semibold">
-            {product.nameKey ? t(product.nameKey) : product.name}
+            {product.nameKey
+              ? t(product.nameKey)
+              : i18n.exists(`products.${product.name}`)
+                ? t(`products.${product.name}`)
+                : product.name}
           </p>
           {selectedVariations.length > 0 && (
             <p className="text-sm text-gray-600">
               {selectedVariations
-                .map(variation =>
-                  variation.nameKey
-                    ? t(`${variation.nameKey}`)
-                    : variation.name,
+                .map(v =>
+                  v.nameKey
+                    ? t(v.nameKey)
+                    : i18n.exists(`variationModal.variations.${v.name}`)
+                      ? t(`variationModal.variations.${v.name}`)
+                      : v.name,
                 )
                 .join(', ')}
             </p>
