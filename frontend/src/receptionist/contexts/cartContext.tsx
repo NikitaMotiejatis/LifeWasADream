@@ -25,6 +25,7 @@ export type CartItem = {
   product: Product;
   selectedVariations: Variation[];
   quantity: number;
+  instanceId?: string;
 };
 
 export type Promotion =
@@ -41,6 +42,7 @@ export type CartDiscount =
 export type CartKey = string;
 
 type CartContextType = {
+  // Cart Items
   items: Record<CartKey, CartItem>;
   itemsList: CartItem[];
   addToCart: (product: Product, variations?: Variation[]) => void;
@@ -48,17 +50,33 @@ type CartContextType = {
   removeItem: (key: CartKey) => void;
   clearCart: () => void;
 
+  // Promotions & Discounts
   promotions: Promotions;
   setPromotions: (p: Promotions) => void;
-
   cartDiscount: CartDiscount | null;
   setCartDiscount: (discount: CartDiscount | null) => void;
 
-  subtotal: Cents;
-  discountTotal: Cents;
-  cartDiscountAmount: Cents;
-  total: Cents;
+  // Pricing Calculations
+  subtotal: number;
+  discountTotal: number;
+  cartDiscountAmount: number;
+  totalWithoutTip: number;
 
+  // Tip Management
+  tipAmount: number;
+  setTipAmount: (amount: number) => void;
+
+  // Individual tips for split payments
+  individualTips: number[];
+  setIndividualTip: (index: number, amount: number) => void;
+  clearIndividualTips: () => void;
+  getIndividualTipsTotal: () => number;
+
+  // Final Totals
+  total: number;
+  splitModeTotal: (payerIndex?: number) => number;
+
+  // Currency
   currency: Currency;
   setCurrency: (c: Currency) => void;
   formatPrice: (price: Cents) => string;
@@ -70,8 +88,13 @@ type CartContextType = {
 
   generateKey: (product: Product, variations: Variation[]) => CartKey;
 
+  // Payment State
   isPaymentStarted: boolean;
   setIsPaymentStarted: (isPaymentStarted: boolean) => void;
+
+  // Split Bill State
+  isSplitMode: boolean;
+  setIsSplitMode: (enabled: boolean) => void;
 };
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -91,20 +114,47 @@ export const generateKey = (
 const clampToCents = (value: number): Cents =>
   Math.max(0, Math.round(value));
 
-export const CartProvider = ({ initItems = [], children }: { initItems?: CartItem[], children: ReactNode }) => {
+const MAX_PAYERS = 50;
+const MAX_QUANTITY = 9999;
+
+export const CartProvider = ({
+  initItems = [],
+  children,
+}: {
+  initItems?: CartItem[];
+  children: ReactNode;
+}) => {
   const { currency, setCurrency, formatPrice } = useCurrency();
-  const [items, setItems] = useState<Record<CartKey, CartItem>>(initItems.reduce((acc, item) => {
-    return { 
-      ...acc,
-      [generateKey(item.product, item.selectedVariations)]: item,
-    };
-  }, {} as Record<CartKey, CartItem>));
+
+  // Cart Items State
+  const [items, setItems] = useState<Record<CartKey, CartItem>>(
+    initItems.reduce(
+      (acc, item) => {
+        return {
+          ...acc,
+          [generateKey(item.product, item.selectedVariations)]: item,
+        };
+      },
+      {} as Record<CartKey, CartItem>,
+    ),
+  );
+
+  // Promotions & Discounts
   const [promotions, setPromotions] = useState<Promotions>({
     'iced-latte': { type: 'percent', value: 50 },
   });
+
   const [cartDiscount, setCartDiscount] = useState<CartDiscount | null>(null);
   const [isPaymentStarted, setIsPaymentStarted] = useState<boolean>(false);
+  const [isSplitMode, setIsSplitMode] = useState<boolean>(false);
 
+  // Tip Management
+  const [tipAmount, setTipAmount] = useState<number>(0);
+  const [individualTips, setIndividualTips] = useState<number[]>(
+    Array(MAX_PAYERS).fill(0),
+  );
+
+  // Cart Operations
   const addToCart = (
     product: Product,
     selectedVariations: Variation[] = [],
@@ -118,13 +168,13 @@ export const CartProvider = ({ initItems = [], children }: { initItems?: CartIte
     }));
   };
 
-  const MAX_QUANTITY = 9999;
-
   const updateQuantity = (key: CartKey, delta: number) => {
     setItems(prev => {
       const item = prev[key];
       if (!item) return prev;
+
       const newQty = item.quantity + delta;
+
       if (newQty <= 0) {
         const { [key]: _, ...rest } = prev;
         return rest;
@@ -135,10 +185,6 @@ export const CartProvider = ({ initItems = [], children }: { initItems?: CartIte
           ...prev,
           [key]: { ...item, quantity: MAX_QUANTITY },
         };
-      }
-
-      if (newQty > Number.MAX_SAFE_INTEGER) {
-        return prev;
       }
 
       return {
@@ -155,14 +201,40 @@ export const CartProvider = ({ initItems = [], children }: { initItems?: CartIte
     });
   };
 
-  const clearCart = () => setItems({});
-
-  const getFinalPrice = (product: Product, variations: Variation[]): Cents => {
-    const extra = variations.reduce((sum, v) => sum + v.priceModifier, 0);
-    return clampToCents(product.basePrice + extra);
+  const clearCart = () => {
+    setItems({});
+    setTipAmount(0);
+    setIndividualTips(Array(MAX_PAYERS).fill(0));
+    setIsSplitMode(false);
   };
 
-  const { subtotal, itemDiscountsTotal, cartDiscountAmount, total } =
+  // Individual Tip Management
+  const setIndividualTip = (index: number, amount: number) => {
+    if (index < 0 || index >= MAX_PAYERS) return;
+
+    setIndividualTips(prev => {
+      const newTips = [...prev];
+      newTips[index] = amount;
+      return newTips;
+    });
+  };
+
+  const clearIndividualTips = () => {
+    setIndividualTips(Array(MAX_PAYERS).fill(0));
+  };
+
+  const getIndividualTipsTotal = () => {
+    return individualTips.reduce((sum, tip) => sum + tip, 0);
+  };
+
+  // Price Calculations
+  const getFinalPrice = (product: Product, variations: Variation[]): number => {
+    const extra = variations.reduce((sum, v) => sum + v.priceModifier, 0);
+    return Math.max(0, product.basePrice + extra);
+  };
+
+  // Calculate totals
+  const { subtotal, itemDiscountsTotal, cartDiscountAmount, totalWithoutTip } =
     useMemo(() => {
       let subtotal = 0;
       let itemDiscountsTotal = 0;
@@ -205,15 +277,31 @@ export const CartProvider = ({ initItems = [], children }: { initItems?: CartIte
         }
       }
 
-      const total = Math.max(0, afterItemsTotal - cartDiscountAmount);
+      const totalWithoutTip = Math.max(0, afterItemsTotal - cartDiscountAmount);
 
       return {
         subtotal,
         itemDiscountsTotal,
         cartDiscountAmount,
-        total,
+        totalWithoutTip,
       };
     }, [items, promotions, cartDiscount]);
+
+  const total = useMemo(() => {
+    if (isSplitMode) {
+      return totalWithoutTip + getIndividualTipsTotal();
+    }
+    return totalWithoutTip + tipAmount;
+  }, [isSplitMode, totalWithoutTip, tipAmount, getIndividualTipsTotal]);
+
+  const splitModeTotal = (payerIndex?: number) => {
+    if (!isSplitMode || payerIndex === undefined) {
+      return totalWithoutTip;
+    }
+
+    const individualTip = individualTips[payerIndex] || 0;
+    return totalWithoutTip + individualTip;
+  };
 
   const discountTotal = itemDiscountsTotal + cartDiscountAmount;
   const itemsList = Object.values(items);
@@ -247,14 +335,25 @@ export const CartProvider = ({ initItems = [], children }: { initItems?: CartIte
         updateQuantity,
         removeItem,
         clearCart,
+
         promotions,
         setPromotions,
         cartDiscount,
         setCartDiscount,
+
         subtotal,
         discountTotal,
         cartDiscountAmount,
+        totalWithoutTip,
+
+        tipAmount,
+        setTipAmount,
+        individualTips,
+        setIndividualTip,
+        clearIndividualTips,
+        getIndividualTipsTotal,
         total,
+        splitModeTotal,
         currency,
         setCurrency,
         formatPrice,
@@ -263,6 +362,8 @@ export const CartProvider = ({ initItems = [], children }: { initItems?: CartIte
         generateKey,
         isPaymentStarted,
         setIsPaymentStarted,
+        isSplitMode,
+        setIsSplitMode,
       }}
     >
       {children}

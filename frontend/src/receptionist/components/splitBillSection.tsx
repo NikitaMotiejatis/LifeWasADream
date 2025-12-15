@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import DropdownSelector from '@/global/components/dropdownSelector';
 import { useCart, type CartItem } from '@/receptionist/contexts/cartContext';
 import { useNavigate } from 'react-router-dom';
+import { TipInput } from './tipInput';
 
 type PaymentMethod = 'Cash' | 'Card' | 'Gift card';
 
@@ -20,22 +21,33 @@ type SplitBillSectionProps = {
   total: number;
   items: CartItem[];
   formatPrice: (amount: number) => string;
+  onSplitEnabledChange?: (enabled: boolean) => void;
   onCompletePayment?: (
-    payments: { amount: number; method: PaymentMethod }[],
+    payments: { amount: number; method: PaymentMethod; tip: number }[],
   ) => void;
-  onStripePayment?: () => void;
+  onStripePayment?: (payerIndex?: number, amount?: number) => void;
+  isProcessing?: boolean;
 };
 
 export const SplitBillSection: React.FC<SplitBillSectionProps> = ({
   total,
   items,
   formatPrice,
+  onSplitEnabledChange,
   onCompletePayment,
   onStripePayment,
+  isProcessing = false,
 }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { setIsPaymentStarted } = useCart();
+  const {
+    setIsPaymentStarted,
+    setIndividualTip,
+    individualTips,
+    clearIndividualTips,
+  } = useCart();
+
+  const MAX_PAYERS = 50;
 
   const [isSplitEnabled, setIsSplitEnabled] = useState(false);
   const [numPeople, setNumPeople] = useState(2);
@@ -56,18 +68,24 @@ export const SplitBillSection: React.FC<SplitBillSectionProps> = ({
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('Cash');
 
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>(
-    Array(50).fill('Cash'),
+    Array(MAX_PAYERS).fill('Cash'),
   );
+
   const [paidStatus, setPaidStatus] = useState<boolean[]>(
-    Array(50).fill(false),
+    Array(MAX_PAYERS).fill(false),
   );
 
   const anyPaid = paidStatus.some(Boolean);
-  const isLocked = anyPaid;
 
   useEffect(() => {
     setIsPaymentStarted(anyPaid);
   }, [anyPaid, setIsPaymentStarted]);
+
+  useEffect(() => {
+    if (onSplitEnabledChange) {
+      onSplitEnabledChange(isSplitEnabled);
+    }
+  }, [isSplitEnabled, onSplitEnabledChange]);
 
   const getUnitPrice = (item: CartItem) => {
     const base = item.product.basePrice;
@@ -78,33 +96,100 @@ export const SplitBillSection: React.FC<SplitBillSectionProps> = ({
     return base + mod;
   };
 
-  const payerTotals = Array.from({ length: numPeople }, () => 0);
+  const calculateBaseAmounts = () => {
+    const baseAmounts = Array.from({ length: numPeople }, () => 0);
 
-  if (splitMode === 'byItems') {
-    expandedItems.forEach((item, idx) => {
-      const payer = assignments[idx] || 1;
-      if (payer >= 1 && payer <= numPeople) {
-        payerTotals[payer - 1] += getUnitPrice(item);
-      }
-    });
-  } else {
-    splitEvenly(total, numPeople).forEach((amount, index) => {
-      payerTotals[index] = amount;
-    });
-  }
+    if (splitMode === 'byItems') {
+      expandedItems.forEach((item, idx) => {
+        const payer = assignments[idx] || 1;
+        if (payer >= 1 && payer <= numPeople) {
+          baseAmounts[payer - 1] += getUnitPrice(item);
+        }
+      });
+    } else {
+      const equalAmount = total / numPeople;
+      baseAmounts.fill(equalAmount);
+    }
 
-  const activePayers = payerTotals
-    .map((amount, i) => ({ index: i + 1, amount }))
-    .filter(p => p.amount > 0);
+    return baseAmounts;
+  };
+
+  const baseAmounts = calculateBaseAmounts();
+
+  const activePayers = baseAmounts
+    .map((base, index) => ({
+      index: index + 1,
+      baseAmount: base,
+      tipAmount: individualTips[index] || 0,
+      totalAmount: base + (individualTips[index] || 0),
+    }))
+    .filter(p => p.totalAmount > 0);
 
   const allPaid = activePayers.every(p => paidStatus[p.index - 1]);
+
+  const handleSplitEnable = () => {
+    setIsSplitEnabled(true);
+    clearIndividualTips();
+    setPaidStatus(Array(MAX_PAYERS).fill(false));
+  };
+
+  const handleSplitDisable = () => {
+    if (!anyPaid) {
+      setIsSplitEnabled(false);
+      clearIndividualTips();
+    }
+  };
+
+  const handlePaymentMethodChange = (
+    payerIndex: number,
+    method: PaymentMethod,
+  ) => {
+    if (paidStatus[payerIndex] || payerIndex < 0 || payerIndex >= MAX_PAYERS)
+      return;
+
+    setPaymentMethods(prev => {
+      const newMethods = [...prev];
+      newMethods[payerIndex] = method;
+      return newMethods;
+    });
+  };
+
+  const handleIndividualTipChange = (payerIndex: number, amount: number) => {
+    setIndividualTip(payerIndex, amount);
+  };
+
+  const handlePayWithCard = (payerIndex: number, amount: number) => {
+    if (onStripePayment) {
+      onStripePayment(payerIndex, amount);
+    }
+  };
+
+  const handlePayerPayment = (payerIndex: number) => {
+    if (payerIndex < 0 || payerIndex >= MAX_PAYERS) return;
+
+    const newPaid = [...paidStatus];
+    newPaid[payerIndex] = true;
+    setPaidStatus(newPaid);
+
+    const allActivePaid = activePayers.every(p => newPaid[p.index - 1]);
+    if (allActivePaid && onCompletePayment) {
+      onCompletePayment(
+        activePayers.map(p => ({
+          amount: p.totalAmount,
+          method: paymentMethods[p.index - 1] || 'Cash',
+          tip: p.tipAmount,
+        })),
+      );
+    }
+  };
 
   if (!isSplitEnabled) {
     return (
       <>
         <button
-          onClick={() => setIsSplitEnabled(true)}
+          onClick={handleSplitEnable}
           className="mt-4 w-full rounded-lg border border-gray-400 bg-white py-3 text-sm font-medium hover:bg-gray-50"
+          disabled={isProcessing}
         >
           {t('orderSummary.splitBill')}
         </button>
@@ -117,12 +202,13 @@ export const SplitBillSection: React.FC<SplitBillSectionProps> = ({
             {(['Cash', 'Card', 'Gift card'] as const).map(method => (
               <button
                 key={method}
-                onClick={() => setPaymentMethod && setPaymentMethod(method)}
+                onClick={() => setPaymentMethod(method)}
                 className={`rounded-lg py-2 text-xs font-medium transition ${
                   paymentMethod === method
                     ? 'bg-blue-600 text-white hover:bg-blue-700'
                     : 'border border-gray-400 hover:bg-gray-100'
                 }`}
+                disabled={isProcessing}
               >
                 {t(`orderSummary.paymentMethods.${method}`)}
               </button>
@@ -139,6 +225,7 @@ export const SplitBillSection: React.FC<SplitBillSectionProps> = ({
             }
           }}
           className="w-full rounded-xl bg-blue-600 py-4 text-lg font-bold text-white shadow-md transition hover:bg-blue-700"
+          disabled={isProcessing}
         >
           {t('orderSummary.completePayment')}
         </button>
@@ -155,13 +242,13 @@ export const SplitBillSection: React.FC<SplitBillSectionProps> = ({
             {t('orderSummary.people')})
           </h3>
           <button
-            onClick={() => setIsSplitEnabled(false)}
+            onClick={handleSplitDisable}
             className={`text-sm font-medium transition-all ${
-              isLocked
+              anyPaid
                 ? 'cursor-not-allowed text-red-400 opacity-60'
                 : 'text-red-600 hover:text-red-800 active:text-red-900'
             } `}
-            disabled={isLocked}
+            disabled={anyPaid || isProcessing}
           >
             {t('common.cancel')}
           </button>
@@ -172,11 +259,11 @@ export const SplitBillSection: React.FC<SplitBillSectionProps> = ({
             {t('orderSummary.peopleCount')}:
           </span>
           <div
-            className={`flex items-center gap-1 ${isLocked ? 'opacity-50' : ''}`}
+            className={`flex items-center gap-1 ${anyPaid ? 'opacity-50' : ''}`}
           >
             <button
               onClick={() => setNumPeople(Math.max(2, numPeople - 1))}
-              disabled={isLocked}
+              disabled={anyPaid || isProcessing}
               className="h-8 w-8 rounded-full border border-gray-400 text-lg font-bold hover:bg-gray-100 disabled:cursor-not-allowed"
             >
               −
@@ -185,8 +272,8 @@ export const SplitBillSection: React.FC<SplitBillSectionProps> = ({
               {numPeople}
             </span>
             <button
-              onClick={() => setNumPeople(Math.min(50, numPeople + 1))}
-              disabled={isLocked}
+              onClick={() => setNumPeople(Math.min(MAX_PAYERS, numPeople + 1))}
+              disabled={anyPaid || isProcessing}
               className="h-8 w-8 rounded-full bg-blue-600 text-lg font-bold text-white hover:bg-blue-700 disabled:opacity-70"
             >
               +
@@ -196,25 +283,29 @@ export const SplitBillSection: React.FC<SplitBillSectionProps> = ({
 
         <div className="mb-5 flex gap-6">
           <label
-            className={`flex items-center gap-2 text-sm font-medium ${isLocked ? 'opacity-50' : 'cursor-pointer'}`}
+            className={`flex items-center gap-2 text-sm font-medium ${anyPaid ? 'opacity-50' : 'cursor-pointer'}`}
           >
             <input
               type="radio"
               checked={splitMode === 'equal'}
-              onChange={() => !isLocked && setSplitMode('equal')}
-              disabled={isLocked}
+              onChange={() =>
+                !anyPaid && !isProcessing && setSplitMode('equal')
+              }
+              disabled={anyPaid || isProcessing}
               className="text-blue-600"
             />
             <span>{t('orderSummary.splitEqually')}</span>
           </label>
           <label
-            className={`flex items-center gap-2 text-sm font-medium ${isLocked ? 'opacity-50' : 'cursor-pointer'}`}
+            className={`flex items-center gap-2 text-sm font-medium ${anyPaid ? 'opacity-50' : 'cursor-pointer'}`}
           >
             <input
               type="radio"
               checked={splitMode === 'byItems'}
-              onChange={() => !isLocked && setSplitMode('byItems')}
-              disabled={isLocked}
+              onChange={() =>
+                !anyPaid && !isProcessing && setSplitMode('byItems')
+              }
+              disabled={anyPaid || isProcessing}
               className="text-blue-600"
             />
             <span>{t('orderSummary.splitByItems')}</span>
@@ -257,13 +348,13 @@ export const SplitBillSection: React.FC<SplitBillSectionProps> = ({
                       }))}
                       selected={String(assignments[idx] || 1)}
                       onChange={val => {
-                        if (!isLocked) {
+                        if (!anyPaid && !isProcessing) {
                           const newAssign = [...assignments];
                           newAssign[idx] = Number(val);
                           setAssignments(newAssign);
                         }
                       }}
-                      buttonClassName="w-36 px-3 py-2 text-sm"
+                      buttonClassName={`w-36 px-3 py-2 text-sm ${anyPaid ? 'opacity-50 cursor-not-allowed' : ''}`}
                       menuClassName="w-36 right-0"
                     />
                   </div>
@@ -274,9 +365,10 @@ export const SplitBillSection: React.FC<SplitBillSectionProps> = ({
         )}
 
         <div className="space-y-4">
-          {activePayers.map(({ index, amount }) => {
-            const paid = paidStatus[index - 1];
-            const method = paymentMethods[index - 1];
+          {activePayers.map(({ index, baseAmount, tipAmount, totalAmount }) => {
+            const payerIndex = index - 1;
+            const paid = paidStatus[payerIndex];
+            const method = paymentMethods[payerIndex] || 'Cash';
 
             return (
               <div
@@ -287,14 +379,47 @@ export const SplitBillSection: React.FC<SplitBillSectionProps> = ({
                     : 'border-gray-300 bg-white'
                 }`}
               >
-                <div className="mb-4 flex items-center justify-between">
-                  <span className="text-md font-bold">
-                    {t('orderSummary.payer')} {index}{' '}
-                    {paid && t('orderSummary.paid')}
-                  </span>
-                  <span className="text-xl font-bold text-blue-600">
-                    {formatPrice(amount)}
-                  </span>
+                <div className="mb-4">
+                  <div className="mb-2 flex items-center justify-between">
+                    <span className="text-md font-bold">
+                      {t('orderSummary.payer')} {index}{' '}
+                      {paid && t('orderSummary.paid')}
+                    </span>
+                    <span className="text-xl font-bold text-blue-600">
+                      {formatPrice(totalAmount)}
+                    </span>
+                  </div>
+
+                  <div className="mb-3 text-sm text-gray-600">
+                    <div className="flex justify-between">
+                      <span>{t('orderSummary.baseAmount')}:</span>
+                      <span>{formatPrice(baseAmount)}</span>
+                    </div>
+                    {tipAmount > 0 && (
+                      <div className="flex justify-between text-green-600">
+                        <span>{t('orderSummary.tip')}:</span>
+                        <span>+{formatPrice(tipAmount)}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Individual Tip Input */}
+                  {!paid && (
+                    <TipInput
+                      value={tipAmount}
+                      onChange={amount =>
+                        handleIndividualTipChange(payerIndex, amount)
+                      }
+                      disabled={paid || isProcessing}
+                      addTipText={t('orderSummary.addIndividualTip')}
+                      enterTipLabel={t('orderSummary.individualTipForPayer', {
+                        payer: index,
+                      })}
+                      showCurrency={false}
+                      formatAmount={formatPrice}
+                      className="w-full"
+                    />
+                  )}
                 </div>
 
                 {!paid && (
@@ -303,16 +428,15 @@ export const SplitBillSection: React.FC<SplitBillSectionProps> = ({
                       {(['Cash', 'Card', 'Gift card'] as const).map(m => (
                         <button
                           key={m}
-                          onClick={() => {
-                            const newMethods = [...paymentMethods];
-                            newMethods[index - 1] = m;
-                            setPaymentMethods(newMethods);
-                          }}
+                          onClick={() =>
+                            handlePaymentMethodChange(payerIndex, m)
+                          }
                           className={`rounded-lg py-2.5 text-xs font-medium transition ${
                             method === m
                               ? 'bg-blue-600 text-white'
                               : 'border border-gray-300 hover:bg-gray-50'
                           }`}
+                          disabled={paid || isProcessing}
                         >
                           {t(`orderSummary.paymentMethods.${m}`)}
                         </button>
@@ -321,24 +445,24 @@ export const SplitBillSection: React.FC<SplitBillSectionProps> = ({
 
                     <button
                       onClick={() => {
-                        const newPaid = [...paidStatus];
-                        newPaid[index - 1] = true;
-                        setPaidStatus(newPaid);
-
-                        if (activePayers.every(p => newPaid[p.index - 1])) {
-                          onCompletePayment?.(
-                            activePayers.map(p => ({
-                              amount: p.amount,
-                              method: paymentMethods[p.index - 1],
-                            })),
-                          );
+                        if (method === 'Card') {
+                          handlePayWithCard(payerIndex, totalAmount);
+                        } else {
+                          handlePayerPayment(payerIndex);
                         }
                       }}
                       className="w-full rounded-xl bg-blue-600 py-5 text-xl font-bold text-white shadow-md transition hover:bg-blue-700"
+                      disabled={
+                        paid ||
+                        isProcessing ||
+                        (method === 'Card' && isProcessing)
+                      }
                     >
-                      {t('orderSummary.payWith', {
-                        method: t(`orderSummary.paymentMethods.${method}`),
-                      })}
+                      {method === 'Card'
+                        ? t('orderSummary.payWithCard')
+                        : t('orderSummary.payWith', {
+                            method: t(`orderSummary.paymentMethods.${method}`),
+                          })}
                     </button>
                   </>
                 )}

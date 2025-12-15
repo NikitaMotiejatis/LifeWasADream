@@ -87,6 +87,9 @@ export default function NewReservationPage() {
       return;
     }
 
+    const selectedServiceObj = services?.find(s => s.id === selectedService);
+    const totalAmount = selectedServiceObj?.price || 0;
+
     const [hours, minutes] = selectedTime.split(':').map(Number);
     const dt = new Date(selectedDate);
     dt.setHours(hours);
@@ -410,6 +413,8 @@ function BookingSummary({
   isSubmitting?: boolean;
 }) {
   const selectedServiceObj = services.find(s => s.id === selectedService);
+  const servicePrice = selectedServiceObj?.price || 0;
+  const totalAmount = servicePrice;
 
   return (
     <div className="rounded-xl bg-white p-5 shadow-lg">
@@ -471,7 +476,8 @@ function BookingSummary({
           value={
             selectedStaff == 'anyone'
               ? t(`reservations.staff.anyone`)
-              : staff.find(s => s.id === selectedStaff)?.name
+              : staff.find(s => s.id === selectedStaff)?.name ||
+                t('reservation.summary.notSelected')
           }
         />
         <SummaryRow
@@ -482,18 +488,31 @@ function BookingSummary({
               : t('reservation.summary.notSelected')
           }
         />
+
+        {/* Price breakdown with tip */}
         {selectedServiceObj && (
-          <div className="flex justify-between border-t pt-3 text-lg font-bold">
-            <span>{t('reservation.summary.total')}:</span>
-            <span>{formatPrice(selectedServiceObj.price)}</span>
-          </div>
+          <>
+            <div className="space-y-2 border-t pt-3">
+              <div className="flex justify-between">
+                <span className="text-gray-600">
+                  {t('reservation.summary.service')}:
+                </span>
+                <span className="font-medium">{formatPrice(servicePrice)}</span>
+              </div>
+
+              <div className="flex justify-between border-t pt-2 text-lg font-bold">
+                <span>{t('reservation.summary.total')}:</span>
+                <span>{formatPrice(totalAmount)}</span>
+              </div>
+            </div>
+          </>
         )}
       </div>
 
       <button
         onClick={onConfirm}
         disabled={isSubmitting}
-        className="w-full rounded-lg bg-blue-600 py-4 font-semibold text-white transition hover:bg-blue-700 disabled:opacity-60"
+        className="w-full rounded-lg bg-blue-600 py-4 font-semibold text-white transition hover:bg-blue-700"
       >
         {isSubmitting
           ? t('payment.processing')

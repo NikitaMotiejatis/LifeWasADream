@@ -56,13 +56,15 @@
     }
   },
   "common": {
+    "remove": "Pašalinti",
     "cancel": "Atšaukti",
     "clear": "Išvalyti",
     "review": "Peržiūrėti",
     "update": "Atnaujinti",
     "add": "Pridėti",
     "edit": "Redaguoti",
-    "delete": "Ištrinti"
+    "delete": "Ištrinti",
+    "tip": "Arbatpinigiai"
   },
   "deliveries": {
     "buttons": {
@@ -387,6 +389,18 @@
     "title": "Meniu"
   },
   "orderSummary": {
+    "payWithCard": "Mokėti kortele",
+    "tipAfterSplit": "Arbatpinigiai pridedami dalijant sąskaitą",
+    "addIndividualTip": "Pridėti arbatpinigių",
+    "individualTipForPayer": "Arbatpinigiai {{payer}}-ajam asmeniui",
+    "tipAdded": "Pridėti arbatpinigiai",
+    "baseAmount": "Pagrindinė suma",
+    "addTip": "Pridėti arbatpinigių",
+    "tip": "Arbatpinigiai",
+    "enterTipAmount": "Įveskite arbatpinigių sumą",
+    "noTipOnSplit": "Dalindami sąskaitą, arbatpinigių pridėti negalima",
+    "tipIncludedInSplit": "Arbatpinigiai įtraukti į padalijimą",
+    "tipAmountIncluded": "{amount} arbatpinigių suma įtraukta į kiekvieno asmens dalį",
     "clearAll": "Išvalyti viską",
     "completePayment": "Baigti apmokėjimą",
     "decreaseQuantity": "Sumažinti kiekį",
@@ -503,6 +517,10 @@
     "Onion Rings": "Svogūnų žiedai"
   },
   "reservation": {
+    "addTip": "Pridėti arbatpinigių",
+    "tip": "Arbatpinigiai",
+    "enterTipAmount": "Įveskite arbatpinigių sumą",
+    "tipDisabled": "Pasirinkite paslaugą, kad pridėtumėte arbatpinigių",
     "weekdays": {
       "mo": "Pr",
       "tu": "An",

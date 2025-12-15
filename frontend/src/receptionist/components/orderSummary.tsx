@@ -7,7 +7,7 @@ import {
 import TrashcanIcon from '@/icons/trashcanIcon';
 import { useNavigate, useParams } from 'react-router-dom';
 import { SplitBillSection } from './splitBillSection';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Toast from '@/global/components/toast';
 import {
   createStripeCheckout,
@@ -16,6 +16,7 @@ import {
 import { useAuth } from '@/global/hooks/auth';
 import { mutate } from 'swr';
 import i18n from '@/i18n';
+import { TipSection } from './orderTipSection';
 
 type OrderSummaryProps = {
   onBack?: () => void;
@@ -36,8 +37,13 @@ export default function OrderSummary({
     clearCart,
     subtotal,
     discountTotal,
+    totalWithoutTip,
+    tipAmount,
     total,
     generateKey,
+    isSplitMode,
+    setIsSplitMode,
+    individualTips,
   } = useCart();
 
   const hasItems = itemsList.length > 0;
@@ -48,6 +54,13 @@ export default function OrderSummary({
     message: string;
     type: 'success' | 'error';
   } | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  useEffect(() => {
+    if (!hasItems && isSplitMode) {
+      setIsSplitMode(false);
+    }
+  }, [hasItems, isSplitMode, setIsSplitMode]);
 
   const showToast = (
     message: string,
@@ -58,7 +71,10 @@ export default function OrderSummary({
   };
 
   const handleSave = async () => {
-    const order = { items: itemsList } as { items: CartItem[] };
+    const order = {
+      items: itemsList,
+      tip: -1, // Tip is set only at checkout. -1 means tip property is to be ignored.
+    };
 
     try {
       const orderId = params.orderId;
@@ -79,12 +95,20 @@ export default function OrderSummary({
     navigate('/orders');
   };
 
-  const handleStripePayment = async () => {
+  const handleStripePayment = async (payerIndex?: number, amount?: number) => {
+    if (isProcessing) return;
+
     try {
+      setIsProcessing(true);
       showToast(t('payment.processing', 'Processing order...'));
 
-      // Create or update the order first
-      const order = { items: itemsList } as { items: CartItem[] };
+      const paymentAmount = amount || total;
+
+      const order = {
+        items: itemsList,
+        tip: tipAmount,
+      };
+
       let orderId: number;
 
       const existingOrderId = params.orderId;
@@ -113,22 +137,40 @@ export default function OrderSummary({
 
       const checkoutResponse = await createStripeCheckout(
         orderId,
-        total,
+        paymentAmount,
         'eur',
       );
 
-      // Clear cart before redirecting
-      clearCart();
+      if (payerIndex === undefined || !isSplitMode) {
+        clearCart();
+      }
 
-      // Redirect to Stripe checkout
       redirectToStripeCheckout(checkoutResponse.session_url);
     } catch (error) {
+      console.error('Stripe payment error:', error);
       showToast(
         t('payment.error', 'Payment failed. Please try again.'),
         'error',
       );
-      console.error('Stripe payment error:', error);
+    } finally {
+      setIsProcessing(false);
     }
+  };
+
+  const handleCashPayment = () => {
+    showToast(t('payment.cashReceived', 'Cash payment received'));
+    clearCart();
+    setTimeout(() => navigate('/orders'), 600);
+  };
+
+  const handleGiftCardPayment = () => {
+    showToast(t('payment.giftCardProcessed', 'Gift card processed'));
+    clearCart();
+    setTimeout(() => navigate('/orders'), 600);
+  };
+
+  const handleSplitEnabledChange = (enabled: boolean) => {
+    setIsSplitMode(enabled);
   };
 
   return (
@@ -142,6 +184,7 @@ export default function OrderSummary({
           <button
             onClick={clearCart}
             className="text-xs font-medium text-red-600 xl:text-sm"
+            disabled={isProcessing}
           >
             {t('orderSummary.clearAll')}
           </button>
@@ -170,14 +213,14 @@ export default function OrderSummary({
           {!onBack && (
             <div className="mt-4 space-y-3 border-t border-gray-300 pt-4">
               <button
-                className="w-full rounded-lg border border-gray-400 py-2 text-xs font-medium hover:bg-gray-50"
+                className="w-full rounded-lg border border-gray-400 py-2 text-xs font-medium hover:bg-gray-50 disabled:opacity-50"
                 onClick={handleSave}
+                disabled={isProcessing}
               >
                 {t('orderSummary.saveOrder')}
               </button>
             </div>
           )}
-
           <div className="mt-4 space-y-3 border-t border-gray-300 pt-4">
             <div className="flex justify-between">
               <span>{t('orderSummary.subtotal')}</span>
@@ -190,48 +233,77 @@ export default function OrderSummary({
               </div>
             )}
 
+            {tipAmount > 0 && !isSplitMode && (
+              <div className="flex justify-between text-green-600">
+                <span>{t('orderSummary.tip')}</span>
+                <span>+ {formatPrice(tipAmount)}</span>
+              </div>
+            )}
+
             <div className="flex flex-col items-center gap-1 xl:flex-row xl:justify-between xl:gap-0">
               <span className="text-xl font-bold text-gray-800 xl:text-2xl">
                 {t('orderSummary.total')}
               </span>
               <span className="text-2xl font-bold text-blue-600 xl:text-2xl">
-                {formatPrice(total)}
+                {formatPrice(isSplitMode ? totalWithoutTip : total)}
               </span>
             </div>
           </div>
-
           {showPaymentSection ? (
             <>
+              {!isSplitMode && <TipSection />}
+
               <SplitBillSection
-                total={total}
+                total={totalWithoutTip}
                 items={itemsList}
                 formatPrice={formatPrice}
+                onSplitEnabledChange={handleSplitEnabledChange}
                 onCompletePayment={payments => {
-                  console.log('All paid:', payments);
+                  console.log('All paid with individual tips:', payments);
                   showToast(t('orderSummary.allPaid'));
                   clearCart();
                   setTimeout(() => navigate('/orders'), 600);
                 }}
                 onStripePayment={handleStripePayment}
+                isProcessing={isProcessing}
               />
             </>
           ) : onBack ? (
             <button
               onClick={onBack}
-              className="w-full rounded-xl bg-blue-600 py-4 text-lg font-bold text-white shadow-md transition hover:bg-blue-700"
+              className="w-full rounded-xl bg-blue-600 py-4 text-lg font-bold text-white shadow-md transition hover:bg-blue-700 disabled:opacity-50"
+              disabled={isProcessing}
             >
               {t('orderPanel.done')}
             </button>
           ) : (
-            <button
-              onClick={() => {
-                navigate('/orders');
-              }}
-              className="w-full rounded-xl bg-blue-600 py-4 text-lg font-bold text-white shadow-md transition hover:bg-blue-700"
-            >
-              {t('orderSummary.completePayment')}
-            </button>
-          )}
+            <div className="space-y-4">
+              <button
+                onClick={() => handleStripePayment()}
+                className="w-full rounded-xl bg-blue-600 py-4 text-lg font-bold text-white shadow-md transition hover:bg-blue-700 disabled:opacity-50"
+                disabled={isProcessing}
+              >
+                {t('orderSummary.completePayment')}
+              </button>
+
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  onClick={handleCashPayment}
+                  className="rounded-lg border border-gray-400 py-2 text-xs font-medium hover:bg-gray-100 disabled:opacity-50"
+                  disabled={isProcessing}
+                >
+                  {t('orderSummary.paymentMethods.Cash')}
+                </button>
+                <button
+                  onClick={handleGiftCardPayment}
+                  className="rounded-lg border border-gray-400 py-2 text-xs font-medium hover:bg-gray-100 disabled:opacity-50"
+                  disabled={isProcessing}
+                >
+                  {t('orderSummary.paymentMethods.Gift card')}
+                </button>
+              </div>
+            </div>
+          )}{' '}
         </div>
       )}
     </div>
@@ -241,7 +313,13 @@ export default function OrderSummary({
 function CartItemRow({ item }: { item: CartItem }) {
   const { t } = useTranslation();
   const { product, selectedVariations, quantity } = item;
-  const { formatPrice, updateQuantity, removeItem, getFinalPrice } = useCart();
+  const {
+    formatPrice,
+    updateQuantity,
+    removeItem,
+    getFinalPrice,
+    generateKey,
+  } = useCart();
 
   const finalPrice = getFinalPrice(product, selectedVariations);
   const key = generateKey(product, selectedVariations);

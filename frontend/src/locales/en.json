@@ -64,7 +64,9 @@
     "update": "Update",
     "add": "Add",
     "edit": "Edit",
-    "delete": "Delete"
+    "delete": "Delete",
+    "remove": "Remove",
+    "tip": "Tip"
   },
   "deliveries": {
     "buttons": {
@@ -381,6 +383,26 @@
     "title": "Menu"
   },
   "orderSummary": {
+    "payWithCard": "Pay with Card",
+    "individualTipForPayer": "individual tip for payer",
+    "addIndividualTip": "Add tip",
+    "enterTipAmount": "Enter tip amount",
+    "baseAmount": "Base amount",
+    "noTipOnSplit": "Tip cannot be added when splitting the bill",
+    "tipIncludedInSplit": "Tip is included in the split",
+    "tipAmountIncluded": "Tip amount of {amount} is included in each person's share",
+    "addTip": "Add Tip",
+    "tip": "Tip",
+    "tipPercentage": "Percentage",
+    "tipFixed": "Fixed Amount",
+    "customTipPercentage": "Custom Tip Percentage",
+    "customTipAmount": "Custom Tip Amount",
+    "tipAmount": "Tip Amount",
+    "baseTotal": "Base Total",
+    "finalTotal": "Final Total",
+    "tipPerPerson": "Tip per person",
+    "splitPerPerson": "Split per person",
+    "suggestedTips": "Suggested Tips",
     "clearAll": "Clear all",
     "completePayment": "Complete Payment",
     "decreaseQuantity": "Decrease quantity",
@@ -499,6 +521,10 @@
     "Onion Rings": "Onion Rings"
   },
   "reservation": {
+    "addTip": "Add Tip",
+    "tip": "Tip",
+    "enterTipAmount": "Enter tip amount",
+    "tipDisabled": "Select a service first to add tip",
     "weekdays": {
       "mo": "Mo",
       "tu": "Tu",

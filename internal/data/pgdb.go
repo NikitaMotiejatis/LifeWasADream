@@ -152,28 +152,45 @@ func (pdb PostgresDb) CreateOrder(order order.Order) (int64, error) {
 }
 
 func (pdb PostgresDb) ModifyOrder(orderId int64, order order.Order) error {
-	checkIfOrderIsOpenQuery := `
-	SELECT COUNT(*)
-	FROM order_data
-	WHERE 
-		id = $1
-		AND status = 'OPEN'
-	`
-	matchedOrderCount := 0
-	err := pdb.Db.QueryRow(checkIfOrderIsOpenQuery, orderId).Scan(&matchedOrderCount)
-	if err != nil {
-		slog.Error(err.Error())
-		return ErrInternal
-	}
-	if matchedOrderCount != 1 {
-		slog.Error(fmt.Sprintf("expected to 1 row, got %d.", matchedOrderCount))
-		return ErrInternal
+	{
+		checkIfOrderIsOpenQuery := `
+		SELECT COUNT(*)
+		FROM order_data
+		WHERE 
+			id = $1
+			AND status = 'OPEN'
+		`
+		matchedOrderCount := 0
+		err := pdb.Db.QueryRow(checkIfOrderIsOpenQuery, orderId).Scan(&matchedOrderCount)
+		if err != nil {
+			slog.Error(err.Error())
+			return ErrInternal
+		}
+		if matchedOrderCount != 1 {
+			slog.Error(fmt.Sprintf("expected to 1 row, got %d.", matchedOrderCount))
+			return ErrInternal
+		}
 	}
 
 	transaction, err := pdb.Db.Begin()
 	if err != nil {
 		slog.Error(err.Error())
 		return ErrInternal
+	}
+
+	if order.Tip > -1 {
+		updateOrderInfoStatement := `
+		UPDATE order_data
+		SET tip = $2
+		WHERE id = $1
+		`
+
+		err = pdb.Db.QueryRow(updateOrderInfoStatement, orderId, order.Tip).Err()
+		if err != nil {
+			slog.Error(err.Error())
+			_ = transaction.Rollback()
+			return ErrInternal
+		}
 	}
 
 	for _, item := range order.Items {
