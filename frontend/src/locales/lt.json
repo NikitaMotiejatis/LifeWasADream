@@ -65,6 +65,7 @@
     "edit": "Redaguoti",
     "delete": "Ištrinti",
     "tip": "Arbatpinigiai"
+    "save": "Išsaugoti"
   },
   "deliveries": {
     "buttons": {
@@ -767,7 +768,8 @@
       "refunds": "Grąžinimų tvirtinimai",
       "reports": "Ataskaitos ir analizė",
       "inventory": "Atsargų apžvalga",
-      "vatSettings": "PVM nustatymai"
+      "vatSettings": "PVM nustatymai",
+      "itemVatSettings": "Prekių PVM"
     },
     "settings": {
       "group": "Nustatymai",
@@ -1078,5 +1080,35 @@
       "duplicate": "{{rate}}% PVM tarifas jau egzistuoja"
     }
   },
-  "somethingWentWrong": "Kažkas nutiko ne taip."
+  "somethingWentWrong": "Kažkas nutiko ne taip.",
+  "itemVat": {
+    "title": "Prekių PVM Nustatymai",
+    "subtitle": "Nustatykite PVM tarifus kiekvienai prekei",
+    "stats": {
+      "totalItems": "Viso Prekių",
+      "averageVat": "Vidutinis PVM",
+      "zeroVat": "Prekių su 0% PVM"
+    },
+    "bulkActions": {
+      "selected": "Pasirinkta {{count}} prekių",
+      "apply": "Taikyti"
+    },
+    "searchPlaceholder": "Ieškoti prekių...",
+    "allCategories": "Visos Kategorijos",
+    "ratePlaceholder": "Tarifas",
+    "table": {
+      "item": "Prekė",
+      "category": "Kategorija",
+      "vatRate": "PVM Tarifas",
+      "actions": "Veiksmai"
+    },
+    "validation": {
+      "required": "Tarifas privalomas",
+      "nan": "Įveskite tinkamą skaičių",
+      "negative": "Tarifas negali būti neigiamas",
+      "exceeds": "Tarifas negali viršyti 100%"
+    },
+    "noItemsFound": "Prekių nerasta",
+    "clearSearch": "Išvalyti paiešką"
+  }
 }

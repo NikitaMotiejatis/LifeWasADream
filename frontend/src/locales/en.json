@@ -731,7 +731,8 @@
       "refunds": "Refund Approvals",
       "reports": "Reports & Analytics",
       "inventory": "Inventory Overview",
-      "vatSettings": "VAT Settings"
+      "vatSettings": "VAT Settings",
+      "itemVatSettings": "Item VAT"
     },
     "settings": {
       "group": "Settings",
@@ -1057,5 +1058,35 @@
     "cancelled": "Payment Cancelled",
     "cancelledMessage": "Your payment was cancelled. No charges were made.",
     "tryAgain": "Try Again"
+  },
+  "itemVat": {
+    "title": "Item VAT Settings",
+    "subtitle": "Set VAT rates for individual items",
+    "stats": {
+      "totalItems": "Total Items",
+      "averageVat": "Average VAT",
+      "zeroVat": "Zero VAT Items"
+    },
+    "bulkActions": {
+      "selected": "{{count}} items selected",
+      "apply": "Apply"
+    },
+    "searchPlaceholder": "Search items...",
+    "allCategories": "All Categories",
+    "ratePlaceholder": "Rate",
+    "table": {
+      "item": "Item",
+      "category": "Category",
+      "vatRate": "VAT Rate",
+      "actions": "Actions"
+    },
+    "validation": {
+      "required": "Rate is required",
+      "nan": "Enter a valid number",
+      "negative": "Rate cannot be negative",
+      "exceeds": "Rate cannot exceed 100%"
+    },
+    "noItemsFound": "No items found",
+    "clearSearch": "Clear search"
   }
 }
