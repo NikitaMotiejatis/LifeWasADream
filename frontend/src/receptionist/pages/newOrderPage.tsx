@@ -3,7 +3,6 @@ import Topbar from '@/global/components/topbar';
 import ProductGrid from '@/receptionist/components/productGrid';
 import OrderSummary from '@/receptionist/components/orderSummary';
 import { CartProvider } from '@/receptionist/contexts/cartContext';
-import { CurrencyProvider } from '@/global/contexts/currencyContext';
 
 export default function NewOrderPage() {
   return (
