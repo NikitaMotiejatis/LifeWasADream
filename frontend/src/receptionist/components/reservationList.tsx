@@ -30,7 +30,14 @@ export type Reservation = {
   staffId: string;
   serviceId: string;
   datetime: string;
-  status: 'pending' | 'completed' | 'cancelled' | 'no_show' | 'refund_pending';
+  status:
+    | 'pending'
+    | 'confirmed'
+    | 'completed'
+    | 'cancelled'
+    | 'no_show'
+    | 'refund_pending'
+    | 'refunded';
 };
 
 function buildISOString(

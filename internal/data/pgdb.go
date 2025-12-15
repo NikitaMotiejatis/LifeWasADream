@@ -828,7 +828,7 @@ func (pdb PostgresDb) GetReservations(filter reservation.ReservationFilter) ([]r
 			CAST(a.id AS TEXT) ILIKE '%' || $4 || '%'
 		)
 	ORDER BY
-		a.appointment_at DESC
+		a.id DESC
 	`
 
 	rows := []struct {
@@ -997,7 +997,7 @@ func (pdb PostgresDb) CreateReservation(res reservation.Reservation) (int32, err
 
 	status := mapApiReservationStatusToAppointment(res.Status)
 	if status == "" {
-		status = "RESERVED"
+		status = "PENDING"
 	}
 
 	const insertQuery = `
@@ -1035,6 +1035,15 @@ func (pdb PostgresDb) CreateReservation(res reservation.Reservation) (int32, err
 }
 
 func (pdb PostgresDb) UpdateReservation(id int32, res reservation.ReservationUpdate) error {
+	var status *string
+	if res.Status != nil {
+		mapped := mapApiReservationStatusToAppointment(*res.Status)
+		if mapped == "" {
+			return ErrInternal
+		}
+		status = &mapped
+	}
+
 	query := `
 	UPDATE appointment
 	SET
@@ -1052,7 +1061,7 @@ func (pdb PostgresDb) UpdateReservation(id int32, res reservation.ReservationUpd
 		res.CustomerName,
 		res.CustomerPhone,
 		res.Datetime,
-		res.Status,
+		status,
 	)
 	if err != nil {
 		slog.Error(err.Error())
@@ -1443,30 +1452,52 @@ func (pdb PostgresDb) GetStaff() ([]reservation.Staff, error) {
 
 func mapAppointmentStatusToApi(status string) string {
 	switch strings.ToUpper(status) {
-	case "RESERVED":
+	case "PENDING", "RESERVED":
 		return "pending"
 	case "SERVING":
 		return "confirmed"
-	case "PAID":
+	case "COMPLETED", "PAID":
 		return "completed"
-	case "CANCELLED":
+	case "CANCELLED", "CANCELED":
 		return "cancelled"
+	case "NO_SHOW", "NO-SHOW", "NOSHOW":
+		return "no_show"
+	case "REFUND_PENDING":
+		return "refund_pending"
+	case "REFUNDED":
+		return "refunded"
 	default:
 		return strings.ToLower(status)
 	}
 }
 
 func mapApiReservationStatusToAppointment(status string) string {
-	switch strings.ToLower(status) {
-	case "pending":
-		return "RESERVED"
-	case "confirmed":
-		return "SERVING"
-	case "completed":
-		return "PAID"
-	case "cancelled", "canceled":
-		return "CANCELLED"
-	default:
+	trimmed := strings.TrimSpace(status)
+	if trimmed == "" {
 		return ""
 	}
+
+	upper := strings.ToUpper(trimmed)
+	switch upper {
+	// Accept DB enum values directly.
+	case "PENDING", "COMPLETED", "CANCELLED", "REFUND_PENDING", "REFUNDED":
+		return upper
+
+	// API / UI values (and common variants).
+	case "CONFIRMED":
+		return "PENDING"
+	case "CANCELED":
+		return "CANCELLED"
+	case "NO_SHOW", "NO-SHOW", "NOSHOW":
+		// Best-effort mapping; DB enum does not currently include NO_SHOW.
+		return "CANCELLED"
+
+	// Legacy values from older appointment_status enums.
+	case "RESERVED", "SERVING":
+		return "PENDING"
+	case "PAID":
+		return "COMPLETED"
+	}
+
+	return ""
 }

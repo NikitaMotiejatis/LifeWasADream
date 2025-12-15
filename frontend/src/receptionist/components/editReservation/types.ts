@@ -6,7 +6,8 @@ export type ReservationStatus =
   | 'completed'
   | 'cancelled'
   | 'no_show'
-  | 'refund_pending';
+  | 'refund_pending'
+  | 'refunded';
 
 export type Reservation = {
   id: string;
