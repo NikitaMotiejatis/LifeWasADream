@@ -90,9 +90,9 @@ func (pdb PostgresDb) GetUserDetails(username string) (auth.UserDetails, error) 
 }
 
 func (pdb PostgresDb) GetUserCurrency(username string) (string, error) {
-    var currency string
+	var currency string
 
-    const query = `
+	const query = `
     SELECT c.currency
     FROM employee e
     JOIN location l ON e.location_id = l.id
@@ -101,16 +101,16 @@ func (pdb PostgresDb) GetUserCurrency(username string) (string, error) {
     LIMIT 1;
     `
 
-    err := pdb.Db.Get(&currency, query, username)
-    if err != nil {
-        if errors.Is(err, sql.ErrNoRows) {
-            return "", fmt.Errorf("user not found")
-        }
-        slog.Error(err.Error())
-        return "", ErrInternal
-    }
+	err := pdb.Db.Get(&currency, query, username)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return "", fmt.Errorf("user not found")
+		}
+		slog.Error(err.Error())
+		return "", ErrInternal
+	}
 
-    return strings.ToUpper(currency), nil
+	return strings.ToUpper(currency), nil
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -904,6 +904,32 @@ func (pdb PostgresDb) UpdatePaymentStatus(sessionID string, status string) error
 	result, err := pdb.Db.Exec(query, strings.ToUpper(status), sessionID)
 	if err != nil {
 		slog.Error("Failed to update payment status", "error", err, "session_id", sessionID)
+		return ErrInternal
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		slog.Error("Failed to check rows affected", "error", err)
+		return ErrInternal
+	}
+
+	if rowsAffected == 0 {
+		return payment.ErrPaymentNotFound
+	}
+
+	return nil
+}
+
+func (pdb PostgresDb) UpdatePaymentIntentID(sessionID string, paymentIntentID string) error {
+	const query = `
+	UPDATE payment
+	SET stripe_payment_intent_id = $1, updated_at = CURRENT_TIMESTAMP
+	WHERE stripe_session_id = $2
+	`
+
+	result, err := pdb.Db.Exec(query, paymentIntentID, sessionID)
+	if err != nil {
+		slog.Error("Failed to update payment intent ID", "error", err, "session_id", sessionID)
 		return ErrInternal
 	}
 

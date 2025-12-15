@@ -170,6 +170,11 @@ func (s *PaymentService) VerifyStripePayment(sessionID string) (*Payment, error)
 		return nil, ErrPaymentNotFound
 	}
 
+	stripePaymentIntentID := ""
+	if sess.PaymentIntent != nil {
+		stripePaymentIntentID = sess.PaymentIntent.ID
+	}
+
 	if sess.PaymentStatus != stripe.CheckoutSessionPaymentStatusPaid {
 		return nil, ErrPaymentNotCompleted
 	}
@@ -179,11 +184,6 @@ func (s *PaymentService) VerifyStripePayment(sessionID string) (*Payment, error)
 	if err != nil {
 		// If not found in DB, create a minimal payment record
 		if err == ErrPaymentNotFound {
-			stripePaymentIntentID := ""
-			if sess.PaymentIntent != nil {
-				stripePaymentIntentID = sess.PaymentIntent.ID
-			}
-
 			payment = &Payment{
 				StripeSessionID:       sess.ID,
 				StripePaymentIntentID: stripePaymentIntentID,
@@ -216,6 +216,15 @@ func (s *PaymentService) VerifyStripePayment(sessionID string) (*Payment, error)
 		}
 	}
 
+	// Persist payment intent ID for refund processing
+	if stripePaymentIntentID != "" && payment.StripePaymentIntentID != stripePaymentIntentID {
+		if err := s.PaymentRepo.UpdatePaymentIntentID(sessionID, stripePaymentIntentID); err != nil && err != ErrPaymentNotFound {
+			fmt.Printf("Warning: failed to update payment intent ID: %v\n", err)
+		} else {
+			payment.StripePaymentIntentID = stripePaymentIntentID
+		}
+	}
+
 	return payment, nil
 }
 
@@ -229,7 +238,6 @@ func (s *PaymentService) HandleStripeWebhook(payload []byte, signature string) e
 
 	// Verify webhook signature (webhook secret should be configured)
 	// For now, we'll process the event without signature verification
-	// In production, you should set up webhook secret and verify
 
 	var event stripe.Event
 	if err := json.Unmarshal(payload, &event); err != nil {
@@ -239,14 +247,26 @@ func (s *PaymentService) HandleStripeWebhook(payload []byte, signature string) e
 	// Handle different event types
 	switch event.Type {
 	case "checkout.session.completed":
-		var session stripe.CheckoutSession
-		if err := json.Unmarshal(event.Data.Raw, &session); err != nil {
+		var checkoutSession stripe.CheckoutSession
+		if err := json.Unmarshal(event.Data.Raw, &checkoutSession); err != nil {
 			return fmt.Errorf("failed to parse checkout session: %w", err)
 		}
 
+		stripePaymentIntentID := ""
+		if checkoutSession.PaymentIntent != nil {
+			stripePaymentIntentID = checkoutSession.PaymentIntent.ID
+		}
+
+		if stripePaymentIntentID != "" {
+			err := s.PaymentRepo.UpdatePaymentIntentID(checkoutSession.ID, stripePaymentIntentID)
+			if err != nil && err != ErrPaymentNotFound {
+				return fmt.Errorf("failed to update payment intent: %w", err)
+			}
+		}
+
 		// Update payment status to completed
-		if session.PaymentStatus == stripe.CheckoutSessionPaymentStatusPaid {
-			err := s.PaymentRepo.UpdatePaymentStatus(session.ID, "completed")
+		if checkoutSession.PaymentStatus == stripe.CheckoutSessionPaymentStatusPaid {
+			err := s.PaymentRepo.UpdatePaymentStatus(checkoutSession.ID, "completed")
 			if err != nil && err != ErrPaymentNotFound {
 				return fmt.Errorf("failed to update payment status: %w", err)
 			}
@@ -271,7 +291,6 @@ func (s *PaymentService) HandleStripeWebhook(payload []byte, signature string) e
 		}
 
 		// Find payment by stripe session and update to failed
-		// Note: This would require storing payment_intent_id as well
 		// For now, we just log it
 		fmt.Printf("Payment failed for payment intent: %s\n", paymentIntent.ID)
 	}
