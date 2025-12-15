@@ -33,7 +33,10 @@ export const getPendingRefunds = async (): Promise<Refund[]> => {
   const response = await authFetch("refund", "GET");
 
   if (!response.ok) {
-    const error = await response.text();
+    const contentType = response.headers.get('content-type') ?? '';
+    const error = contentType.includes('application/json')
+      ? JSON.stringify(await response.json())
+      : await response.text();
     throw new Error(`Failed to fetch pending refunds: ${error}`);
   }
 
@@ -62,10 +65,16 @@ export const processRefundAction = async (
     JSON.stringify(requestBody),
   );
 
-  const responseBody = await response.json();
+  const contentType = response.headers.get('content-type') ?? '';
+  const responseBody =
+    contentType.includes('application/json')
+      ? await response.json()
+      : { message: await response.text() };
 
   if (!response.ok) {
-    throw new Error(`Failed to process refund action: ${responseBody.message || response.statusText}`);
+    throw new Error(
+      `Failed to process refund action: ${responseBody.message || response.statusText}`,
+    );
   }
 
   return responseBody;

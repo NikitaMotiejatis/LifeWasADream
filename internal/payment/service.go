@@ -26,12 +26,17 @@ type PaymentService struct {
 	SuccessURL      string
 	CancelURL       string
 	OrderTotals     OrderTotalProvider
+	OrderStatus     OrderStatusUpdater
 	PaymentRepo     PaymentRepo
 	OrderItems      OrderItemsProvider
 }
 
 type OrderTotalProvider interface {
 	GetOrderTotal(orderID int64) (int64, string, error)
+}
+
+type OrderStatusUpdater interface {
+	MarkOrderClosed(orderID int64) error
 }
 
 type OrderItemsProvider interface {
@@ -199,6 +204,13 @@ func (s *PaymentService) VerifyStripePayment(sessionID string) (*Payment, error)
 					payment.OrderID = parsed
 				}
 			}
+
+			if s.OrderStatus != nil && payment.OrderID > 0 {
+				if err := s.OrderStatus.MarkOrderClosed(payment.OrderID); err != nil {
+					fmt.Printf("Warning: failed to mark order as closed: %v\n", err)
+				}
+			}
+
 			return payment, nil
 		}
 		return nil, err
@@ -222,6 +234,12 @@ func (s *PaymentService) VerifyStripePayment(sessionID string) (*Payment, error)
 			fmt.Printf("Warning: failed to update payment intent ID: %v\n", err)
 		} else {
 			payment.StripePaymentIntentID = stripePaymentIntentID
+		}
+	}
+
+	if s.OrderStatus != nil && payment.OrderID > 0 {
+		if err := s.OrderStatus.MarkOrderClosed(payment.OrderID); err != nil {
+			fmt.Printf("Warning: failed to mark order as closed: %v\n", err)
 		}
 	}
 
@@ -269,6 +287,16 @@ func (s *PaymentService) HandleStripeWebhook(payload []byte, signature string) e
 			err := s.PaymentRepo.UpdatePaymentStatus(checkoutSession.ID, "completed")
 			if err != nil && err != ErrPaymentNotFound {
 				return fmt.Errorf("failed to update payment status: %w", err)
+			}
+
+			if s.OrderStatus != nil && checkoutSession.Metadata != nil {
+				if orderIDStr, ok := checkoutSession.Metadata["order_id"]; ok {
+					if orderID, err := strconv.ParseInt(orderIDStr, 10, 64); err == nil && orderID > 0 {
+						if err := s.OrderStatus.MarkOrderClosed(orderID); err != nil {
+							fmt.Printf("Warning: failed to mark order as closed: %v\n", err)
+						}
+					}
+				}
 			}
 		}
 

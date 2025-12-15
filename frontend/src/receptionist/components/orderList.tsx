@@ -72,6 +72,7 @@ export default function OrderList() {
   ) => {
     if (type === 'edit') {
       navigate(`/edit-order/${order.id}`);
+      return;
     }
 
     setModalType(type);

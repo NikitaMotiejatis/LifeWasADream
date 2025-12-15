@@ -8,22 +8,19 @@ import (
 )
 
 type Service interface {
-	ProcessRefund(chargeID string, amount float64) (string, error)
+	ProcessRefund(paymentIntentID string, amountCents int64) (string, error)
 }
 
 type StripeService struct {
 	StripeSecretKey string
 }
 
-func (s *StripeService) ProcessRefund(chargeID string, amount float64) (string, error) {
+func (s *StripeService) ProcessRefund(paymentIntentID string, amountCents int64) (string, error) {
 	stripe.Key = s.StripeSecretKey
 
-	// Converting amount to cents (Stripe requires smallest currency unit)
-	amountInCents := int64(amount * 100)
-
 	params := &stripe.RefundParams{
-		Charge: stripe.String(chargeID),
-		Amount: stripe.Int64(amountInCents),
+		PaymentIntent: stripe.String(paymentIntentID),
+		Amount:        stripe.Int64(amountCents),
 		// More parameters can be added here, like Reason, Currency, etc.
 	}
 

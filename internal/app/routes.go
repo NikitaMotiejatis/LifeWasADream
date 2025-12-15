@@ -92,11 +92,11 @@ func setupApiRoutes(router *chi.Mux, config config.Config, authMiddleware func(h
 
 	{
 		c := refund.RefundController{
-			RefundRepo:    refund.NewMockRefundRepo(),
+			RefundRepo:    db,
 			RefundService: refundService, // Pass the refund service for Stripe integration
 		}
 
-		apiRouter.Mount("/refund", c.Routes())
+		apiRouter.With(authMiddleware).Mount("/refund", c.Routes())
 	}
 
 	router.Mount("/api", apiRouter)
@@ -111,6 +111,7 @@ func setupPaymentRoutes(router *chi.Mux, config config.Config, authMiddleware fu
 		SuccessURL:      fmt.Sprintf("http://%s/payment/success", config.FrontendUrl), // When I save it automatically makes the spaces, after ':' !?
 		CancelURL:       fmt.Sprintf("http://%s/payment/cancel", config.FrontendUrl),
 		OrderTotals:     db,
+		OrderStatus:     db,
 		PaymentRepo:     db,
 		OrderItems:      db,
 	}
