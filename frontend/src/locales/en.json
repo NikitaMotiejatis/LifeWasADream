@@ -65,7 +65,8 @@
     "add": "Add",
     "edit": "Edit",
     "delete": "Delete",
-    "remove": "Remove"
+    "remove": "Remove",
+    "tip": "Tip"
   },
   "deliveries": {
     "buttons": {

@@ -9,7 +9,7 @@ interface TipInputProps {
   addTipText?: string;
   enterTipLabel?: string;
   showCurrency?: boolean;
-  formatAmount?: (amount: number) => string;
+  formatAmount: (amount: number) => string;
   className?: string;
 }
 
@@ -47,7 +47,8 @@ export const TipInput: React.FC<TipInputProps> = ({
   };
 
   const handleSubmit = () => {
-    onChange(100 * (parseFloat('0' + inputValue + '0') || 0));
+    const tipString = '0' + inputValue + (inputValue.endsWith('.') ? '0' : '');
+    onChange(100 * (parseFloat(tipString) || 0));
     setShowInput(false);
     setInputValue('');
   };

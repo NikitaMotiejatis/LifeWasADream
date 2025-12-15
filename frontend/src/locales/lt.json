@@ -63,7 +63,8 @@
     "update": "Atnaujinti",
     "add": "Pridėti",
     "edit": "Redaguoti",
-    "delete": "Ištrinti"
+    "delete": "Ištrinti",
+    "tip": "Arbatpinigiai"
   },
   "deliveries": {
     "buttons": {
