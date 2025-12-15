@@ -937,10 +937,6 @@ func (pdb PostgresDb) GetOrderItems(orderId int64) ([]order.Item, error) {
 // -------------------------------------------------------------------------------------------------
 
 func (pdb PostgresDb) GetProducts(filter order.ProductFilter) ([]order.Product, error) {
-	if filter.Category == nil {
-		filter.Category = new(string)
-	}
-
 	var filteredProducts []order.Product
 	{
 		const query = `
@@ -952,12 +948,12 @@ func (pdb PostgresDb) GetProducts(filter order.ProductFilter) ([]order.Product, 
 			ON category.id = category_id
 		WHERE 
 			item.status = 'ACTIVE'
-			AND ($1 = '' OR category.name = $1)
+			AND ($1::text IS NULL OR category.name = $1::text)
 		ORDER BY
 			item.name ASC
 		`
 
-		err := pdb.Db.Select(&filteredProducts, query, *filter.Category)
+		err := pdb.Db.Select(&filteredProducts, query, filter.Category)
 		if err != nil {
 			slog.Error(err.Error())
 			return []order.Product{}, ErrInternal
@@ -968,8 +964,8 @@ func (pdb PostgresDb) GetProducts(filter order.ProductFilter) ([]order.Product, 
 		SELECT category.name
 		FROM item_category
 		JOIN category
-				ON item_category.item_id = $1
-				AND category.id = category_id
+			ON item_category.item_id = $1
+			AND category.id = category_id
 		`
 
 		for i := range filteredProducts {
@@ -997,6 +993,25 @@ func (pdb PostgresDb) GetProducts(filter order.ProductFilter) ([]order.Product, 
 	}
 
 	return filteredProducts, nil
+}
+
+func (pdb PostgresDb) GetDefaultVat(locationId int64) (float64, error) {
+	var vat float64
+	query := `
+	SELECT country.vat::DOUBLE PRECISION
+	FROM location
+	JOIN country
+	ON country.code = location.country_code
+	WHERE location.id = $1
+	LIMIT 1
+	`
+	err := pdb.Db.Get(&vat, query, locationId)
+	if err != nil {
+		slog.Error(err.Error())
+		return 0, ErrInternal
+	}
+
+	return vat, nil
 }
 
 // -------------------------------------------------------------------------------------------------

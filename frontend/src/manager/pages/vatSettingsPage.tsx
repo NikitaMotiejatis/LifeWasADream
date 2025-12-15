@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next';
 import ManagerLayout from '../components/managerLayout';
 import { Package, Percent, AlertTriangle, Tag } from 'lucide-react';
 import { useCurrency } from '@/global/contexts/currencyContext';
+import { useAuth } from '@/global/hooks/auth';
+import useSWR from 'swr';
 
 interface ItemVatRate {
   id: number;
@@ -84,8 +86,12 @@ const VatSettingsPage: React.FC = () => {
   ]);
 
   // Get default VAT rate
+  const { authFetchJson } = useAuth();
+  const { data: defaultVatValue } = useSWR(
+    `tax/default?locationId=${9}`,
+    (url) => authFetchJson<number>(url, 'GET'),
+  );
 
-  const defaultVatValue = 21;
   const [editingItemId, setEditingItemId] = useState<number | null>(null);
   const [vatRateInput, setVatRateInput] = useState<string>('');
   const [selectedCategory, setSelectedCategory] = useState('all');

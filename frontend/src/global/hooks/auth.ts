@@ -38,6 +38,7 @@ export const useAuth = () => {
         method: 'POST',
         credentials: 'include',
       });
+      localStorage.clear();
     } catch {}
   };
 
