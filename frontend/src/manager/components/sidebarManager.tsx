@@ -73,13 +73,6 @@ export default function SidebarManager() {
           >
             {t('sidebar.manager.vatSettings')}
           </MenuGroupItem>
-          <MenuGroupItem
-            to="/item-vat-settings"
-            icon={VatItemIcon}
-            active={isActive('/item-vat-settings')}
-          >
-            {t('sidebar.manager.itemVatSettings')}
-          </MenuGroupItem>
         </MenuGroup>
       </nav>
     </div>

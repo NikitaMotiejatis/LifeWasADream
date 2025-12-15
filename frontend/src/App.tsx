@@ -23,7 +23,6 @@ import EditReservationPage from '@/receptionist/pages/editReservationPage';
 import PaymentSuccessPage from '@/receptionist/pages/paymentSuccessPage';
 import PaymentCancelPage from '@/receptionist/pages/paymentCancelPage';
 import VatSettingsPage from '@/manager/pages/vatSettingsPage'; 
-import ItemVatPage from '@/manager/pages/itemVatPage';
 
 const router = createBrowserRouter(
   [
@@ -48,7 +47,6 @@ const router = createBrowserRouter(
     { path: '/payment/success', element: <PaymentSuccessPage /> },
     { path: '/payment/cancel', element: <PaymentCancelPage /> },
     { path: '/vat-settings', element: <VatSettingsPage /> },
-    { path: '/item-vat-settings', element: <ItemVatPage /> },
   ],
   {
     future: {

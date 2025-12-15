@@ -2,15 +2,28 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import ManagerLayout from '../components/managerLayout';
 import {
-  Plus,
+  Package,
+  Percent,
+  Search,
+  Filter,
   Edit2,
-  Trash2,
   Save,
   X,
-  Percent,
-  Package,
   AlertTriangle,
+  Pencil,
+  Tag,
 } from 'lucide-react';
+
+interface ItemVatRate {
+  id: number;
+  itemId: string;
+  itemName: string;
+  category: string;
+  vatRate: number;
+  customVatRate: number | null; // null = uses default, number = custom rate
+  sku: string;
+  price: number;
+}
 
 interface VatRate {
   id: number;
@@ -22,180 +35,344 @@ interface VatRate {
 const VatSettingsPage: React.FC = () => {
   const { t } = useTranslation();
 
-  // State for all VAT rates in the system
+  // Default VAT rates (system-wide)
   const [vatRates, setVatRates] = useState<VatRate[]>([
     { id: 1, name: t('vat.rates.21percent'), rate: 21, isDefault: true },
     { id: 2, name: t('vat.rates.9percent'), rate: 9, isDefault: false },
     { id: 3, name: t('vat.rates.0percent'), rate: 0, isDefault: false },
   ]);
 
-  // State for managing form interactions
-  const [editingId, setEditingId] = useState<number | null>(null);
-  const [isAdding, setIsAdding] = useState(false);
-  const [newRate, setNewRate] = useState<string>('');
+  // Items with their VAT rates
+  const [items, setItems] = useState<ItemVatRate[]>([
+    {
+      id: 1,
+      itemId: 'PROD-001',
+      itemName: t('products.Espresso Shot'),
+      category: t('menu.categories.hot drinks'),
+      vatRate: 21,
+      customVatRate: null, // Uses default
+      sku: 'ESP001',
+      price: 3.5,
+    },
+    {
+      id: 2,
+      itemId: 'PROD-002',
+      itemName: t('products.croissant'),
+      category: t('menu.categories.pastries'),
+      vatRate: 9,
+      customVatRate: null, // Uses default
+      sku: 'CRS002',
+      price: 2.5,
+    },
+    {
+      id: 3,
+      itemId: 'PROD-003',
+      itemName: t('products.House Blend Coffee'),
+      category: t('stockUpdates.categories.Raw Materials'),
+      vatRate: 5,
+      customVatRate: 5, // Custom rate (overrides default)
+      sku: 'BEAN003',
+      price: 15.99,
+    },
+    {
+      id: 4,
+      itemId: 'PROD-004',
+      itemName: t('products.Iced Latte'),
+      category: t('menu.categories.cold drinks'),
+      vatRate: 15,
+      customVatRate: 15, // Custom rate
+      sku: 'ICED004',
+      price: 4.5,
+    },
+    {
+      id: 5,
+      itemId: 'PROD-005',
+      itemName: t('products.orangeJuice'),
+      category: t('menu.categories.cold drinks'),
+      vatRate: 9,
+      customVatRate: null, // Uses default
+      sku: 'WTR005',
+      price: 1.5,
+    },
+    {
+      id: 6,
+      itemId: 'PROD-006',
+      itemName: t('products.Blueberry Muffin'),
+      category: t('menu.categories.pastries'),
+      vatRate: 12,
+      customVatRate: 12, // Custom rate
+      sku: 'CAKE006',
+      price: 6.99,
+    },
+  ]);
+
+  // Get default VAT rate
+  const defaultVatRate = vatRates.find(rate => rate.isDefault) || vatRates[0];
+  const defaultVatValue = defaultVatRate?.rate || 21;
+
+  // State for UI
+  const [editingItemId, setEditingItemId] = useState<number | null>(null);
+  const [vatRateInput, setVatRateInput] = useState<string>('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [bulkSelection, setBulkSelection] = useState<number[]>([]);
+  const [bulkVatRate, setBulkVatRate] = useState<string>('');
   const [validationError, setValidationError] = useState<string | null>(null);
+  const [editingDefaultVat, setEditingDefaultVat] = useState(false);
+  const [defaultVatInput, setDefaultVatInput] = useState<string>('');
+  const [bulkValidationError, setBulkValidationError] = useState<string | null>(null);
+  const [defaultVatValidationError, setDefaultVatValidationError] = useState<string | null>(null);
 
-  // State for confirmation dialog when changing default VAT
-  const [confirmChange, setConfirmChange] = useState<number | null>(null);
+  // Get all unique categories
+  const categories = [
+    'all',
+    ...Array.from(new Set(items.map(item => item.category))),
+  ];
 
-  // Validate the rate input
+  // Filter items
+  const filteredItems = items.filter(item => {
+    const matchesSearch =
+      searchTerm === '' ||
+      item.itemName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.sku.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory =
+      selectedCategory === 'all' || item.category === selectedCategory;
+
+    return matchesSearch && matchesCategory;
+  });
+
+  // Calculate stats
+  const stats = {
+    totalItems: items.length,
+    itemsUsingDefault: items.filter(item => item.customVatRate === null).length,
+    itemsWithCustomVat: items.filter(item => item.customVatRate !== null).length,
+  };
+
+  // Get effective VAT rate for item (custom or default)
+  const getEffectiveVatRate = (item: ItemVatRate) => {
+    return item.customVatRate !== null ? item.customVatRate : defaultVatValue;
+  };
+
+  // Start editing item
+  const handleEditItem = (item: ItemVatRate) => {
+    setEditingItemId(item.id);
+    const currentRate = item.customVatRate !== null ? item.customVatRate : defaultVatValue;
+    setVatRateInput(currentRate.toString());
+    setValidationError(null);
+  };
+
+  // Start editing default VAT
+  const handleEditDefaultVat = () => {
+    setEditingDefaultVat(true);
+    setDefaultVatInput(defaultVatValue.toString());
+    setDefaultVatValidationError(null);
+  };
+
+  // Validate rate input
   const validateRate = (
-    value: string,
-    isEditing: boolean = false,
-  ): string | null => {
-    if (!value.trim()) {
-      return t('vat.validation.required');
+    rateStr: string,
+  ): { valid: boolean; error?: string } => {
+    if (rateStr.trim() === '') {
+      return {
+        valid: false,
+        error: t('vat.validation.required'),
+      };
     }
 
-    const rateValue = parseFloat(value);
-
-    if (isNaN(rateValue)) {
-      return t('vat.validation.nan');
+    const rate = parseFloat(rateStr);
+    if (isNaN(rate)) {
+      return {
+        valid: false,
+        error: t('vat.validation.nan'),
+      };
     }
 
-    if (rateValue < 0) {
-      return t('vat.validation.negative');
+    if (rate < 0) {
+      return {
+        valid: false,
+        error: t('vat.validation.negative'),
+      };
     }
 
-    if (rateValue > 100) {
-      return t('vat.validation.exceeds');
+    if (rate > 100) {
+      return {
+        valid: false,
+        error: t('vat.validation.exceeds'),
+      };
     }
 
-    // Check for duplicate rates (only when adding new, not when editing the same rate)
-    if (!isEditing) {
-      const existingRate = vatRates.find(rate => rate.rate === rateValue);
-      if (existingRate) {
-        return t('vat.validation.duplicate', { rate: rateValue });
-      }
-    }
-
-    return null; // No error
+    return { valid: true };
   };
 
-  // Handle input change with validation
-  const handleRateChange = (value: string) => {
-    setNewRate(value);
+  // Save item changes
+  const handleSaveItem = () => {
+    if (editingItemId === null) return;
 
-    // Clear error if input is being corrected
-    if (validationError) {
-      const isEditing = editingId !== null;
-      const error = validateRate(value, isEditing);
-      setValidationError(error);
-    }
-  };
-
-  // Get the currently active default VAT rate
-  const getDefaultVatRate = () => {
-    if (vatRates.length === 0) {
-      return { id: 0, name: t('vat.rates.0percent'), rate: 0, isDefault: true };
-    }
-    return vatRates.find(rate => rate.isDefault) || vatRates[0];
-  };
-
-  // Get default VAT rate safely for display
-  const defaultVatRate = getDefaultVatRate();
-
-  // Start the process of adding a new VAT rate
-  const handleAddNew = () => {
-    setIsAdding(true);
-    setEditingId(null);
-    setNewRate('');
-    setValidationError(null);
-  };
-
-  // Start editing an existing VAT rate
-  const handleEdit = (rate: VatRate) => {
-    setEditingId(rate.id);
-    setNewRate(rate.rate.toString());
-    setIsAdding(false);
-    setValidationError(null);
-  };
-
-  const handleSave = () => {
-    const isEditing = editingId !== null;
-    const error = validateRate(newRate, isEditing);
-    if (error) {
-      setValidationError(error);
+    const validation = validateRate(vatRateInput);
+    if (!validation.valid && validation.error) {
+      setValidationError(validation.error);
       return;
     }
 
-    const rateValue = parseFloat(newRate);
+    const newRate = parseFloat(vatRateInput);
+    const isUsingDefault = newRate === defaultVatValue;
 
-    if (editingId) {
-      // Check if editing would create a duplicate with another rate
-      const duplicateRate = vatRates.find(
-        rate => rate.rate === rateValue && rate.id !== editingId,
-      );
-
-      if (duplicateRate) {
-        setValidationError(t('vat.validation.duplicate', { rate: rateValue }));
-        return;
-      }
-
-      setVatRates(prev =>
-        prev.map(rate =>
-          rate.id === editingId
-            ? {
-                ...rate,
-                name: t('vat.rateName', { rate: rateValue }),
-                rate: rateValue,
-              }
-            : rate,
-        ),
-      );
-    } else {
-      // Add new rate
-      const newVatRate: VatRate = {
-        id: vatRates.length > 0 ? Math.max(...vatRates.map(r => r.id)) + 1 : 1,
-        name: t('vat.rateName', { rate: rateValue }),
-        rate: rateValue,
-        isDefault: vatRates.length === 0,
-      };
-      setVatRates(prev => [...prev, newVatRate]);
-    }
+    setItems(prev =>
+      prev.map(item => {
+        if (item.id === editingItemId) {
+          return {
+            ...item,
+            vatRate: newRate,
+            customVatRate: isUsingDefault ? null : newRate,
+          };
+        }
+        return item;
+      }),
+    );
 
     handleCancel();
   };
 
-  // Delete a VAT rate with confirmation
-  const handleDelete = (id: number) => {
-    const updatedRates = vatRates.filter(rate => rate.id !== id);
-    const deletedRate = vatRates.find(rate => rate.id === id);
-    if (deletedRate?.isDefault && updatedRates.length > 0) {
-      updatedRates[0].isDefault = true;
+  // Save default VAT changes
+  const handleSaveDefaultVat = () => {
+    const validation = validateRate(defaultVatInput);
+    if (!validation.valid && validation.error) {
+      setDefaultVatValidationError(validation.error);
+      return;
     }
 
-    setVatRates(updatedRates);
-  };
+    const newDefaultRate = parseFloat(defaultVatInput);
 
-  const handleCancel = () => {
-    setEditingId(null);
-    setIsAdding(false);
-    setNewRate('');
-    setValidationError(null);
-  };
-
-  const setAsDefault = (id: number) => {
-    const vatRate = vatRates.find(r => r.id === id);
-    if (!vatRate) return;
-    setConfirmChange(id);
-  };
-
-  const confirmSetAsDefault = () => {
-    if (!confirmChange) return;
-
+    // Update the default rate
     setVatRates(prev =>
       prev.map(rate => ({
         ...rate,
-        isDefault: rate.id === confirmChange,
-      })),
+        isDefault: rate.rate === newDefaultRate,
+      }))
     );
 
-    setConfirmChange(null);
+    // If the rate doesn't exist in the list, add it
+    if (!vatRates.find(rate => rate.rate === newDefaultRate)) {
+      const newVatRate: VatRate = {
+        id: Math.max(...vatRates.map(r => r.id)) + 1,
+        name: t('vat.rateName', { rate: newDefaultRate }),
+        rate: newDefaultRate,
+        isDefault: true,
+      };
+      setVatRates(prev => [
+        ...prev.map(rate => ({ ...rate, isDefault: false })),
+        newVatRate,
+      ]);
+    }
+
+    // Update items that use the default (only those with customVatRate === null)
+    setItems(prev =>
+      prev.map(item => {
+        if (item.customVatRate === null) {
+          return {
+            ...item,
+            vatRate: newDefaultRate,
+          };
+        }
+        return item;
+      }),
+    );
+
+    setEditingDefaultVat(false);
+    setDefaultVatInput('');
+    setDefaultVatValidationError(null);
   };
 
-  const cancelSetAsDefault = () => {
-    setConfirmChange(null);
+  // Cancel editing
+  const handleCancel = () => {
+    setEditingItemId(null);
+    setVatRateInput('');
+    setValidationError(null);
+    setEditingDefaultVat(false);
+    setDefaultVatInput('');
+    setDefaultVatValidationError(null);
+  };
+
+  // Reset item to default VAT
+  const handleResetToDefault = (itemId: number) => {
+    setItems(prev =>
+      prev.map(item => {
+        if (item.id === itemId) {
+          return {
+            ...item,
+            vatRate: defaultVatValue,
+            customVatRate: null,
+          };
+        }
+        return item;
+      }),
+    );
+  };
+
+  // Bulk selection
+  const handleBulkSelectAll = () => {
+    if (bulkSelection.length === filteredItems.length) {
+      setBulkSelection([]);
+    } else {
+      setBulkSelection(filteredItems.map(item => item.id));
+    }
+  };
+
+  const handleBulkSelect = (itemId: number) => {
+    setBulkSelection(prev =>
+      prev.includes(itemId)
+        ? prev.filter(id => id !== itemId)
+        : [...prev, itemId],
+    );
+  };
+
+  // Apply bulk VAT rate
+  const handleBulkApply = () => {
+    if (bulkSelection.length === 0) return;
+
+    const validation = validateRate(bulkVatRate);
+    if (!validation.valid && validation.error) {
+      setBulkValidationError(validation.error);
+      return;
+    }
+
+    const newRate = parseFloat(bulkVatRate);
+    const isUsingDefault = newRate === defaultVatValue;
+
+    setItems(prev =>
+      prev.map(item => {
+        if (bulkSelection.includes(item.id)) {
+          return {
+            ...item,
+            vatRate: newRate,
+            customVatRate: isUsingDefault ? null : newRate,
+          };
+        }
+        return item;
+      }),
+    );
+
+    setBulkSelection([]);
+    setBulkVatRate('');
+    setBulkValidationError(null);
+  };
+
+  // Clear bulk validation error when user types
+  const handleBulkVatRateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setBulkVatRate(e.target.value.replace(/[^0-9.]/g, ''));
+    setBulkValidationError(null);
+  };
+
+  // Clear default VAT validation error when user types
+  const handleDefaultVatInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setDefaultVatInput(e.target.value.replace(/[^0-9.]/g, ''));
+    setDefaultVatValidationError(null);
+  };
+
+  // Clear item validation error when user types
+  const handleVatRateInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setVatRateInput(e.target.value.replace(/[^0-9.]/g, ''));
+    setValidationError(null);
   };
 
   return (
@@ -209,253 +386,357 @@ const VatSettingsPage: React.FC = () => {
           <p className="mt-1 text-sm text-gray-500">{t('vat.subtitle')}</p>
         </div>
 
-        {/* Current Default VAT Banner */}
-        {vatRates.length > 0 && (
-          <div className="mb-6 rounded-lg border border-blue-200 bg-blue-50 p-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Percent className="h-5 w-5 text-blue-600" />
-                <div>
-                  <p className="text-sm font-medium text-blue-900">
-                    {t('vat.currentDefault')}
-                  </p>
-                  <p className="text-2xl font-bold text-blue-800">
-                    {defaultVatRate.name}
-                  </p>
-                </div>
-              </div>
-              <div className="text-sm text-blue-700">
-                {t('vat.appliesToAll')}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Add/Edit Form */}
-        {(isAdding || editingId) && (
-          <div className="mb-6 rounded-lg border bg-white p-4">
-            <h3 className="text-md mb-3 font-medium text-gray-900">
-              {editingId ? t('vat.editRate') : t('vat.addRate')}
-            </h3>
-
-            <div className="space-y-4">
+        {/* Default VAT Section */}
+        <div className="mb-6 rounded-lg border border-blue-200 bg-blue-50 p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Percent className="h-5 w-5 text-blue-600" />
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">
-                  {t('vat.percentageLabel')}
-                </label>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="number"
-                    value={newRate}
-                    onChange={e => handleRateChange(e.target.value)}
-                    onBlur={() => {
-                      const isEditing = editingId !== null;
-                      const error = validateRate(newRate, isEditing);
-                      setValidationError(error);
-                    }}
-                    min="0"
-                    max="100"
-                    step="0.1"
-                    className={`flex-1 rounded-md border px-3 py-2 focus:ring-2 focus:outline-none ${
-                      validationError
-                        ? 'border-red-300 focus:ring-red-500'
-                        : 'border-gray-300 focus:ring-blue-500'
-                    }`}
-                    placeholder={t('vat.percentagePlaceholder')}
-                    autoFocus
-                  />
-                  <span className="text-gray-600">%</span>
-                </div>
-
-                {/* Validation Error Message */}
-                {validationError && (
-                  <p className="mt-1 flex items-center gap-1 text-sm text-red-600">
-                    <AlertTriangle className="h-3 w-3" />
-                    {validationError}
-                  </p>
+                <p className="text-sm font-medium text-blue-900">
+                  {t('vat.currentDefault')}
+                </p>
+                {editingDefaultVat ? (
+                  <div className="space-y-2 mt-1">
+                    <div className="flex items-center gap-2">
+                      <div className="relative">
+                        <input
+                          type="text"
+                          inputMode="decimal"
+                          value={defaultVatInput}
+                          onChange={handleDefaultVatInputChange}
+                          placeholder={t('itemVat.ratePlaceholder')}
+                          className={`w-24 rounded-md border ${defaultVatValidationError ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'} px-3 py-2 pr-8 text-sm`}
+                        />
+                        <span className="absolute top-1/2 right-3 -translate-y-1/2 text-gray-500">
+                          %
+                        </span>
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={handleSaveDefaultVat}
+                          className="rounded bg-green-600 px-3 py-2 text-sm font-medium text-white hover:bg-green-700"
+                        >
+                          {t('common.save')}
+                        </button>
+                        <button
+                          onClick={handleCancel}
+                          className="rounded border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                        >
+                          {t('common.cancel')}
+                        </button>
+                      </div>
+                    </div>
+                    {defaultVatValidationError && (
+                      <p className="text-sm text-red-600">
+                        {defaultVatValidationError}
+                      </p>
+                    )}
+                  </div>
+                ) : (
+                  <>
+                    <p className="text-2xl font-bold text-blue-800">
+                      {defaultVatValue}%
+                    </p>
+                    <p className="text-sm text-blue-700">
+                      {t('vat.appliesToAll')}
+                    </p>
+                  </>
                 )}
-
-                {/* Help text when no error */}
-                {!validationError && (
-                  <p className="mt-1 text-sm text-gray-500">
-                    {editingId ? t('vat.editHelp') : t('vat.addHelp')}
-                  </p>
-                )}
-              </div>
-
-              <div className="flex gap-2">
-                <button
-                  onClick={handleCancel}
-                  className="flex-1 rounded border border-gray-300 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                >
-                  {t('common.cancel')}
-                </button>
-                <button
-                  onClick={handleSave}
-                  disabled={!!validationError || !newRate.trim()}
-                  className={`flex-1 rounded px-3 py-2 text-sm ${
-                    validationError || !newRate.trim()
-                      ? 'cursor-not-allowed bg-gray-300 text-gray-500'
-                      : 'bg-blue-600 text-white hover:bg-blue-700'
-                  }`}
-                >
-                  {editingId ? t('common.update') : t('common.add')}
-                </button>
               </div>
             </div>
+            {!editingDefaultVat && (
+              <button
+                onClick={handleEditDefaultVat}
+                className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+              >
+                <Pencil className="h-4 w-4 inline mr-2" />
+                {t('common.edit')}
+              </button>
+            )}
           </div>
-        )}
-
-        {/* Action Bar */}
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-medium text-gray-900">
-            {t('vat.availableRates')}
-          </h2>
-          {!isAdding && !editingId && !confirmChange && (
-            <button
-              onClick={handleAddNew}
-              className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
-            >
-              <Plus className="h-4 w-4" />
-              {t('vat.addNewRate')}
-            </button>
-          )}
         </div>
 
-        {/* Confirmation Dialog for Changing Default VAT */}
-        {confirmChange && (
-          <div className="mb-6 rounded-lg border border-yellow-200 bg-yellow-50 p-4">
-            <div className="flex items-start gap-3">
-              <AlertTriangle className="mt-0.5 h-5 w-5 flex-shrink-0 text-yellow-600" />
-              <div className="flex-1">
-                <h3 className="text-md mb-2 font-medium text-yellow-800">
-                  {t('vat.confirmChange.title')}
-                </h3>
-                <p className="mb-4 text-sm text-yellow-700">
-                  {t('vat.confirmChange.message', {
-                    rate: vatRates.find(r => r.id === confirmChange)?.name,
-                  })}
+        {/* Stats Overview */}
+        <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
+            <div className="flex items-center gap-3">
+              <Package className="h-5 w-5 text-blue-600" />
+              <div>
+                <p className="text-sm font-medium text-blue-900">
+                  {t('itemVat.stats.totalItems')}
                 </p>
+                <p className="text-2xl font-bold text-blue-800">
+                  {stats.totalItems}
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="rounded-lg border border-purple-200 bg-purple-50 p-4">
+            <div className="flex items-center gap-3">
+              <Tag className="h-5 w-5 text-purple-600" />
+              <div>
+                <p className="text-sm font-medium text-purple-900">
+                  {t('itemVat.stats.customVat')}
+                </p>
+                <p className="text-2xl font-bold text-purple-800">
+                  {stats.itemsWithCustomVat}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Bulk Actions */}
+        {bulkSelection.length > 0 && (
+          <div className="mb-4 rounded-lg border border-yellow-200 bg-yellow-50 p-4">
+            <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+              <div className="flex items-center gap-3">
+                <AlertTriangle className="h-5 w-5 text-yellow-600" />
+                <div>
+                  <p className="text-sm font-medium text-yellow-900">
+                    {t('itemVat.bulkActions.selected', {
+                      count: bulkSelection.length,
+                    })}
+                  </p>
+                </div>
+              </div>
+              <div className="flex flex-col gap-3 md:flex-row md:items-center">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Percent className="h-4 w-4 text-gray-500" />
+                    <input
+                      type="text"
+                      inputMode="decimal"
+                      value={bulkVatRate}
+                      onChange={handleBulkVatRateChange}
+                      placeholder={t('itemVat.ratePlaceholder')}
+                      className={`w-32 rounded-md border ${bulkValidationError ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : 'border-gray-300 focus:border-yellow-500 focus:ring-yellow-500'} px-3 py-2 text-sm`}
+                    />
+                    <span className="text-gray-600">%</span>
+                  </div>
+                  {bulkValidationError && (
+                    <p className="text-sm text-red-600">
+                      {bulkValidationError}
+                    </p>
+                  )}
+                </div>
                 <div className="flex gap-2">
                   <button
-                    onClick={cancelSetAsDefault}
-                    className="rounded border border-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-50"
+                    onClick={handleBulkApply}
+                    className="rounded bg-yellow-600 px-4 py-2 text-sm font-medium text-white hover:bg-yellow-700"
+                  >
+                    {t('itemVat.bulkActions.apply')}
+                  </button>
+                  <button
+                    onClick={() => {
+                      setBulkSelection([]);
+                      setBulkValidationError(null);
+                    }}
+                    className="rounded border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
                   >
                     {t('common.cancel')}
                   </button>
-                  <button
-                    onClick={confirmSetAsDefault}
-                    className="rounded bg-yellow-600 px-4 py-2 text-white hover:bg-yellow-700"
-                  >
-                    {t('vat.confirmChange.confirm')}
-                  </button>
                 </div>
               </div>
             </div>
           </div>
         )}
 
-        {/* VAT Rates List */}
-        {vatRates.length > 0 ? (
-          <div className="space-y-3">
-            {vatRates.map(rate => (
-              <div
-                key={rate.id}
-                className={`rounded-lg border bg-white p-4 ${
-                  rate.isDefault ? 'border-blue-300 bg-blue-50' : ''
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div
-                      className={`flex h-12 w-12 items-center justify-center rounded-lg ${
-                        rate.isDefault ? 'bg-blue-100' : 'bg-gray-100'
-                      }`}
-                    >
-                      <Percent
-                        className={`h-6 w-6 ${
-                          rate.isDefault ? 'text-blue-600' : 'text-gray-600'
-                        }`}
-                      />
-                    </div>
-
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <h3 className="text-lg font-medium text-gray-900">
-                          {rate.name}
-                        </h3>
-                        {rate.isDefault && (
-                          <span className="rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800">
-                            {t('vat.activeLabel')}
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-sm text-gray-500">
-                        {rate.isDefault
-                          ? t('vat.appliedToAll')
-                          : t('vat.availableForSelection')}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    {!rate.isDefault && !confirmChange && (
-                      <button
-                        onClick={() => setAsDefault(rate.id)}
-                        className="rounded bg-gray-100 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-200"
-                      >
-                        {t('vat.setAsDefault')}
-                      </button>
-                    )}
-
-                    {!confirmChange && (
-                      <>
-                        <button
-                          onClick={() => handleEdit(rate)}
-                          className="rounded-lg p-2 text-blue-600 hover:bg-blue-50"
-                          title={t('common.edit')}
-                        >
-                          <Edit2 className="h-4 w-4" />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(rate.id)}
-                          className="rounded-lg p-2 text-red-600 hover:bg-red-50"
-                          title={t('common.delete')}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </>
-                    )}
-                  </div>
-                </div>
-
-                {rate.isDefault && (
-                  <div className="mt-3 border-t border-blue-200 pt-3">
-                    <div className="flex items-center gap-2 text-sm text-blue-700">
-                      <Package className="h-4 w-4" />
-                      <span>{t('vat.defaultExplanation')}</span>
-                    </div>
-                  </div>
-                )}
+        {/* Search and Filters */}
+        <div className="mb-6 rounded-lg border bg-white p-4">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div className="flex flex-col gap-4 md:flex-row md:items-center">
+              <div className="relative">
+                <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={e => setSearchTerm(e.target.value)}
+                  placeholder={t('itemVat.searchPlaceholder')}
+                  className="w-full rounded-md border border-gray-300 py-2 pr-4 pl-10 focus:border-blue-500 focus:ring-blue-500 md:w-64"
+                />
               </div>
-            ))}
+              <div className="flex items-center gap-4">
+                <Filter className="h-5 w-5 text-gray-400" />
+                <select
+                  value={selectedCategory}
+                  onChange={e => setSelectedCategory(e.target.value)}
+                  className="rounded-md border border-gray-300 px-3 py-2"
+                >
+                  {categories.map(category => (
+                    <option key={category} value={category}>
+                      {category === 'all'
+                        ? t('itemVat.allCategories')
+                        : category}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
           </div>
-        ) : (
-          /* Empty State */
-          <div className="py-12 text-center">
-            <Percent className="mx-auto mb-3 h-12 w-12 text-gray-300" />
-            <p className="mb-2 text-gray-500">{t('vat.noRates')}</p>
-            <p className="mb-4 text-sm text-gray-400">
-              {t('vat.defaultToZero')}
-            </p>
-            <button
-              onClick={handleAddNew}
-              className="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
-            >
-              {t('vat.addFirstRate')}
-            </button>
+        </div>
+
+        {/* Items Table */}
+        <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow">
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="w-12 px-4 py-3">
+                    <input
+                      type="checkbox"
+                      checked={
+                        bulkSelection.length === filteredItems.length &&
+                        filteredItems.length > 0
+                      }
+                      onChange={handleBulkSelectAll}
+                      className="rounded border-gray-300"
+                    />
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                    {t('itemVat.table.item')}
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                    {t('itemVat.table.category')}
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                    {t('itemVat.table.vatRate')}
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                    {t('itemVat.table.actions')}
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200 bg-white">
+                {filteredItems.map(item => {
+                  const effectiveRate = getEffectiveVatRate(item);
+                  const isUsingDefault = item.customVatRate === null;
+                  
+                  return (
+                    <tr key={item.id}>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <input
+                          type="checkbox"
+                          checked={bulkSelection.includes(item.id)}
+                          onChange={() => handleBulkSelect(item.id)}
+                          className="rounded border-gray-300"
+                        />
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <div>
+                          <p className="font-medium text-gray-900">
+                            {item.itemName}
+                          </p>
+                          <p className="text-sm text-gray-500">
+                            {item.sku} • ${item.price.toFixed(2)}
+                          </p>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <span className="text-sm text-gray-700">
+                          {item.category}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        {editingItemId === item.id ? (
+                          <div className="space-y-2">
+                            <div className="flex items-center gap-2">
+                              <div className="relative">
+                                <input
+                                  type="text"
+                                  inputMode="decimal"
+                                  value={vatRateInput}
+                                  onChange={handleVatRateInputChange}
+                                  placeholder={t('itemVat.ratePlaceholder')}
+                                  className={`w-24 rounded-md border ${validationError ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'} px-3 py-2 pr-8 text-sm`}
+                                />
+                                <span className="absolute top-1/2 right-3 -translate-y-1/2 text-gray-500">
+                                  %
+                                </span>
+                              </div>
+                            </div>
+                            {validationError && (
+                              <p className="text-sm text-red-600">
+                                {validationError}
+                              </p>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2">
+                              <span className={`inline-flex items-center rounded-full px-3 py-1 text-sm font-medium ${
+                                isUsingDefault
+                                  ? 'bg-blue-100 text-blue-800'
+                                  : 'bg-purple-100 text-purple-800'
+                              }`}>
+                                {effectiveRate}%
+                              </span>
+                              {!isUsingDefault && (
+                                <span className="text-xs text-gray-500">
+                                  ({t('itemVat.custom')})
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        {editingItemId === item.id ? (
+                          <div className="flex gap-2">
+                            <button
+                              onClick={handleSaveItem}
+                              className="rounded bg-green-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-green-700"
+                            >
+                              {t('common.save')}
+                            </button>
+                            <button
+                              onClick={handleCancel}
+                              className="rounded border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                            >
+                              {t('common.cancel')}
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => handleEditItem(item)}
+                              className="rounded bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700"
+                            >
+                              {t('common.edit')}
+                            </button>
+                            {!isUsingDefault && (
+                              <button
+                                onClick={() => handleResetToDefault(item.id)}
+                                className="rounded border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                              >
+                                {t('itemVat.reset')}
+                              </button>
+                            )}
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
-        )}
+
+          {filteredItems.length === 0 && (
+            <div className="py-12 text-center">
+              <Package className="mx-auto mb-3 h-12 w-12 text-gray-300" />
+              <p className="text-gray-500">{t('itemVat.noItemsFound')}</p>
+              {searchTerm && (
+                <button
+                  onClick={() => setSearchTerm('')}
+                  className="mt-2 text-sm text-blue-600 hover:text-blue-800"
+                >
+                  {t('itemVat.clearSearch')}
+                </button>
+              )}
+            </div>
+          )}
+        </div>
       </div>
     </ManagerLayout>
   );

@@ -1041,6 +1041,15 @@
     "saveChanges": "Išsaugoti pakeitimus"
   },
   "vat": {
+    "categoryRates": "Kategorijų PVM tarifai",
+    "categoryExplanation": "Nustatykite PVM tarifus visoms kategorijoms. Pakeičia numatytąjį tarifą.",
+    "categoriesWithCustom": "kategorijos su individualiais tarifais",
+    "usingDefault": "Naudoja numatytąjį",
+    "usingCategory": "Naudoja kategorijos tarifą",
+    "usingIndividual": "Individualus tarifas",
+    "usingDefaultOnly": "Naudoja tik numatytąjį tarifą",
+    "totalProducts": "Iš viso produktų",
+    "itemsUsingDefault": "{{count}} prekės",
     "title": "PVM tarifai",
     "subtitle": "Tvarkykite PVM tarifus. Nustatykite pagrindinį, kuris bus taikomas visiems produktams.",
     "currentDefault": "Dabartinis PVM visiems produktams:",
@@ -1081,34 +1090,38 @@
     }
   },
   "somethingWentWrong": "Kažkas nutiko ne taip.",
-  "itemVat": {
-    "title": "Prekių PVM Nustatymai",
-    "subtitle": "Nustatykite PVM tarifus kiekvienai prekei",
+   "itemVat": {
+    "searchPlaceholder": "Ieškoti produktų...",
+    "allCategories": "Visos kategorijos",
+    "ratePlaceholder": "Įveskite tarifą",
+    "custom": "Individualus",
+    "usingDefault": "Naudoja numatytąjį PVM tarifą",
+    "usingCustom": "Naudoja individualų PVM tarifą",
+    "currentlyUsingDefault": "Šiuo metu naudoja numatytąjį PVM tarifą",
+    "currentlyCustom": "Šiuo metu naudoja individualų PVM tarifą",
+    "reset": "Atstatyti į kategorijos",
     "stats": {
-      "totalItems": "Viso Prekių",
-      "averageVat": "Vidutinis PVM",
-      "zeroVat": "Prekių su 0% PVM"
+      "totalItems": "Iš viso prekių",
+      "customVat": "Individualus PVM",
+      "defaultVat": "Numatytasis PVM",
+      "categoryVat": "Kategorijos PVM"
     },
     "bulkActions": {
-      "selected": "Pasirinkta {{count}} prekių",
-      "apply": "Taikyti"
+      "selected": "Pažymėta {{count}} prekių",
+      "apply": "Taikyti PVM tarifą"
     },
-    "searchPlaceholder": "Ieškoti prekių...",
-    "allCategories": "Visos Kategorijos",
-    "ratePlaceholder": "Tarifas",
     "table": {
       "item": "Prekė",
       "category": "Kategorija",
       "vatRate": "PVM Tarifas",
       "actions": "Veiksmai"
     },
-    "validation": {
-      "required": "Tarifas privalomas",
-      "nan": "Įveskite tinkamą skaičių",
-      "negative": "Tarifas negali būti neigiamas",
-      "exceeds": "Tarifas negali viršyti 100%"
-    },
     "noItemsFound": "Prekių nerasta",
-    "clearSearch": "Išvalyti paiešką"
+    "clearSearch": "Išvalyti paiešką",
+    "source": {
+      "custom": "Individualus tarifas",
+      "category": "Kategorijos tarifas",
+      "default": "Numatytasis tarifas"
+    }
   }
 }
