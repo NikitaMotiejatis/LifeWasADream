@@ -220,7 +220,7 @@ INSERT INTO order_data (employee_id, created_at, status, currency, discount, tip
 (5, NOW() - INTERVAL '2 days', 'CLOSED', 'EUR', 0, 0, 0),
 (5, NOW() - INTERVAL '2 days', 'REFUNDED', 'EUR', 0, 0, 0),
 (6, NOW() - INTERVAL '1 day', 'OPEN', 'EUR', 0, 500, 0),
-(9, NOW() - INTERVAL '12 hours', 'CLOSED', 'AUD', 0, 50, 0),
+(9, NOW() - INTERVAL '12 hours', 'REFUND_PENDING', 'AUD', 0, 50, 0),
 (9, NOW() - INTERVAL '10 hours', 'CLOSED', 'AUD', 0, 0, 0),
 (10, NOW() - INTERVAL '2 hours', 'OPEN', 'AUD', 0, 100, 0),
 (10, NOW() - INTERVAL '1 hour', 'CLOSED', 'AUD', 100, 0, 0);
@@ -277,5 +277,12 @@ INSERT INTO appointment_bill (id, appointment_id, amount, discount, tip, created
 (2, 2, 5000, 500, 0, NOW() - INTERVAL '9 days'),
 (3, 3, 8000, 0, 1000, NOW() - INTERVAL '8 days'),
 (4, 4, 12000, 0, 2000, NOW() - INTERVAL '7 days');
+
+-- ================================================================================================
+-- 9. PAYMENTS & REFUNDS
+-- ================================================================================================
+
+INSERT INTO refund_data (order_id, name, phone, email, reason) VALUES
+(9, 'Grace Wilson', '+14160003', 'relax@serenity.com', 'Not good burger.');
 
 COMMIT TRANSACTION;

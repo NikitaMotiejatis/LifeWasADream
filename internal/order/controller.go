@@ -22,6 +22,7 @@ func (c OrderController) Routes() http.Handler {
 	router.Post("/{orderId:^[0-9]{1,10}$}", c.createOrder)
 	router.Patch("/{orderId:^[0-9]{1,10}$}", c.updateOrder)
 	router.Get("/{orderId:^[0-9]{1,10}$}", c.getOrder)
+	router.Post("/{orderId:^[0-9]{1,10}$}/refund", c.refund)
 	router.Get("/counts", c.counts)
 	router.Get("/products", c.getProducts)
 
@@ -148,6 +149,32 @@ func (c OrderController) updateOrder(w http.ResponseWriter, r *http.Request) {
 	err = c.OrderRepo.ModifyOrder(orderId, order)
 	if err != nil {
 		http.Error(w, "failed to modify order", http.StatusBadRequest)
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}
+
+func (c OrderController) refund(w http.ResponseWriter, r *http.Request) {
+	if w == nil || r == nil {
+		return
+	}
+
+	orderId, err := strconv.ParseInt(r.PathValue("orderId"), 10, 64)
+	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	var refundData RefundData
+	if err := json.NewDecoder(r.Body).Decode(&refundData); err != nil {
+		http.Error(w, "bad refund data", http.StatusBadRequest)
+		return
+	}
+
+	err = c.OrderRepo.CreateRefundRequest(orderId, refundData)
+	if err != nil {
+		http.Error(w, "failed to create refund request", http.StatusInternalServerError)
+		return
 	}
 
 	w.WriteHeader(http.StatusNoContent)

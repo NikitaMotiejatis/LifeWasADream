@@ -397,7 +397,7 @@ CREATE TABLE appointment (
 );
 
 DROP TABLE IF EXISTS appointment_bill CASCADE;
-CREATE TABLE appointment_bill(
+CREATE TABLE appointment_bill (
     id              INTEGER     PRIMARY KEY,
     appointment_id  INTEGER     NOT NULL REFERENCES appointment(id),
     amount          DECIMAL(15) NOT NULL,
@@ -415,6 +415,22 @@ CREATE TRIGGER appointment_bill_valid_created_at
     BEFORE INSERT OR UPDATE ON appointment_bill
     FOR EACH ROW
     EXECUTE FUNCTION not_in_future();
+
+-- -------------------------------------------------------------------------------------------------
+-- Payment data-------------------------------------------------------------------------------------
+-- -------------------------------------------------------------------------------------------------
+
+DROP TABLE IF EXISTS refund_data CASCADE;
+CREATE TABLE refund_data (
+    order_id    INTEGER PRIMARY KEY REFERENCES order_data(id),
+    name        VARCHAR(128)    NOT NULL,
+    phone       VARCHAR(16)     NOT NULL,
+    email       VARCHAR(512)    NOT NULL,
+    reason      VARCHAR(512)    NOT NULL,
+
+    CONSTRAINT valid_email          CHECK (email ~ '^[^\.][a-zA-Z0-9\-\.+]{0,62}[^\.]+@([^\-][a-zA-Z0-9\-]{0,61}[^\-]\.)+[^\-][a-zA-Z0-9\-]{0,61}[^\-]$'),
+    CONSTRAINT valid_phone          CHECK (phone ~ '^\+[0-9]{3,15}$')
+);
 
 -- -------------------------------------------------------------------------------------------------
 -- -------------------------------------------------------------------------------------------------
@@ -474,9 +490,9 @@ AS
         order_id,
         vat,
         quantity,
-         SUM(price_per_unit + COALESCE(price_difference, 0) - unit_discount)                            ::DECIMAL(15) AS gross,
-        (SUM(price_per_unit + COALESCE(price_difference, 0) - unit_discount) / (0.01 * (100 + vat)))    ::DECIMAL(15) AS net,
-        (SUM(price_per_unit + COALESCE(price_difference, 0) - unit_discount) * quantity)                ::DECIMAL(15) AS total
+        SUM(price_per_unit + COALESCE(price_difference, 0) - unit_discount)                         ::DECIMAL(15) AS gross,
+        SUM(price_per_unit + COALESCE(price_difference, 0) - unit_discount) / (0.01 * (100 + vat))  ::DECIMAL(15) AS net,
+        SUM(price_per_unit + COALESCE(price_difference, 0) - unit_discount) * quantity              ::DECIMAL(15) AS total
     FROM order_item_detail
     GROUP BY 
         order_item_id,
