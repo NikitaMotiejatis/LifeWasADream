@@ -1069,7 +1069,7 @@
     "cancelledMessage": "Your payment was cancelled. No charges were made.",
     "tryAgain": "Try Again"
   },
-   "itemVat": {
+  "itemVat": {
     "searchPlaceholder": "Search products...",
     "allCategories": "All Categories",
     "ratePlaceholder": "Enter rate",
@@ -1078,12 +1078,11 @@
     "usingCustom": "Using custom VAT rate",
     "currentlyUsingDefault": "Currently using default VAT rate",
     "currentlyCustom": "Currently using custom VAT rate",
-    "reset": "Reset to category",
+    "reset": "Reset to default",
     "stats": {
       "totalItems": "Total Items",
       "customVat": "Custom VAT",
-      "defaultVat": "Default VAT",
-      "categoryVat": "Category VAT"
+      "defaultVat": "Default VAT"
     },
     "bulkActions": {
       "selected": "{{count}} items selected",

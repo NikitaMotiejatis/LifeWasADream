@@ -1090,7 +1090,7 @@
     }
   },
   "somethingWentWrong": "Kažkas nutiko ne taip.",
-   "itemVat": {
+  "itemVat": {
     "searchPlaceholder": "Ieškoti produktų...",
     "allCategories": "Visos kategorijos",
     "ratePlaceholder": "Įveskite tarifą",
@@ -1099,12 +1099,11 @@
     "usingCustom": "Naudoja individualų PVM tarifą",
     "currentlyUsingDefault": "Šiuo metu naudoja numatytąjį PVM tarifą",
     "currentlyCustom": "Šiuo metu naudoja individualų PVM tarifą",
-    "reset": "Atstatyti į kategorijos",
+    "reset": "Atstatyti į numatytąjį",
     "stats": {
       "totalItems": "Iš viso prekių",
       "customVat": "Individualus PVM",
-      "defaultVat": "Numatytasis PVM",
-      "categoryVat": "Kategorijos PVM"
+      "defaultVat": "Numatytasis PVM"
     },
     "bulkActions": {
       "selected": "Pažymėta {{count}} prekių",

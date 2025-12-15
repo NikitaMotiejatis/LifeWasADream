@@ -1,18 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import ManagerLayout from '../components/managerLayout';
-import {
-  Package,
-  Percent,
-  Search,
-  Filter,
-  Edit2,
-  Save,
-  X,
-  AlertTriangle,
-  Pencil,
-  Tag,
-} from 'lucide-react';
+import { Package, Percent, AlertTriangle, Pencil, Tag } from 'lucide-react';
 
 interface ItemVatRate {
   id: number;
@@ -20,110 +9,96 @@ interface ItemVatRate {
   itemName: string;
   category: string;
   vatRate: number;
-  customVatRate: number | null; // null = uses default, number = custom rate
+  customVatRate: number | null;
   sku: string;
   price: number;
-}
-
-interface VatRate {
-  id: number;
-  name: string;
-  rate: number;
-  isDefault: boolean;
 }
 
 const VatSettingsPage: React.FC = () => {
   const { t } = useTranslation();
 
-  // Default VAT rates (system-wide)
-  const [vatRates, setVatRates] = useState<VatRate[]>([
-    { id: 1, name: t('vat.rates.21percent'), rate: 21, isDefault: true },
-    { id: 2, name: t('vat.rates.9percent'), rate: 9, isDefault: false },
-    { id: 3, name: t('vat.rates.0percent'), rate: 0, isDefault: false },
-  ]);
-
-  // Items with their VAT rates
-  const [items, setItems] = useState<ItemVatRate[]>([
-    {
-      id: 1,
-      itemId: 'PROD-001',
-      itemName: t('products.Espresso Shot'),
-      category: t('menu.categories.hot drinks'),
-      vatRate: 21,
-      customVatRate: null, // Uses default
-      sku: 'ESP001',
-      price: 3.5,
-    },
-    {
-      id: 2,
-      itemId: 'PROD-002',
-      itemName: t('products.croissant'),
-      category: t('menu.categories.pastries'),
-      vatRate: 9,
-      customVatRate: null, // Uses default
-      sku: 'CRS002',
-      price: 2.5,
-    },
-    {
-      id: 3,
-      itemId: 'PROD-003',
-      itemName: t('products.House Blend Coffee'),
-      category: t('stockUpdates.categories.Raw Materials'),
-      vatRate: 5,
-      customVatRate: 5, // Custom rate (overrides default)
-      sku: 'BEAN003',
-      price: 15.99,
-    },
-    {
-      id: 4,
-      itemId: 'PROD-004',
-      itemName: t('products.Iced Latte'),
-      category: t('menu.categories.cold drinks'),
-      vatRate: 15,
-      customVatRate: 15, // Custom rate
-      sku: 'ICED004',
-      price: 4.5,
-    },
-    {
-      id: 5,
-      itemId: 'PROD-005',
-      itemName: t('products.orangeJuice'),
-      category: t('menu.categories.cold drinks'),
-      vatRate: 9,
-      customVatRate: null, // Uses default
-      sku: 'WTR005',
-      price: 1.5,
-    },
-    {
-      id: 6,
-      itemId: 'PROD-006',
-      itemName: t('products.Blueberry Muffin'),
-      category: t('menu.categories.pastries'),
-      vatRate: 12,
-      customVatRate: 12, // Custom rate
-      sku: 'CAKE006',
-      price: 6.99,
-    },
-  ]);
+// Items with their VAT rates (price in CENTS)
+const [items, setItems] = useState<ItemVatRate[]>([
+  {
+    id: 1,
+    itemId: 'PROD-001',
+    itemName: t('products.Espresso Shot'),
+    category: t('menu.categories.hot drinks'),
+    vatRate: 21,
+    customVatRate: null,
+    sku: 'ESP001',
+    price: 350, 
+  },
+  {
+    id: 2,
+    itemId: 'PROD-002',
+    itemName: t('products.croissant'),
+    category: t('menu.categories.pastries'),
+    vatRate: 9,
+    customVatRate: null,
+    sku: 'CRS002',
+    price: 250, 
+  },
+  {
+    id: 3,
+    itemId: 'PROD-003',
+    itemName: t('products.House Blend Coffee'),
+    category: t('stockUpdates.categories.Raw Materials'),
+    vatRate: 5,
+    customVatRate: 5,
+    sku: 'BEAN003',
+    price: 1599,
+  },
+  {
+    id: 4,
+    itemId: 'PROD-004',
+    itemName: t('products.Iced Latte'),
+    category: t('menu.categories.cold drinks'),
+    vatRate: 15,
+    customVatRate: 15,
+    sku: 'ICED004',
+    price: 450, 
+  },
+  {
+    id: 5,
+    itemId: 'PROD-005',
+    itemName: t('products.orangeJuice'),
+    category: t('menu.categories.cold drinks'),
+    vatRate: 9,
+    customVatRate: null,
+    sku: 'WTR005',
+    price: 150,
+  },
+  {
+    id: 6,
+    itemId: 'PROD-006',
+    itemName: t('products.Blueberry Muffin'),
+    category: t('menu.categories.pastries'),
+    vatRate: 12,
+    customVatRate: 12,
+    sku: 'CAKE006',
+    price: 699, 
+  },
+]);
 
   // Get default VAT rate
-  const defaultVatRate = vatRates.find(rate => rate.isDefault) || vatRates[0];
-  const defaultVatValue = defaultVatRate?.rate || 21;
 
-  // State for UI
+  const [defaultVatValue, setDefaultVatValue] = useState<number>(21);
   const [editingItemId, setEditingItemId] = useState<number | null>(null);
   const [vatRateInput, setVatRateInput] = useState<string>('');
-  const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [bulkSelection, setBulkSelection] = useState<number[]>([]);
   const [bulkVatRate, setBulkVatRate] = useState<string>('');
   const [validationError, setValidationError] = useState<string | null>(null);
   const [editingDefaultVat, setEditingDefaultVat] = useState(false);
   const [defaultVatInput, setDefaultVatInput] = useState<string>('');
-  const [bulkValidationError, setBulkValidationError] = useState<string | null>(null);
-  const [defaultVatValidationError, setDefaultVatValidationError] = useState<string | null>(null);
+  const [bulkValidationError, setBulkValidationError] = useState<string | null>(
+    null,
+  );
+  const [defaultVatValidationError, setDefaultVatValidationError] = useState<
+    string | null
+  >(null);
 
-  // Get all unique categories
   const categories = [
     'all',
     ...Array.from(new Set(items.map(item => item.category))),
@@ -131,21 +106,17 @@ const VatSettingsPage: React.FC = () => {
 
   // Filter items
   const filteredItems = items.filter(item => {
-    const matchesSearch =
-      searchTerm === '' ||
-      item.itemName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.sku.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory =
       selectedCategory === 'all' || item.category === selectedCategory;
-
-    return matchesSearch && matchesCategory;
+    return matchesCategory;
   });
 
   // Calculate stats
   const stats = {
     totalItems: items.length,
     itemsUsingDefault: items.filter(item => item.customVatRate === null).length,
-    itemsWithCustomVat: items.filter(item => item.customVatRate !== null).length,
+    itemsWithCustomVat: items.filter(item => item.customVatRate !== null)
+      .length,
   };
 
   // Get effective VAT rate for item (custom or default)
@@ -156,7 +127,8 @@ const VatSettingsPage: React.FC = () => {
   // Start editing item
   const handleEditItem = (item: ItemVatRate) => {
     setEditingItemId(item.id);
-    const currentRate = item.customVatRate !== null ? item.customVatRate : defaultVatValue;
+    const currentRate =
+      item.customVatRate !== null ? item.customVatRate : defaultVatValue;
     setVatRateInput(currentRate.toString());
     setValidationError(null);
   };
@@ -167,7 +139,16 @@ const VatSettingsPage: React.FC = () => {
     setDefaultVatInput(defaultVatValue.toString());
     setDefaultVatValidationError(null);
   };
+  // Helper function to convert cents to display format
+  const centsToDisplay = (cents: number): string => {
+    return (cents / 100).toFixed(2);
+  };
 
+  // Helper function to convert display format to cents
+  const displayToCents = (displayPrice: string): number => {
+    const price = parseFloat(displayPrice);
+    return Math.round(price * 100);
+  };
   // Validate rate input
   const validateRate = (
     rateStr: string,
@@ -233,39 +214,15 @@ const VatSettingsPage: React.FC = () => {
     handleCancel();
   };
 
-  // Save default VAT changes
   const handleSaveDefaultVat = () => {
     const validation = validateRate(defaultVatInput);
     if (!validation.valid && validation.error) {
       setDefaultVatValidationError(validation.error);
       return;
     }
-
     const newDefaultRate = parseFloat(defaultVatInput);
+    setDefaultVatValue(newDefaultRate);
 
-    // Update the default rate
-    setVatRates(prev =>
-      prev.map(rate => ({
-        ...rate,
-        isDefault: rate.rate === newDefaultRate,
-      }))
-    );
-
-    // If the rate doesn't exist in the list, add it
-    if (!vatRates.find(rate => rate.rate === newDefaultRate)) {
-      const newVatRate: VatRate = {
-        id: Math.max(...vatRates.map(r => r.id)) + 1,
-        name: t('vat.rateName', { rate: newDefaultRate }),
-        rate: newDefaultRate,
-        isDefault: true,
-      };
-      setVatRates(prev => [
-        ...prev.map(rate => ({ ...rate, isDefault: false })),
-        newVatRate,
-      ]);
-    }
-
-    // Update items that use the default (only those with customVatRate === null)
     setItems(prev =>
       prev.map(item => {
         if (item.customVatRate === null) {
@@ -364,7 +321,9 @@ const VatSettingsPage: React.FC = () => {
   };
 
   // Clear default VAT validation error when user types
-  const handleDefaultVatInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleDefaultVatInputChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     setDefaultVatInput(e.target.value.replace(/[^0-9.]/g, ''));
     setDefaultVatValidationError(null);
   };
@@ -396,7 +355,7 @@ const VatSettingsPage: React.FC = () => {
                   {t('vat.currentDefault')}
                 </p>
                 {editingDefaultVat ? (
-                  <div className="space-y-2 mt-1">
+                  <div className="mt-1 space-y-2">
                     <div className="flex items-center gap-2">
                       <div className="relative">
                         <input
@@ -449,7 +408,7 @@ const VatSettingsPage: React.FC = () => {
                 onClick={handleEditDefaultVat}
                 className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
               >
-                <Pencil className="h-4 w-4 inline mr-2" />
+                <Pencil className="mr-2 inline h-4 w-4" />
                 {t('common.edit')}
               </button>
             )}
@@ -545,33 +504,18 @@ const VatSettingsPage: React.FC = () => {
         {/* Search and Filters */}
         <div className="mb-6 rounded-lg border bg-white p-4">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div className="flex flex-col gap-4 md:flex-row md:items-center">
-              <div className="relative">
-                <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                <input
-                  type="text"
-                  value={searchTerm}
-                  onChange={e => setSearchTerm(e.target.value)}
-                  placeholder={t('itemVat.searchPlaceholder')}
-                  className="w-full rounded-md border border-gray-300 py-2 pr-4 pl-10 focus:border-blue-500 focus:ring-blue-500 md:w-64"
-                />
-              </div>
-              <div className="flex items-center gap-4">
-                <Filter className="h-5 w-5 text-gray-400" />
-                <select
-                  value={selectedCategory}
-                  onChange={e => setSelectedCategory(e.target.value)}
-                  className="rounded-md border border-gray-300 px-3 py-2"
-                >
-                  {categories.map(category => (
-                    <option key={category} value={category}>
-                      {category === 'all'
-                        ? t('itemVat.allCategories')
-                        : category}
-                    </option>
-                  ))}
-                </select>
-              </div>
+            <div className="flex items-center">
+              <select
+                value={selectedCategory}
+                onChange={e => setSelectedCategory(e.target.value)}
+                className="rounded-md border border-gray-300 px-3 py-2"
+              >
+                {categories.map(category => (
+                  <option key={category} value={category}>
+                    {category === 'all' ? t('itemVat.allCategories') : category}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
         </div>
@@ -611,7 +555,7 @@ const VatSettingsPage: React.FC = () => {
                 {filteredItems.map(item => {
                   const effectiveRate = getEffectiveVatRate(item);
                   const isUsingDefault = item.customVatRate === null;
-                  
+
                   return (
                     <tr key={item.id}>
                       <td className="px-4 py-3 whitespace-nowrap">
@@ -664,11 +608,13 @@ const VatSettingsPage: React.FC = () => {
                         ) : (
                           <div className="space-y-1">
                             <div className="flex items-center gap-2">
-                              <span className={`inline-flex items-center rounded-full px-3 py-1 text-sm font-medium ${
-                                isUsingDefault
-                                  ? 'bg-blue-100 text-blue-800'
-                                  : 'bg-purple-100 text-purple-800'
-                              }`}>
+                              <span
+                                className={`inline-flex items-center rounded-full px-3 py-1 text-sm font-medium ${
+                                  isUsingDefault
+                                    ? 'bg-blue-100 text-blue-800'
+                                    : 'bg-purple-100 text-purple-800'
+                                }`}
+                              >
                                 {effectiveRate}%
                               </span>
                               {!isUsingDefault && (
@@ -726,14 +672,6 @@ const VatSettingsPage: React.FC = () => {
             <div className="py-12 text-center">
               <Package className="mx-auto mb-3 h-12 w-12 text-gray-300" />
               <p className="text-gray-500">{t('itemVat.noItemsFound')}</p>
-              {searchTerm && (
-                <button
-                  onClick={() => setSearchTerm('')}
-                  className="mt-2 text-sm text-blue-600 hover:text-blue-800"
-                >
-                  {t('itemVat.clearSearch')}
-                </button>
-              )}
             </div>
           )}
         </div>
