@@ -103,18 +103,10 @@ export default function OrderSummary({
       showToast(t('payment.processing', 'Processing order...'));
 
       const paymentAmount = amount || total;
-      const individualTip =
-        payerIndex !== undefined ? individualTips[payerIndex] || 0 : 0;
 
       const order = {
         items: itemsList,
-        tip: {
-          amount: payerIndex !== undefined ? individualTip : tipAmount,
-          total: paymentAmount,
-        },
-        isSplit: isSplitMode,
-        payerIndex: payerIndex,
-        isIndividualPayment: payerIndex !== undefined,
+        tip: tipAmount,
       };
 
       let orderId: number;
