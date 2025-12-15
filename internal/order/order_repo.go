@@ -8,6 +8,7 @@ type OrderRepo interface {
 	CreateOrder(order Order) (int64, error)
 	ModifyOrder(orderId int64, order Order) error
 	CreateRefundRequest(orderId int64, refundData RefundData) error
+	CancelRefundRequest(orderId int64) error
 	GetOrderItems(orderId int64) ([]Item, error)
 }
 

@@ -21,7 +21,7 @@ func attachGlobalMiddlewares(router *chi.Mux, config config.Config) {
 
 	corsOptions := cors.Options{
 		AllowedOrigins:   []string{"http://localhost:" + fmt.Sprint(config.VitePort)},
-		AllowedMethods:   []string{"GET", "POST", "PUT", "PATCH"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "PATCH", "DELETE"},
 		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "Location", config.XSRFHeaderKey},
 		ExposedHeaders:   []string{"Link"},
 		AllowCredentials: true,
