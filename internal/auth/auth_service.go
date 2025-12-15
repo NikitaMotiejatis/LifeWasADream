@@ -4,6 +4,7 @@ import (
 	"errors"
 	"log/slog"
 	"slices"
+	"strings"
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
@@ -49,6 +50,13 @@ func (s AuthService) login(user LoginInfo, sessionTokenDuration time.Duration) (
 		return "", "", "", ErrWrongPassword
 	}
 
+	currency, err := s.UserRepo.GetUserCurrency(user.Username)
+	if err != nil {
+		slog.Warn("failed to get user currency, falling back to USD", "username", user.Username, "err", err)
+		currency = "USD"
+	}
+	currency = strings.ToUpper(currency)
+
 	csrfToken, err := s.TokenService.generateCsrfToken(64)
 	if err != nil {
 		slog.Error("failed to generate CSRF token: " + err.Error())
@@ -56,9 +64,10 @@ func (s AuthService) login(user LoginInfo, sessionTokenDuration time.Duration) (
 	}
 
 	claims := JwtSessionToken{
-		Username: user.Username, 
-		ExpiresUnix: time.Now().Add(sessionTokenDuration).Unix(), 
-		CsrfToken: csrfToken,
+		Username: 		user.Username, 
+		ExpiresUnix:	time.Now().Add(sessionTokenDuration).Unix(), 
+		CsrfToken:		csrfToken,
+		Currency:		currency,
 	}
 	sessionToken, err := s.TokenService.generateSessionToken(claims)
 	if err != nil {

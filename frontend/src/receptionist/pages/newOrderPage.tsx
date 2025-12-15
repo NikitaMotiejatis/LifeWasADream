@@ -16,23 +16,21 @@ export default function NewOrderPage() {
         <div className="flex flex-1 flex-col overflow-hidden">
           <Topbar />
 
-          <CurrencyProvider>
-            <CartProvider>
-              <main className="flex-1 overflow-y-auto">
-                <div className="flex gap-6 p-6">
-                  {/* Left: Products */}
-                  <div className="flex-1">
-                    <ProductGrid />
-                  </div>
-
-                  {/* Right: Order summary */}
-                  <div className="w-1/3 max-w-md">
-                    <OrderSummary showPaymentSection={true} />
-                  </div>
+          <CartProvider>
+            <main className="flex-1 overflow-y-auto">
+              <div className="flex gap-6 p-6">
+                {/* Left: Products */}
+                <div className="flex-1">
+                  <ProductGrid />
                 </div>
-              </main>
-            </CartProvider>
-          </CurrencyProvider>
+
+                {/* Right: Order summary */}
+                <div className="w-1/3 max-w-md">
+                  <OrderSummary showPaymentSection={true} />
+                </div>
+              </div>
+            </main>
+          </CartProvider>
         </div>
       </div>
     </div>

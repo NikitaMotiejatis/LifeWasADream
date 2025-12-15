@@ -25,6 +25,7 @@ type JwtSessionToken struct {
 	Username		string	`json:"username"`
 	ExpiresUnix		int64	`json:"expires"`
 	CsrfToken		string	`json:"csrf-token"`
+	Currency 		string	`json:"currency,omitempty"`
 	jwt.RegisteredClaims
 }
 

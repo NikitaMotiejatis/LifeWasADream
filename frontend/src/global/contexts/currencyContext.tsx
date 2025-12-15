@@ -8,7 +8,7 @@ import {
 } from 'react';
 import { useTranslation } from 'react-i18next';
 
-export type Currency = 'USD' | 'EUR' | 'GBP';
+export type Currency = 'USD' | 'EUR' | 'GBP' | 'CAD' | 'AUD';
 
 type CurrencyContextType = {
   currency: Currency;
@@ -23,6 +23,8 @@ const currencySymbols: Record<Currency, string> = {
   USD: '$',
   EUR: '€',
   GBP: '£',
+  CAD: '$',
+  AUD: '$',
 };
 
 const CurrencyContext = createContext<CurrencyContextType | undefined>(
@@ -36,6 +38,8 @@ const getDefaultCurrency = (lang: string): Currency => {
     gb: 'GBP',
     en: 'GBP',
     us: 'USD',
+    ca: 'CAD',
+    au: 'AUD',
   };
   const code = lang.toLowerCase();
   const base = code.split('-')[0];
@@ -94,7 +98,7 @@ export const CurrencyProvider = ({ children }: { children: ReactNode }) => {
     const symbol = currencySymbols[currency];
     const amount = (0.01 * price).toFixed(2);
 
-    if (currency === 'EUR' && i18n.language.startsWith('lt')) {
+    if (currency === 'EUR') {
       return `${amount.replace('.', ',')} ${symbol}`;
     }
     return `${symbol}${amount}`;

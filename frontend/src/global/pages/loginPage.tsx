@@ -4,6 +4,7 @@ import LockIcon from '@/icons/lockIcon';
 import { useNavigate } from 'react-router-dom';
 import { useForm, useFormState } from 'react-hook-form';
 import { LoginInfo, useAuth } from '@/global/hooks/auth';
+import { Currency, useCurrency } from '../contexts/currencyContext';
 
 const demoAccounts = [
   { role: 'Cashier / Receptionist', login: 'cashier1', pass: 'demo123' },
@@ -16,11 +17,12 @@ export default function LoginPage() {
   const { t } = useTranslation();
 
   const { login } = useAuth();
+  const { overrideFromBackend } = useCurrency();
 
   const { register, handleSubmit, control, setValue } = useForm({
     defaultValues: {
-      username: "",
-      password: "",
+      username: '',
+      password: '',
     },
   });
   const { errors, isSubmitting } = useFormState({
@@ -31,9 +33,15 @@ export default function LoginPage() {
   const navigate = useNavigate();
 
   const tryToLogin = async (data: any) => {
-    const redirectPath = await login(data as LoginInfo);
-    if (redirectPath) {
-      navigate(redirectPath);
+    const userData = await login(data as LoginInfo);
+
+    if (!userData) return;
+
+    if (userData.redirectPath) {
+      navigate(userData.redirectPath);
+    }
+    if (userData.currency) {
+      overrideFromBackend(userData.currency as Currency, false);
     }
   };
 
@@ -44,7 +52,11 @@ export default function LoginPage() {
         <p className="mt-2 text-gray-500">{t('login.subtitle')}</p>
       </div>
 
-      <form onSubmit={handleSubmit(tryToLogin)} className="ml-10 w-full max-w-md rounded-xl bg-white p-10 shadow-lg">
+      {/* TODO: failed login message is needed */}
+      <form
+        onSubmit={handleSubmit(tryToLogin)}
+        className="ml-10 w-full max-w-md rounded-xl bg-white p-10 shadow-lg"
+      >
         <h2 className="mb-6 text-xl font-semibold">{t('login.formTitle')}</h2>
 
         {/* USERNAME */}
@@ -58,21 +70,19 @@ export default function LoginPage() {
             </span>
             <input
               type="text"
-              {...register("username", {
+              {...register('username', {
                 required: t('login.usernameRequired'),
                 // TODO: maybe some pattern matching
               })}
               placeholder={t('login.usernamePlaceholder')}
               className={`w-full rounded-lg border bg-gray-50 py-3 pr-4 pl-10 transition focus:bg-white focus:ring-2 focus:ring-blue-400 focus:outline-none ${
-                errors.username ? 'border-red-500' : 'border-gray-500' 
+                errors.username ? 'border-red-500' : 'border-gray-500'
               }`}
             />
           </div>
           <div className="mt-1 h-5">
             {errors.username && (
-              <p className="text-xs text-red-500">
-                {errors.username.message}
-              </p>
+              <p className="text-xs text-red-500">{errors.username.message}</p>
             )}
           </div>
         </div>
@@ -89,21 +99,19 @@ export default function LoginPage() {
 
             <input
               type="password"
-              {...register("password", {
+              {...register('password', {
                 required: t('login.passwordRequired'),
                 // TODO: maybe some pattern matching
               })}
               placeholder={t('login.passwordPlaceholder')}
               className={`w-full rounded-lg border bg-gray-50 py-3 pr-4 pl-10 transition focus:bg-white focus:ring-2 focus:ring-blue-400 focus:outline-none ${
-                errors.password ? 'border-red-500' : 'border-gray-500' 
+                errors.password ? 'border-red-500' : 'border-gray-500'
               }`}
             />
           </div>
           <div className="mt-1 h-5">
             {errors.password && (
-              <p className="text-xs text-red-500">
-                {errors.password.message}
-              </p>
+              <p className="text-xs text-red-500">{errors.password.message}</p>
             )}
           </div>
         </div>
@@ -128,8 +136,8 @@ export default function LoginPage() {
                 key={acc.login}
                 type="button"
                 onClick={() => {
-                  setValue("username", acc.login);
-                  setValue("password", acc.pass);
+                  setValue('username', acc.login);
+                  setValue('password', acc.pass);
                 }}
                 className="group relative cursor-pointer overflow-hidden rounded-xl border border-gray-300 bg-white px-5 py-4 text-left shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-gray-400 hover:bg-gray-200 hover:shadow-lg active:scale-95 active:bg-gray-300"
               >
@@ -144,7 +152,6 @@ export default function LoginPage() {
           </div>
         </div>
       </form>
-
     </div>
   );
 }

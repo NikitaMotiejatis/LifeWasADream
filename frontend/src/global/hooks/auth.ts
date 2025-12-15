@@ -1,7 +1,6 @@
-
 // TODO: load from .env
-const BACKEND_URL: string = "http://localhost:8081";
-const CSRF_TOKEN_NAME: string = "X-XSRF-TOKEN";
+const BACKEND_URL: string = 'http://localhost:8081';
+const CSRF_TOKEN_NAME: string = 'X-XSRF-TOKEN';
 
 export type LoginInfo = {
   username: string;
@@ -17,18 +16,18 @@ export const useAuth = () => {
   const login = async (loginInfo: LoginInfo) => {
     try {
       const response = await fetch(`${BACKEND_URL}/auth/login`, {
-        method: "POST",
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify(loginInfo),
-        credentials: "include",
+        credentials: 'include',
       });
-      const redirectPath = await response.text();
+      const data = await response.json();
 
-      return redirectPath;
+      return data;
     } catch (e) {
-      console.log("Failed to login: " + e);
+      console.log('Failed to login: ' + e);
       return null;
     }
   };
@@ -36,7 +35,7 @@ export const useAuth = () => {
   const logout = async () => {
     try {
       const _response = await fetch(`${BACKEND_URL}/auth/logout`, {
-        method: "POST",
+        method: 'POST',
         credentials: 'include',
       });
     } catch {}
@@ -46,29 +45,32 @@ export const useAuth = () => {
     fetch(`${BACKEND_URL}/api/${apiPath}`, {
       method: method,
       headers: {
-        [CSRF_TOKEN_NAME]: getCookie(CSRF_TOKEN_NAME) ?? "",
+        [CSRF_TOKEN_NAME]: getCookie(CSRF_TOKEN_NAME) ?? '',
       },
-      body: (bodyJson && bodyJson),
+      body: bodyJson && bodyJson,
       credentials: 'include',
     });
 
-  const authFetchJson = <T>(apiPath: string, method: string, bodyJson?: string) =>
+  const authFetchJson = <T>(
+    apiPath: string,
+    method: string,
+    bodyJson?: string,
+  ) =>
     authFetch(apiPath, method, bodyJson)
-    .then(response => response.json())
-    .then(data => data as T);
-
+      .then(response => response.json())
+      .then(data => data as T);
 
   const userDetailsFetcher = (url: string) =>
     fetch(`${BACKEND_URL}/${url}`, {
-      method: "GET",
+      method: 'GET',
       headers: {
-        [CSRF_TOKEN_NAME]: getCookie(CSRF_TOKEN_NAME) ?? "",
-        Accept: "application/json",
+        [CSRF_TOKEN_NAME]: getCookie(CSRF_TOKEN_NAME) ?? '',
+        Accept: 'application/json',
       },
       credentials: 'include',
     })
-    .then(response => response.json())
-    .then(data => data as UserDetails);
+      .then(response => response.json())
+      .then(data => data as UserDetails);
 
   return {
     login,
@@ -77,17 +79,19 @@ export const useAuth = () => {
     authFetchJson,
     userDetailsFetcher,
   };
-}
+};
 
 function getCookie(name: string): string | null {
-	const nameLenPlus = (name.length + 1);
-	return document.cookie
-		.split(';')
-		.map(c => c.trim())
-		.filter(cookie => {
-			return cookie.substring(0, nameLenPlus) === `${name}=`;
-		})
-		.map(cookie => {
-			return decodeURIComponent(cookie.substring(nameLenPlus));
-		})[0] || null;
+  const nameLenPlus = name.length + 1;
+  return (
+    document.cookie
+      .split(';')
+      .map(c => c.trim())
+      .filter(cookie => {
+        return cookie.substring(0, nameLenPlus) === `${name}=`;
+      })
+      .map(cookie => {
+        return decodeURIComponent(cookie.substring(nameLenPlus));
+      })[0] || null
+  );
 }

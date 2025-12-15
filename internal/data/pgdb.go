@@ -89,6 +89,30 @@ func (pdb PostgresDb) GetUserDetails(username string) (auth.UserDetails, error) 
 	return userDetails, nil
 }
 
+func (pdb PostgresDb) GetUserCurrency(username string) (string, error) {
+    var currency string
+
+    const query = `
+    SELECT c.currency
+    FROM employee e
+    JOIN location l ON e.location_id = l.id
+    JOIN country c ON l.country_code = c.code
+    WHERE e.username = $1
+    LIMIT 1;
+    `
+
+    err := pdb.Db.Get(&currency, query, username)
+    if err != nil {
+        if errors.Is(err, sql.ErrNoRows) {
+            return "", fmt.Errorf("user not found")
+        }
+        slog.Error(err.Error())
+        return "", ErrInternal
+    }
+
+    return strings.ToUpper(currency), nil
+}
+
 // -------------------------------------------------------------------------------------------------
 // order.OrderRepo implimentation ----------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------
