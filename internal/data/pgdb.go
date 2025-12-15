@@ -93,7 +93,7 @@ func (pdb PostgresDb) GetUserDetails(username string) (auth.UserDetails, error) 
 func (pdb PostgresDb) GetUserCurrency(username string) (string, error) {
 	var currency string
 
-    const query = `
+	const query = `
     SELECT country.currency
 	FROM employee
 	JOIN business
@@ -120,7 +120,7 @@ func (pdb PostgresDb) GetUserCurrency(username string) (string, error) {
 }
 
 func (pdb PostgresDb) GetBusinessInfo(username string) (auth.BusinessInfo, error) {
-    var businessInfo auth.BusinessInfo
+	var businessInfo auth.BusinessInfo
 
 	{
 		query := `
@@ -153,7 +153,7 @@ func (pdb PostgresDb) GetBusinessInfo(username string) (auth.BusinessInfo, error
 		}
 	}
 
-    return businessInfo, nil
+	return businessInfo, nil
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -472,12 +472,12 @@ func (pdb PostgresDb) GetPendingRefunds() ([]refund.Refund, error) {
 	`
 
 	var rows []struct {
-		OrderID              int64     `db:"order_id"`
-		Reason               string    `db:"reason"`
-		RequestedAt          time.Time `db:"requested_at"`
-		AmountCents          int64     `db:"amount_cents"`
-		StripePaymentIntentID string   `db:"stripe_payment_intent_id"`
-		PaymentMethod        string    `db:"payment_method"`
+		OrderID               int64     `db:"order_id"`
+		Reason                string    `db:"reason"`
+		RequestedAt           time.Time `db:"requested_at"`
+		AmountCents           int64     `db:"amount_cents"`
+		StripePaymentIntentID string    `db:"stripe_payment_intent_id"`
+		PaymentMethod         string    `db:"payment_method"`
 	}
 
 	if err := pdb.Db.Select(&rows, query); err != nil {
@@ -526,12 +526,12 @@ func (pdb PostgresDb) GetRefundByID(id uint32) (*refund.Refund, error) {
 	`
 
 	var row struct {
-		OrderID              int64     `db:"order_id"`
-		Reason               string    `db:"reason"`
-		RequestedAt          time.Time `db:"requested_at"`
-		AmountCents          int64     `db:"amount_cents"`
-		StripePaymentIntentID string   `db:"stripe_payment_intent_id"`
-		PaymentMethod        string    `db:"payment_method"`
+		OrderID               int64     `db:"order_id"`
+		Reason                string    `db:"reason"`
+		RequestedAt           time.Time `db:"requested_at"`
+		AmountCents           int64     `db:"amount_cents"`
+		StripePaymentIntentID string    `db:"stripe_payment_intent_id"`
+		PaymentMethod         string    `db:"payment_method"`
 	}
 
 	if err := pdb.Db.Get(&row, query, id); err != nil {
@@ -1035,6 +1035,42 @@ func (pdb PostgresDb) CreateReservation(res reservation.Reservation) (int32, err
 }
 
 func (pdb PostgresDb) UpdateReservation(id int32, res reservation.ReservationUpdate) error {
+	var serviceLocationId *int32
+	if res.ServiceId != nil {
+		serviceId, err := strconv.ParseInt(strings.TrimSpace(*res.ServiceId), 10, 32)
+		if err != nil {
+			return ErrInternal
+		}
+
+		const query = `
+		SELECT id
+		FROM service_location
+		WHERE service_id = $1
+		ORDER BY id
+		LIMIT 1
+		`
+		var slId int32
+		err = pdb.Db.Get(&slId, query, int32(serviceId))
+		if err != nil {
+			slog.Error(err.Error())
+			return ErrInternal
+		}
+		serviceLocationId = &slId
+	}
+
+	var actionedBy *int32
+	if res.StaffId != nil {
+		staffIdStr := strings.TrimSpace(*res.StaffId)
+		if staffIdStr != "" && !strings.EqualFold(staffIdStr, "anyone") {
+			staffId, err := strconv.ParseInt(staffIdStr, 10, 32)
+			if err != nil {
+				return ErrInternal
+			}
+			empId := int32(staffId)
+			actionedBy = &empId
+		}
+	}
+
 	var status *string
 	if res.Status != nil {
 		mapped := mapApiReservationStatusToAppointment(*res.Status)
@@ -1047,17 +1083,19 @@ func (pdb PostgresDb) UpdateReservation(id int32, res reservation.ReservationUpd
 	query := `
 	UPDATE appointment
 	SET
-		actioned_by    = COALESCE($2, actioned_by),
-		customer_name  = COALESCE($3, customer_name),
-		customer_phone = COALESCE($4, customer_phone),
-		appointment_at = COALESCE($5, appointment_at),
-		status 		   = COALESCE(UPPER($6)::appointment_status, status)
+		service_location_id = COALESCE($2, service_location_id),
+		actioned_by         = COALESCE($3, actioned_by),
+		customer_name       = COALESCE($4, customer_name),
+		customer_phone      = COALESCE($5, customer_phone),
+		appointment_at      = COALESCE($6, appointment_at),
+		status 		        = COALESCE($7::appointment_status, status)
 	WHERE id = $1
 	`
 
 	_, err := pdb.Db.Exec(query,
 		id,
-		res.StaffId,
+		serviceLocationId,
+		actionedBy,
 		res.CustomerName,
 		res.CustomerPhone,
 		res.Datetime,

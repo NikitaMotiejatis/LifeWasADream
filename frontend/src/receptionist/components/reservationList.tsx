@@ -7,13 +7,15 @@ import ReservationModal from '@/receptionist/components/reservationModal';
 import { EditReservationPanel } from '@/receptionist/components/editReservation/editReservationPanel';
 import Toast from '@/global/components/toast';
 import { useAuth } from '@/global/hooks/auth';
-import useSWR from 'swr';
+import useSWR, { mutate } from 'swr';
 import type { Cents } from '@/receptionist/contexts/cartContext';
+import type { Reservation as EditReservation } from '@/receptionist/components/editReservation/types';
 
 type Service = {
   id: string;
   nameKey: string;
   price: Cents;
+  duration: number;
 };
 
 type Staff = {
@@ -137,6 +139,8 @@ export default function ReservationList() {
   const [reservationIdToEdit, setReservationIdToEdit] = useState<string | null>(
     null,
   );
+  const [selectedReservationToEdit, setSelectedReservationToEdit] =
+    useState<EditReservation | null>(null);
 
   const [toast, setToast] = useState<{
     message: string;
@@ -151,20 +155,76 @@ export default function ReservationList() {
 
   const handleEditClick = (reservation: Reservation) => {
     setReservationIdToEdit(reservation.id);
-    setSelectedReservation(reservation as any);
+    const selectedService = services?.find(s => s.id === reservation.serviceId);
+    setSelectedReservationToEdit({
+      id: reservation.id,
+      service: reservation.serviceId,
+      staff: reservation.staffId,
+      datetime: new Date(reservation.datetime),
+      duration: selectedService?.duration ?? 60,
+      customerName: reservation.customerName,
+      customerPhone: reservation.customerPhone,
+      status: reservation.status as any,
+      notes: '',
+      price: selectedService?.price ?? 0,
+    });
     setEditModalOpen(true);
   };
 
   const handleSaveEdit = async (reservationData: any) => {
     try {
       if (!reservationData) throw new Error('No reservation data received');
-      await authFetch(
+
+      const staffId =
+        reservationData.staffId ??
+        reservationData.staff ??
+        selectedReservationToEdit?.staff ??
+        null;
+      const serviceId =
+        reservationData.serviceId ??
+        reservationData.service ??
+        selectedReservationToEdit?.service ??
+        null;
+
+      const datetimeValue = reservationData.datetime ?? selectedReservationToEdit?.datetime;
+      const datetime =
+        datetimeValue instanceof Date
+          ? datetimeValue.toISOString()
+          : typeof datetimeValue === 'string'
+            ? datetimeValue
+            : null;
+
+      const payload: Record<string, unknown> = {
+        customerName: reservationData.customerName,
+        customerPhone: reservationData.customerPhone,
+        staffId: staffId,
+        serviceId: serviceId,
+        datetime: datetime,
+        status: reservationData.status,
+      };
+
+      for (const key of Object.keys(payload)) {
+        if (payload[key] === null || payload[key] === undefined || payload[key] === '') {
+          delete payload[key];
+        }
+      }
+
+      const res = await authFetch(
         `reservation/${reservationData.id}`,
         'PUT',
-        JSON.stringify(reservationData),
+        JSON.stringify(payload),
       );
+      if (!res.ok) {
+        const errBody = await res.json().catch(() => null);
+        const msg = errBody?.error || `Request failed (${res.status})`;
+        throw new Error(msg);
+      }
+
       setEditModalOpen(false);
+      setSelectedReservationToEdit(null);
+      setReservationIdToEdit(null);
       setToast({ message: t('reservations.toast.updated'), type: 'success' });
+      await mutate(`reservation?${query}`);
     } catch (err: any) {
       console.error(err);
       setToast({ message: `Error: ${err.message}`, type: 'error' });
@@ -231,11 +291,15 @@ export default function ReservationList() {
         }}
       />
 
-      {editModalOpen && reservationIdToEdit && (
+      {editModalOpen && reservationIdToEdit && selectedReservationToEdit && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div
             className="absolute inset-0 bg-black/50"
-            onClick={() => setEditModalOpen(false)}
+            onClick={() => {
+              setEditModalOpen(false);
+              setSelectedReservationToEdit(null);
+              setReservationIdToEdit(null);
+            }}
           />
           <div className="relative max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-2xl bg-white p-7 shadow-2xl">
             <EditReservationPanel
@@ -243,9 +307,13 @@ export default function ReservationList() {
               reservationId={reservationIdToEdit}
               services={services as any}
               staffMembers={staff as any}
-              initialReservation={selectedReservation as any}
+              initialReservation={selectedReservationToEdit as any}
               onSave={handleSaveEdit}
-              onCancel={() => setEditModalOpen(false)}
+              onCancel={() => {
+                setEditModalOpen(false);
+                setSelectedReservationToEdit(null);
+                setReservationIdToEdit(null);
+              }}
             />
           </div>
         </div>
