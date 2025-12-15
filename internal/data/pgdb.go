@@ -900,8 +900,6 @@ func (pdb PostgresDb) GetReservationCounts(filter reservation.ReservationFilter)
 			counts.Completed += row.Count
 		case "cancelled":
 			counts.Cancelled += row.Count
-		case "no_show":
-			counts.NoShow += row.Count
 		case "refund_pending":
 			counts.RefundPending += row.Count
 		}
@@ -1500,8 +1498,6 @@ func mapAppointmentStatusToApi(status string) string {
 		return "completed"
 	case "CANCELLED", "CANCELED":
 		return "cancelled"
-	case "NO_SHOW", "NO-SHOW", "NOSHOW":
-		return "no_show"
 	case "REFUND_PENDING":
 		return "refund_pending"
 	case "REFUNDED":
@@ -1527,9 +1523,6 @@ func mapApiReservationStatusToAppointment(status string) string {
 	case "CONFIRMED":
 		return "PENDING"
 	case "CANCELED":
-		return "CANCELLED"
-	case "NO_SHOW", "NO-SHOW", "NOSHOW":
-		// Best-effort mapping; DB enum does not currently include NO_SHOW.
 		return "CANCELLED"
 
 	// Legacy values from older appointment_status enums.
