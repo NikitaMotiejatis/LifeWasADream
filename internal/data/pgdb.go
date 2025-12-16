@@ -940,7 +940,11 @@ func (pdb PostgresDb) GetProducts(filter order.ProductFilter) ([]order.Product, 
 	var filteredProducts []order.Product
 	{
 		const query = `
-		SELECT item.id, item.name, price_per_unit
+		SELECT 
+			item.id,
+			item.name,
+			price_per_unit,
+			(vat::BIGINT * 100) AS vat
 		FROM item
 		JOIN item_category
 			ON item.id = item_id
@@ -998,7 +1002,7 @@ func (pdb PostgresDb) GetProducts(filter order.ProductFilter) ([]order.Product, 
 func (pdb PostgresDb) GetDefaultVat(locationId int64) (float64, error) {
 	var vat float64
 	query := `
-	SELECT country.vat::DOUBLE PRECISION
+	SELECT (country.vat::BIGINT) * 100 AS vat
 	FROM location
 	JOIN country
 	ON country.code = location.country_code

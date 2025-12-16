@@ -32,50 +32,13 @@ const VatSettingsPage: React.FC = () => {
   );
 
   // Items with their VAT rates (price in CENTS)
-  const [items, setItems] = useState<ItemVatRate[]>([
-    {
-      id: 1,
-      name: t('products.Espresso Shot'),
-      categories: [ t('menu.categories.hot drinks') ],
-      vat: 21,
-      basePrice: 350,
-    },
-    {
-      id: 2,
-      name: t('products.croissant'),
-      categories: [ t('menu.categories.pastries') ],
-      vat: 9,
-      basePrice: 250,
-    },
-    {
-      id: 3,
-      name: t('products.House Blend Coffee'),
-      categories: [ t('stockUpdates.categories.Raw Materials') ],
-      vat: 5,
-      basePrice: 1599,
-    },
-    {
-      id: 4,
-      name: t('products.Iced Latte'),
-      categories: [ t('menu.categories.cold drinks') ],
-      vat: 15,
-      basePrice: 450,
-    },
-    {
-      id: 5,
-      name: t('products.orangeJuice'),
-      categories: [ t('menu.categories.cold drinks') ],
-      vat: 9,
-      basePrice: 150,
-    },
-    {
-      id: 6,
-      name: t('products.Blueberry Muffin'),
-      categories: [ t('menu.categories.pastries') ],
-      vat: 12,
-      basePrice: 699,
-    },
-  ]);
+  const { data: items } = useSWR(
+      `order/products?category=${selectedCategory}`,
+      (url) => authFetchJson<ItemVatRate[]>(url, 'GET'),
+      {
+          revalidateOnMount: true,
+      }
+  );
 
   // Get default VAT rate
   const { data: defaultVatValue } = useSWR(
@@ -85,22 +48,21 @@ const VatSettingsPage: React.FC = () => {
 
   const categories: string[] = [
     'all',
-    ...Array.from(items.reduce(
+    ...Array.from((items ?? []).reduce(
         (acc, item) => acc.union(new Set(item.categories)),
         new Set<string>()
     )),
   ];
 
-  // Filter items
-  const filteredItems = items.filter(item => {
-    return selectedCategory === 'all' 
-      || item.categories.includes(selectedCategory);
-  });
+  const formatVat = (vat?: number) => 
+    vat != undefined 
+        ? (vat / 100).toString() 
+        : '';
 
   // Start editing item
   const handleEditItem = (item: ItemVatRate) => {
     setEditingItemId(item.id);
-    setVatRateInput(item.vat.toString());
+    setVatRateInput(formatVat(item.vat));
     setValidationError(null);
   };
 
@@ -152,17 +114,9 @@ const VatSettingsPage: React.FC = () => {
 
     const newRate = parseFloat(vatRateInput);
 
-    setItems(prev =>
-      prev.map(item => {
-        if (item.id === editingItemId) {
-          return {
-            ...item,
-            vat: newRate,
-          };
-        }
-        return item;
-      }),
-    );
+    // TODO: save item
+    console.log(items?.filter(item => item.id === editingItemId)[0]);
+    console.log(newRate);
 
     handleCancel();
   };
@@ -176,26 +130,14 @@ const VatSettingsPage: React.FC = () => {
 
   // Reset item to default VAT
   const handleResetToDefault = (itemId: number) => {
-    setItems(prev =>
-      prev.map(item => {
-        if (item.id === itemId) {
-          return {
-            ...item,
-            vat: defaultVatValue ?? item.vat,
-          };
-        }
-        return item;
-      }),
-    );
+    // TODO: reset item vat
+    console.log(items?.filter(item => item.id === itemId)[0]);
+    console.log(defaultVatValue);
   };
 
   // Bulk selection
   const handleBulkSelectAll = () => {
-    if (bulkSelection.length === filteredItems.length) {
-      setBulkSelection([]);
-    } else {
-      setBulkSelection(filteredItems.map(item => item.id));
-    }
+    setBulkSelection((items ?? []).map(item => item.id));
   };
 
   const handleBulkSelect = (itemId: number) => {
@@ -218,17 +160,8 @@ const VatSettingsPage: React.FC = () => {
 
     const newRate = parseFloat(bulkVatRate);
 
-    setItems(prev =>
-      prev.map(item => {
-        if (bulkSelection.includes(item.id)) {
-          return {
-            ...item,
-            vat: newRate,
-          };
-        }
-        return item;
-      }),
-    );
+    // TODO: set vat for a bulk
+
     setSelectedCategory('all');
     setBulkSelection([]);
     setBulkVatRate('');
@@ -267,7 +200,7 @@ const VatSettingsPage: React.FC = () => {
                 {t('vat.currentDefault')}
               </p>
               <p className="text-2xl font-bold text-blue-800">
-                {defaultVatValue}%
+                {formatVat(defaultVatValue)}%
               </p>
               <p className="text-sm text-blue-700">{t('vat.appliesToAll')}</p>
             </div>
@@ -343,7 +276,9 @@ const VatSettingsPage: React.FC = () => {
             >
               {categories.map(category => (
                 <option key={category} value={category}>
-                  {category === 'all' ? t('itemVat.allCategories') : category}
+                  {category === 'all' 
+                      ? t('itemVat.allCategories') 
+                      : category[0].toUpperCase() + category.slice(1)}
                 </option>
               ))}
             </select>
@@ -374,8 +309,8 @@ const VatSettingsPage: React.FC = () => {
             <input
               type="checkbox"
               checked={
-                bulkSelection.length === filteredItems.length &&
-                filteredItems.length > 0
+                bulkSelection.length === items?.length &&
+                items?.length > 0
               }
               onChange={handleBulkSelectAll}
               className="rounded border-gray-300"
@@ -399,8 +334,7 @@ const VatSettingsPage: React.FC = () => {
         </tr>
       </thead>
       <tbody className="divide-y divide-gray-200 bg-white">
-        {filteredItems.map(item => {
-          const effectiveRate = item.vat;
+        {(items ?? []).map(item => {
           const isUsingDefault = item.vat === defaultVatValue;
 
           return (
@@ -416,7 +350,7 @@ const VatSettingsPage: React.FC = () => {
               </td>
               
               {/* Item Cell - Flexible Width (will auto-fill space) */}
-              <td className="px-4 py-3"> {/* Removed 'whitespace-nowrap' to allow wrapping */}
+              <td className="px-4 py-3">
                 <div>
                   <p className="font-medium text-gray-900">
                     {item.name}
@@ -462,7 +396,7 @@ const VatSettingsPage: React.FC = () => {
                             : 'bg-purple-100 text-purple-800'
                         }`}
                       >
-                        {effectiveRate}%
+                        {formatVat(item.vat)}%
                       </span>
                       {!isUsingDefault && (
                         <span className="text-xs text-gray-500">
@@ -517,7 +451,7 @@ const VatSettingsPage: React.FC = () => {
     </table>
   </div>
 
-  {filteredItems.length === 0 && (
+  {items?.length === 0 && (
     <div className="py-12 text-center">
       <Package className="mx-auto mb-3 h-12 w-12 text-gray-300" />
       <p className="text-gray-500">{t('itemVat.noItemsFound')}</p>
