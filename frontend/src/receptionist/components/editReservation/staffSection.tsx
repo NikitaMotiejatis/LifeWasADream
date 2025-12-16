@@ -14,6 +14,12 @@ export function StaffSection({
   handleChange,
 }: StaffSectionProps) {
   const { t } = useTranslation();
+  const visibleStaff = reservation.service
+    ? staffMembers.filter(
+        staff =>
+          staff.id === 'anyone' || staff.services.includes(reservation.service),
+      )
+    : staffMembers;
 
   return (
     <div className="rounded-xl bg-white p-5 shadow">
@@ -21,7 +27,7 @@ export function StaffSection({
         {t('reservation.staffMember')}
       </h3>
       <div className="space-y-2">
-        {staffMembers.map(staff => (
+        {visibleStaff.map(staff => (
           <div
             key={staff.id}
             onClick={() => handleChange('staff', staff.id)}

@@ -1140,19 +1140,22 @@ func (pdb PostgresDb) CreateReservation(res reservation.Reservation) (int32, err
 
 	// Resolve staff/employee; fallback to any employee linked to the service.
 	var actionedBy int32
-	if staffId, err := strconv.ParseInt(res.StaffId, 10, 32); err == nil {
-		actionedBy = int32(staffId)
+	staffIdStr := strings.TrimSpace(res.StaffId)
+	if staffIdStr != "" && !strings.EqualFold(staffIdStr, "anyone") {
+		if staffId, err := strconv.ParseInt(staffIdStr, 10, 32); err == nil {
+			actionedBy = int32(staffId)
+		} else {
+			return 0, ErrInternal
+		}
 	} else {
 		const query = `
 		SELECT employee_id
-		FROM service_employee se
-		JOIN service_location sl
-			ON se.service_location_id = sl.id
-		WHERE sl.service_id = $1
+		FROM service_employee
+		WHERE service_location_id = $1
 		ORDER BY employee_id
 		LIMIT 1
 		`
-		err := pdb.Db.Get(&actionedBy, query, serviceId)
+		err := pdb.Db.Get(&actionedBy, query, serviceLocationId)
 		if err != nil {
 			slog.Error(err.Error())
 			return 0, ErrInternal
@@ -1231,6 +1234,37 @@ func (pdb PostgresDb) UpdateReservation(id int32, res reservation.ReservationUpd
 				return ErrInternal
 			}
 			empId := int32(staffId)
+			actionedBy = &empId
+		} else {
+			// If "anyone" (or blank) is requested, pick an employee that can perform the current/new service.
+			finalServiceLocationId := int32(0)
+			if serviceLocationId != nil {
+				finalServiceLocationId = *serviceLocationId
+			} else {
+				const query = `
+				SELECT service_location_id
+				FROM appointment
+				WHERE id = $1
+				LIMIT 1
+				`
+				if err := pdb.Db.Get(&finalServiceLocationId, query, id); err != nil {
+					slog.Error(err.Error())
+					return ErrInternal
+				}
+			}
+
+			const pickQuery = `
+			SELECT employee_id
+			FROM service_employee
+			WHERE service_location_id = $1
+			ORDER BY employee_id
+			LIMIT 1
+			`
+			var empId int32
+			if err := pdb.Db.Get(&empId, pickQuery, finalServiceLocationId); err != nil {
+				slog.Error(err.Error())
+				return ErrInternal
+			}
 			actionedBy = &empId
 		}
 	}
