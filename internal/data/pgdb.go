@@ -172,12 +172,15 @@ func (pdb PostgresDb) GetOrders(filter order.OrderFilter) ([]order.OrderSummary,
 		($1::order_status IS NULL OR status = $1::order_status)
 		AND ($2::timestamp IS NULL OR $2::timestamp <= created_at)
 		AND ($3::timestamp IS NULL OR created_at <= $3::timestamp)
+		AND ($4::bigint IS NULL OR id = $4::bigint)
 	ORDER BY
 		id DESC
+	LIMIT COALESCE($5::bigint, 100)
+	OFFSET COALESCE($6::bigint, 0)
 	`
 
 	orders := []order.OrderSummary{}
-	err := pdb.Db.Select(&orders, query, filter.OrderStatus, filter.From, filter.To)
+	err := pdb.Db.Select(&orders, query, filter.OrderStatus, filter.From, filter.To, filter.Id, filter.Limit, filter.Offset)
 	if err != nil {
 		slog.Error(err.Error())
 		return []order.OrderSummary{}, ErrInternal
@@ -1937,6 +1940,7 @@ func (pdb PostgresDb) CreateReservationRefundRequest(reservationId int32, refund
 
 	return nil
 }
+
 // Prob will delete, needed for testing
 func (pdb PostgresDb) CancelReservationRefundRequest(reservationId int32) error {
 	transaction, err := pdb.Db.Beginx()
