@@ -179,12 +179,10 @@ INSERT INTO item_variation (id, item_id, name, price_difference) VALUES
 (7, 11, 'Small', 0),
 (8, 11, 'Large', 150),
 -- Burger Joint variations
-(9, 15, 'Add Beetroot', 100),
-(10, 16, 'Spicy Sauce', 50),
 (11, 19, 'Small', 0),
 (12, 19, 'Large', 150),
-(13, 23, 'Large', 200),
-(14, 25, 'Chocolate Dip', 100);
+(13, 23, 'Large', 200)
+;
 
 -- Category
 INSERT INTO category (id, name) VALUES
