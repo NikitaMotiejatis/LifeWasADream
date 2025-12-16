@@ -10,7 +10,9 @@ export type RefundStatus =
 
 export interface Refund {
   id: number;
-  orderId: number;
+  orderId?: number;
+  reservationId?: number;
+  refundType: 'order' | 'reservation';
   amount: number;
   reason: string;
   status: RefundStatus;
@@ -78,4 +80,53 @@ export const processRefundAction = async (
   }
 
   return responseBody;
+};
+
+/**
+ * Creates a refund request for a reservation.
+ * @param reservationId The ID of the reservation to request a refund for.
+ * @param refundData The refund request data (name, phone, email, reason).
+ * @returns A promise that resolves when the refund request is created.
+ */
+export const createReservationRefundRequest = async (
+  reservationId: number,
+  refundData: { name: string; phone: string; email: string; reason: string },
+): Promise<void> => {
+  const { authFetch } = useAuth();
+  const response = await authFetch(
+    `reservation/${reservationId}/ask-refund`,
+    'POST',
+    JSON.stringify(refundData),
+  );
+
+  if (!response.ok) {
+    const contentType = response.headers.get('content-type') ?? '';
+    const error = contentType.includes('application/json')
+      ? JSON.stringify(await response.json())
+      : await response.text();
+    throw new Error(`Failed to create reservation refund request: ${error}`);
+  }
+};
+
+/**
+ * Cancels a refund request for a reservation.
+ * @param reservationId The ID of the reservation to cancel the refund request for.
+ * @returns A promise that resolves when the refund request is cancelled.
+ */
+export const cancelReservationRefundRequest = async (
+  reservationId: number,
+): Promise<void> => {
+  const { authFetch } = useAuth();
+  const response = await authFetch(
+    `reservation/${reservationId}/ask-refund/cancel`,
+    'DELETE',
+  );
+
+  if (!response.ok) {
+    const contentType = response.headers.get('content-type') ?? '';
+    const error = contentType.includes('application/json')
+      ? JSON.stringify(await response.json())
+      : await response.text();
+    throw new Error(`Failed to cancel reservation refund request: ${error}`);
+  }
 };

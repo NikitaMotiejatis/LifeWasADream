@@ -14,6 +14,10 @@ import {
   createStripeReservationCheckout,
   redirectToStripeCheckout,
 } from '@/utils/paymentService';
+import {
+  createReservationRefundRequest,
+  cancelReservationRefundRequest,
+} from '@/utils/refundService';
 
 type Service = {
   id: string;
@@ -296,7 +300,7 @@ export default function ReservationList() {
               : undefined
           }
           onClose={() => setModalOpen(false)}
-          onConfirm={async () => {
+          onConfirm={async (refundData) => {
             if (!selectedReservation) return;
 
             const updateStatus = async (status: Reservation['status']) => {
@@ -331,10 +335,16 @@ export default function ReservationList() {
                 redirectToStripeCheckout(checkoutResponse.session_url);
                 return;
               } else if (modalType === 'refund') {
-                await updateStatus('refund_pending');
+                if (!refundData) {
+                  throw new Error('Refund data is required');
+                }
+                await createReservationRefundRequest(
+                  parseInt(selectedReservation.id),
+                  refundData
+                );
                 showToast('reservations.toast.refundRequested');
               } else if (modalType === 'cancel_refund') {
-                await updateStatus('completed');
+                await cancelReservationRefundRequest(parseInt(selectedReservation.id));
                 showToast('reservations.toast.refundCancelled');
               }
 

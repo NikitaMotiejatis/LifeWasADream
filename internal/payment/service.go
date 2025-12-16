@@ -1,7 +1,6 @@
 package payment
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"strconv"
@@ -316,7 +315,6 @@ func (s *PaymentService) VerifyStripePayment(sessionID string) (*Payment, error)
 	// Get payment from database
 	payment, err := s.PaymentRepo.GetPaymentBySessionID(sessionID)
 	if err != nil {
-		// If not found in DB, create a minimal payment record
 		if err == ErrPaymentNotFound {
 			payment = &Payment{
 				StripeSessionID:       sess.ID,
@@ -327,16 +325,33 @@ func (s *PaymentService) VerifyStripePayment(sessionID string) (*Payment, error)
 				Status:                "completed",
 				UpdatedAt:             time.Now().Format(time.RFC3339),
 			}
-			// Extract order_id from metadata
-			if orderID, ok := sess.Metadata["order_id"]; ok {
-				if parsed, err := strconv.ParseInt(orderID, 10, 64); err == nil {
-					payment.OrderID = parsed
-				}
-			}
 
-			if s.OrderStatus != nil && payment.OrderID > 0 {
-				if err := s.OrderStatus.MarkOrderClosed(payment.OrderID); err != nil {
-					fmt.Printf("Warning: failed to mark order as closed: %v\n", err)
+			// Check metadata to determine if this is an order or reservation
+			if sess.Metadata != nil {
+				paymentType, hasType := sess.Metadata["type"]
+
+				if hasType && paymentType == "reservation" {
+					if reservationIDStr, ok := sess.Metadata["reservation_id"]; ok {
+						if parsed, err := strconv.ParseInt(reservationIDStr, 10, 64); err == nil {
+							payment.OrderID = parsed // Using OrderID field for reservation_id
+
+							if s.ReservationStatus != nil && parsed > 0 {
+								if err := s.ReservationStatus.MarkReservationCompleted(int32(parsed)); err != nil {
+									fmt.Printf("Warning: failed to mark reservation as completed: %v\n", err)
+								}
+							}
+						}
+					}
+				} else if orderID, ok := sess.Metadata["order_id"]; ok {
+					if parsed, err := strconv.ParseInt(orderID, 10, 64); err == nil {
+						payment.OrderID = parsed
+
+						if s.OrderStatus != nil && payment.OrderID > 0 {
+							if err := s.OrderStatus.MarkOrderClosed(payment.OrderID); err != nil {
+								fmt.Printf("Warning: failed to mark order as closed: %v\n", err)
+							}
+						}
+					}
 				}
 			}
 
@@ -366,88 +381,28 @@ func (s *PaymentService) VerifyStripePayment(sessionID string) (*Payment, error)
 		}
 	}
 
-	if s.OrderStatus != nil && payment.OrderID > 0 {
-		if err := s.OrderStatus.MarkOrderClosed(payment.OrderID); err != nil {
-			fmt.Printf("Warning: failed to mark order as closed: %v\n", err)
-		}
-	}
+	// Re-fetch session to check metadata for completing order/reservation
+	params2 := &stripe.CheckoutSessionParams{}
+	sess2, err := session.Get(sessionID, params2)
+	if err == nil && sess2.Metadata != nil {
+		paymentType, hasType := sess2.Metadata["type"]
 
-	return payment, nil
-}
-
-// Handles Stripe webhook events
-func (s *PaymentService) HandleStripeWebhook(payload []byte, signature string) error {
-	if s.PaymentRepo == nil {
-		return fmt.Errorf("%w: payment repository not configured", ErrInternal)
-	}
-
-	stripe.Key = s.StripeSecretKey
-
-	var event stripe.Event
-	if err := json.Unmarshal(payload, &event); err != nil {
-		return fmt.Errorf("failed to parse webhook payload: %w", err)
-	}
-
-	// Handle different event types
-	switch event.Type {
-	case "checkout.session.completed":
-		var checkoutSession stripe.CheckoutSession
-		if err := json.Unmarshal(event.Data.Raw, &checkoutSession); err != nil {
-			return fmt.Errorf("failed to parse checkout session: %w", err)
-		}
-
-		stripePaymentIntentID := ""
-		if checkoutSession.PaymentIntent != nil {
-			stripePaymentIntentID = checkoutSession.PaymentIntent.ID
-		}
-
-		if stripePaymentIntentID != "" {
-			err := s.PaymentRepo.UpdatePaymentIntentID(checkoutSession.ID, stripePaymentIntentID)
-			if err != nil && err != ErrPaymentNotFound {
-				return fmt.Errorf("failed to update payment intent: %w", err)
-			}
-		}
-
-		// Update payment status to completed
-		if checkoutSession.PaymentStatus == stripe.CheckoutSessionPaymentStatusPaid {
-			err := s.PaymentRepo.UpdatePaymentStatus(checkoutSession.ID, "completed")
-			if err != nil && err != ErrPaymentNotFound {
-				return fmt.Errorf("failed to update payment status: %w", err)
-			}
-
-			if s.OrderStatus != nil && checkoutSession.Metadata != nil {
-				if orderIDStr, ok := checkoutSession.Metadata["order_id"]; ok {
-					if orderID, err := strconv.ParseInt(orderIDStr, 10, 64); err == nil && orderID > 0 {
-						if err := s.OrderStatus.MarkOrderClosed(orderID); err != nil {
-							fmt.Printf("Warning: failed to mark order as closed: %v\n", err)
+		if hasType && paymentType == "reservation" {
+			if reservationIDStr, ok := sess2.Metadata["reservation_id"]; ok {
+				if reservationID, err := strconv.ParseInt(reservationIDStr, 10, 32); err == nil && reservationID > 0 {
+					if s.ReservationStatus != nil {
+						if err := s.ReservationStatus.MarkReservationCompleted(int32(reservationID)); err != nil {
+							fmt.Printf("Warning: failed to mark reservation as completed: %v\n", err)
 						}
 					}
 				}
 			}
+		} else if s.OrderStatus != nil && payment.OrderID > 0 {
+			if err := s.OrderStatus.MarkOrderClosed(payment.OrderID); err != nil {
+				fmt.Printf("Warning: failed to mark order as closed: %v\n", err)
+			}
 		}
-
-	case "checkout.session.expired":
-		var session stripe.CheckoutSession
-		if err := json.Unmarshal(event.Data.Raw, &session); err != nil {
-			return fmt.Errorf("failed to parse checkout session: %w", err)
-		}
-
-		// Update payment status to cancelled
-		err := s.PaymentRepo.UpdatePaymentStatus(session.ID, "cancelled")
-		if err != nil && err != ErrPaymentNotFound {
-			return fmt.Errorf("failed to update payment status: %w", err)
-		}
-
-	case "payment_intent.payment_failed":
-		var paymentIntent stripe.PaymentIntent
-		if err := json.Unmarshal(event.Data.Raw, &paymentIntent); err != nil {
-			return fmt.Errorf("failed to parse payment intent: %w", err)
-		}
-
-		// Find payment by stripe session and update to failed
-		// For now, we just log it
-		fmt.Printf("Payment failed for payment intent: %s\n", paymentIntent.ID)
 	}
 
-	return nil
+	return payment, nil
 }

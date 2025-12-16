@@ -28,6 +28,8 @@ func (c *ReservationController) Routes() http.Handler {
 	router.Get("/services", c.listServices)
 	router.Get("/staff", c.listStaff)
 	router.Get("/{id}", c.getReservation)
+	router.Post("/{id}/ask-refund", c.askForRefund)
+	router.Delete("/{id}/ask-refund/cancel", c.cancelRefundRequest)
 
 	return router
 }
@@ -336,4 +338,56 @@ func (c *ReservationController) listStaff(w http.ResponseWriter, r *http.Request
 // =====================
 func (c *ReservationController) generateReservationID() string {
 	return "RES-" + time.Now().Format("20060102150405")
+}
+
+// =======================================
+// POST /api/reservation/{id}/ask-refund
+// =======================================
+func (c *ReservationController) askForRefund(w http.ResponseWriter, r *http.Request) {
+	if w == nil || r == nil {
+		return
+	}
+
+	reservationId, err := strconv.ParseInt(r.PathValue("id"), 10, 32)
+	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	var refundData RefundData
+	if err := json.NewDecoder(r.Body).Decode(&refundData); err != nil {
+		http.Error(w, "bad refund data", http.StatusBadRequest)
+		return
+	}
+
+	err = c.ReservationRepo.CreateReservationRefundRequest(int32(reservationId), refundData)
+	if err != nil {
+		http.Error(w, "failed to create refund request", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}
+
+// ==============================================
+// DELETE /api/reservation/{id}/ask-refund/cancel
+// ==============================================
+func (c *ReservationController) cancelRefundRequest(w http.ResponseWriter, r *http.Request) {
+	if w == nil || r == nil {
+		return
+	}
+
+	reservationId, err := strconv.ParseInt(r.PathValue("id"), 10, 32)
+	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	err = c.ReservationRepo.CancelReservationRefundRequest(int32(reservationId))
+	if err != nil {
+		http.Error(w, "failed to cancel refund request", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
 }

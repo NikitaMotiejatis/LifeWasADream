@@ -3,7 +3,6 @@ package payment
 import (
 	"encoding/json"
 	"errors"
-	"io"
 	"log/slog"
 	"net/http"
 
@@ -153,11 +152,6 @@ func (c *PaymentController) handleStripeWebhook(w http.ResponseWriter, r *http.R
 	const MaxBodyBytes = int64(65536)
 	r.Body = http.MaxBytesReader(w, r.Body, MaxBodyBytes)
 
-	payload, err := io.ReadAll(r.Body)
-	if err != nil {
-		http.Error(w, "error reading request body", http.StatusBadRequest)
-		return
-	}
 
 	signature := r.Header.Get("Stripe-Signature")
 	if signature == "" {
@@ -165,13 +159,6 @@ func (c *PaymentController) handleStripeWebhook(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	err = c.Service.HandleStripeWebhook(payload, signature)
-	if err != nil {
-		// Expose only safe erros to client
-		slog.Error("Webhook processing failed", "error", err)
-		http.Error(w, "webhook processing failed", http.StatusBadRequest)
-		return
-	}
 
 	w.WriteHeader(http.StatusOK)
 }
