@@ -8,6 +8,7 @@ type ProductRepo interface {
 // Options for filtering products.
 // If a filter field should be ignored, it should be set to nil pointer.
 type ProductFilter struct {
-	Category *string
-	Includes *string
+	LocationId	int64
+	Category	*string
+	Includes	*string
 }

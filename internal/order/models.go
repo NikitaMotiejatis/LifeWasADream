@@ -22,11 +22,12 @@ type Variation struct {
 }
 
 type Product struct {
-	Id         int64       `json:"id"         db:"id"`
-	Name       string      `json:"name"       db:"name"`
-	BasePrice  int64       `json:"basePrice"  db:"price_per_unit"`
-	Categories []string    `json:"categories"`
-	Variations []Variation `json:"variations"`
+	Id         	int64		`json:"id"         db:"id"`
+	Name       	string		`json:"name"       db:"name"`
+	BasePrice  	int64     	`json:"basePrice"  db:"price_per_unit"`
+	Vat			int64		`json:"vat"        db:"vat"`
+	Categories 	[]string	`json:"categories"`
+	Variations 	[]Variation	`json:"variations"`
 }
 
 type OrderCounts struct {
