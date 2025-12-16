@@ -3,7 +3,7 @@ import DropdownSelector from './dropdownSelector';
 
 export default function BranchSelector() {
   const businessInfo = JSON.parse(localStorage.getItem('businessInfo') || '');
-  const [selected, setSelected] = useState<string>(businessInfo.locations[0].id.toString());
+  const [selected, setSelected] = useState<string>(localStorage.getItem('selectedLocation') ?? businessInfo.locations[0].id.toString());
 
   localStorage.setItem('selectedLocation', selected);
 

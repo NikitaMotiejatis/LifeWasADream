@@ -944,7 +944,7 @@ func (pdb PostgresDb) GetProducts(filter order.ProductFilter) ([]order.Product, 
 			item.id,
 			item.name,
 			price_per_unit,
-			(vat::BIGINT * 100) AS vat
+			(vat * 100)::BIGINT AS vat
 		FROM item
 		JOIN item_category
 			ON item.id = item_id
@@ -952,12 +952,13 @@ func (pdb PostgresDb) GetProducts(filter order.ProductFilter) ([]order.Product, 
 			ON category.id = category_id
 		WHERE 
 			item.status = 'ACTIVE'
-			AND ($1::text IS NULL OR category.name = $1::text)
+			AND item.location_id = $1
+			AND ($2::text IS NULL OR category.name = $2::text)
 		ORDER BY
 			item.name ASC
 		`
 
-		err := pdb.Db.Select(&filteredProducts, query, filter.Category)
+		err := pdb.Db.Select(&filteredProducts, query, filter.LocationId, filter.Category)
 		if err != nil {
 			slog.Error(err.Error())
 			return []order.Product{}, ErrInternal
@@ -999,10 +1000,33 @@ func (pdb PostgresDb) GetProducts(filter order.ProductFilter) ([]order.Product, 
 	return filteredProducts, nil
 }
 
-func (pdb PostgresDb) GetDefaultVat(locationId int64) (float64, error) {
-	var vat float64
+func (pdb PostgresDb) GetCategories(locationId int64) ([]string, error) {
+	categories := []string{}
+
 	query := `
-	SELECT (country.vat::BIGINT) * 100 AS vat
+	SELECT category.name
+	FROM item
+	JOIN item_category
+		ON item_category.item_id = item.id
+	JOIN category
+		ON category.id = item_category.category_id
+	WHERE item.location_id = $1
+	ORDER BY category.name
+	`
+
+	err := pdb.Db.Select(&categories, query, locationId)
+	if err != nil {
+		slog.Error(err.Error())
+		return []string{}, ErrInternal
+	}
+
+	return categories, nil
+}
+
+func (pdb PostgresDb) GetDefaultVat(locationId int64) (int64, error) {
+	var vat int64
+	query := `
+	SELECT (country.vat * 100)::BIGINT AS vat
 	FROM location
 	JOIN country
 	ON country.code = location.country_code
@@ -1016,6 +1040,23 @@ func (pdb PostgresDb) GetDefaultVat(locationId int64) (float64, error) {
 	}
 
 	return vat, nil
+}
+
+func (pdb PostgresDb) SetVat(locationId int64, itemId int64, newVat int64) error {
+	setVatStatement := `
+	UPDATE item
+	SET vat = ($3::DECIMAL(6, 2) * 0.01::DECIMAL(6, 2))::DECIMAL(4, 2)
+	WHERE
+		id = $2
+		AND location_id = $1
+	`
+	err := pdb.Db.QueryRow(setVatStatement, locationId, itemId, newVat).Err()
+	if err != nil {
+		slog.Error(err.Error())
+		return ErrInternal
+	}
+
+	return nil
 }
 
 // -------------------------------------------------------------------------------------------------

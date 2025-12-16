@@ -14,13 +14,11 @@ type ProductGridProps = {
 export default function ProductGrid({ onProductClick }: ProductGridProps) {
   const { t } = useTranslation();
   const { addToCart } = useCart();
+  const { authFetchJson } = useAuth();
 
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [search, setSearch] = useState('');
-  // TODO: load from backend
-  const [category, setCategory] = useState<
-    'all' | 'hot drinks' | 'cold drinks' | 'pastries' | 'popular'
-  >('all');
+  const [category, setCategory] = useState<string>('all');
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(6);
 
@@ -31,6 +29,16 @@ export default function ProductGrid({ onProductClick }: ProductGridProps) {
     }
     setSelectedProduct(product);
   };
+
+  const locationId = parseInt(localStorage.getItem('selectedLocation') ?? '');
+  const { data: categories } = useSWR(
+    `product/category?locationId=${locationId}`,
+    (url) => authFetchJson<string[]>(url, 'GET')
+        .then(categories => [ 'all' ].concat(categories)),
+    {
+      revalidateOnMount: true,
+    }
+  );
 
   return (
     <div>
@@ -56,9 +64,7 @@ export default function ProductGrid({ onProductClick }: ProductGridProps) {
         </div>
 
         <div className="flex flex-wrap gap-3">
-          {(
-            ['all', 'popular', 'hot drinks', 'cold drinks', 'pastries'] as const
-          ).map(cat => (
+          {(categories || []).map(cat => (
             <button
               key={cat}
               onClick={() => { setCategory(cat); setPage(0); }}
@@ -68,7 +74,7 @@ export default function ProductGrid({ onProductClick }: ProductGridProps) {
                   : 'border border-gray-400 hover:bg-gray-100'
               }`}
             >
-              {t(`menu.categories.${cat}`)}
+              {cat[0].toUpperCase() + cat.slice(1)}
             </button>
           ))}
         </div>
@@ -163,8 +169,10 @@ function Items({
   const { formatPrice, isPaymentStarted } = useCart();
   const { authFetchJson } = useAuth();
 
+  const locationId = parseInt(localStorage.getItem('selectedLocation') ?? '');
+
   const { data: filteredProducts } = useSWR(
-    `order/products?category=${category}`,
+    `order/products?category=${category}&locationId=${locationId}`,
     (url: string) => authFetchJson<Product[]>(url, 'GET'),
     {
       suspense: true,

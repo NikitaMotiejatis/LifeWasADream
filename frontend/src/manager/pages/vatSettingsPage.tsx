@@ -18,7 +18,7 @@ const VatSettingsPage: React.FC = () => {
   const { t } = useTranslation();
   const { formatPrice } = useCurrency();
 
-  const { authFetchJson } = useAuth();
+  const { authFetch, authFetchJson } = useAuth();
   const locationId = parseInt(localStorage.getItem('selectedLocation') ?? '');
 
   const [editingItemId, setEditingItemId] = useState<number | null>(null);
@@ -32,31 +32,35 @@ const VatSettingsPage: React.FC = () => {
   );
 
   // Items with their VAT rates (price in CENTS)
-  const { data: items } = useSWR(
-      `order/products?category=${selectedCategory}`,
-      (url) => authFetchJson<ItemVatRate[]>(url, 'GET'),
-      {
-          revalidateOnMount: true,
-      }
+  const { data: items, mutate: reloadItems } = useSWR(
+    `product?locationId=${locationId}&category=${selectedCategory}`,
+    (url) => authFetchJson<ItemVatRate[]>(url, 'GET'),
+    {
+      revalidateOnMount: true,
+    }
   );
 
   // Get default VAT rate
   const { data: defaultVatValue } = useSWR(
-    `tax/default?locationId=${locationId}`,
+    `product/tax/default?locationId=${locationId}`,
     (url) => authFetchJson<number>(url, 'GET'),
+    {
+      revalidateOnMount: true,
+    }
   );
 
-  const categories: string[] = [
-    'all',
-    ...Array.from((items ?? []).reduce(
-        (acc, item) => acc.union(new Set(item.categories)),
-        new Set<string>()
-    )),
-  ];
+  const { data: categories } = useSWR(
+    `product/category?locationId=${locationId}`,
+    (url) => authFetchJson<string[]>(url, 'GET')
+        .then(categories => [ 'all' ].concat(categories)),
+    {
+      revalidateOnMount: true,
+    }
+  );
 
   const formatVat = (vat?: number) => 
     vat != undefined 
-        ? (vat / 100).toString() 
+        ? (vat / 100).toFixed(2) 
         : '';
 
   // Start editing item
@@ -103,7 +107,7 @@ const VatSettingsPage: React.FC = () => {
   };
 
   // Save item changes
-  const handleSaveItem = () => {
+  const handleSaveItem = async () => {
     if (editingItemId === null) return;
 
     const validation = validateRate(vatRateInput);
@@ -112,11 +116,15 @@ const VatSettingsPage: React.FC = () => {
       return;
     }
 
-    const newRate = parseFloat(vatRateInput);
-
-    // TODO: save item
-    console.log(items?.filter(item => item.id === editingItemId)[0]);
-    console.log(newRate);
+    await authFetch(
+      `product/tax?locationId=${locationId}`,
+      'PATCH',
+      JSON.stringify({
+        id: editingItemId,
+        vat: 100 * parseFloat(vatRateInput),
+      }),
+    );
+    await reloadItems();
 
     handleCancel();
   };
@@ -129,10 +137,20 @@ const VatSettingsPage: React.FC = () => {
   };
 
   // Reset item to default VAT
-  const handleResetToDefault = (itemId: number) => {
-    // TODO: reset item vat
-    console.log(items?.filter(item => item.id === itemId)[0]);
-    console.log(defaultVatValue);
+  const handleResetToDefault = async (itemId: number) => {
+    if (defaultVatValue === undefined) {
+      return;
+    }
+
+    await authFetch(
+      `product/tax?locationId=${locationId}`,
+      'PATCH',
+      JSON.stringify({
+        id: itemId,
+        vat: defaultVatValue,
+      }),
+    );
+    await reloadItems();
   };
 
   // Bulk selection
@@ -149,7 +167,7 @@ const VatSettingsPage: React.FC = () => {
   };
 
   // Apply bulk VAT rate
-  const handleBulkApply = () => {
+  const handleBulkApply = async () => {
     if (bulkSelection.length === 0) return;
 
     const validation = validateRate(bulkVatRate);
@@ -158,9 +176,17 @@ const VatSettingsPage: React.FC = () => {
       return;
     }
 
-    const newRate = parseFloat(bulkVatRate);
-
-    // TODO: set vat for a bulk
+    bulkSelection.forEach(async (id) => {
+      await authFetch(
+        `product/tax?locationId=${locationId}`,
+        'PATCH',
+        JSON.stringify({
+          id,
+          vat: 100 * parseFloat(bulkVatRate),
+        }),
+      );
+      await reloadItems();
+    });
 
     setSelectedCategory('all');
     setBulkSelection([]);
@@ -194,7 +220,6 @@ const VatSettingsPage: React.FC = () => {
         {/* Default VAT Section */}
         <div className="mb-6 rounded-lg border border-blue-200 bg-blue-50 p-4">
           <div className="flex items-center gap-3">
-            <Percent className="h-5 w-5 text-blue-600" />
             <div>
               <p className="text-sm font-medium text-blue-900">
                 {t('vat.currentDefault')}
@@ -224,7 +249,6 @@ const VatSettingsPage: React.FC = () => {
               <div className="flex flex-col gap-3 md:flex-row md:items-center">
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
-                    <Percent className="h-4 w-4 text-gray-500" />
                     <input
                       type="text"
                       inputMode="decimal"
@@ -274,7 +298,7 @@ const VatSettingsPage: React.FC = () => {
               onChange={e => setSelectedCategory(e.target.value)}
               className="w-full appearance-none rounded-lg border-2 border-gray-300 bg-white px-4 py-3 pr-10 text-base transition-colors hover:border-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none"
             >
-              {categories.map(category => (
+              {categories?.map(category => (
                 <option key={category} value={category}>
                   {category === 'all' 
                       ? t('itemVat.allCategories') 

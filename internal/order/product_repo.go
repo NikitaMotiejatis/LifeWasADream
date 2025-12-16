@@ -2,7 +2,9 @@ package order
 
 type ProductRepo interface {
 	GetProducts(filter ProductFilter) ([]Product, error)
-	GetDefaultVat(locationId int64) (float64, error)
+	GetCategories(locationId int64) ([]string, error)
+	GetDefaultVat(locationId int64) (int64, error)
+	SetVat(locationId int64, itemId int64, newVat int64) error
 }
 
 // Options for filtering products.
