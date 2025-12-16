@@ -602,7 +602,8 @@
       "Staff": "Darbuotojas (-a)",
       "Colorist": "Dažytojas (-a)",
       "Nail Technician": "Nagų meistras (-ė)",
-      "Any available staff": "Bet kuris darbuotojas (-a)"
+      "Any available staff": "Bet kuris darbuotojas (-a)",
+      "CASHIER": "Darbuotojas (-a)"
     },
 
     "dateTime": "Data ir laikas",
@@ -1098,6 +1099,23 @@
     }
   },
   "somethingWentWrong": "Kažkas nutiko ne taip.",
+  "payment": {
+    "payWithStripe": "Mokėti su Stripe",
+    "processing": "Vykdomas užsakymas...",
+    "redirecting": "Nukreipiama į mokėjimą...",
+    "error": "Mokėjimas nepavyko, bandykite dar kartą.",
+    "verifying": "Tvirtinamas mokėjimas...",
+    "verificationFailed": "Tvirtinimas nepavyko",
+    "backToOrders": "Atgal į užsakymus",
+    "success": "Mokėjimas sėkmingas!",
+    "successMessage": "Jūsų mokėjimas įvyko sėkmingai.",
+    "orderId": "Užsakymo ID",
+    "viewOrders": "Žiūrėti užsakymus",
+    "newOrder": "Sukurti naują užsakymą",
+    "cancelled": "Mokėjimas atšauktas",
+    "cancelledMessage": "Jūsų mokėjimas buvo atšauktas, niekas nenuskaičiuota nuo jūsų sąskaitos.",
+    "tryAgain": "Pabandyti per naują"
+  },
   "itemVat": {
     "searchPlaceholder": "Ieškoti produktų...",
     "allCategories": "Visos kategorijos",
@@ -1145,5 +1163,9 @@
   "Westside Branch": "Vakarinis filialas",
   "Failed to fetch pending refunds:": "Nepavyko užkrauti laukiančių pinigų grąžinimų:",
   "Failed to approve refund.": "Nepavyko patvirtinti pinigų grąžinimo.",
-  "Failed to reject refund.": "Nepavyko atmesti pinigų grąžinimo."
+  "Failed to reject refund.": "Nepavyko atmesti pinigų grąžinimo.",
+  "All": "Visi",
+  "Beverages": "Gėrimai",
+  "Burgers": "Burgeriai",
+  "Sides": "Garnyrai"
 }
