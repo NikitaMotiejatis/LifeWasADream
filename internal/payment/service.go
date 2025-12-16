@@ -192,11 +192,15 @@ func (s *PaymentService) CreateStripeReservationCheckoutSession(req StripeReserv
 	if amountCents <= 0 {
 		return nil, ErrInvalidAmount
 	}
-	if currency == "" {
+	if currency == "" && strings.TrimSpace(req.Currency) == "" {
 		return nil, ErrInvalidCurrency
 	}
 
 	stripeCurrency := strings.ToLower(currency)
+	if strings.TrimSpace(req.Currency) != "" {
+		stripeCurrency = strings.ToLower(strings.TrimSpace(req.Currency))
+		currency = stripeCurrency
+	}
 
 	stripe.Key = s.StripeSecretKey
 
@@ -276,9 +280,7 @@ func (s *PaymentService) CreateStripeReservationCheckoutSession(req StripeReserv
 		stripePaymentIntentID = sess.PaymentIntent.ID
 	}
 
-	// Store payment record in database - using order_id field for reservation_id
-	// This is a workaround since the payment table currently only has order_id
-	// In production, you'd want to modify the schema to support both
+	// HACK: Store payment recod, for both reservation and order
 	payment := Payment{
 		OrderID:               int64(req.ReservationID),
 		AmountCents:           amountCents,

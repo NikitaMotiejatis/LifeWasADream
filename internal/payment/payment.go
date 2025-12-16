@@ -29,6 +29,7 @@ type StripeCheckoutRequest struct {
 // Request to create a Stripe checkout session for a reservation
 type StripeReservationCheckoutRequest struct {
 	ReservationID int32 `json:"reservation_id" binding:"required"`
+	Currency      string `json:"currency,omitempty"`
 }
 
 // Contains the Stripe session URL
