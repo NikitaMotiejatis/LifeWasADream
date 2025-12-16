@@ -33,11 +33,13 @@ export default function ProductGrid({ onProductClick }: ProductGridProps) {
   const locationId = parseInt(localStorage.getItem('selectedLocation') ?? '');
   const { data: categories } = useSWR(
     `product/category?locationId=${locationId}`,
-    (url) => authFetchJson<string[]>(url, 'GET')
-        .then(categories => [ 'all' ].concat(categories)),
+    url =>
+      authFetchJson<string[]>(url, 'GET').then(categories =>
+        ['all'].concat(categories),
+      ),
     {
       revalidateOnMount: true,
-    }
+    },
   );
 
   return (
@@ -49,13 +51,19 @@ export default function ProductGrid({ onProductClick }: ProductGridProps) {
             type="text"
             placeholder={t('menu.searchPlaceholder')}
             value={search}
-            onChange={e => { setSearch(e.target.value); setPage(0); }}
+            onChange={e => {
+              setSearch(e.target.value);
+              setPage(0);
+            }}
             className="mb-4 w-full rounded-lg border border-gray-300 px-4 py-2 pr-10 text-sm placeholder-gray-500 transition placeholder:leading-tight focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
           />
           <SearchIcon className="pointer-events-none absolute top-5 right-2.5 h-5 w-5 -translate-y-1/2 text-gray-400" />
           {search && (
             <button
-              onClick={() => { setSearch(''); setPage(0); }}
+              onClick={() => {
+                setSearch('');
+                setPage(0);
+              }}
               className="absolute top-5 right-2 -translate-y-1/2 rounded-full bg-gray-200 px-2 py-0.5 text-xs font-bold text-gray-600 hover:bg-gray-300"
             >
               ×
@@ -67,14 +75,19 @@ export default function ProductGrid({ onProductClick }: ProductGridProps) {
           {(categories || []).map(cat => (
             <button
               key={cat}
-              onClick={() => { setCategory(cat); setPage(0); }}
+              onClick={() => {
+                setCategory(cat);
+                setPage(0);
+              }}
               className={`rounded-lg px-4 py-2 text-xs font-medium transition ${
                 category === cat
                   ? 'bg-blue-600 text-white hover:bg-blue-700'
                   : 'border border-gray-400 hover:bg-gray-100'
               }`}
             >
-              {cat[0].toUpperCase() + cat.slice(1)}
+              {i18n.exists(`${cat[0].toUpperCase() + cat.slice(1)}`)
+                ? t(`${cat[0].toUpperCase() + cat.slice(1)}`)
+                : cat[0].toUpperCase() + cat.slice(1)}
             </button>
           ))}
         </div>
@@ -103,7 +116,9 @@ export default function ProductGrid({ onProductClick }: ProductGridProps) {
       <div className="mt-4 flex items-center justify-between rounded-lg border border-gray-200 bg-white p-3">
         <div className="flex items-center gap-2">
           <span className="text-sm text-gray-600">{t('common.page')}</span>
-          <span className="rounded bg-gray-100 px-2 py-1 text-sm font-semibold">{page + 1}</span>
+          <span className="rounded bg-gray-100 px-2 py-1 text-sm font-semibold">
+            {page + 1}
+          </span>
         </div>
         <div className="flex items-center gap-3">
           <label className="text-sm text-gray-600">
@@ -111,10 +126,15 @@ export default function ProductGrid({ onProductClick }: ProductGridProps) {
             <select
               className="ml-2 rounded border border-gray-300 px-2 py-1 text-sm"
               value={pageSize}
-              onChange={e => { setPageSize(parseInt(e.target.value) || 12); setPage(0); }}
+              onChange={e => {
+                setPageSize(parseInt(e.target.value) || 12);
+                setPage(0);
+              }}
             >
               {[6, 12, 24].map(s => (
-                <option key={s} value={s}>{s}</option>
+                <option key={s} value={s}>
+                  {s}
+                </option>
               ))}
             </select>
           </label>
@@ -191,7 +211,9 @@ function Items({
   const normalizedIncludes = includes.trim().toLowerCase();
   const searched = normalizedIncludes
     ? filteredProducts.filter(p =>
-        (p.nameKey ? t(p.nameKey) : p.name).toLowerCase().includes(normalizedIncludes),
+        (p.nameKey ? t(p.nameKey) : p.name)
+          .toLowerCase()
+          .includes(normalizedIncludes),
       )
     : filteredProducts;
 

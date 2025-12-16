@@ -597,7 +597,8 @@
       "Staff": "Staff",
       "Colorist": "Colorist",
       "Nail Technician": "Nail Technician",
-      "Any available staff": "Any available staff"
+      "Any available staff": "Any available staff",
+      "CASHIER": "Staff"
     },
     "staffMember": "Staff Member",
     "staffServiceTitle": "Select Staff & Service",
@@ -1124,5 +1125,9 @@
   "Westside Branch": "Westside Branch",
   "Failed to fetch pending refunds:": "Failed to fetch pending refunds:",
   "Failed to approve refund.": "Failed to approve refund.",
-  "Failed to reject refund.": "Failed to reject refund."
+  "Failed to reject refund.": "Failed to reject refund.",
+  "All": "All",
+  "Beverages": "Beverages",
+  "Burgers": "Burgers",
+  "Sides": "Sides"
 }
