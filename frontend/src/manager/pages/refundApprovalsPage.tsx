@@ -201,17 +201,35 @@ export default function RefundApprovalsPage() {
             {t('manager.refunds.noRefunds')}
           </p>
         ) : (
-          pendingRequests.map(request => (
-            <div
-              key={request.id}
-              className="rounded-lg border-l-4 border-yellow-500 bg-white p-6 shadow-md"
-            >
+          pendingRequests.map(request => {
+            const entityId =
+              request.refundType === 'reservation'
+                ? request.reservationId || request.id
+                : request.orderId || request.id;
+            const entityLabel =
+              request.refundType === 'reservation'
+                ? t('reservationId', { defaultValue: 'Reservation ID' })
+                : t('orderId', { defaultValue: 'Order ID' });
+            const entityTitle =
+              request.refundType === 'reservation'
+                ? t('manager.refunds.card.reservationTitle', {
+                    reservationId: entityId,
+                    defaultValue: `Reservation #${entityId}`,
+                  })
+                : t('manager.refunds.card.orderTitle', {
+                    orderId: entityId,
+                    defaultValue: `Order #${entityId}`,
+                  });
+
+            return (
+              <div
+                key={`${request.refundType}-${request.id}`}
+                className="rounded-lg border-l-4 border-yellow-500 bg-white p-6 shadow-md"
+              >
               <div className="mb-4 flex items-start justify-between">
                 <div>
                   <h2 className="text-lg font-semibold text-gray-900">
-                    {t('manager.refunds.card.orderTitle', {
-                      orderId: request.orderId,
-                    })}
+                    {entityTitle}
                   </h2>
                   <p className="text-xs text-gray-500">
                     {t('manager.refunds.card.requestMeta', {
@@ -255,7 +273,7 @@ export default function RefundApprovalsPage() {
                   {t('orderDetailsSimpl')}
                 </p>
                 <p className="text-sm text-gray-700">
-                  {t('orderId') + ' ' + request.orderId}
+                  {entityLabel + ' ' + entityId}
                 </p>
 
                 <p className="text-sm text-gray-700">
@@ -273,7 +291,8 @@ export default function RefundApprovalsPage() {
                 </button>
               </div>
             </div>
-          ))
+            );
+          })
         )}
       </section>
 

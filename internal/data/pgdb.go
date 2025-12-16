@@ -454,7 +454,20 @@ func (pdb PostgresDb) CancelRefundRequest(orderId int64) error {
 // -------------------------------------------------------------------------------------------------
 
 func (pdb PostgresDb) GetPendingRefunds() ([]refund.Refund, error) {
-	const orderQuery = `
+	paymentQuery := `
+	SELECT DISTINCT ON (order_id)
+		order_id,
+		COALESCE(stripe_payment_intent_id, '') AS stripe_payment_intent_id,
+		COALESCE(payment_method::TEXT, '') AS payment_method
+	FROM payment
+	ORDER BY
+		order_id,
+		(status = 'COMPLETED') DESC,
+		updated_at DESC,
+		id DESC
+	`
+
+	orderQuery := fmt.Sprintf(`
 	SELECT
 		od.id AS id,
 		od.id AS order_id,
@@ -470,12 +483,12 @@ func (pdb PostgresDb) GetPendingRefunds() ([]refund.Refund, error) {
 		ON odetail.id = od.id
 	JOIN refund_data rd
 		ON rd.order_id = od.id
-	LEFT JOIN payment p
+	LEFT JOIN (%s) p
 		ON p.order_id = od.id
 	WHERE od.status = 'REFUND_PENDING'
-	`
+	`, paymentQuery)
 
-	const reservationQuery = `
+	reservationQuery := fmt.Sprintf(`
 	SELECT
 		a.id AS id,
 		0 AS order_id,
@@ -489,14 +502,18 @@ func (pdb PostgresDb) GetPendingRefunds() ([]refund.Refund, error) {
 	FROM appointment a
 	JOIN service_location sl
 		ON a.service_location_id = sl.id
-	LEFT JOIN appointment_bill ab
+	LEFT JOIN (
+		SELECT appointment_id, MAX(created_at) AS created_at
+		FROM appointment_bill
+		GROUP BY appointment_id
+	) ab
 		ON ab.appointment_id = a.id
 	JOIN reservation_refund_data rrd
 		ON rrd.appointment_id = a.id
-	LEFT JOIN payment p
+	LEFT JOIN (%s) p
 		ON p.order_id = a.id
 	WHERE a.status = 'REFUND_PENDING'
-	`
+	`, paymentQuery)
 
 	combinedQuery := orderQuery + " UNION ALL " + reservationQuery + " ORDER BY requested_at DESC"
 
@@ -545,7 +562,20 @@ func (pdb PostgresDb) GetPendingRefunds() ([]refund.Refund, error) {
 }
 
 func (pdb PostgresDb) GetRefundByID(id uint32) (*refund.Refund, error) {
-	const orderQuery = `
+	paymentQuery := `
+	SELECT DISTINCT ON (order_id)
+		order_id,
+		COALESCE(stripe_payment_intent_id, '') AS stripe_payment_intent_id,
+		COALESCE(payment_method::TEXT, '') AS payment_method
+	FROM payment
+	ORDER BY
+		order_id,
+		(status = 'COMPLETED') DESC,
+		updated_at DESC,
+		id DESC
+	`
+
+	orderQuery := fmt.Sprintf(`
 	SELECT
 		od.id AS id,
 		od.id AS order_id,
@@ -561,14 +591,14 @@ func (pdb PostgresDb) GetRefundByID(id uint32) (*refund.Refund, error) {
 		ON odetail.id = od.id
 	JOIN refund_data rd
 		ON rd.order_id = od.id
-	LEFT JOIN payment p
+	LEFT JOIN (%s) p
 		ON p.order_id = od.id
 	WHERE od.id = $1
 		AND od.status = 'REFUND_PENDING'
 	LIMIT 1
-	`
+	`, paymentQuery)
 
-	const reservationQuery = `
+	reservationQuery := fmt.Sprintf(`
 	SELECT
 		a.id AS id,
 		0 AS order_id,
@@ -582,16 +612,20 @@ func (pdb PostgresDb) GetRefundByID(id uint32) (*refund.Refund, error) {
 	FROM appointment a
 	JOIN service_location sl
 		ON a.service_location_id = sl.id
-	LEFT JOIN appointment_bill ab
+	LEFT JOIN (
+		SELECT appointment_id, MAX(created_at) AS created_at
+		FROM appointment_bill
+		GROUP BY appointment_id
+	) ab
 		ON ab.appointment_id = a.id
 	JOIN reservation_refund_data rrd
 		ON rrd.appointment_id = a.id
-	LEFT JOIN payment p
+	LEFT JOIN (%s) p
 		ON p.order_id = a.id
 	WHERE a.id = $1
 		AND a.status = 'REFUND_PENDING'
 	LIMIT 1
-	`
+	`, paymentQuery)
 
 	var row struct {
 		ID                    int64     `db:"id"`
