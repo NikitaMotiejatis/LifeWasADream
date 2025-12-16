@@ -8,6 +8,7 @@ import (
 	"dreampos/internal/payment"
 	"dreampos/internal/refund"
 	"dreampos/internal/reservation"
+	"dreampos/internal/product"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -97,6 +98,14 @@ func setupApiRoutes(router *chi.Mux, config config.Config, authMiddleware func(h
 		}
 
 		apiRouter.With(authMiddleware).Mount("/refund", c.Routes())
+	}
+
+	{
+		c := product.ProductController{
+			ProductRepo: db,
+		}
+
+		apiRouter.With(authMiddleware).Mount("/product", c.Routes())
 	}
 
 	router.Mount("/api", apiRouter)

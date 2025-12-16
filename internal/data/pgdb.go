@@ -937,14 +937,14 @@ func (pdb PostgresDb) GetOrderItems(orderId int64) ([]order.Item, error) {
 // -------------------------------------------------------------------------------------------------
 
 func (pdb PostgresDb) GetProducts(filter order.ProductFilter) ([]order.Product, error) {
-	if filter.Category == nil {
-		filter.Category = new(string)
-	}
-
 	var filteredProducts []order.Product
 	{
 		const query = `
-		SELECT item.id, item.name, price_per_unit
+		SELECT 
+			item.id,
+			item.name,
+			price_per_unit,
+			(vat * 100)::BIGINT AS vat
 		FROM item
 		JOIN item_category
 			ON item.id = item_id
@@ -952,12 +952,13 @@ func (pdb PostgresDb) GetProducts(filter order.ProductFilter) ([]order.Product, 
 			ON category.id = category_id
 		WHERE 
 			item.status = 'ACTIVE'
-			AND ($1 = '' OR category.name = $1)
+			AND item.location_id = $1
+			AND ($2::text IS NULL OR category.name = $2::text)
 		ORDER BY
 			item.name ASC
 		`
 
-		err := pdb.Db.Select(&filteredProducts, query, *filter.Category)
+		err := pdb.Db.Select(&filteredProducts, query, filter.LocationId, filter.Category)
 		if err != nil {
 			slog.Error(err.Error())
 			return []order.Product{}, ErrInternal
@@ -968,8 +969,8 @@ func (pdb PostgresDb) GetProducts(filter order.ProductFilter) ([]order.Product, 
 		SELECT category.name
 		FROM item_category
 		JOIN category
-				ON item_category.item_id = $1
-				AND category.id = category_id
+			ON item_category.item_id = $1
+			AND category.id = category_id
 		`
 
 		for i := range filteredProducts {
@@ -997,6 +998,65 @@ func (pdb PostgresDb) GetProducts(filter order.ProductFilter) ([]order.Product, 
 	}
 
 	return filteredProducts, nil
+}
+
+func (pdb PostgresDb) GetCategories(locationId int64) ([]string, error) {
+	categories := []string{}
+
+	query := `
+	SELECT category.name
+	FROM item
+	JOIN item_category
+		ON item_category.item_id = item.id
+	JOIN category
+		ON category.id = item_category.category_id
+	WHERE item.location_id = $1
+	ORDER BY category.name
+	`
+
+	err := pdb.Db.Select(&categories, query, locationId)
+	if err != nil {
+		slog.Error(err.Error())
+		return []string{}, ErrInternal
+	}
+
+	return categories, nil
+}
+
+func (pdb PostgresDb) GetDefaultVat(locationId int64) (int64, error) {
+	var vat int64
+	query := `
+	SELECT (country.vat * 100)::BIGINT AS vat
+	FROM location
+	JOIN country
+	ON country.code = location.country_code
+	WHERE location.id = $1
+	LIMIT 1
+	`
+	err := pdb.Db.Get(&vat, query, locationId)
+	if err != nil {
+		slog.Error(err.Error())
+		return 0, ErrInternal
+	}
+
+	return vat, nil
+}
+
+func (pdb PostgresDb) SetVat(locationId int64, itemId int64, newVat int64) error {
+	setVatStatement := `
+	UPDATE item
+	SET vat = ($3::DECIMAL(6, 2) * 0.01::DECIMAL(6, 2))::DECIMAL(4, 2)
+	WHERE
+		id = $2
+		AND location_id = $1
+	`
+	err := pdb.Db.QueryRow(setVatStatement, locationId, itemId, newVat).Err()
+	if err != nil {
+		slog.Error(err.Error())
+		return ErrInternal
+	}
+
+	return nil
 }
 
 // -------------------------------------------------------------------------------------------------

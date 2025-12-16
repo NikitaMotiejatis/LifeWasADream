@@ -308,10 +308,18 @@ func (c OrderController) getProducts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	filter := ProductFilter{}
+
+	locationId, err := strconv.ParseInt(r.URL.Query().Get("locationId"), 10, 64)
+	if err != nil {
+		http.Error(w, "failed to get location id", http.StatusBadRequest)
+		return
+	}
+	filter.LocationId = locationId
+
 	category := r.URL.Query().Get("category")
 	includes := r.URL.Query().Get("includes")
 
-	filter := ProductFilter{}
 	if category != "" && category != "all" {
 		filter.Category = &category
 	}
