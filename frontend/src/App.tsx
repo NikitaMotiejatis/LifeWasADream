@@ -4,6 +4,7 @@ import {
   Navigate,
 } from 'react-router-dom';
 import LoginPage from '@/global/pages/loginPage';
+import UnauthorizedPage from '@/global/pages/unauthorizedPage';
 import NewOrderPage from '@/receptionist/pages/newOrderPage';
 import OrdersPage from '@/receptionist/pages/ordersList';
 import NewReservationPage from '@/receptionist/pages/newReservationPage';
@@ -25,32 +26,64 @@ import PaymentCancelPage from '@/receptionist/pages/paymentCancelPage';
 import ReservationPaymentSuccessPage from '@/receptionist/pages/reservationPaymentSuccessPage';
 import ReservationPaymentCancelPage from '@/receptionist/pages/reservationPaymentCancelPage';
 import VatSettingsPage from '@/manager/pages/vatSettingsPage'; 
+import ProtectedRoute from '@/global/components/protectedRoute';
+
+const POS_ROLES = ['CASHIER', 'RECEPTIONIST'];
+const MANAGER_ROLES = ['OWNER', 'MANAGER'];
+const STOCK_ROLES = ['CLERK'];
+const SUPPLIER_ROLES = ['SUPPLIER'];
 
 const router = createBrowserRouter(
   [
     { path: '/', element: <Navigate to="/login" /> },
     { path: '/login', element: <LoginPage /> },
-    { path: '/newOrder', element: <NewOrderPage /> },
-    { path: '/orders', element: <OrdersPage /> },
-    { path: '/newReservation', element: <NewReservationPage /> },
-    { path: '/reservations', element: <ReservationsPage /> },
-    { path: '/stockUpdates', element: <StockUpdatesPage /> },
-    { path: '/transferRequests', element: <TransferRequestsPage /> },
-    { path: '/stockAlerts', element: <StockAlertsPage /> },
-    { path: '/auditHistory', element: <AuditHistoryPage /> },
-    { path: '/invoiceStatus', element: <InvoiceStatusPage /> },
-    { path: '/deliveries', element: <DeliveriesPage /> },
-    { path: '/dashboard', element: <DashboardPage /> },
-    { path: '/refunds', element: <RefundApprovalsPage /> },
-    { path: '/reports', element: <ReportsAnalyticsPage /> },
-    { path: '/inventory', element: <InventoryOverviewPage /> },
-    { path: '/edit-order/:orderId', element: <EditOrderPage /> },
-    { path: '/edit-reservation/:reservationId',  element: <EditReservationPage /> },
-    { path: '/payment/success', element: <PaymentSuccessPage /> },
-    { path: '/payment/cancel', element: <PaymentCancelPage /> },
-    { path: '/reservation-payment/success', element: <ReservationPaymentSuccessPage /> },
-    { path: '/reservation-payment/cancel', element: <ReservationPaymentCancelPage /> },
-    { path: '/vat-settings', element: <VatSettingsPage /> },
+    { path: '/unauthorized', element: <UnauthorizedPage /> },
+    {
+      element: <ProtectedRoute />,
+      children: [
+        {
+          element: <ProtectedRoute requiredRoles={POS_ROLES} />,
+          children: [
+            { path: '/newOrder', element: <NewOrderPage /> },
+            { path: '/orders', element: <OrdersPage /> },
+            { path: '/edit-order/:orderId', element: <EditOrderPage /> },
+            { path: '/payment/success', element: <PaymentSuccessPage /> },
+            { path: '/payment/cancel', element: <PaymentCancelPage /> },
+            { path: '/newReservation', element: <NewReservationPage /> },
+            { path: '/reservations', element: <ReservationsPage /> },
+            { path: '/edit-reservation/:reservationId', element: <EditReservationPage /> },
+            { path: '/reservation-payment/success', element: <ReservationPaymentSuccessPage /> },
+            { path: '/reservation-payment/cancel', element: <ReservationPaymentCancelPage /> },
+          ],
+        },
+        {
+          element: <ProtectedRoute requiredRoles={STOCK_ROLES} />,
+          children: [
+            { path: '/stockUpdates', element: <StockUpdatesPage /> },
+            { path: '/transferRequests', element: <TransferRequestsPage /> },
+            { path: '/stockAlerts', element: <StockAlertsPage /> },
+            { path: '/auditHistory', element: <AuditHistoryPage /> },
+          ],
+        },
+        {
+          element: <ProtectedRoute requiredRoles={SUPPLIER_ROLES} />,
+          children: [
+            { path: '/invoiceStatus', element: <InvoiceStatusPage /> },
+            { path: '/deliveries', element: <DeliveriesPage /> },
+          ],
+        },
+        {
+          element: <ProtectedRoute requiredRoles={MANAGER_ROLES} />,
+          children: [
+            { path: '/dashboard', element: <DashboardPage /> },
+            { path: '/refunds', element: <RefundApprovalsPage /> },
+            { path: '/reports', element: <ReportsAnalyticsPage /> },
+            { path: '/inventory', element: <InventoryOverviewPage /> },
+            { path: '/vat-settings', element: <VatSettingsPage /> },
+          ],
+        },
+      ],
+    },
   ],
   {
     future: {

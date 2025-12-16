@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import PersonIcon from '@/icons/personIcon';
 import LockIcon from '@/icons/lockIcon';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useForm, useFormState } from 'react-hook-form';
 import { LoginInfo, useAuth } from '@/global/hooks/auth';
 import { Currency, useCurrency } from '../contexts/currencyContext';
@@ -31,13 +31,22 @@ export default function LoginPage() {
   });
 
   const navigate = useNavigate();
+  const location = useLocation();
 
   const tryToLogin = async (data: any) => {
     const userData = await login(data as LoginInfo);
 
     if (!userData) return;
 
-    if (userData.redirectPath) {
+    const from = (location.state as any)?.from;
+    const fromPath =
+      typeof from?.pathname === 'string'
+        ? `${from.pathname}${from.search ?? ''}${from.hash ?? ''}`
+        : null;
+
+    if (fromPath && fromPath !== '/login') {
+      navigate(fromPath, { replace: true });
+    } else if (userData.redirectPath) {
       navigate(userData.redirectPath);
     }
     if (userData.currency) {
