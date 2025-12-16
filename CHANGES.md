@@ -8,18 +8,35 @@ significant number of elements were modified, removed, or redesigned during deve
 
 ## Data model
 
-The original documentation described a wide range of functionalities that were
-outside the scope of our project. The data model was overly detailed and included
-many features that were not required for the core system objectives.
+The design of some parts of the data model was less than ideal
+and in a couple of cases really poor.
+There were a lot of tables that stored data in an inefficient manner
+requiring more joins than other possible designs.
+The increased complexity also led to other mistakes 
+that introduced the possibility of inconsistencies in the model.
 
-For this reason, we decided to focus only on the most important and relevant
+One of the worst cases of this was versioning strategy.
+The majority of the tables unnecessarily had composite keys
+which, obviously, greatly impacted almost all of data retrieval
+(not to mention the fact that
+in the diagram those composite keys were referenced 
+by only one part of their respective key).
+As well as this, those tables contained a calculated field (`is_active`)
+and the consistency of the data depended on some process constantly
+maintaining the integrity of these values.
+
+As mentioned before, 
+the original documentation described a wide range of functionalities that were
+not specified in the requirements. 
+Because of that, the data model was much bigger than needed 
+and greatly impacted the ease of implementation.
+
+For these reasons, we decided to focus only on the most important and relevant
 parts of the domain. Unnecessary entities, tables, and relationships were
 removed, and the data model was simplified to better match the actual project
 scope and implementation goals.
 
 The provided YAML specification included recursive structures, which are not legal in standard YAML. We found this approach invalid and unnecessarily complex, so we chose to simplify our implementation and focus on the core functionality and usability aspects.
-
-Additionally, most items in their specification relied on a `version_id` system. We found this approach unusual and decided not to implement it like that.
 
 ### Deleted Items
 
@@ -58,7 +75,6 @@ The following features, tables, or data structures were fully removed from the s
 - Employee table was deleted and replaced by a new structure
 - Employee status table was removed
 - Removed fields:
-  - `business_id`
   - `joined_at`
 - Added **connected time data**:
   - Weekday-based working hours
@@ -79,15 +95,12 @@ The following features, tables, or data structures were fully removed from the s
 
 #### Orders
 
-- Removed:
-  - `created_at`
-  - `closed_at`
+- Removed: `created_at`
 
 ### Added / New Features
 
-- **Price Type** introduced
-- `discount_id` added to specific entities
 - **Item Discount table** added to replace the old discount logic
+- `discount_id` added to specific entities
 - Refund logic reworked and renamed to **Payment**
 
 ## Frontend
