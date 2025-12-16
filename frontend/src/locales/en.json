@@ -1117,5 +1117,8 @@
   "Downtown Branch": "Downtown Branch",
   "Eastside Branch": "Eastside Branch",
   "North Branch": "North Branch",
-  "Westside Branch": "Westside Branch"
+  "Westside Branch": "Westside Branch",
+  "Failed to fetch pending refunds:": "Failed to fetch pending refunds:",
+  "Failed to approve refund.": "Failed to approve refund.",
+  "Failed to reject refund.": "Failed to reject refund."
 }

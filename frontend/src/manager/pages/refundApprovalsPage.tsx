@@ -70,7 +70,7 @@ export default function RefundApprovalsPage() {
       showToast(
         error instanceof Error
           ? error.message
-          : 'Failed to fetch pending refunds.',
+          : t('Failed to fetch pending refunds.'),
         'error',
       );
     } finally {
@@ -94,7 +94,7 @@ export default function RefundApprovalsPage() {
     } catch (error) {
       console.error('Failed to approve refund:', error);
       showToast(
-        error instanceof Error ? error.message : 'Failed to approve refund.',
+        error instanceof Error ? error.message : t('Failed to approve refund.'),
         'error',
       );
     }
@@ -116,7 +116,7 @@ export default function RefundApprovalsPage() {
     } catch (error) {
       console.error('Failed to reject refund:', error);
       showToast(
-        error instanceof Error ? error.message : 'Failed to reject refund.',
+        error instanceof Error ? error.message : t('Failed to reject refund.'),
         'error',
       );
     }

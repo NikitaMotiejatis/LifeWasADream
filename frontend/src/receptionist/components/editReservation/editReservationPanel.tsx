@@ -1,11 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import type {
-  Reservation,
-  Service,
-  Staff,
-  EditReservationPanelProps,
-} from './types';
+import type { Reservation, EditReservationPanelProps } from './types';
 
 import { CustomerInfoSection } from './customerInfoSection';
 import { ServiceSection } from './serviceSection';

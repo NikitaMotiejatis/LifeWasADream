@@ -1,9 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import {
-  CartItem,
-  generateKey,
-  useCart,
-} from '@/receptionist/contexts/cartContext';
+import { CartItem, useCart } from '@/receptionist/contexts/cartContext';
 import TrashcanIcon from '@/icons/trashcanIcon';
 import { useNavigate, useParams } from 'react-router-dom';
 import { SplitBillSection } from './splitBillSection';
@@ -43,7 +39,6 @@ export default function OrderSummary({
     generateKey,
     isSplitMode,
     setIsSplitMode,
-    individualTips,
     currency,
   } = useCart();
 
