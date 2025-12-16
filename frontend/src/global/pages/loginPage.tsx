@@ -9,8 +9,6 @@ import { Currency, useCurrency } from '../contexts/currencyContext';
 const demoAccounts = [
   { role: 'Cashier / Receptionist', login: 'cashier1', pass: 'demo123' },
   { role: 'Manager', login: 'manager1', pass: 'demo123' },
-  { role: 'Stock Clerk', login: 'clerk1', pass: 'demo123' },
-  { role: 'Supplier', login: 'supplier1', pass: 'demo123' },
 ];
 
 export default function LoginPage() {
