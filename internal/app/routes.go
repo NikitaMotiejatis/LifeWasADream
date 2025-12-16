@@ -105,19 +105,22 @@ func setupApiRoutes(router *chi.Mux, config config.Config, authMiddleware func(h
 func setupPaymentRoutes(router *chi.Mux, config config.Config, authMiddleware func(http.Handler) http.Handler, paymentService *payment.PaymentService) {
 	// Setup payment controller with Stripe configuration
 	db := data.MustCreatePostgresDb(config)
-	paymentService = &payment.PaymentService{
-		StripeSecretKey: config.StripeSecretKey,
-		StripePublicKey: config.StripePublicKey,
-		SuccessURL:      fmt.Sprintf("http://%s/payment/success", config.FrontendUrl), // When I save it automatically makes the spaces, after ':' !?
-		CancelURL:       fmt.Sprintf("http://%s/payment/cancel", config.FrontendUrl),
-		OrderTotals:     db,
-		OrderStatus:     db,
-		PaymentRepo:     db,
-		OrderItems:      db,
-		ReservationTotals: db,
-		ReservationStatus: db,
-		ReservationItems:  db,
+	if paymentService == nil {
+		paymentService = &payment.PaymentService{}
 	}
+	paymentService.StripeSecretKey = config.StripeSecretKey
+	paymentService.StripePublicKey = config.StripePublicKey
+	paymentService.SuccessURL = fmt.Sprintf("http://%s/payment/success", config.FrontendUrl)
+	paymentService.CancelURL = fmt.Sprintf("http://%s/payment/cancel", config.FrontendUrl)
+	paymentService.ReservationSuccessURL = fmt.Sprintf("http://%s/reservation-payment/success", config.FrontendUrl)
+	paymentService.ReservationCancelURL = fmt.Sprintf("http://%s/reservation-payment/cancel", config.FrontendUrl)
+	paymentService.OrderTotals = db
+	paymentService.OrderStatus = db
+	paymentService.PaymentRepo = db
+	paymentService.OrderItems = db
+	paymentService.ReservationTotals = db
+	paymentService.ReservationStatus = db
+	paymentService.ReservationItems = db
 
 	paymentController := &payment.PaymentController{
 		Service: paymentService,

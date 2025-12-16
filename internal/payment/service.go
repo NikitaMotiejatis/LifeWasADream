@@ -20,17 +20,19 @@ var (
 )
 
 type PaymentService struct {
-	StripeSecretKey string
-	StripePublicKey string
-	SuccessURL      string
-	CancelURL       string
-	OrderTotals     OrderTotalProvider
-	OrderStatus     OrderStatusUpdater
-	PaymentRepo     PaymentRepo
-	OrderItems      OrderItemsProvider
-	ReservationTotals ReservationTotalProvider
-	ReservationStatus ReservationStatusUpdater
-	ReservationItems  ReservationItemsProvider
+	StripeSecretKey       string
+	StripePublicKey       string
+	SuccessURL            string
+	CancelURL             string
+	ReservationSuccessURL string
+	ReservationCancelURL  string
+	OrderTotals           OrderTotalProvider
+	OrderStatus           OrderStatusUpdater
+	PaymentRepo           PaymentRepo
+	OrderItems            OrderItemsProvider
+	ReservationTotals     ReservationTotalProvider
+	ReservationStatus     ReservationStatusUpdater
+	ReservationItems      ReservationItemsProvider
 }
 
 type OrderTotalProvider interface {
@@ -237,14 +239,26 @@ func (s *PaymentService) CreateStripeReservationCheckoutSession(req StripeReserv
 		}
 	}
 
+	successBaseURL := s.ReservationSuccessURL
+	cancelBaseURL := s.ReservationCancelURL
+	if successBaseURL == "" {
+		successBaseURL = s.SuccessURL
+	}
+	if cancelBaseURL == "" {
+		cancelBaseURL = s.CancelURL
+	}
+
+	successURL := successBaseURL + fmt.Sprintf("?session_id={CHECKOUT_SESSION_ID}&reservation_id=%d", req.ReservationID)
+	cancelURL := cancelBaseURL + fmt.Sprintf("?reservation_id=%d", req.ReservationID)
+
 	params := &stripe.CheckoutSessionParams{
 		PaymentMethodTypes: stripe.StringSlice([]string{
 			"card",
 		}),
 		LineItems:  lineItems,
 		Mode:       stripe.String(string(stripe.CheckoutSessionModePayment)),
-		SuccessURL: stripe.String(s.SuccessURL + fmt.Sprintf("?session_id={CHECKOUT_SESSION_ID}&reservation_id=%d", req.ReservationID)),
-		CancelURL:  stripe.String(s.CancelURL + fmt.Sprintf("?reservation_id=%d", req.ReservationID)),
+		SuccessURL: stripe.String(successURL),
+		CancelURL:  stripe.String(cancelURL),
 		Metadata: map[string]string{
 			"reservation_id": fmt.Sprintf("%d", req.ReservationID),
 			"type":           "reservation",
