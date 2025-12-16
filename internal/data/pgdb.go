@@ -195,17 +195,34 @@ func (pdb PostgresDb) GetOrderCounts(filter order.OrderFilter) (order.OrderCount
 	return order.OrderCounts{}, nil
 }
 
-func (pdb PostgresDb) CreateOrder(order order.Order) (int64, error) {
+func (pdb PostgresDb) CreateOrder(username string, order order.Order) (int64, error) {
 	currency := strings.ToUpper(order.Currency)
+
+	employeeID := int64(0)
+	{
+		const query = `
+		SELECT id
+		FROM employee
+		WHERE username = $1
+		LIMIT 1
+		`
+		if err := pdb.Db.Get(&employeeID, query, username); err != nil {
+			slog.Error(err.Error())
+			return 0, ErrInternal
+		}
+		if employeeID <= 0 {
+			return 0, ErrInternal
+		}
+	}
 
 	createOrderStatement := `
 	INSERT INTO order_data (employee_id, currency)
-		VALUES (1, $1)
+		VALUES ($1, $2)
 		RETURNING id
 	`
 
 	orderId := int64(-1)
-	err := pdb.Db.QueryRow(createOrderStatement, currency).Scan(&orderId)
+	err := pdb.Db.QueryRow(createOrderStatement, employeeID, currency).Scan(&orderId)
 	if err != nil {
 		slog.Error(err.Error())
 		return 0, ErrInternal
