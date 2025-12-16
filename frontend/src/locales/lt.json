@@ -65,7 +65,11 @@
     "edit": "Redaguoti",
     "delete": "Ištrinti",
     "tip": "Arbatpinigiai",
-    "save": "Išsaugoti"
+    "save": "Išsaugoti",
+    "prev": "Ankstesnis",
+    "next": "Kitas",
+    "page": "Puslapis",
+    "pageSize": "Puslapio dydis"
   },
   "deliveries": {
     "buttons": {

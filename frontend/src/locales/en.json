@@ -67,7 +67,11 @@
     "edit": "Edit",
     "delete": "Delete",
     "remove": "Remove",
-    "tip": "Tip"
+    "tip": "Tip",
+    "prev": "Previous",
+    "next": "Next",
+    "page": "Page",
+    "pageSize": "Page size"
   },
   "deliveries": {
     "buttons": {
