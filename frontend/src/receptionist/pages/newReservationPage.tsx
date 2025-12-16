@@ -87,9 +87,6 @@ export default function NewReservationPage() {
       return;
     }
 
-    const selectedServiceObj = services?.find(s => s.id === selectedService);
-    const totalAmount = selectedServiceObj?.price || 0;
-
     const [hours, minutes] = selectedTime.split(':').map(Number);
     const dt = new Date(selectedDate);
     dt.setHours(hours);
@@ -517,7 +514,7 @@ function BookingSummary({
           label={t('reservation.summary.service')}
           value={
             selectedServiceObj
-              ? t(`reservation.services.${selectedServiceObj.nameKey}`)
+              ? t(`reservations.services.${selectedServiceObj.id}`)
               : t('reservation.summary.notSelected')
           }
         />
