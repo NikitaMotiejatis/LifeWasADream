@@ -1,8 +1,8 @@
 # LifeWasADream
-3rd year Software Engineer group project 
+
+3rd year Software Engineer group project
 
 ## Backend
-
 
 ### Starting the Database
 
@@ -23,13 +23,13 @@ DB_PASS=...
 
 Simple way to run DB locally is provided using Docker containers.
 
-**To start the DB:**
+**To start the DB the first time:**
 
 ```console
 docker compose up -d
 ```
 
-**Note:** To run DB using Docker containers 
+**Note:** To run DB using Docker containers
 you **still need** to specify DB environment variables from before.
 
 Docker containers, besides the Postgres DB, will also start pgAdmin.
@@ -50,17 +50,22 @@ you'll have to specify the standard Postgres port (`5432`).
 **To stop the DB:**
 
 ```console
-docker compose down -v
+docker compose stop
+```
+
+**To start the DB again:**
+
+```console
+docker compose start
 ```
 
 #### Creating DB objects and filling in dummy data
 
-Execute `postgres/init.sql` to generate DB with some sample data.
-
+Execute `postgres/init.sql` to generate DB and `dummy_data.sql` for some sample data.
 
 ### Starting the server
 
-Before starting the server 
+Before starting the server
 you need to specify `URL` environment variable in `.env` file
 in the root directory of the repository
 (if it's not there create it).
@@ -71,42 +76,35 @@ in the root directory of the repository
 go run cmd/dreampos/main.go
 ```
 
-#### Using the server
+## External services
 
-Following routes are implemented:
- - `/businesses/<business_id>` 
-    - `GET` request;
-    - Returns `Business` with ID equal to `<business_id>`;
- - `/businesses/list?pageNumber=<page_number>&pageSize=<page_size>`
-    - `GET` request;
-    - Returns a page of `Business` objects according to the parameters;
-    - Defaults: `pageNumber=0`, `pageSize=10`;
- - `/businesses/create`
-    - `PUT` request;
-    - Adds specified `Business` to DB;
-    - Request body consists solely of a single `Business` (see below);
+In our project we use **Stripe** integration for payments and **Twilio** for SMS sending.
 
-Following is an example of a `Business` object:
-```json
-{
-    "id": 5,
-    "name": "Zava",
-    "description": "Aenean lectus. Pellentesque eget nunc. Donec quis orci eget orci vehicula condimentum.",
-    "type": "APPOINTMENT_BASED",
-    "email": "lcotter4@studiopress.com",
-    "phone": "530-368-8393",
-    "created_at": "2010-10-27T16:46:23Z"
-}
+It requires additional variables in `.env` file:
+
 ```
+STRIPE_SECRET_KEY=...
+STRIPE_PUBLIC_KEY=...
+STRIPE_WEBHOOK_SECRET=...
+
+TWILIO_ENABLED=true
+TWILIO_ACCOUNT_SID=...
+TWILIO_AUTH_TOKEN=...
+TWILIO_FROM_NUMBER=...
+```
+
 ## Frontend
 
 Make sure to have this variable in `.env` file:
+
 ```
 VITE_PORT=...
 ```
 
 ### Starting the frontend
+
 Go to frontend directory and run these commands:
+
 ```
 npm i
 npm run dev
