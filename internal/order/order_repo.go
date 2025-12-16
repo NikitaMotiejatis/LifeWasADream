@@ -18,4 +18,8 @@ type OrderFilter struct {
 	OrderStatus *string    `db:"order_status"`
 	From        *time.Time `db:"from"`
 	To          *time.Time `db:"to"`
+	// Pagination and search
+	Limit  *uint64 `db:"limit"`
+	Offset *uint64 `db:"offset"`
+	Id     *int64  `db:"id"`
 }
