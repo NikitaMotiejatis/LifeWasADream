@@ -21,6 +21,8 @@ export default function ProductGrid({ onProductClick }: ProductGridProps) {
   const [category, setCategory] = useState<
     'all' | 'hot drinks' | 'cold drinks' | 'pastries' | 'popular'
   >('all');
+  const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(6);
 
   const handleProductClick = (product: Product) => {
     if (!product.variations || product.variations.length === 0) {
@@ -39,13 +41,13 @@ export default function ProductGrid({ onProductClick }: ProductGridProps) {
             type="text"
             placeholder={t('menu.searchPlaceholder')}
             value={search}
-            onChange={e => setSearch(e.target.value)}
+            onChange={e => { setSearch(e.target.value); setPage(0); }}
             className="mb-4 w-full rounded-lg border border-gray-300 px-4 py-2 pr-10 text-sm placeholder-gray-500 transition placeholder:leading-tight focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
           />
           <SearchIcon className="pointer-events-none absolute top-5 right-2.5 h-5 w-5 -translate-y-1/2 text-gray-400" />
           {search && (
             <button
-              onClick={() => setSearch('')}
+              onClick={() => { setSearch(''); setPage(0); }}
               className="absolute top-5 right-2 -translate-y-1/2 rounded-full bg-gray-200 px-2 py-0.5 text-xs font-bold text-gray-600 hover:bg-gray-300"
             >
               ×
@@ -59,7 +61,7 @@ export default function ProductGrid({ onProductClick }: ProductGridProps) {
           ).map(cat => (
             <button
               key={cat}
-              onClick={() => setCategory(cat)}
+              onClick={() => { setCategory(cat); setPage(0); }}
               className={`rounded-lg px-4 py-2 text-xs font-medium transition ${
                 category === cat
                   ? 'bg-blue-600 text-white hover:bg-blue-700'
@@ -83,10 +85,47 @@ export default function ProductGrid({ onProductClick }: ProductGridProps) {
           <Items
             includes={search}
             category={category}
+            page={page}
+            pageSize={pageSize}
             onProductClick={onProductClick}
             handleProductClick={handleProductClick}
           ></Items>
         </Suspense>
+      </div>
+
+      {/* Pagination controls */}
+      <div className="mt-4 flex items-center justify-between rounded-lg border border-gray-200 bg-white p-3">
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-gray-600">{t('common.page')}</span>
+          <span className="rounded bg-gray-100 px-2 py-1 text-sm font-semibold">{page + 1}</span>
+        </div>
+        <div className="flex items-center gap-3">
+          <label className="text-sm text-gray-600">
+            {t('common.pageSize')}
+            <select
+              className="ml-2 rounded border border-gray-300 px-2 py-1 text-sm"
+              value={pageSize}
+              onChange={e => { setPageSize(parseInt(e.target.value) || 12); setPage(0); }}
+            >
+              {[6, 12, 24].map(s => (
+                <option key={s} value={s}>{s}</option>
+              ))}
+            </select>
+          </label>
+          <button
+            className="rounded-lg border border-gray-300 px-3 py-2 text-sm hover:bg-gray-100 disabled:opacity-50"
+            onClick={() => setPage(Math.max(0, page - 1))}
+            disabled={page <= 0}
+          >
+            {t('common.prev')}
+          </button>
+          <button
+            className="rounded-lg border border-gray-300 px-3 py-2 text-sm hover:bg-gray-100"
+            onClick={() => setPage(page + 1)}
+          >
+            {t('common.next')}
+          </button>
+        </div>
       </div>
 
       {selectedProduct && selectedProduct.variations && (
@@ -106,6 +145,8 @@ export default function ProductGrid({ onProductClick }: ProductGridProps) {
 type ItemProps = {
   includes: string;
   category: string;
+  page: number;
+  pageSize: number;
   onProductClick?: (product: Product) => void;
   handleProductClick: (product: Product) => void;
 };
@@ -113,6 +154,8 @@ type ItemProps = {
 function Items({
   includes,
   category,
+  page,
+  pageSize,
   onProductClick,
   handleProductClick,
 }: ItemProps) {
@@ -137,10 +180,21 @@ function Items({
     );
   }
 
+  const normalizedIncludes = includes.trim().toLowerCase();
+  const searched = normalizedIncludes
+    ? filteredProducts.filter(p =>
+        (p.nameKey ? t(p.nameKey) : p.name).toLowerCase().includes(normalizedIncludes),
+      )
+    : filteredProducts;
+
+  const start = page * pageSize;
+  const end = start + pageSize;
+  const paginated = searched.slice(start, end);
+
   return (
     <>
-      {filteredProducts &&
-        filteredProducts.map(product => (
+      {paginated &&
+        paginated.map(product => (
           <button
             key={product.id}
             onClick={() =>

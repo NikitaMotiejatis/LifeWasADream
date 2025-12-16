@@ -154,6 +154,9 @@ export default function ReservationList() {
     type: 'success' | 'error';
   } | null>(null);
 
+  const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
+
   const openModal = (type: typeof modalType, res: Reservation) => {
     setModalType(type);
     setSelectedReservation(res);
@@ -276,87 +279,128 @@ export default function ReservationList() {
           onEdit={handleEditClick}
           staff={staff || []}
           services={services || []}
+          page={page}
+          pageSize={pageSize}
         />
+
+        {/* Pagination controls for reservations (client-side) */}
+        <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-white p-3">
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-600">{t('common.page')}</span>
+            <span className="rounded bg-gray-100 px-2 py-1 text-sm font-semibold">{page + 1}</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <label className="text-sm text-gray-600">
+              {t('common.pageSize')}
+              <select
+                className="ml-2 rounded border border-gray-300 px-2 py-1 text-sm"
+                value={pageSize}
+                onChange={e => {
+                  const size = parseInt(e.target.value) || 20;
+                  setPageSize(size);
+                  setPage(0);
+                }}
+              >
+                {[10, 20, 50].map(s => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </select>
+            </label>
+            <button
+              className="rounded-lg border border-gray-300 px-3 py-2 text-sm hover:bg-gray-100 disabled:opacity-50"
+              onClick={() => setPage(Math.max(0, page - 1))}
+              disabled={page <= 0}
+            >
+              {t('common.prev')}
+            </button>
+            <button
+              className="rounded-lg border border-gray-300 px-3 py-2 text-sm hover:bg-gray-100"
+              onClick={() => setPage(page + 1)}
+            >
+              {t('common.next')}
+            </button>
+          </div>
+        </div>
       </div>
 
-        <ReservationModal
-          open={modalOpen}
-          type={modalType}
-          reservation={selectedReservation}
-          service={
-            selectedReservation
-              ? (() => {
-                  const srv = services?.find(s => s.id === selectedReservation.serviceId);
-                  return srv
-                    ? {
-                        id: srv.id,
-                        name: srv.nameKey,
-                        nameKey: srv.nameKey,
-                        duration: srv.duration,
-                        price: srv.price,
-                      }
-                    : undefined;
-                })()
-              : undefined
-          }
-          onClose={() => setModalOpen(false)}
-          onConfirm={async (refundData) => {
-            if (!selectedReservation) return;
+      <ReservationModal
+        open={modalOpen}
+        type={modalType}
+        reservation={selectedReservation}
+        service={
+          selectedReservation
+            ? (() => {
+                const srv = services?.find(s => s.id === selectedReservation.serviceId);
+                return srv
+                  ? {
+                      id: srv.id,
+                      name: srv.nameKey,
+                      nameKey: srv.nameKey,
+                      duration: srv.duration,
+                      price: srv.price,
+                    }
+                  : undefined;
+              })()
+            : undefined
+        }
+        onClose={() => setModalOpen(false)}
+        onConfirm={async (refundData) => {
+          if (!selectedReservation) return;
 
-            const updateStatus = async (status: Reservation['status']) => {
-              const res = await authFetch(
-                `reservation/${selectedReservation.id}`,
-                'PUT',
-                JSON.stringify({ status }),
+          const updateStatus = async (status: Reservation['status']) => {
+            const res = await authFetch(
+              `reservation/${selectedReservation.id}`,
+              'PUT',
+              JSON.stringify({ status }),
+            );
+            if (!res.ok) {
+              const errBody = await res.json().catch(() => null);
+              const msg = errBody?.error || `Request failed (${res.status})`;
+              throw new Error(msg);
+            }
+          };
+
+          try {
+            if (modalType === 'cancel') {
+              await updateStatus('cancelled');
+              showToast('reservations.toast.cancelled');
+            } else if (modalType === 'complete') {
+              const service = services?.find(s => s.id === selectedReservation.serviceId);
+              const servicePrice = service?.price ?? 0;
+
+              const checkoutResponse = await createStripeReservationCheckout(
+                parseInt(selectedReservation.id),
+                servicePrice,
+                currency.toLowerCase(),
               );
-              if (!res.ok) {
-                const errBody = await res.json().catch(() => null);
-                const msg = errBody?.error || `Request failed (${res.status})`;
-                throw new Error(msg);
-              }
-            };
 
-            try {
-              if (modalType === 'cancel') {
-                await updateStatus('cancelled');
-                showToast('reservations.toast.cancelled');
-              } else if (modalType === 'complete') {
-                const service = services?.find(s => s.id === selectedReservation.serviceId);
-                const servicePrice = service?.price ?? 0;
-                
-                const checkoutResponse = await createStripeReservationCheckout(
-                  parseInt(selectedReservation.id),
-                  servicePrice,
-                  currency.toLowerCase(),
-                );
-                
-                setModalOpen(false);
-                setSelectedReservation(null);
-                redirectToStripeCheckout(checkoutResponse.session_url);
-                return;
-              } else if (modalType === 'refund') {
-                if (!refundData) {
-                  throw new Error('Refund data is required');
-                }
-                await createReservationRefundRequest(
-                  parseInt(selectedReservation.id),
-                  refundData
-                );
-                showToast('reservations.toast.refundRequested');
-              } else if (modalType === 'cancel_refund') {
-                await cancelReservationRefundRequest(parseInt(selectedReservation.id));
-                showToast('reservations.toast.refundCancelled');
-              }
-
-              await mutate(`reservation?${query}`);
               setModalOpen(false);
               setSelectedReservation(null);
-            } catch (err: any) {
-              setToast({ message: `Error: ${err.message}`, type: 'error' });
-              setTimeout(() => setToast(null), 5000);
+              redirectToStripeCheckout(checkoutResponse.session_url);
+              return;
+            } else if (modalType === 'refund') {
+              if (!refundData) {
+                throw new Error('Refund data is required');
+              }
+              await createReservationRefundRequest(
+                parseInt(selectedReservation.id),
+                refundData
+              );
+              showToast('reservations.toast.refundRequested');
+            } else if (modalType === 'cancel_refund') {
+              await cancelReservationRefundRequest(parseInt(selectedReservation.id));
+              showToast('reservations.toast.refundCancelled');
             }
-          }}
-        />
+
+            await mutate(`reservation?${query}`);
+            setModalOpen(false);
+            setSelectedReservation(null);
+          } catch (err: any) {
+            setToast({ message: `Error: ${err.message}`, type: 'error' });
+            setTimeout(() => setToast(null), 5000);
+          }
+        }}
+      />
 
       {editModalOpen && reservationIdToEdit && selectedReservationToEdit && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
@@ -400,6 +444,8 @@ type ReservationsProps = {
   onEdit: (res: Reservation) => void;
   staff: Staff[];
   services: Service[];
+  page: number;
+  pageSize: number;
 };
 
 function Reservations({
@@ -409,6 +455,8 @@ function Reservations({
   onEdit,
   staff,
   services,
+  page,
+  pageSize,
 }: ReservationsProps) {
   const { t } = useTranslation();
   const { authFetchJson } = useAuth();
@@ -444,7 +492,11 @@ function Reservations({
   }
 
   const visibleReservations = reservations.filter(res => res.status !== 'cancelled');
-  if (visibleReservations.length === 0) {
+  // Apply client-side pagination
+  const start = page * pageSize;
+  const end = start + pageSize;
+  const paginated = visibleReservations.slice(start, end);
+  if (paginated.length === 0) {
     return (
       <p className="py-12 text-center text-gray-400">
         {t('reservations.noReservations')}
@@ -454,7 +506,7 @@ function Reservations({
 
   return (
     <>
-      {visibleReservations.map(res => {
+      {paginated.map(res => {
         const resStaff = staff.find(s => s.id === res.staffId);
         const resService = services.find(s => s.id === res.serviceId);
         return (

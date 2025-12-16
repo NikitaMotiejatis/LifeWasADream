@@ -23,6 +23,9 @@ export type OrderFilter = {
   searchTerm?: string;
   from?: string;
   to?: string;
+  // Pagination
+  limit?: number;
+  offset?: number;
 };
 
 export type Counts = {
@@ -37,9 +40,15 @@ const toQueryString = (filter: OrderFilter) => {
   // TODO: timezones
   const queryArgs = [
     `orderStatus=${filter.orderStatus}`,
-    filter.searchTerm ? `includes=${filter.searchTerm}` : '',
+    // Search: if numeric, treat as id filter
+    filter.searchTerm && /^\d+$/.test(filter.searchTerm.trim())
+      ? `id=${filter.searchTerm.trim()}`
+      : '',
     filter.from ? `from=${filter.from}` : '',
     filter.to ? `to=${filter.to}` : '',
+    // Pagination
+    typeof filter.limit === 'number' ? `limit=${filter.limit}` : '',
+    typeof filter.offset === 'number' ? `offset=${filter.offset}` : '',
   ].filter(a => a.length > 0);
 
   return queryArgs.length > 0 ? `?${queryArgs.join('&')}` : '';
@@ -53,7 +62,10 @@ export default function OrderList() {
     searchTerm: undefined,
     from: undefined,
     to: undefined,
+    limit: 10,
+    offset: 0,
   });
+  const [page, setPage] = useState(0);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalType, setModalType] = useState<
     'edit' | 'pay' | 'refund' | 'cancel'
@@ -93,6 +105,13 @@ export default function OrderList() {
     setTimeout(() => setToast(null), 5800);
   };
 
+  // Keep offset in sync with page
+  const setPageAndOffset = (newPage: number) => {
+    const safePage = Math.max(0, newPage);
+    setPage(safePage);
+    setOrderFilter(prev => ({ ...prev, offset: safePage * (prev.limit ?? 20) }));
+  };
+
   return (
     <>
       <div className="space-y-6">
@@ -103,7 +122,11 @@ export default function OrderList() {
 
           <OrderFilters
             orderFilter={orderFilter}
-            setOrderFilter={setOrderFilter}
+            setOrderFilter={f => {
+              // Reset pagination when filters change
+              setPageAndOffset(0);
+              setOrderFilter({ ...orderFilter, ...f, offset: 0 });
+            }}
           />
         </div>
 
@@ -111,6 +134,48 @@ export default function OrderList() {
           <Suspense fallback={<div>{t('orders.loading')}</div>}>
             <Orders orderFilter={orderFilter} openModal={openModal} />
           </Suspense>
+
+          {/* Pagination controls */}
+          <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-white p-3">
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-600">{t('common.page')}</span>
+              <span className="rounded bg-gray-100 px-2 py-1 text-sm font-semibold">
+                {page + 1}
+              </span>
+            </div>
+            <div className="flex gap-2 items-center">
+              <label className="text-sm text-gray-600">
+                {t('common.pageSize')}
+                <select
+                  className="ml-2 rounded border border-gray-300 px-2 py-1 text-sm"
+                  value={orderFilter.limit ?? 20}
+                  onChange={e => {
+                    const newLimit = parseInt(e.target.value) || 20;
+                    // reset to first page with new limit
+                    setPage(0);
+                    setOrderFilter(prev => ({ ...prev, limit: newLimit, offset: 0 }));
+                  }}
+                >
+                  {[10, 20, 50].map(s => (
+                    <option key={s} value={s}>{s}</option>
+                  ))}
+                </select>
+              </label>
+              <button
+                className="rounded-lg border border-gray-300 px-3 py-2 text-sm hover:bg-gray-100 disabled:opacity-50"
+                onClick={() => setPageAndOffset(page - 1)}
+                disabled={page <= 0}
+              >
+                {t('common.prev')}
+              </button>
+              <button
+                className="rounded-lg border border-gray-300 px-3 py-2 text-sm hover:bg-gray-100"
+                onClick={() => setPageAndOffset(page + 1)}
+              >
+                {t('common.next')}
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -185,7 +250,7 @@ function Orders({ orderFilter, openModal }: OrdersProps) {
     );
   }
 
-  if (orders.length < 1) {
+  if (!orders || orders.length < 1) {
     return (
       <p className="py-12 text-center text-gray-400">{t('orders.noOrders')}</p>
     );

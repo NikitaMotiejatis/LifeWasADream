@@ -67,6 +67,41 @@ func (c OrderController) orders(w http.ResponseWriter, r *http.Request) {
 			filter.To = &orderTo
 		}
 	}
+	// Optional search by id
+	{
+		paramString := r.URL.Query().Get("id")
+		if paramString != "" {
+			if id, err := strconv.ParseInt(paramString, 10, 64); err == nil && id > 0 {
+				filter.Id = &id
+			} else {
+				http.Error(w, "invalid param 'id'.", http.StatusBadRequest)
+				return
+			}
+		}
+	}
+	// Pagination: limit and offset
+	{
+		paramString := r.URL.Query().Get("limit")
+		if paramString != "" {
+			if lim64, err := strconv.ParseUint(paramString, 10, 64); err == nil {
+				filter.Limit = &lim64
+			} else {
+				http.Error(w, "invalid param 'limit'.", http.StatusBadRequest)
+				return
+			}
+		}
+	}
+	{
+		paramString := r.URL.Query().Get("offset")
+		if paramString != "" {
+			if off64, err := strconv.ParseUint(paramString, 10, 64); err == nil {
+				filter.Offset = &off64
+			} else {
+				http.Error(w, "invalid param 'offset'.", http.StatusBadRequest)
+				return
+			}
+		}
+	}
 
 	orders, err := c.OrderRepo.GetOrders(filter)
 	if err != nil {

@@ -59,11 +59,43 @@ func (s MockDataSource) GetOrders(filter order.OrderFilter) ([]order.OrderSummar
 		if filter.To != nil && o.CreatedAt.After(*filter.To) {
 			continue
 		}
+		if filter.Id != nil && o.Id != *filter.Id {
+			continue
+		}
 
 		orders = append(orders, o)
 	}
 
-	return orders, nil
+	// Sort by id desc to match DB behavior
+	slices.SortFunc(orders, func(a, b order.OrderSummary) int {
+		if a.Id == b.Id {
+			return 0
+		}
+		if a.Id > b.Id {
+			return -1
+		}
+		return 1
+	})
+
+	// Apply pagination
+	start := 0
+	if filter.Offset != nil {
+		if *filter.Offset >= uint64(len(orders)) {
+			return []order.OrderSummary{}, nil
+		}
+		start = int(*filter.Offset)
+	}
+	end := len(orders)
+	defaultLimit := 100
+	limit := defaultLimit
+	if filter.Limit != nil {
+		limit = int(*filter.Limit)
+	}
+	if start+limit < end {
+		end = start + limit
+	}
+
+	return orders[start:end], nil
 }
 
 func (s MockDataSource) GetOrderCounts(filter order.OrderFilter) (order.OrderCounts, error) {
