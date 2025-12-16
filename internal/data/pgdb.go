@@ -1004,7 +1004,7 @@ func (pdb PostgresDb) GetCategories(locationId int64) ([]string, error) {
 	categories := []string{}
 
 	query := `
-	SELECT category.name
+	SELECT DISTINCT(category.name)
 	FROM item
 	JOIN item_category
 		ON item_category.item_id = item.id

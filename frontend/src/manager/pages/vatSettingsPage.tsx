@@ -121,7 +121,7 @@ const VatSettingsPage: React.FC = () => {
       'PATCH',
       JSON.stringify({
         id: editingItemId,
-        vat: 100 * parseFloat(vatRateInput),
+        vat: Math.round(100 * parseFloat(vatRateInput)),
       }),
     );
     await reloadItems();
@@ -182,7 +182,7 @@ const VatSettingsPage: React.FC = () => {
         'PATCH',
         JSON.stringify({
           id,
-          vat: 100 * parseFloat(bulkVatRate),
+          vat: Math.round(100 * parseFloat(bulkVatRate)),
         }),
       );
       await reloadItems();

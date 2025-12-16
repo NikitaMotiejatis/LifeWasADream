@@ -145,7 +145,28 @@ INSERT INTO item (id, name, location_id, price_per_unit, vat, status) VALUES
 (11, 'Fries', 9, 400, 10.00, 'ACTIVE'),
 (12, 'Soda', 9, 250, 10.00, 'ACTIVE'),
 (13, 'Double Burger', 10, 1100, 10.00, 'ACTIVE'),
-(14, 'Onion Rings', 10, 500, 10.00, 'ACTIVE');
+(14, 'Onion Rings', 10, 500, 10.00, 'ACTIVE'),
+-- Burger Joint Circular Quay (Loc 9) - extra items
+(15, 'Aussie Burger', 9, 1050, 10.00, 'ACTIVE'),
+(16, 'Chicken Burger', 9, 950, 10.00, 'ACTIVE'),
+(17, 'Sweet Potato Fries', 9, 550, 10.00, 'ACTIVE'),
+(18, 'Lemon Lime Bitters', 9, 450, 10.00, 'ACTIVE'),
+(19, 'Vanilla Thickshake', 9, 600, 10.00, 'ACTIVE'),
+(20, 'Pavlova Slice', 9, 650, 10.00, 'ACTIVE'),
+(27, 'Barramundi Burger', 9, 1150, 10.00, 'ACTIVE'),
+(28, 'Mozzarella Sticks', 9, 600, 10.00, 'ACTIVE'),
+(29, 'Sparkling Water', 9, 300, 10.00, 'ACTIVE'),
+-- Burger Joint Bourke St. (Loc 10) - extra items
+(21, 'Spicy Chicken Burger', 10, 1000, 10.00, 'ACTIVE'),
+(22, 'Veggie Burger', 10, 900, 10.00, 'ACTIVE'),
+(23, 'Loaded Fries', 10, 650, 10.00, 'ACTIVE'),
+(24, 'Craft Cola', 10, 450, 10.00, 'ACTIVE'),
+(25, 'Chiuras', 10, 700, 10.00, 'ACTIVE'),
+(26, 'Gelato Cup', 10, 550, 10.00, 'ACTIVE'),
+(30, 'BBQ Bacon Burger', 10, 1200, 10.00, 'ACTIVE'),
+(31, 'Kids Nuggets', 10, 650, 10.00, 'ACTIVE'),
+(32, 'Apple Pie', 10, 650, 10.00, 'ACTIVE'),
+(33, 'Peach Iced Tea', 10, 400, 10.00, 'ACTIVE');
 
 -- Item Variations
 INSERT INTO item_variation (id, item_id, name, price_difference) VALUES 
@@ -156,7 +177,14 @@ INSERT INTO item_variation (id, item_id, name, price_difference) VALUES
 (5, 5, 'Oat Milk', 50),
 (6, 5, 'Almond Milk', 50),
 (7, 11, 'Small', 0),
-(8, 11, 'Large', 150);
+(8, 11, 'Large', 150),
+-- Burger Joint variations
+(9, 15, 'Add Beetroot', 100),
+(10, 16, 'Spicy Sauce', 50),
+(11, 19, 'Small', 0),
+(12, 19, 'Large', 150),
+(13, 23, 'Large', 200),
+(14, 25, 'Chocolate Dip', 100);
 
 -- Category
 INSERT INTO category (id, name) VALUES
@@ -167,7 +195,8 @@ INSERT INTO category (id, name) VALUES
 (5, 'peripherals'),
 (6, 'burgers'),
 (7, 'sides'),
-(8, 'beverages');
+(8, 'beverages'),
+(9, 'desserts');
 
 INSERT INTO item_category (item_id, category_id) VALUES
 -- Morning Roast Items
@@ -188,7 +217,26 @@ INSERT INTO item_category (item_id, category_id) VALUES
 (11, 7), -- Fries -> Sides
 (12, 8), -- Soda -> Beverages
 (13, 6), -- Double Burger -> Burgers
-(14, 7); -- Onion Rings -> Sides
+(14, 7), -- Onion Rings -> Sides
+(15, 6), -- Aussie Burger -> Burgers
+(16, 6), -- Chicken Burger -> Burgers
+(17, 7), -- Sweet Potato Fries -> Sides
+(18, 8), -- Lemon Lime Bitters -> Beverages
+(19, 8), -- Vanilla Thickshake -> Beverages
+(20, 9), -- Pavlova Slice -> Desserts
+(21, 6), -- Spicy Chicken Burger -> Burgers
+(22, 6), -- Veggie Burger -> Burgers
+(23, 7), -- Loaded Fries -> Sides
+(24, 8), -- Craft Cola -> Beverages
+(25, 9), -- Churros -> Desserts
+(26, 9), -- Gelato Cup -> Desserts
+(27, 6), -- Barramundi Burger -> Burgers
+(28, 7), -- Mozzarella Sticks -> Sides
+(29, 8), -- Sparkling Water -> Beverages
+(30, 6), -- BBQ Bacon Burger -> Burgers
+(31, 7), -- Kids Nuggets -> Sides
+(32, 9), -- Apple Pie -> Desserts
+(33, 8); -- Peach Iced Tea -> Beverages
 
 -- ================================================================================================
 -- 6. SERVICES (For Appointment-Based Businesses)
