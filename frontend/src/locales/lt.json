@@ -1100,11 +1100,11 @@
   },
   "somethingWentWrong": "Kažkas nutiko ne taip.",
   "payment": {
-    "payWithStripe": "Mokėtu su Stripe",
+    "payWithStripe": "Mokėti su Stripe",
     "processing": "Vykdomas užsakymas...",
     "redirecting": "Nukreipiama į mokėjimą...",
     "error": "Mokėjimas nepavyko, bandykite dar kartą.",
-    "verifying": "Tvirtinimas mokėjimas...",
+    "verifying": "Tvirtinamas mokėjimas...",
     "verificationFailed": "Tvirtinimas nepavyko",
     "backToOrders": "Atgal į užsakymus",
     "success": "Mokėjimas sėkmingas!",
@@ -1113,7 +1113,7 @@
     "viewOrders": "Žiūrėti užsakymus",
     "newOrder": "Sukurti naują užsakymą",
     "cancelled": "Mokėjimas atšauktas",
-    "cancelledMessage": "Jūsų mokėjimas buvo atšauktas, niekas nenuskaičiuota.",
+    "cancelledMessage": "Jūsų mokėjimas buvo atšauktas, niekas nenuskaičiuota nuo jūsų sąskaitos.",
     "tryAgain": "Pabandyti per naują"
   },
   "itemVat": {
