@@ -30,6 +30,7 @@ type PaymentService struct {
 	OrderStatus           OrderStatusUpdater
 	PaymentRepo           PaymentRepo
 	OrderItems            OrderItemsProvider
+	OrderTip              OrderTipProvider
 	ReservationTotals     ReservationTotalProvider
 	ReservationStatus     ReservationStatusUpdater
 	ReservationItems      ReservationItemsProvider
@@ -45,6 +46,10 @@ type OrderStatusUpdater interface {
 
 type OrderItemsProvider interface {
 	GetOrderItemsForPayment(orderID int64) ([]OrderItem, error)
+}
+
+type OrderTipProvider interface {
+	GetOrderTipCents(orderID int64) (int64, error)
 }
 
 type ReservationTotalProvider interface {
@@ -108,6 +113,23 @@ func (s *PaymentService) CreateStripeCheckoutSession(req StripeCheckoutRequest) 
 					Quantity: stripe.Int64(int64(item.Quantity)),
 				})
 			}
+		}
+	}
+
+	// Append tip as a separate line item if available
+	if s.OrderTip != nil {
+		tipCents, err := s.OrderTip.GetOrderTipCents(req.OrderID)
+		if err == nil && tipCents > 0 {
+			lineItems = append(lineItems, &stripe.CheckoutSessionLineItemParams{
+				PriceData: &stripe.CheckoutSessionLineItemPriceDataParams{
+					Currency: stripe.String(stripeCurrency),
+					ProductData: &stripe.CheckoutSessionLineItemPriceDataProductDataParams{
+						Name: stripe.String("Tip"),
+					},
+					UnitAmount: stripe.Int64(tipCents),
+				},
+				Quantity: stripe.Int64(1),
+			})
 		}
 	}
 

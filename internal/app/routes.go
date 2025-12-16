@@ -6,9 +6,9 @@ import (
 	"dreampos/internal/data"
 	"dreampos/internal/order"
 	"dreampos/internal/payment"
+	"dreampos/internal/product"
 	"dreampos/internal/refund"
 	"dreampos/internal/reservation"
-	"dreampos/internal/product"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -127,6 +127,7 @@ func setupPaymentRoutes(router *chi.Mux, config config.Config, authMiddleware fu
 	paymentService.OrderStatus = db
 	paymentService.PaymentRepo = db
 	paymentService.OrderItems = db
+	paymentService.OrderTip = db
 	paymentService.ReservationTotals = db
 	paymentService.ReservationStatus = db
 	paymentService.ReservationItems = db

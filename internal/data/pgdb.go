@@ -1428,7 +1428,7 @@ func (pdb PostgresDb) UpdateReservation(id int32, res reservation.ReservationUpd
 func (pdb PostgresDb) GetOrderTotal(orderID int64) (int64, string, error) {
 	const query = `
 	SELECT 
-		CAST(ROUND(total) AS BIGINT) AS total_cents,
+		CAST(ROUND(total_with_tip) AS BIGINT) AS total_cents,
 		currency
 	FROM order_detail
 	WHERE id = $1
@@ -2047,4 +2047,23 @@ func (pdb PostgresDb) CancelReservationRefundRequest(reservationId int32) error 
 	_ = transaction.Commit()
 
 	return nil
+}
+
+// payment.OrderTipProvider implementation ---------------------------------------------------------
+func (pdb PostgresDb) GetOrderTipCents(orderID int64) (int64, error) {
+	const query = `
+	SELECT CAST(ROUND(tip) AS BIGINT) AS tip_cents
+	FROM order_detail
+	WHERE id = $1
+	LIMIT 1
+	`
+	var tipCents int64
+	if err := pdb.Db.Get(&tipCents, query, orderID); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return 0, nil
+		}
+		slog.Error(err.Error())
+		return 0, ErrInternal
+	}
+	return tipCents, nil
 }
