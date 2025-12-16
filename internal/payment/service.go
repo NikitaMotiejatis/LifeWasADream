@@ -1,7 +1,6 @@
 package payment
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"strconv"
@@ -21,14 +20,19 @@ var (
 )
 
 type PaymentService struct {
-	StripeSecretKey string
-	StripePublicKey string
-	SuccessURL      string
-	CancelURL       string
-	OrderTotals     OrderTotalProvider
-	OrderStatus     OrderStatusUpdater
-	PaymentRepo     PaymentRepo
-	OrderItems      OrderItemsProvider
+	StripeSecretKey       string
+	StripePublicKey       string
+	SuccessURL            string
+	CancelURL             string
+	ReservationSuccessURL string
+	ReservationCancelURL  string
+	OrderTotals           OrderTotalProvider
+	OrderStatus           OrderStatusUpdater
+	PaymentRepo           PaymentRepo
+	OrderItems            OrderItemsProvider
+	ReservationTotals     ReservationTotalProvider
+	ReservationStatus     ReservationStatusUpdater
+	ReservationItems      ReservationItemsProvider
 }
 
 type OrderTotalProvider interface {
@@ -43,13 +47,25 @@ type OrderItemsProvider interface {
 	GetOrderItemsForPayment(orderID int64) ([]OrderItem, error)
 }
 
+type ReservationTotalProvider interface {
+	GetReservationTotal(reservationID int32) (int64, string, error)
+}
+
+type ReservationStatusUpdater interface {
+	MarkReservationCompleted(reservationID int32) error
+}
+
+type ReservationItemsProvider interface {
+	GetReservationItemsForPayment(reservationID int32) ([]OrderItem, error)
+}
+
 type OrderItem struct {
 	Name     string
 	Quantity int
 	Price    int64 // in cents
 }
 
-// CreateStripeCheckoutSession creates a Stripe Checkout session
+// Creates a Stripe Checkout session
 func (s *PaymentService) CreateStripeCheckoutSession(req StripeCheckoutRequest) (*StripeCheckoutResponse, error) {
 	if s.OrderTotals == nil {
 		return nil, fmt.Errorf("%w: order total provider not configured", ErrInternal)
@@ -160,7 +176,135 @@ func (s *PaymentService) CreateStripeCheckoutSession(req StripeCheckoutRequest) 
 	}, nil
 }
 
-// VerifyStripePayment verifies a completed Stripe payment
+// Creates a Stripe Checkout session for a reservation
+func (s *PaymentService) CreateStripeReservationCheckoutSession(req StripeReservationCheckoutRequest) (*StripeCheckoutResponse, error) {
+	if s.ReservationTotals == nil {
+		return nil, fmt.Errorf("%w: reservation total provider not configured", ErrInternal)
+	}
+	if s.PaymentRepo == nil {
+		return nil, fmt.Errorf("%w: payment repository not configured", ErrInternal)
+	}
+
+	amountCents, currency, err := s.ReservationTotals.GetReservationTotal(req.ReservationID)
+	if err != nil {
+		return nil, ErrInternal
+	}
+	if amountCents <= 0 {
+		return nil, ErrInvalidAmount
+	}
+	if currency == "" && strings.TrimSpace(req.Currency) == "" {
+		return nil, ErrInvalidCurrency
+	}
+
+	stripeCurrency := strings.ToLower(currency)
+	if strings.TrimSpace(req.Currency) != "" {
+		stripeCurrency = strings.ToLower(strings.TrimSpace(req.Currency))
+		currency = stripeCurrency
+	}
+
+	stripe.Key = s.StripeSecretKey
+
+	// Build line items from reservation items
+	var lineItems []*stripe.CheckoutSessionLineItemParams
+
+	if s.ReservationItems != nil {
+		resItems, err := s.ReservationItems.GetReservationItemsForPayment(req.ReservationID)
+		if err == nil && len(resItems) > 0 {
+			// Create line items for each reservation service
+			for _, item := range resItems {
+				lineItems = append(lineItems, &stripe.CheckoutSessionLineItemParams{
+					PriceData: &stripe.CheckoutSessionLineItemPriceDataParams{
+						Currency: stripe.String(stripeCurrency),
+						ProductData: &stripe.CheckoutSessionLineItemPriceDataProductDataParams{
+							Name: stripe.String(item.Name),
+						},
+						UnitAmount: stripe.Int64(item.Price),
+					},
+					Quantity: stripe.Int64(int64(item.Quantity)),
+				})
+			}
+		}
+	}
+
+	// Fallback to single line item if no items or error
+	if len(lineItems) == 0 {
+		lineItems = []*stripe.CheckoutSessionLineItemParams{
+			{
+				PriceData: &stripe.CheckoutSessionLineItemPriceDataParams{
+					Currency: stripe.String(stripeCurrency),
+					ProductData: &stripe.CheckoutSessionLineItemPriceDataProductDataParams{
+						Name:        stripe.String(fmt.Sprintf("Reservation #%d", req.ReservationID)),
+						Description: stripe.String(fmt.Sprintf("Payment for Reservation #%d", req.ReservationID)),
+					},
+					UnitAmount: stripe.Int64(amountCents),
+				},
+				Quantity: stripe.Int64(1),
+			},
+		}
+	}
+
+	successBaseURL := s.ReservationSuccessURL
+	cancelBaseURL := s.ReservationCancelURL
+	if successBaseURL == "" {
+		successBaseURL = s.SuccessURL
+	}
+	if cancelBaseURL == "" {
+		cancelBaseURL = s.CancelURL
+	}
+
+	successURL := successBaseURL + fmt.Sprintf("?session_id={CHECKOUT_SESSION_ID}&reservation_id=%d", req.ReservationID)
+	cancelURL := cancelBaseURL + fmt.Sprintf("?reservation_id=%d", req.ReservationID)
+
+	params := &stripe.CheckoutSessionParams{
+		PaymentMethodTypes: stripe.StringSlice([]string{
+			"card",
+		}),
+		LineItems:  lineItems,
+		Mode:       stripe.String(string(stripe.CheckoutSessionModePayment)),
+		SuccessURL: stripe.String(successURL),
+		CancelURL:  stripe.String(cancelURL),
+		Metadata: map[string]string{
+			"reservation_id": fmt.Sprintf("%d", req.ReservationID),
+			"type":           "reservation",
+		},
+	}
+	params.AddExpand("payment_intent")
+
+	sess, err := session.New(params)
+	if err != nil {
+		return nil, fmt.Errorf("%w: checkout session creation failed", ErrInternal)
+	}
+
+	stripePaymentIntentID := ""
+	if sess.PaymentIntent != nil {
+		stripePaymentIntentID = sess.PaymentIntent.ID
+	}
+
+	// HACK: Store payment recod, for both reservation and order
+	payment := Payment{
+		OrderID:               int64(req.ReservationID),
+		AmountCents:           amountCents,
+		Currency:              currency,
+		PaymentMethod:         "stripe",
+		StripeSessionID:       sess.ID,
+		StripePaymentIntentID: stripePaymentIntentID,
+		Status:                "pending",
+		CreatedAt:             time.Now().Format(time.RFC3339),
+		UpdatedAt:             time.Now().Format(time.RFC3339),
+	}
+	_, err = s.PaymentRepo.CreatePayment(payment)
+	if err != nil {
+		// Log error but don't fail the checkout session
+		fmt.Printf("Warning: failed to store payment record: %v\n", err)
+	}
+
+	return &StripeCheckoutResponse{
+		SessionID:  sess.ID,
+		SessionURL: sess.URL,
+	}, nil
+}
+
+// Verifies a completed Stripe payment
 func (s *PaymentService) VerifyStripePayment(sessionID string) (*Payment, error) {
 	if s.PaymentRepo == nil {
 		return nil, fmt.Errorf("%w: payment repository not configured", ErrInternal)
@@ -187,7 +331,6 @@ func (s *PaymentService) VerifyStripePayment(sessionID string) (*Payment, error)
 	// Get payment from database
 	payment, err := s.PaymentRepo.GetPaymentBySessionID(sessionID)
 	if err != nil {
-		// If not found in DB, create a minimal payment record
 		if err == ErrPaymentNotFound {
 			payment = &Payment{
 				StripeSessionID:       sess.ID,
@@ -198,16 +341,33 @@ func (s *PaymentService) VerifyStripePayment(sessionID string) (*Payment, error)
 				Status:                "completed",
 				UpdatedAt:             time.Now().Format(time.RFC3339),
 			}
-			// Extract order_id from metadata
-			if orderID, ok := sess.Metadata["order_id"]; ok {
-				if parsed, err := strconv.ParseInt(orderID, 10, 64); err == nil {
-					payment.OrderID = parsed
-				}
-			}
 
-			if s.OrderStatus != nil && payment.OrderID > 0 {
-				if err := s.OrderStatus.MarkOrderClosed(payment.OrderID); err != nil {
-					fmt.Printf("Warning: failed to mark order as closed: %v\n", err)
+			// Check metadata to determine if this is an order or reservation
+			if sess.Metadata != nil {
+				paymentType, hasType := sess.Metadata["type"]
+
+				if hasType && paymentType == "reservation" {
+					if reservationIDStr, ok := sess.Metadata["reservation_id"]; ok {
+						if parsed, err := strconv.ParseInt(reservationIDStr, 10, 64); err == nil {
+							payment.OrderID = parsed // Using OrderID field for reservation_id
+
+							if s.ReservationStatus != nil && parsed > 0 {
+								if err := s.ReservationStatus.MarkReservationCompleted(int32(parsed)); err != nil {
+									fmt.Printf("Warning: failed to mark reservation as completed: %v\n", err)
+								}
+							}
+						}
+					}
+				} else if orderID, ok := sess.Metadata["order_id"]; ok {
+					if parsed, err := strconv.ParseInt(orderID, 10, 64); err == nil {
+						payment.OrderID = parsed
+
+						if s.OrderStatus != nil && payment.OrderID > 0 {
+							if err := s.OrderStatus.MarkOrderClosed(payment.OrderID); err != nil {
+								fmt.Printf("Warning: failed to mark order as closed: %v\n", err)
+							}
+						}
+					}
 				}
 			}
 
@@ -237,91 +397,28 @@ func (s *PaymentService) VerifyStripePayment(sessionID string) (*Payment, error)
 		}
 	}
 
-	if s.OrderStatus != nil && payment.OrderID > 0 {
-		if err := s.OrderStatus.MarkOrderClosed(payment.OrderID); err != nil {
-			fmt.Printf("Warning: failed to mark order as closed: %v\n", err)
-		}
-	}
+	// Re-fetch session to check metadata for completing order/reservation
+	params2 := &stripe.CheckoutSessionParams{}
+	sess2, err := session.Get(sessionID, params2)
+	if err == nil && sess2.Metadata != nil {
+		paymentType, hasType := sess2.Metadata["type"]
 
-	return payment, nil
-}
-
-// HandleStripeWebhook handles Stripe webhook events
-func (s *PaymentService) HandleStripeWebhook(payload []byte, signature string) error {
-	if s.PaymentRepo == nil {
-		return fmt.Errorf("%w: payment repository not configured", ErrInternal)
-	}
-
-	stripe.Key = s.StripeSecretKey
-
-	// Verify webhook signature (webhook secret should be configured)
-	// For now, we'll process the event without signature verification
-
-	var event stripe.Event
-	if err := json.Unmarshal(payload, &event); err != nil {
-		return fmt.Errorf("failed to parse webhook payload: %w", err)
-	}
-
-	// Handle different event types
-	switch event.Type {
-	case "checkout.session.completed":
-		var checkoutSession stripe.CheckoutSession
-		if err := json.Unmarshal(event.Data.Raw, &checkoutSession); err != nil {
-			return fmt.Errorf("failed to parse checkout session: %w", err)
-		}
-
-		stripePaymentIntentID := ""
-		if checkoutSession.PaymentIntent != nil {
-			stripePaymentIntentID = checkoutSession.PaymentIntent.ID
-		}
-
-		if stripePaymentIntentID != "" {
-			err := s.PaymentRepo.UpdatePaymentIntentID(checkoutSession.ID, stripePaymentIntentID)
-			if err != nil && err != ErrPaymentNotFound {
-				return fmt.Errorf("failed to update payment intent: %w", err)
-			}
-		}
-
-		// Update payment status to completed
-		if checkoutSession.PaymentStatus == stripe.CheckoutSessionPaymentStatusPaid {
-			err := s.PaymentRepo.UpdatePaymentStatus(checkoutSession.ID, "completed")
-			if err != nil && err != ErrPaymentNotFound {
-				return fmt.Errorf("failed to update payment status: %w", err)
-			}
-
-			if s.OrderStatus != nil && checkoutSession.Metadata != nil {
-				if orderIDStr, ok := checkoutSession.Metadata["order_id"]; ok {
-					if orderID, err := strconv.ParseInt(orderIDStr, 10, 64); err == nil && orderID > 0 {
-						if err := s.OrderStatus.MarkOrderClosed(orderID); err != nil {
-							fmt.Printf("Warning: failed to mark order as closed: %v\n", err)
+		if hasType && paymentType == "reservation" {
+			if reservationIDStr, ok := sess2.Metadata["reservation_id"]; ok {
+				if reservationID, err := strconv.ParseInt(reservationIDStr, 10, 32); err == nil && reservationID > 0 {
+					if s.ReservationStatus != nil {
+						if err := s.ReservationStatus.MarkReservationCompleted(int32(reservationID)); err != nil {
+							fmt.Printf("Warning: failed to mark reservation as completed: %v\n", err)
 						}
 					}
 				}
 			}
+		} else if s.OrderStatus != nil && payment.OrderID > 0 {
+			if err := s.OrderStatus.MarkOrderClosed(payment.OrderID); err != nil {
+				fmt.Printf("Warning: failed to mark order as closed: %v\n", err)
+			}
 		}
-
-	case "checkout.session.expired":
-		var session stripe.CheckoutSession
-		if err := json.Unmarshal(event.Data.Raw, &session); err != nil {
-			return fmt.Errorf("failed to parse checkout session: %w", err)
-		}
-
-		// Update payment status to cancelled
-		err := s.PaymentRepo.UpdatePaymentStatus(session.ID, "cancelled")
-		if err != nil && err != ErrPaymentNotFound {
-			return fmt.Errorf("failed to update payment status: %w", err)
-		}
-
-	case "payment_intent.payment_failed":
-		var paymentIntent stripe.PaymentIntent
-		if err := json.Unmarshal(event.Data.Raw, &paymentIntent); err != nil {
-			return fmt.Errorf("failed to parse payment intent: %w", err)
-		}
-
-		// Find payment by stripe session and update to failed
-		// For now, we just log it
-		fmt.Printf("Payment failed for payment intent: %s\n", paymentIntent.ID)
 	}
 
-	return nil
+	return payment, nil
 }

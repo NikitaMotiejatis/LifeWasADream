@@ -477,6 +477,18 @@ CREATE TABLE refund_data (
     CONSTRAINT valid_phone          CHECK (phone ~ '^\+[0-9]{3,15}$')
 );
 
+DROP TABLE IF EXISTS reservation_refund_data CASCADE;
+CREATE TABLE reservation_refund_data (
+    appointment_id  INTEGER PRIMARY KEY REFERENCES appointment(id),
+    name            VARCHAR(128)    NOT NULL,
+    phone           VARCHAR(16)     NOT NULL,
+    email           VARCHAR(512)    NOT NULL,
+    reason          VARCHAR(512)    NOT NULL,
+
+    CONSTRAINT valid_reservation_refund_email  CHECK (email ~ '^[^\.][a-zA-Z0-9\-\.+]{0,62}[^\.]+@([^\-][a-zA-Z0-9\-]{0,61}[^\-]\.)+[^\-][a-zA-Z0-9\-]{0,61}[^\-]$'),
+    CONSTRAINT valid_reservation_refund_phone  CHECK (phone ~ '^\+[0-9]{3,15}$')
+);
+
 -- -------------------------------------------------------------------------------------------------
 -- -------------------------------------------------------------------------------------------------
 -- Views -------------------------------------------------------------------------------------------

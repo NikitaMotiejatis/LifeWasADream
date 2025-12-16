@@ -3,12 +3,12 @@ import { useTranslation } from 'react-i18next';
 import ErrorIcon from '@/icons/errorIcon';
 import Topbar from '@/global/components/topbar';
 
-export default function PaymentCancelPage() {
+export default function ReservationPaymentCancelPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
-  const orderId = searchParams.get('order_id');
+  const reservationId = searchParams.get('reservation_id');
 
   return (
     <div className="flex h-screen flex-col">
@@ -27,29 +27,17 @@ export default function PaymentCancelPage() {
               'Your payment was cancelled. No charges were made.',
             )}
           </p>
-          {orderId && (
+          {reservationId && (
             <p className="mb-6 text-sm text-gray-500">
-              {t('payment.orderId', 'Order ID')}: #{orderId}
+              {t('payment.reservationId', 'Reservation ID')}: #{reservationId}
             </p>
           )}
           <div className="space-y-3">
             <button
-              onClick={() => navigate('/orders')}
+              onClick={() => navigate('/reservations')}
               className="w-full rounded-lg bg-blue-600 px-6 py-3 font-medium text-white hover:bg-blue-700"
             >
-              {t('payment.backToOrders', 'Back to Orders')}
-            </button>
-            <button
-              onClick={() => {
-                if (orderId) {
-                  navigate(`/edit-order/${orderId}`);
-                } else {
-                  navigate('/newOrder');
-                }
-              }}
-              className="w-full rounded-lg border border-gray-300 px-6 py-3 font-medium text-gray-700 hover:bg-gray-50"
-            >
-              {t('payment.tryAgain', 'Try Again')}
+              {t('payment.backToReservations', 'Back to Reservations')}
             </button>
           </div>
         </div>

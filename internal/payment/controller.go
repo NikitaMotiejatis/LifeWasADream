@@ -3,7 +3,6 @@ package payment
 import (
 	"encoding/json"
 	"errors"
-	"io"
 	"log/slog"
 	"net/http"
 
@@ -19,13 +18,14 @@ func (c *PaymentController) Routes() chi.Router {
 	r := chi.NewRouter()
 
 	r.Post("/stripe/create-checkout-session", c.createStripeCheckoutSession)
+	r.Post("/stripe/create-reservation-checkout-session", c.createStripeReservationCheckoutSession)
 	r.Get("/stripe/verify/{sessionId}", c.verifyStripePayment)
 	r.Post("/stripe/webhook", c.handleStripeWebhook)
 
 	return r
 }
 
-// createStripeCheckoutSession creates a new Stripe checkout session
+// creates a new Stripe checkout session
 func (c *PaymentController) createStripeCheckoutSession(w http.ResponseWriter, r *http.Request) {
 	if w == nil || r == nil {
 		return
@@ -60,6 +60,45 @@ func (c *PaymentController) createStripeCheckoutSession(w http.ResponseWriter, r
 	w.WriteHeader(http.StatusOK)
 	if err := json.NewEncoder(w).Encode(response); err != nil {
 		slog.Error("Failed to encode checkout response", "error", err)
+		return
+	}
+}
+
+// creates a new Stripe checkout session for a reservation
+func (c *PaymentController) createStripeReservationCheckoutSession(w http.ResponseWriter, r *http.Request) {
+	if w == nil || r == nil {
+		return
+	}
+
+	var req StripeReservationCheckoutRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	if req.ReservationID <= 0 {
+		http.Error(w, "reservation ID is required", http.StatusBadRequest)
+		return
+	}
+
+	response, err := c.Service.CreateStripeReservationCheckoutSession(req)
+	if err != nil {
+		// Expose only safe errors to client
+		if errors.Is(err, ErrInvalidAmount) || errors.Is(err, ErrInvalidCurrency) {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		slog.Error("Failed to create reservation checkout session",
+			"reservation_id", req.ReservationID,
+			"error", err)
+		http.Error(w, "failed to create reservation checkout session", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		slog.Error("Failed to encode reservation checkout response", "error", err)
 		return
 	}
 }
@@ -113,11 +152,6 @@ func (c *PaymentController) handleStripeWebhook(w http.ResponseWriter, r *http.R
 	const MaxBodyBytes = int64(65536)
 	r.Body = http.MaxBytesReader(w, r.Body, MaxBodyBytes)
 
-	payload, err := io.ReadAll(r.Body)
-	if err != nil {
-		http.Error(w, "error reading request body", http.StatusBadRequest)
-		return
-	}
 
 	signature := r.Header.Get("Stripe-Signature")
 	if signature == "" {
@@ -125,13 +159,6 @@ func (c *PaymentController) handleStripeWebhook(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	err = c.Service.HandleStripeWebhook(payload, signature)
-	if err != nil {
-		// Expose only safe erros to client
-		slog.Error("Webhook processing failed", "error", err)
-		http.Error(w, "webhook processing failed", http.StatusBadRequest)
-		return
-	}
 
 	w.WriteHeader(http.StatusOK)
 }

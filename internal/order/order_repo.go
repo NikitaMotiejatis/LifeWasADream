@@ -5,7 +5,7 @@ import "time"
 type OrderRepo interface {
 	GetOrders(filter OrderFilter) ([]OrderSummary, error)
 	GetOrderCounts(filter OrderFilter) (OrderCounts, error)
-	CreateOrder(order Order) (int64, error)
+	CreateOrder(username string, order Order) (int64, error)
 	ModifyOrder(orderId int64, order Order) error
 	CreateRefundRequest(orderId int64, refundData RefundData) error
 	CancelRefundRequest(orderId int64) error

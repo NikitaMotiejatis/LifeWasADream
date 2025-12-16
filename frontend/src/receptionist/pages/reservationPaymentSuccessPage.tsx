@@ -5,7 +5,7 @@ import { verifyStripePayment } from '@/utils/paymentService';
 import SuccessIcon from '@/icons/successIcon';
 import Topbar from '@/global/components/topbar';
 
-export default function PaymentSuccessPage() {
+export default function ReservationPaymentSuccessPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -13,7 +13,7 @@ export default function PaymentSuccessPage() {
   const [error, setError] = useState<string | null>(null);
 
   const sessionId = searchParams.get('session_id');
-  const orderId = searchParams.get('order_id');
+  const reservationId = searchParams.get('reservation_id');
 
   useEffect(() => {
     const verifyPayment = async () => {
@@ -76,12 +76,14 @@ export default function PaymentSuccessPage() {
               {t('payment.verificationFailed', 'Verification Failed')}
             </h2>
             <p className="mb-6 text-gray-600">{error}</p>
-            <button
-              onClick={() => navigate('/orders')}
-              className="rounded-lg bg-blue-600 px-6 py-3 font-medium text-white hover:bg-blue-700"
-            >
-              {t('payment.backToOrders', 'Back to Orders')}
-            </button>
+            <div className="space-y-3">
+              <button
+                onClick={() => navigate('/reservations')}
+                className="w-full rounded-lg bg-blue-600 px-6 py-3 font-medium text-white hover:bg-blue-700"
+              >
+                {t('payment.backToReservations', 'Back to Reservations')}
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -100,25 +102,25 @@ export default function PaymentSuccessPage() {
             {t('payment.success', 'Payment Successful!')}
           </h2>
           <p className="mb-2 text-gray-600">
-            {t('payment.successMessage', 'Your payment has been processed successfully.')}
+            {t('payment.reservationSuccessMessage', 'Your reservation payment has been processed successfully.')}
           </p>
-          {orderId && (
+          {reservationId && (
             <p className="mb-6 text-sm text-gray-500">
-              {t('payment.orderId', 'Order ID')}: #{orderId}
+              {t('payment.reservationId', 'Reservation ID')}: #{reservationId}
             </p>
           )}
           <div className="space-y-3">
             <button
-              onClick={() => navigate('/orders')}
+              onClick={() => navigate('/reservations')}
               className="w-full rounded-lg bg-blue-600 px-6 py-3 font-medium text-white hover:bg-blue-700"
             >
-              {t('payment.viewOrders', 'View Orders')}
+              {t('payment.viewReservations', 'View Reservations')}
             </button>
             <button
-              onClick={() => navigate('/newOrder')}
+              onClick={() => navigate('/newReservation')}
               className="w-full rounded-lg border border-gray-300 px-6 py-3 font-medium text-gray-700 hover:bg-gray-50"
             >
-              {t('payment.newOrder', 'Create New Order')}
+              {t('payment.newReservation', 'Create New Reservation')}
             </button>
           </div>
         </div>

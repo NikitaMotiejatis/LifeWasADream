@@ -26,6 +26,15 @@ export default function RefundApprovalModal({
   const [rejectionReason, setRejectionReason] = useState('');
   const [isRejecting, setIsRejecting] = useState(false);
 
+  const entityId =
+    request.refundType === 'reservation'
+      ? request.reservationId || request.id
+      : request.orderId || request.id;
+  const entityLabel =
+    request.refundType === 'reservation'
+      ? t('reservationId', { defaultValue: 'Reservation ID' })
+      : t('orderId', { defaultValue: 'Order ID' });
+
   const resetModalState = () => {
     setRejectionReason('');
     setIsRejecting(false);
@@ -67,7 +76,7 @@ export default function RefundApprovalModal({
                 className="text-xl leading-6 font-semibold text-gray-900"
                 id="modal-title"
               >
-                {t('manager.refunds.modal.title')} - {request.orderId}
+                {t('manager.refunds.modal.title')} - {entityId}
               </h3>
               <p className="text-sm text-gray-500">
                 {t('manager.refunds.modal.subtitle')}
@@ -87,9 +96,9 @@ export default function RefundApprovalModal({
                         ' ' +
                         request.id +
                         ' | ' +
-                        t('orderId') +
+                        entityLabel +
                         ' ' +
-                        request.orderId}
+                        entityId}
                     </p>
                   </div>
                 </div>

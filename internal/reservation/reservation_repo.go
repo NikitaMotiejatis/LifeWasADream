@@ -8,6 +8,8 @@ type ReservationRepo interface {
 	GetReservationItems(reservationId int32) ([]Service, error)
 	CreateReservation(res Reservation) (int32, error)
 	UpdateReservation(id int32, res ReservationUpdate) error
+	CreateReservationRefundRequest(reservationId int32, refundData RefundData) error
+	CancelReservationRefundRequest(reservationId int32) error
 }
 
 // Options for filtering reservations.

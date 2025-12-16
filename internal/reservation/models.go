@@ -57,3 +57,10 @@ type Staff struct {
 	Role     string   `json:"role"`
 	Services []string `json:"services"`
 }
+
+type RefundData struct {
+	Name   string `json:"name"`
+	Phone  string `json:"phone"`
+	Email  string `json:"email"`
+	Reason string `json:"reason"`
+}

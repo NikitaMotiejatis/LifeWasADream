@@ -230,7 +230,7 @@ const RefundQueue = ({
           </thead>
           <tbody className="divide-y divide-gray-200">
             {visibleRequests.map(request => (
-              <tr key={request.id}>
+              <tr key={`${request.refundType}-${request.id}`}>
                 <td className="px-2 py-2 text-sm whitespace-nowrap text-gray-900">
                   {request.id}
                 </td>

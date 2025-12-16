@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import i18n from '@/i18n';
 import { useCurrency } from '@/global/contexts/currencyContext';
@@ -26,7 +26,7 @@ type Staff = {
   id: string;
   name: string;
   role: string;
-  services: Service[];
+  services: string[];
 };
 
 const timeSlots = [
@@ -86,9 +86,6 @@ export default function NewReservationPage() {
       showToast(t('reservation.toast.incomplete'), 'error');
       return;
     }
-
-    const selectedServiceObj = services?.find(s => s.id === selectedService);
-    const totalAmount = selectedServiceObj?.price || 0;
 
     const [hours, minutes] = selectedTime.split(':').map(Number);
     const dt = new Date(selectedDate);
@@ -208,6 +205,25 @@ function StaffAndServiceSelector({
   services: Service[];
   t: any;
 }) {
+  const staffForSelectedService = useMemo(() => {
+    if (!selectedService) return [];
+    return staff.filter(
+      s => s.id === 'anyone' || (s.services ?? []).includes(selectedService),
+    );
+  }, [staff, selectedService]);
+
+  useEffect(() => {
+    if (!selectedService) return;
+
+    const allowedIds = new Set(staffForSelectedService.map(s => s.id));
+    if (!allowedIds.has(selectedStaff)) {
+      const anyone = staffForSelectedService.find(s => s.id === 'anyone');
+      if (anyone) setSelectedStaff('anyone');
+      else if (staffForSelectedService.length > 0)
+        setSelectedStaff(staffForSelectedService[0].id);
+    }
+  }, [selectedService, selectedStaff, setSelectedStaff, staffForSelectedService]);
+
   return (
     <div className="rounded-xl bg-white p-5 shadow">
       <h2 className="mb-5 text-xl font-bold">
@@ -216,9 +232,50 @@ function StaffAndServiceSelector({
 
       <div className="mb-6">
         <h3 className="mb-3 text-sm font-medium text-gray-600 uppercase">
-          {t('reservation.staffMember')}
+          {t('reservation.service')}
         </h3>
-        {staff.map(s => (
+        {services.map(service => (
+          <div
+            key={service.id}
+            onClick={() => setSelectedService(service.id)}
+            className={`mb-2 flex cursor-pointer items-center justify-between rounded-lg border p-4 transition ${
+              selectedService === service.id
+                ? 'border-blue-500 bg-blue-50'
+                : 'border-gray-300 hover:bg-gray-50'
+            }`}
+          >
+            <div>
+              <div className="font-medium">
+                {t(`reservations.services.${service.id}`)}
+              </div>
+              <div className="text-xs text-gray-500">
+                {service.duration + ' ' + t(`reservation.durations.min`)}
+              </div>
+            </div>
+            <div className="font-semibold text-blue-600">
+              {formatPrice(service.price)}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <h3 className="mb-3 text-sm font-medium text-gray-600 uppercase">
+        {t('reservation.staffMember')}
+      </h3>
+
+      {!selectedService ? (
+        <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm text-gray-600">
+          {t('reservation.selectServiceFirst', 'Select a service first')}
+        </div>
+      ) : staffForSelectedService.length === 0 ? (
+        <div className="rounded-lg border border-orange-200 bg-orange-50 p-4 text-sm text-orange-700">
+          {t(
+            'reservation.noStaffForService',
+            'No staff available for the selected service.',
+          )}
+        </div>
+      ) : (
+        staffForSelectedService.map(s => (
           <div
             key={s.id}
             onClick={() => setSelectedStaff(s.id)}
@@ -244,35 +301,8 @@ function StaffAndServiceSelector({
               <span className="text-xl text-blue-600">✓</span>
             )}
           </div>
-        ))}
-      </div>
-
-      <h3 className="mb-3 text-sm font-medium text-gray-600 uppercase">
-        {t('reservation.service')}
-      </h3>
-      {services.map(service => (
-        <div
-          key={service.id}
-          onClick={() => setSelectedService(service.id)}
-          className={`mb-2 flex cursor-pointer justify-between rounded-lg border p-4 transition ${
-            selectedService === service.id
-              ? 'border-blue-500 bg-blue-50'
-              : 'border-gray-300 hover:bg-gray-50'
-          }`}
-        >
-          <div>
-            <div className="font-medium">
-              {t(`reservations.services.${service.id}`)}
-            </div>
-            <div className="text-xs text-gray-500">
-              {service.duration + ' ' + t(`reservation.durations.min`)}
-            </div>
-          </div>
-          <div className="font-semibold text-blue-600">
-            {formatPrice(service.price)}
-          </div>
-        </div>
-      ))}
+        ))
+      )}
     </div>
   );
 }
@@ -484,7 +514,7 @@ function BookingSummary({
           label={t('reservation.summary.service')}
           value={
             selectedServiceObj
-              ? t(`reservation.services.${selectedServiceObj.nameKey}`)
+              ? t(`reservations.services.${selectedServiceObj.id}`)
               : t('reservation.summary.notSelected')
           }
         />

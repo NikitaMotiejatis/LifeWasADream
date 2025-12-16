@@ -7,6 +7,8 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
+
+	"dreampos/internal/auth"
 )
 
 type OrderController struct {
@@ -85,13 +87,19 @@ func (c OrderController) createOrder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	user, ok := r.Context().Value("user").(auth.User)
+	if !ok || user.Username == "" {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
 	var order Order
 	if err := json.NewDecoder(r.Body).Decode(&order); err != nil {
 		http.Error(w, "invalid order", http.StatusBadRequest)
 		return
 	}
 
-	orderId, err := c.OrderRepo.CreateOrder(order)
+	orderId, err := c.OrderRepo.CreateOrder(user.Username, order)
 	if err != nil {
 		http.Error(w, "failed to create order", http.StatusBadRequest)
 		return

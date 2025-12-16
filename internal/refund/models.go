@@ -13,10 +13,12 @@ const (
 	StatusFailed      RefundStatus = "Failed"     // For when Stripe request fails
 )
 
-// Refund represents a refund request for an order.
+// Refund represents a refund request for an order or reservation.
 type Refund struct {
 	ID                   uint32       `json:"id"`
 	OrderID              uint32       `json:"orderId"`
+	ReservationID         uint32       `json:"reservationId,omitempty"`
+	RefundType            string       `json:"refundType"` // "order" or "reservation"
 	Amount               float64      `json:"amount"`
 	AmountCents          int64        `json:"-" db:"amount_cents"`
 	Reason               string       `json:"reason"`

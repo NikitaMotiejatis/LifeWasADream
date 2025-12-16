@@ -10,6 +10,14 @@ import { useAuth } from '@/global/hooks/auth';
 import useSWR, { mutate } from 'swr';
 import type { Cents } from '@/receptionist/contexts/cartContext';
 import type { Reservation as EditReservation } from '@/receptionist/components/editReservation/types';
+import {
+  createStripeReservationCheckout,
+  redirectToStripeCheckout,
+} from '@/utils/paymentService';
+import {
+  createReservationRefundRequest,
+  cancelReservationRefundRequest,
+} from '@/utils/refundService';
 
 type Service = {
   id: string;
@@ -83,7 +91,7 @@ type ReservationFiltersState = {
 
 export default function ReservationList() {
   const { t } = useTranslation();
-  const { formatPrice } = useCurrency();
+  const { formatPrice, currency } = useCurrency();
   const { authFetch, authFetchJson } = useAuth();
 
   const [filters, setFilters] = useState<ReservationFiltersState>({
@@ -275,8 +283,24 @@ export default function ReservationList() {
           open={modalOpen}
           type={modalType}
           reservation={selectedReservation}
+          service={
+            selectedReservation
+              ? (() => {
+                  const srv = services?.find(s => s.id === selectedReservation.serviceId);
+                  return srv
+                    ? {
+                        id: srv.id,
+                        name: srv.nameKey,
+                        nameKey: srv.nameKey,
+                        duration: srv.duration,
+                        price: srv.price,
+                      }
+                    : undefined;
+                })()
+              : undefined
+          }
           onClose={() => setModalOpen(false)}
-          onConfirm={async () => {
+          onConfirm={async (refundData) => {
             if (!selectedReservation) return;
 
             const updateStatus = async (status: Reservation['status']) => {
@@ -297,13 +321,30 @@ export default function ReservationList() {
                 await updateStatus('cancelled');
                 showToast('reservations.toast.cancelled');
               } else if (modalType === 'complete') {
-                await updateStatus('completed');
-                showToast('reservations.toast.completed');
+                const service = services?.find(s => s.id === selectedReservation.serviceId);
+                const servicePrice = service?.price ?? 0;
+                
+                const checkoutResponse = await createStripeReservationCheckout(
+                  parseInt(selectedReservation.id),
+                  servicePrice,
+                  currency.toLowerCase(),
+                );
+                
+                setModalOpen(false);
+                setSelectedReservation(null);
+                redirectToStripeCheckout(checkoutResponse.session_url);
+                return;
               } else if (modalType === 'refund') {
-                await updateStatus('refund_pending');
+                if (!refundData) {
+                  throw new Error('Refund data is required');
+                }
+                await createReservationRefundRequest(
+                  parseInt(selectedReservation.id),
+                  refundData
+                );
                 showToast('reservations.toast.refundRequested');
               } else if (modalType === 'cancel_refund') {
-                await updateStatus('completed');
+                await cancelReservationRefundRequest(parseInt(selectedReservation.id));
                 showToast('reservations.toast.refundCancelled');
               }
 

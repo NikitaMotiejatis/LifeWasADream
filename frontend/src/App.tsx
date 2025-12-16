@@ -22,6 +22,8 @@ import EditOrderPage from '@/receptionist/pages/editOrderPage';
 import EditReservationPage from '@/receptionist/pages/editReservationPage';
 import PaymentSuccessPage from '@/receptionist/pages/paymentSuccessPage';
 import PaymentCancelPage from '@/receptionist/pages/paymentCancelPage';
+import ReservationPaymentSuccessPage from '@/receptionist/pages/reservationPaymentSuccessPage';
+import ReservationPaymentCancelPage from '@/receptionist/pages/reservationPaymentCancelPage';
 import VatSettingsPage from '@/manager/pages/vatSettingsPage'; 
 
 const router = createBrowserRouter(
@@ -46,6 +48,8 @@ const router = createBrowserRouter(
     { path: '/edit-reservation/:reservationId',  element: <EditReservationPage /> },
     { path: '/payment/success', element: <PaymentSuccessPage /> },
     { path: '/payment/cancel', element: <PaymentCancelPage /> },
+    { path: '/reservation-payment/success', element: <ReservationPaymentSuccessPage /> },
+    { path: '/reservation-payment/cancel', element: <ReservationPaymentCancelPage /> },
     { path: '/vat-settings', element: <VatSettingsPage /> },
   ],
   {

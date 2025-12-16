@@ -35,12 +35,7 @@ func New(config config.Config) App {
 	}
 
 	// Create payment service for checkout sessions
-	paymentService := &payment.PaymentService{
-		StripeSecretKey: config.StripeSecretKey,
-		StripePublicKey: config.StripePublicKey,
-		SuccessURL:      fmt.Sprintf("http://%s/payment/success", config.FrontendUrl),
-		CancelURL:       fmt.Sprintf("http://%s/payment/cancel", config.FrontendUrl),
-	}
+	paymentService := &payment.PaymentService{}
 
 	setupApiRoutes(mainRouter, config, authController.AuthenticateMiddleware, refundService)
 	setupPaymentRoutes(mainRouter, config, authController.AuthenticateMiddleware, paymentService)
