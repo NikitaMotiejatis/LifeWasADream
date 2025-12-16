@@ -32,7 +32,7 @@ export interface PaymentVerification {
 export const createStripeCheckout = async (
   orderId: number,
   amount: number,
-  currency: string = 'eur',
+  currency: string,
 ): Promise<StripeCheckoutResponse> => {
   const { authFetch } = useAuth();
   const response = await authFetch(
@@ -56,7 +56,7 @@ export const createStripeCheckout = async (
 export const createStripeReservationCheckout = async (
   reservationId: number,
   amount: number,
-  currency: string = 'eur',
+  currency: string,
 ): Promise<StripeCheckoutResponse> => {
   const { authFetch } = useAuth();
   const response = await authFetch(

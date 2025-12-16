@@ -279,6 +279,22 @@ export default function ReservationList() {
           open={modalOpen}
           type={modalType}
           reservation={selectedReservation}
+          service={
+            selectedReservation
+              ? (() => {
+                  const srv = services?.find(s => s.id === selectedReservation.serviceId);
+                  return srv
+                    ? {
+                        id: srv.id,
+                        name: srv.nameKey,
+                        nameKey: srv.nameKey,
+                        duration: srv.duration,
+                        price: srv.price,
+                      }
+                    : undefined;
+                })()
+              : undefined
+          }
           onClose={() => setModalOpen(false)}
           onConfirm={async () => {
             if (!selectedReservation) return;
